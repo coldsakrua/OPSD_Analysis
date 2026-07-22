@@ -1,0 +1,431 @@
+import re
+from pathlib import Path
+from typing import Any, Iterable, List, Optional, Union
+
+from datasets import Dataset, load_dataset
+
+# Standard user instruction (single LaTeX backslash before "boxed").
+DEFAULT_MATH_INSTRUCTION_SUFFIX = (
+    "\n\nPlease reason step by step, and put your final answer within \\boxed{}."
+)
+
+# DAPO / OpenR1-style lead-in; ``math`` and comma before ``step`` are optional.
+_SOLVE_FOLLOWING_PROBLEM_STEP = (
+    r"Solve\s+the\s+following(?:\s+math)?\s+problem\s*,?\s+step\s+by\s+step\s*[.:]?\s*"
+)
+_LEADING_STEP_BY_STEP = re.compile(
+    rf"^\s*(?:{_SOLVE_FOLLOWING_PROBLEM_STEP})",
+    re.IGNORECASE | re.DOTALL,
+)
+# DAPO-style “Answer: $Answer … answer to the problem.” preamble (often after the Solve… sentence).
+_LEADING_LAST_LINE_ANSWER_BLOCK = re.compile(
+    r"^\s*The last line of your response should be.+?answer\s+to\s+the\s+problem\.\s*",
+    re.IGNORECASE | re.DOTALL,
+)
+_ANSWER_LINE_FORMAT_HINT = re.compile(
+    r'\s*Remember\s+to\s+put\s+your\s+answer\s+on\s+its\s+own\s+line\s+after\s*(?:\\?["“”\'])?\s*Answer\s*:?\s*(?:\\?["“”\'])?\.?\s*',
+    re.IGNORECASE | re.DOTALL,
+)
+_TRAILING_REASON_BOXED = re.compile(
+    r"\s*Please\s+reason\s+step\s+by\s+step.*$",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+_PROMPT_KEYS = ("prompt", "problem", "question", "query", "input", "instruction")
+_SOLUTION_KEYS = ("solution", "answer", "ground_truth", "target", "reference")
+_AGGREGATED_L3PLUS_KEYS = ("problem", "solution", "level", "type", "subject")
+
+
+def _looks_like_dapo(columns: Iterable[str]) -> bool:
+    """DAPO-style parquet: chat `prompt` + `reward_model.ground_truth` (no top-level solution)."""
+    col_set = set(columns)
+    return "prompt" in col_set and "reward_model" in col_set
+
+
+def _ground_truth_from_reward_model(reward_model) -> str:
+    if reward_model is None:
+        return ""
+    if isinstance(reward_model, dict):
+        gt = reward_model.get("ground_truth")
+        return str(gt).strip() if gt is not None else ""
+    # Arrow/pyarrow struct may surface as simple namespace in some versions
+    gt = getattr(reward_model, "ground_truth", None)
+    if gt is not None:
+        return str(gt).strip()
+    return ""
+
+
+def _coerce_prompt_for_rlsd(prompt) -> Union[str, list]:
+    """Keep chat-style message lists for tokenizer.apply_chat_template; stringify only scalars."""
+    if isinstance(prompt, str):
+        return prompt.strip()
+    if isinstance(prompt, list):
+        return prompt
+    return str(prompt).strip()
+
+
+def coerce_prompt_to_qwen3_user_messages(prompt: Any) -> list:
+    """
+    Match Qwen3 HF examples: rollout prompts are a ``conversation`` list so TRL GRPO calls
+    ``apply_chat_template`` (with ``add_generation_prompt=True``) instead of raw ``encode`` on plain text.
+
+    - ``str`` / non-list scalars -> ``[{"role": "user", "content": ...}]``
+    - existing chat ``list[dict]`` -> returned unchanged (shallow copy of list only if we mutate elsewhere)
+    """
+    if isinstance(prompt, list):
+        return prompt
+    if isinstance(prompt, dict):
+        return [prompt]
+    text = prompt.strip() if isinstance(prompt, str) else str(prompt).strip()
+    return [{"role": "user", "content": text}]
+
+
+def _content_to_text(content: Any) -> str:
+    if isinstance(content, list):
+        parts: List[str] = []
+        for part in content:
+            if isinstance(part, dict):
+                if part.get("type") == "text":
+                    parts.append(str(part.get("text", "")))
+                elif "text" in part:
+                    parts.append(str(part.get("text", "")))
+                elif "content" in part:
+                    parts.append(str(part.get("content", "")))
+            elif part is not None:
+                parts.append(str(part))
+        return "\n".join(x.strip() for x in parts if str(x).strip()).strip()
+    if content is None:
+        return ""
+    return str(content).strip()
+
+
+def extract_last_user_text(prompt: Any) -> str:
+    """
+    Best-effort extraction of the last user turn text without chat template tokens.
+    """
+    if isinstance(prompt, list):
+        last_user = None
+        for msg in prompt:
+            if not isinstance(msg, dict):
+                continue
+            role = str(msg.get("role", "")).lower()
+            if role == "user":
+                last_user = msg
+            elif role == "" and "content" in msg and last_user is None:
+                # Some datasets store single-turn dicts without explicit role.
+                last_user = msg
+        if last_user is not None:
+            return _content_to_text(last_user.get("content", ""))
+        return _content_to_text(prompt)
+    if isinstance(prompt, dict):
+        if "content" in prompt:
+            return _content_to_text(prompt.get("content", ""))
+        return str(prompt).strip()
+    if isinstance(prompt, str):
+        return prompt.strip()
+    if prompt is None:
+        return ""
+    return str(prompt).strip()
+
+
+def apply_qwen3_rollout_chat_template(
+    tokenizer,
+    prompt: Any,
+    *,
+    enable_thinking: bool = False,
+    add_generation_prompt: bool = True,
+    tokenize: bool = False,
+) -> str:
+    """
+    Same call shape as Qwen3 docs: ``apply_chat_template(messages, tokenize=..., add_generation_prompt=...,
+    enable_thinking=...)``. ``enable_thinking=False`` is the non-thinking rollout path.
+    """
+    messages = coerce_prompt_to_qwen3_user_messages(prompt)
+    kwargs: dict = {"tokenize": tokenize, "add_generation_prompt": add_generation_prompt}
+    kwargs["enable_thinking"] = enable_thinking
+    try:
+        return tokenizer.apply_chat_template(messages, **kwargs)
+    except TypeError:
+        kwargs.pop("enable_thinking", None)
+        return tokenizer.apply_chat_template(messages, **kwargs)
+
+
+def _coerce_solution_scalar(solution) -> str:
+    if isinstance(solution, str):
+        return solution.strip()
+    if solution is None:
+        return ""
+    return str(solution).strip()
+
+
+def _pick_key(candidates: Iterable[str], columns: Iterable[str]) -> Optional[str]:
+    col_set = set(columns)
+    for key in candidates:
+        if key in col_set:
+            return key
+    return None
+
+
+def extract_gsm8k_final_answer(answer_text: str) -> str:
+    """
+    Extract the final GSM8K answer.
+    Typical format ends with: ``#### 72``
+    """
+    text = str(answer_text or "").strip()
+    if not text:
+        return ""
+    m = re.search(r"####\s*(.+?)\s*$", text, flags=re.DOTALL)
+    if m:
+        return m.group(1).strip()
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    return lines[-1] if lines else ""
+
+
+def _looks_like_gsm8k_hf_dir(path: Path) -> bool:
+    return (
+        path.is_dir()
+        and (path / "dataset_infos.json").is_file()
+        and (path / "main").is_dir()
+    )
+
+
+def _infer_gsm8k_config(path: Path) -> str:
+    path_str = str(path).lower()
+    if "socratic" in path_str:
+        return "socratic"
+    return "main"
+
+
+def _looks_like_gsm8k_schema(columns: Iterable[str]) -> bool:
+    col_set = set(columns)
+    return "question" in col_set and "answer" in col_set
+
+
+def _format_gsm8k_prompt(
+    question: str,
+    *,
+    suffix: str = DEFAULT_MATH_INSTRUCTION_SUFFIX,
+) -> str:
+    q = str(question or "").strip()
+    if not q:
+        return ""
+    if _already_has_standard_suffix(q):
+        return q
+    return f"{q}{suffix or DEFAULT_MATH_INSTRUCTION_SUFFIX}"
+
+
+def _load_gsm8k_parquet_dataset(path: Path, *, split: str, config: str) -> Dataset:
+    config_dir = path / config
+    if not config_dir.is_dir():
+        raise FileNotFoundError(
+            f"GSM8K config directory not found: {config_dir} (expected one of main, socratic)."
+        )
+    shards = sorted(config_dir.glob(f"{split}-*.parquet"))
+    if not shards:
+        raise FileNotFoundError(
+            f"No GSM8K parquet shards for config={config!r}, split={split!r} under {path}."
+        )
+    data_files = {split: [str(shard) for shard in shards]}
+    return load_dataset("parquet", data_files=data_files, split=split)
+
+
+def _normalize_gsm8k_dataset(ds: Dataset) -> Dataset:
+    def _normalize_gsm8k(row):
+        row["prompt"] = _format_gsm8k_prompt(str(row.get("question", "")))
+        row["solution"] = extract_gsm8k_final_answer(str(row.get("answer", "")))
+        return row
+
+    ds = ds.map(_normalize_gsm8k, desc="GSM8K: format prompt + extract #### final answer")
+    ds = ds.filter(
+        lambda row: _non_empty_text(row["prompt"]) and _non_empty_text(row["solution"]),
+        desc="Filtering empty GSM8K prompt/solution rows",
+    )
+    return ds
+
+
+def _resolve_data_file(dataset_path: str, split: str) -> Path:
+    path = Path(dataset_path)
+    if path.is_file():
+        return path
+
+    candidates = [
+        path / f"{split}.jsonl",
+        path / f"{split}.json",
+        path / f"{split}.parquet",
+        path / "data.jsonl",
+        path / "data.json",
+        path / "data.parquet",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    raise FileNotFoundError(
+        f"Cannot find dataset file under {dataset_path}. "
+        f"Tried: {', '.join(str(p) for p in candidates)}"
+    )
+
+
+def _load_single_file(path: Path, split: str) -> Dataset:
+    suffix = path.suffix.lower()
+    if suffix in (".jsonl", ".json"):
+        return load_dataset("json", data_files={split: str(path)}, split=split)
+    if suffix == ".parquet":
+        return load_dataset("parquet", data_files={split: str(path)}, split=split)
+    raise ValueError(f"Unsupported dataset format: {path}")
+
+
+def _looks_like_aggregated_l3plus(columns: Iterable[str]) -> bool:
+    col_set = set(columns)
+    return all(k in col_set for k in _AGGREGATED_L3PLUS_KEYS)
+
+
+def _non_empty_text(x) -> bool:
+    if x is None:
+        return False
+    return bool(str(x).strip())
+
+
+def _strip_math_prompt_boilerplate(text: str) -> str:
+    """Remove common DAPO-style wrappers so the stem is mostly the math statement."""
+    t = text.strip()
+    m = re.search(
+        r"<\|im_start\|>\s*user\s*(.*?)(?:<\|im_end\|>|<\|im_start\|>\s*assistant|$)",
+        t,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if m:
+        t = m.group(1).strip()
+    t = _LEADING_STEP_BY_STEP.sub("", t)
+    t = _LEADING_LAST_LINE_ANSWER_BLOCK.sub("", t)
+    t = _ANSWER_LINE_FORMAT_HINT.sub("\n\n", t)
+    t = _TRAILING_REASON_BOXED.sub("", t).strip()
+    return t
+
+
+def _already_has_standard_suffix(text: str) -> bool:
+    low = text.lower()
+    return "please reason step by step" in low and "boxed" in low
+
+
+def normalize_prompt_to_standard_instruction(
+    prompt: Any,
+    *,
+    suffix: str = DEFAULT_MATH_INSTRUCTION_SUFFIX,
+) -> Any:
+    """
+    Collapse dataset-specific instructions to: (core problem text) + fixed suffix with ``\\boxed{}``.
+
+    - Chat-style ``list[dict]``: shallow-copies messages and rewrites the last user turn.
+    - Plain ``str``: strips known boilerplate then appends ``suffix`` (once).
+    """
+    suf = suffix or DEFAULT_MATH_INSTRUCTION_SUFFIX
+
+    if isinstance(prompt, list):
+        out: List[Any] = []
+        last_user_idx = None
+        for msg in prompt:
+            out.append(dict(msg) if isinstance(msg, dict) else msg)
+            if isinstance(out[-1], dict) and str(out[-1].get("role", "")).lower() == "user":
+                last_user_idx = len(out) - 1
+        # Some parquet rows store a single ``{"content": "..."}`` turn without ``role``.
+        if last_user_idx is None and len(out) == 1 and isinstance(out[0], dict) and "content" in out[0]:
+            last_user_idx = 0
+        if last_user_idx is None:
+            return prompt
+        user_msg = dict(out[last_user_idx])
+        content = user_msg.get("content", "")
+        if isinstance(content, list):
+            new_parts = []
+            for part in content:
+                if isinstance(part, dict) and part.get("type") == "text":
+                    p = _strip_math_prompt_boilerplate(str(part.get("text", "")))
+                    if not _already_has_standard_suffix(p):
+                        p = f"{p}{suf}"
+                    new_parts.append({**part, "text": p})
+                else:
+                    new_parts.append(part)
+            user_msg["content"] = new_parts
+        else:
+            p = _strip_math_prompt_boilerplate(str(content))
+            if not _already_has_standard_suffix(p):
+                p = f"{p}{suf}"
+            user_msg["content"] = p
+        out[last_user_idx] = user_msg
+        return out
+
+    if isinstance(prompt, str):
+        p = _strip_math_prompt_boilerplate(prompt)
+        if not _already_has_standard_suffix(p):
+            p = f"{p}{suf}"
+        return p
+    return prompt
+
+
+def load_rlsd_dataset(
+    dataset_path: str,
+    split: str = "train",
+    *,
+    normalize_dapo_prompt: bool = True,
+    gsm8k_config: Optional[str] = None,
+) -> Dataset:
+    path = Path(dataset_path)
+    if path.is_dir() and _looks_like_gsm8k_hf_dir(path):
+        config = gsm8k_config or _infer_gsm8k_config(path)
+        ds = _load_gsm8k_parquet_dataset(path, split=split, config=config)
+        return _normalize_gsm8k_dataset(ds)
+
+    data_file = _resolve_data_file(dataset_path, split)
+    ds = _load_single_file(data_file, split=split)
+
+    if _looks_like_aggregated_l3plus(ds.column_names):
+        def _normalize_l3plus(row):
+            row["prompt"] = str(row["problem"]).strip()
+            row["solution"] = str(row["solution"]).strip()
+            row["problem_level"] = str(row.get("level", "")).strip()
+            row["problem_type"] = str(row.get("type", "")).strip()
+            row["problem_subject"] = str(row.get("subject", "")).strip()
+            return row
+
+        ds = ds.map(_normalize_l3plus, desc="Normalizing aggregated_l3plus schema")
+        ds = ds.filter(
+            lambda row: _non_empty_text(row["prompt"]) and _non_empty_text(row["solution"]),
+            desc="Filtering empty prompt/solution rows",
+        )
+        return ds
+
+    if _looks_like_dapo(ds.column_names):
+
+        def _normalize_dapo(row):
+            row["solution"] = _ground_truth_from_reward_model(row.get("reward_model"))
+            prompt = _coerce_prompt_for_rlsd(row.get("prompt"))
+            if normalize_dapo_prompt:
+                prompt = normalize_prompt_to_standard_instruction(prompt)
+            row["prompt"] = prompt
+            return row
+
+        _desc = "DAPO schema: extract solution from reward_model.ground_truth + normalize prompt"
+        if not normalize_dapo_prompt:
+            _desc = "DAPO schema: extract solution from reward_model.ground_truth + keep raw prompt"
+        ds = ds.map(_normalize_dapo, desc=_desc)
+        return ds
+
+    if _looks_like_gsm8k_schema(ds.column_names):
+        return _normalize_gsm8k_dataset(ds)
+
+    prompt_key = _pick_key(_PROMPT_KEYS, ds.column_names)
+    solution_key = _pick_key(_SOLUTION_KEYS, ds.column_names)
+    if prompt_key is None or solution_key is None:
+        raise ValueError(
+            f"Failed to infer prompt/solution columns from {ds.column_names}. "
+            f"Expected prompt in {_PROMPT_KEYS}, solution in {_SOLUTION_KEYS}."
+        )
+
+    def _normalize(row):
+        row["prompt"] = _coerce_prompt_for_rlsd(row[prompt_key])
+        row["solution"] = _coerce_solution_scalar(row[solution_key])
+        return row
+
+    ds = ds.map(_normalize, desc="Normalizing prompt and solution columns")
+    return ds
