@@ -64,8 +64,8 @@ python "${BASE_DIR}/eval/eval_math_vllm_local.py" \
   --val-n 8 \
   --pass-at-k 1,4,8 \
   --max-new-tokens 32768 \
-  --temperature 0.7 \
-  --top-p 0.8 \
+  --temperature 0.6 \
+  --top-p 0.95 \
   --top-k 20 \
   --min-p 0.0 \
   --presence-penalty 0.0 \
@@ -73,7 +73,7 @@ python "${BASE_DIR}/eval/eval_math_vllm_local.py" \
   --tensor-parallel-size 1 \
   --gpu-memory-utilization 0.9 \
   --max-model-len 40960 \
-  --generate-batch-size 8 \
+  --generate-batch-size 16 \
   --disable-custom-all-reduce \
   --force-base-tokenizer \
   "${THINK_ARGS[@]}"

@@ -73,7 +73,7 @@ python "${BASE_DIR}/eval/eval_math_vllm_local.py" \
   --tensor-parallel-size 1 \
   --gpu-memory-utilization 0.9 \
   --max-model-len 40960 \
-  --generate-batch-size 8 \
+  --generate-batch-size 16 \
   --disable-custom-all-reduce \
   --force-base-tokenizer \
   "${THINK_ARGS[@]}"

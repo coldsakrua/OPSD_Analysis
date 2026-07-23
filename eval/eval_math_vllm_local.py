@@ -1301,6 +1301,88 @@ def _eval_output_paths(base: Path) -> tuple[Path, Path]:
     return metrics_path, results_path
 
 
+def _load_resume_results(results_path: Path, gen_n: int) -> List[Dict[str, Any]]:
+    """Load previously written per-problem rows that already have ``gen_n`` samples."""
+    if not results_path.is_file():
+        return []
+    try:
+        payload = json.loads(results_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[eval] resume: failed to read {results_path}: {e}", flush=True)
+        return []
+    rows = payload.get("results") if isinstance(payload, dict) else payload
+    if not isinstance(rows, list):
+        return []
+    kept: List[Dict[str, Any]] = []
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        gens = r.get("generations") or []
+        if not isinstance(gens, list) or len(gens) < gen_n:
+            continue
+        # Prefer exact match; if more samples exist, keep first gen_n for this run.
+        if len(gens) > gen_n:
+            r = dict(r)
+            r["generations"] = gens[:gen_n]
+            r["gen_n"] = gen_n
+            flags = [bool(g.get("correct")) for g in r["generations"]]
+            preds = [g.get("predicted_answer") for g in r["generations"]]
+            formatted = [bool(g.get("formatted")) for g in r["generations"]]
+            token_counts = [int(g.get("num_tokens") or 0) for g in r["generations"]]
+            r["num_correct"] = sum(flags)
+            r["pass_at_gen_n"] = bool(any(flags))
+            r["avg_output_tokens"] = sum(token_counts) / len(token_counts) if token_counts else 0.0
+            r["predicted_answer"] = preds[0] if preds else r.get("predicted_answer")
+            r["full_generation"] = r["generations"][0].get("full_generation", "")
+            r["correct"] = flags[0] if flags else False
+            r["formatted"] = formatted[0] if formatted else False
+            pass_at_k_problem = {}
+            for k_str, ok in (r.get("pass_at_k") or {}).items():
+                try:
+                    k = int(k_str)
+                except Exception:
+                    continue
+                pass_at_k_problem[str(k)] = bool(any(flags[:k]))
+            r["pass_at_k"] = pass_at_k_problem
+        kept.append(r)
+    return kept
+
+
+def _accumulate_result_stats(
+    results: List[Dict[str, Any]],
+    pass_at_k_list: List[int],
+) -> tuple[Dict[int, int], int, int, int, int, int]:
+    """Rebuild running counters from already-finished problem rows."""
+    pass_at_k_counts: Dict[int, int] = {k: 0 for k in pass_at_k_list}
+    formatted_total = 0
+    total_solutions = 0
+    total_correct = 0
+    total_output_tokens = 0
+    majority_correct = 0
+    for r in results:
+        gens = r.get("generations") or []
+        for g in gens:
+            total_solutions += 1
+            if g.get("formatted"):
+                formatted_total += 1
+            if g.get("correct"):
+                total_correct += 1
+            total_output_tokens += int(g.get("num_tokens") or 0)
+        for k in pass_at_k_list:
+            if r.get("pass_at_k", {}).get(str(k)):
+                pass_at_k_counts[k] += 1
+        if r.get("majority_vote_correct"):
+            majority_correct += 1
+    return (
+        pass_at_k_counts,
+        formatted_total,
+        total_solutions,
+        total_correct,
+        total_output_tokens,
+        majority_correct,
+    )
+
+
 def _write_eval_checkpoints(
     *,
     metrics_path: Path,
@@ -1521,6 +1603,15 @@ def main() -> None:
             "Number of **problems** (prompts) per llm.generate() call. "
             "0 = one call with all prompts. "
             "Use 8–32 to cap concurrent prefill/decode batches (vLLM still schedules internally)."
+        ),
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        default=False,
+        help=(
+            "Continue from sibling *.results.json if present: skip problems that already have "
+            "gen_n samples and only generate the remainder."
         ),
     )
     parser.add_argument(
@@ -1819,18 +1910,14 @@ def main() -> None:
 
     sampling_params = SamplingParams(**sp_kw)
 
-    n_prompts = len(all_prompts)
+    n_prompts_total = len(all_prompts)
+    n_prompts = n_prompts_total
     gbs = args.generate_batch_size
     if gbs <= 0:
-        gbs = n_prompts
+        gbs = n_prompts_total
     out_path = Path(args.output_json)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     metrics_path, results_path = _eval_output_paths(out_path)
-
-    print(
-        f"[eval] generating {n_prompts} prompts x n={gen_n} "
-        f"(pass-at-k={pass_at_k_list}, generate_batch_size={gbs}) ..."
-    )
 
     results: List[Dict[str, Any]] = []
     pass_at_k_counts: Dict[int, int] = {k: 0 for k in pass_at_k_list}
@@ -1841,9 +1928,40 @@ def main() -> None:
     majority_correct = 0
     processed = 0
 
+    if args.resume:
+        resumed = _load_resume_results(results_path, gen_n)
+        if resumed:
+            done_ids = {str(r.get("problem_id")) for r in resumed}
+            keep_idx = [i for i, ex in enumerate(examples) if str(ex["id"]) not in done_ids]
+            results = list(resumed)
+            (
+                pass_at_k_counts,
+                formatted_total,
+                total_solutions,
+                total_correct,
+                total_output_tokens,
+                majority_correct,
+            ) = _accumulate_result_stats(results, pass_at_k_list)
+            processed = len(results)
+            examples = [examples[i] for i in keep_idx]
+            all_prompts = [all_prompts[i] for i in keep_idx]
+            n_prompts = len(all_prompts)
+            print(
+                f"[eval] resume: loaded {processed} finished problems from {results_path.name}; "
+                f"remaining {n_prompts}/{n_prompts_total} to generate",
+                flush=True,
+            )
+        else:
+            print(f"[eval] resume: no usable prior results at {results_path}", flush=True)
+
+    print(
+        f"[eval] generating {n_prompts} prompts x n={gen_n} "
+        f"(pass-at-k={pass_at_k_list}, generate_batch_size={gbs}) ..."
+    )
+
     use_inner_tqdm = n_prompts <= gbs
     for start in tqdm(
-        range(0, n_prompts, gbs),
+        range(0, n_prompts, gbs) if n_prompts > 0 else [],
         desc="prompt_batches",
         dynamic_ncols=True,
         disable=n_prompts <= gbs,
@@ -2011,14 +2129,14 @@ def main() -> None:
             "metrics_by_dataset": metrics_by_dataset,
             "metrics_by_category": metrics_by_category,
             "num_problems": processed,
-            "num_problems_total": n_prompts,
+            "num_problems_total": n_prompts_total,
             "total_solutions": total_solutions,
             "average_correct_pct": 100.0 * total_correct / total_solutions if total_solutions else 0.0,
             "majority_vote_pct": 100.0 * majority_correct / processed if processed else 0.0,
             "format_rate_pct": 100.0 * formatted_total / total_solutions if total_solutions else 0.0,
             "avg_output_tokens_mean": total_output_tokens / total_solutions if total_solutions else 0.0,
             "math_verify": _HAS_MATH_VERIFY,
-            "generate_batch_size": gbs if args.generate_batch_size > 0 else n_prompts,
+            "generate_batch_size": gbs if args.generate_batch_size > 0 else n_prompts_total,
             "generate_batch_size_requested": args.generate_batch_size,
             "streaming_write": True,
             "metrics_json": str(metrics_path),
@@ -2031,8 +2149,80 @@ def main() -> None:
             summary=summary,
             results=results,
             processed=processed,
-            n_prompts=n_prompts,
+            n_prompts=n_prompts_total,
         )
+
+    # If everything was resumed (nothing left to generate), still materialize final summary.
+    if n_prompts == 0 and results:
+        processed = len(results)
+        pass_at_k_summary = {}
+        for k in pass_at_k_list:
+            c = pass_at_k_counts[k]
+            pass_at_k_summary[str(k)] = {
+                "count": c,
+                "total": processed,
+                "pct": 100.0 * c / processed if processed else 0.0,
+            }
+        by_tag = defaultdict(list)
+        for r in results:
+            by_tag[str(r.get("dataset_tag", ""))].append(r)
+        metrics_by_dataset = {}
+        for tag, sub in sorted(by_tag.items(), key=lambda x: x[0]):
+            path0 = sub[0].get("dataset_path", "") if sub else ""
+            metrics_by_dataset[tag] = {
+                "dataset_path": path0,
+                **summarize_result_subset(sub, pass_at_k_list, gen_n),
+            }
+        by_category = defaultdict(list)
+        for r in results:
+            cat = str(r.get("category", "")).strip() or "__uncategorized__"
+            by_category[cat].append(r)
+        metrics_by_category = {
+            cat: summarize_result_subset(sub, pass_at_k_list, gen_n)
+            for cat, sub in sorted(by_category.items(), key=lambda x: x[0])
+        }
+        summary = {
+            "model_path": args.model_path,
+            "vllm_base_model_path": vllm_model_path,
+            "checkpoint_dir": args.lora_arg,
+            "lora_adapter_dir": lora_dir_str,
+            "max_lora_rank": max_lora_rank,
+            "data_root": str(data_root),
+            "data_paths": [str(p) for p in resolved_paths],
+            "dataset_args": list(args.dataset) if args.dataset else [],
+            "data_format": args.data_format,
+            "enable_thinking": enable_thinking,
+            "fill_context": args.fill_context,
+            "relaxed_answer_extraction": args.relaxed_answer_extraction,
+            "temperature": temperature,
+            "top_p": top_p,
+            "top_k": top_k,
+            "min_p": min_p,
+            "presence_penalty": presence_penalty,
+            "max_new_tokens": max_new_tokens,
+            "val_n_requested": args.val_n,
+            "gen_n": gen_n,
+            "pass_at_k_list": pass_at_k_list,
+            "pass_at_k": pass_at_k_summary,
+            "avg1_pct": pass_at_k_summary.get("1", {}).get("pct", 0.0),
+            "avg16_pct": 100.0 * total_correct / total_solutions if total_solutions else 0.0,
+            "metrics_by_dataset": metrics_by_dataset,
+            "metrics_by_category": metrics_by_category,
+            "num_problems": processed,
+            "num_problems_total": n_prompts_total,
+            "total_solutions": total_solutions,
+            "average_correct_pct": 100.0 * total_correct / total_solutions if total_solutions else 0.0,
+            "majority_vote_pct": 100.0 * majority_correct / processed if processed else 0.0,
+            "format_rate_pct": 100.0 * formatted_total / total_solutions if total_solutions else 0.0,
+            "avg_output_tokens_mean": total_output_tokens / total_solutions if total_solutions else 0.0,
+            "math_verify": _HAS_MATH_VERIFY,
+            "generate_batch_size": gbs if args.generate_batch_size > 0 else n_prompts_total,
+            "generate_batch_size_requested": args.generate_batch_size,
+            "streaming_write": True,
+            "metrics_json": str(metrics_path),
+            "results_json": str(results_path),
+            "results": results,
+        }
 
     n = len(results)
     pass_at_k_summary = summary["pass_at_k"]
@@ -2057,7 +2247,7 @@ def main() -> None:
         summary=summary,
         results=results,
         processed=n,
-        n_prompts=n_prompts,
+        n_prompts=n_prompts_total,
     )
     print(f"[eval] wrote final metrics -> {metrics_path}", flush=True)
     print(f"[eval] wrote final results -> {results_path}", flush=True)
