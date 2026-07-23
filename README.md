@@ -6,12 +6,12 @@ This directory implements paper-style on-policy self-distillation for Qwen3-4B. 
 
 | Script | Teacher context | Qwen3 thinking |
 |---|---|---|
-| `scripts/opsd_correct_nothink.sh` | verified integer answer | off |
-| `scripts/opsd_correct_think.sh` | verified integer answer | on |
-| `scripts/opsd_pi_nothink.sh` | fixed wrong answer `π` | off |
-| `scripts/opsd_pi_think.sh` | fixed wrong answer `π` | on |
-| `scripts/opsd_instruction_nothink.sh` | detailed instruction, no answer | off |
-| `scripts/opsd_instruction_think.sh` | detailed instruction, no answer | on |
+| `scripts/train/opsd_nothink_4b.sh` | verified integer answer | off |
+| `scripts/train/opsd_think_4b.sh` | verified integer answer | on |
+| `scripts/train/opsd_pi_nothink_4b.sh` | fixed wrong answer `π` | off |
+| `scripts/train/opsd_pi_think_4b.sh` | fixed wrong answer `π` | on |
+| `scripts/train/opsd_instruction_nothink_4b.sh` | detailed instruction, no answer | off |
+| `scripts/train/opsd_instruction_think_4b.sh` | detailed instruction, no answer | on |
 
 Student and teacher use the Qwen3 chat template with the same explicit `enable_thinking` value. In the instruction-shift variants, the student is instructed to be concise and the teacher to be detailed.
 
@@ -36,11 +36,24 @@ Logged metrics include loss, student/teacher entropy, sampled-token log-probabil
 Set the server dataset path and submit one experiment:
 
 ```bash
-export DATASET_PATH=/server/path/to/dapo-train.parquet
-sbatch scripts/opsd_correct_nothink.sh
+sbatch scripts/train/opsd_nothink_4b.sh
 ```
 
-Optional overrides are `OUTPUT_ROOT`, `WANDB_DIR`, `HF_HOME`, and `MASTER_PORT`.
+Submit from the repository root so Slurm writes job logs under `log/opsd_<jobname>.<jobid>.out`.
+
+Default training data for `opsd_nothink_4b` is
+`${BASE_DIR}/data/dapo/preprocessed/dapo-math-17k.opsd.correct.nothink.maxprompt1024.parquet`
+(offline `{problem, solution}` + prompt-length filter). Rebuild with:
+
+```bash
+python scripts/data/preprocess_opsd_dapo.py --privilege-mode correct
+# field-only (no length filter):
+python scripts/data/preprocess_opsd_dapo.py --skip-prompt-length-filter
+```
+
+Override with `DATASET_PATH` if needed.
+
+Optional overrides are `BASE_DIR`, `DATASET_PATH`, `OUTPUT_ROOT`, `WANDB_DIR`, `HF_HOME`, and `MASTER_PORT`.
 
 Before the first training job, verify the existing `anchor` environment without installing anything:
 
@@ -53,20 +66,21 @@ bash scripts/smoke_test_imports.sh
 The evaluator is adapted from CAST and directly loads a full checkpoint. It covers AIME24, AIME25, AIME26, HMMT25, and MATH500 with pass@1/4/8/16.
 
 ```bash
-export CHECKPOINT_PATH=/path/to/opsd_correct_nothink/checkpoint-100
-export EVAL_DATA_ROOT=/server/path/to/eval/data
-sbatch scripts/eval_nothink.sh
+export CHECKPOINT_PATH=/path/to/opsd_nothink_4b/checkpoint-100
+sbatch scripts/eval/eval_nothink.sh
 ```
 
-Use `scripts/eval_think.sh` for a thinking checkpoint. No LoRA adapter argument is used.
+Default eval data root is `${BASE_DIR}/data` (AIME24/25/26, HMMT25, MATH-500). Override with `EVAL_DATA_ROOT` if needed.
+
+Use `scripts/eval/eval_think.sh` for a thinking checkpoint. No LoRA adapter argument is used.
 
 ## Layout
 
-- `src/opsd_trainer.py`: official OPSD trainer adapted for an independent frozen full model and TRL 0.22.1
-- `src/data_collator.py`: three privileged-context constructions and Qwen3 chat templates
-- `src/train_opsd.py`: DAPO loading, prompt filtering, trainer setup, and metrics
+- `src/`: training Python (`train_opsd.py`, `opsd_trainer.py`, `opsd_config.py`, `data_collator.py`)
+- `scripts/train/`: self-contained Slurm training jobs (no shared `*_common.sh`)
+- `scripts/eval/`: self-contained Slurm evaluation jobs
+- `eval/`: CAST-derived full-model math evaluation Python
 - `configs/`: ZeRO-3 and Accelerate configuration
-- `eval/`: CAST-derived full-model math evaluation
 - `vendor/verl`: safely extracted CAST `verl.zip`
 - `vendor/OPSD_official`: upstream OPSD reference snapshot
 - `vendor/trl_v0.22.1`: server-version API reference used for static compatibility checks

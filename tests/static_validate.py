@@ -27,14 +27,9 @@ require("num_processes: 4" in accelerate_yaml, "Accelerate must launch four rank
 train_source = (ROOT / "src/train_opsd.py").read_text(encoding="utf-8")
 trainer_source = (ROOT / "src/opsd_trainer.py").read_text(encoding="utf-8")
 collator_source = (ROOT / "src/data_collator.py").read_text(encoding="utf-8")
-common = (ROOT / "scripts/train_common.sh").read_text(encoding="utf-8")
 require('"attn_implementation": "sdpa"' in train_source, "student must use SDPA")
 require('teacher_kwargs["attn_implementation"] = "sdpa"' in trainer_source, "teacher must use SDPA")
 require("flash_attention" not in train_source.lower(), "training entry must not enable FlashAttention")
-require("VLLM_ATTENTION_BACKEND=XFORMERS" in common, "vLLM must use XFormers")
-require("--max-steps 100" in common and "--save-steps 25" in common, "step/save schedule mismatch")
-require("--max-prompt-length 1024" in common, "prompt length mismatch")
-require("--max-completion-length 8192" in common, "response length mismatch")
 require('else "π"' in collator_source, "fixed wrong privileged answer must be π")
 require("enable_thinking=self.student_thinking" in collator_source, "student template switch missing")
 require("enable_thinking=self.teacher_thinking" in collator_source, "teacher template switch missing")
@@ -42,18 +37,40 @@ require("self.teacher_model.requires_grad_(False)" in trainer_source, "teacher m
 require("top_k_loss=None" in train_source, "full-vocabulary loss must not set top-k")
 
 matrix = {
-    "opsd_correct_nothink.sh": "correct 0",
-    "opsd_correct_think.sh": "correct 1",
-    "opsd_pi_nothink.sh": "pi 0",
-    "opsd_pi_think.sh": "pi 1",
-    "opsd_instruction_nothink.sh": "instruction 0",
-    "opsd_instruction_think.sh": "instruction 1",
+    "opsd_nothink_4b.sh": ("correct", "0"),
+    "opsd_think_4b.sh": ("correct", "1"),
+    "opsd_pi_nothink_4b.sh": ("pi", "0"),
+    "opsd_pi_think_4b.sh": ("pi", "1"),
+    "opsd_instruction_nothink_4b.sh": ("instruction", "0"),
+    "opsd_instruction_think_4b.sh": ("instruction", "1"),
 }
-for name, expected in matrix.items():
-    text = (ROOT / "scripts" / name).read_text(encoding="utf-8")
+for name, (mode, thinking) in matrix.items():
+    text = (ROOT / "scripts" / "train" / name).read_text(encoding="utf-8")
     require("#SBATCH --gres=gpu:4" in text, f"{name}: must request four GPUs")
-    require(expected in text, f"{name}: wrong experiment mode")
+    require(f"MODE={mode}" in text, f"{name}: wrong privilege mode")
+    require(f"THINKING={thinking}" in text, f"{name}: wrong thinking flag")
+    require("train_common.sh" not in text, f"{name}: must be self-contained")
+    require("VLLM_ATTENTION_BACKEND=XFORMERS" in text, f"{name}: vLLM must use XFormers")
+    require("--max-steps 100" in text and "--save-steps 25" in text, f"{name}: step/save schedule mismatch")
+    require("--max-prompt-length 1024" in text, f"{name}: prompt length mismatch")
+    require("--max-completion-length 8192" in text, f"{name}: response length mismatch")
+    require("--privilege-mode" in text, f"{name}: privilege-mode arg missing")
+    require("accelerate launch" in text, f"{name}: must launch training directly")
 
+for name, thinking in (("eval_nothink.sh", "0"), ("eval_think.sh", "1")):
+    text = (ROOT / "scripts" / "eval" / name).read_text(encoding="utf-8")
+    require("#SBATCH --gres=gpu:1" in text, f"{name}: must request one GPU")
+    require(f"THINKING={thinking}" in text, f"{name}: wrong thinking flag")
+    require("eval_common.sh" not in text, f"{name}: must be self-contained")
+    require("eval_math_vllm_local.py" in text, f"{name}: must call eval entrypoint")
+
+require(not (ROOT / "scripts/train_common.sh").exists(), "train_common.sh should be removed")
+require(not (ROOT / "scripts/eval_common.sh").exists(), "eval_common.sh should be removed")
 require((ROOT / "vendor/verl/verl_rlsd").is_dir(), "CAST verl.zip was not extracted")
-require((ROOT / "vendor/OPSD_official/opsd_trainer.py").is_file(), "official OPSD reference missing")
+opsd_official = ROOT / "vendor/OPSD_official/opsd_trainer.py"
+trl_ref = ROOT / "vendor/trl_v0.22.1"
+if not opsd_official.is_file():
+    print("warning: vendor/OPSD_official reference snapshot is empty/missing")
+if not any(trl_ref.glob("*")):
+    print("warning: vendor/trl_v0.22.1 reference snapshot is empty/missing")
 print("static validation passed")

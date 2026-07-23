@@ -1,15 +1,30 @@
 #!/bin/bash
+#SBATCH --job-name=opsd_eval_th
+#SBATCH --output=log/opsd_%x.%j.out
+#SBATCH --partition=GPUA800
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=7
+#SBATCH --gres=gpu:1
+#SBATCH --mem=80G
+#SBATCH --time=24:00:00
 set -euo pipefail
 
-THINKING=${1:?thinking flag is required}
-BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(pwd)}}
+THINKING=1
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR=${BASE_DIR:-$(cd "${SCRIPT_DIR}/../.." && pwd)}
 : "${CHECKPOINT_PATH:?Set CHECKPOINT_PATH to a full saved model directory}"
+EVAL_DATA_ROOT=${EVAL_DATA_ROOT:-${BASE_DIR}/data}
 : "${EVAL_DATA_ROOT:?Set EVAL_DATA_ROOT to the server test-data root}"
 EVAL_TAG=${EVAL_TAG:-$(basename "${CHECKPOINT_PATH}")}
 OUTPUT_JSON=${OUTPUT_JSON:-${BASE_DIR}/eval_outputs/${EVAL_TAG}_think${THINKING}.json}
 
 cd "${BASE_DIR}"
+# conda activate scripts reference unset vars; keep nounset elsewhere
+set +u
 source activate anchor
+set -u
 export PYTHONPATH="${BASE_DIR}/vendor/verl:${BASE_DIR}/eval:${PYTHONPATH:-}"
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export VLLM_USE_V1=0

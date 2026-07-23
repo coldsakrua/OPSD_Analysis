@@ -48,7 +48,7 @@ from trl.import_utils import is_vllm_available
 from trl.models import prepare_deepspeed
 from trl.models.utils import unwrap_model_for_generation
 from trl.trainer.sft_trainer import SFTTrainer
-from trl.trainer.utils import disable_dropout_in_model, empty_cache, pad
+from trl.trainer.utils import disable_dropout_in_model, empty_cache, pad, split_tensor_dict
 from opsd_config import OPSDConfig
 from data_collator import SelfDistillationDataCollator
 
@@ -353,12 +353,18 @@ class OPSDTrainer(SFTTrainer):
                 os.environ["WORLD_SIZE"] = str(self.accelerator.num_processes)
                 ensure_master_addr_port()
 
+                # Allow one wake-up to cover a full grad-accumulation window.
+                gen_concurrency = max(
+                    1,
+                    int(self.args.per_device_train_batch_size)
+                    * int(self.args.steps_per_generation or self.args.gradient_accumulation_steps or 1),
+                )
                 self.vllm_engine = LLM(
                     model=student_model_name_or_path,
                     revision=self.model_revision,
                     tensor_parallel_size=self.vllm_tensor_parallel_size,
                     gpu_memory_utilization=self.vllm_gpu_memory_utilization,
-                    max_num_seqs=self.args.per_device_train_batch_size,
+                    max_num_seqs=gen_concurrency,
                     max_num_batched_tokens=args.max_length,
                     max_model_len=args.max_length,
                     distributed_executor_backend="external_launcher",
@@ -1039,29 +1045,20 @@ class OPSDTrainer(SFTTrainer):
         avg_completion_length = total_completion_tokens / num_prompts if num_prompts > 0 else 0
         tokens_per_sec = total_completion_tokens / elapsed_time if elapsed_time > 0 else 0
         print(
-            f"vLLM generation done - elapsed time: {elapsed_time:.2f}s, prompts: {num_prompts}, total tokens: {total_completion_tokens}, avg length: {avg_completion_length:.1f}, speed: {tokens_per_sec:.1f} tok/s"
-        )
+            f"vLLM generation done - elapsed time: {elapsed_time:.2f}s, prompts: {num_prompts}, "
+            f"total tokens: {total_completion_tokens}, avg length: {avg_completion_length:.1f}, "
+            f"speed: {tokens_per_sec:.1f} tok/s",
+            flush=True,
+        ) if self.accelerator.is_main_process else None
         self._metrics["train"]["rollout/tokens_per_second"].append(tokens_per_sec)
         self._metrics["train"]["rollout/mean_response_length"].append(avg_completion_length)
         self._metrics["train"]["rollout/generated_tokens"].append(float(total_completion_tokens))
 
-        # We need to combine prompt and completion for new_input_ids
-        # Tokenize prompts again to get prompt_ids on the correct device and format
-        # Use prompts_text_for_vllm (without special tokens) for tokenization since vLLM expects clean text
-        # Ensure add_special_tokens=False as vLLM typically handles prompts as raw text
-        # Calculate max_length for prompts, ensuring it's positive
-        prompt_max_length = (
-            max(1, self.args.max_length - max_completion_length) if self.args.max_length else None
-        )
-        prompt_tokenized = self.processing_class(
-            prompts_text_for_vllm,
-            return_tensors="pt",
-            padding="longest",
-            truncation=True if prompt_max_length else False,
-            max_length=prompt_max_length,
-            add_special_tokens=False,
-        ).to(device)
-        prompt_ids = prompt_tokenized.input_ids
+        # Reuse the collator prompt tensors instead of decode→encode. Retokenizing
+        # can change prompt width and desync training_step's student_prompt_length
+        # when slicing completions for student/teacher sequences.
+        prompt_ids = inputs["student_prompts"].to(device)
+        prompt_attention = inputs["student_prompt_attention_mask"].to(device)
 
         completion_ids_tensors = [torch.tensor(ids, device=device) for ids in completion_ids]
         # Manually pad/truncate completions to max_completion_length length before using pad function
@@ -1092,6 +1089,7 @@ class OPSDTrainer(SFTTrainer):
         # Ensure prompt_ids and padded_completion_ids are 2D
         if prompt_ids.ndim == 1:
             prompt_ids = prompt_ids.unsqueeze(0)
+            prompt_attention = prompt_attention.unsqueeze(0)
         if padded_completion_ids.ndim == 1:
             padded_completion_ids = padded_completion_ids.unsqueeze(0)
 
@@ -1101,7 +1099,7 @@ class OPSDTrainer(SFTTrainer):
         for row, comp_ids in enumerate(completion_ids):
             completion_attention[row, : min(len(comp_ids), max_completion_length)] = 1
         new_attention_mask = torch.cat(
-            [prompt_tokenized.attention_mask, completion_attention],
+            [prompt_attention, completion_attention],
             dim=1,
         )
         new_labels = torch.cat(
@@ -1373,6 +1371,115 @@ class OPSDTrainer(SFTTrainer):
         # Clear buffer after saving
         self._generation_outputs_buffer.clear()
 
+    @staticmethod
+    def _pad_cat_tensors(tensors: list[torch.Tensor], pad_value: int | float = 0) -> torch.Tensor:
+        """Pad 1D/2D tensors on the last dim to a common width, then cat on batch dim."""
+        if not tensors:
+            raise ValueError("empty tensor list")
+        if tensors[0].ndim == 1:
+            return torch.cat(tensors, dim=0)
+        max_len = max(t.shape[-1] for t in tensors)
+        padded = []
+        for t in tensors:
+            if t.shape[-1] == max_len:
+                padded.append(t)
+            else:
+                padded.append(F.pad(t, (0, max_len - t.shape[-1]), mode="constant", value=pad_value))
+        return torch.cat(padded, dim=0)
+
+    def _merge_prompt_batches(self, batches: list[dict[str, Any]]) -> dict[str, Any]:
+        """Merge microbatches into one generation batch (pad prompt widths as needed)."""
+        if len(batches) == 1:
+            return dict(batches[0])
+        pad_id = self.processing_class.pad_token_id or 0
+        merged: dict[str, Any] = {}
+        for key in batches[0].keys():
+            values = [b[key] for b in batches]
+            sample = values[0]
+            if torch.is_tensor(sample):
+                if sample.ndim == 0:
+                    merged[key] = torch.stack(values).max()
+                elif "mask" in key:
+                    merged[key] = self._pad_cat_tensors(values, pad_value=0)
+                elif sample.ndim >= 2:
+                    merged[key] = self._pad_cat_tensors(values, pad_value=pad_id)
+                else:
+                    merged[key] = torch.cat(values, dim=0)
+            elif isinstance(sample, list):
+                merged[key] = [item for sub in values for item in sub]
+            else:
+                merged[key] = sample
+        if "student_prompts" in merged:
+            merged["student_prompt_length"] = int(merged["student_prompts"].shape[-1])
+        if "teacher_prompts" in merged:
+            merged["teacher_prompt_length"] = int(merged["teacher_prompts"].shape[-1])
+        return merged
+
+    def _attach_rollouts_to_inputs(self, inputs: dict[str, Any]) -> dict[str, Any]:
+        """Run vLLM once and attach student/teacher full sequences + labels."""
+        self._wake_vllm_if_needed()
+        generated_ids, generated_attention_mask, _, prompt_texts, completion_texts = (
+            self._generate_on_policy_outputs_vllm(
+                inputs, self.generation_config, self.processing_class.pad_token_id
+            )
+        )
+        student_prompt_len = int(inputs["student_prompt_length"])
+        generation_ids = generated_ids[:, student_prompt_len:]
+        response_attention_mask = generated_attention_mask[:, student_prompt_len:]
+        teacher_full_ids = torch.cat([inputs["teacher_prompts"], generation_ids], dim=1)
+        teacher_attention_mask = torch.cat(
+            [inputs["teacher_prompt_attention_mask"], response_attention_mask],
+            dim=1,
+        )
+        labels = torch.full_like(generated_ids, -100)
+        response_mask = response_attention_mask.bool()
+        labels[:, student_prompt_len:][response_mask] = generation_ids[response_mask]
+
+        inputs = dict(inputs)
+        inputs["student_input_ids"] = generated_ids
+        inputs["student_attention_mask"] = generated_attention_mask
+        inputs["teacher_input_ids"] = teacher_full_ids
+        inputs["teacher_attention_mask"] = teacher_attention_mask
+        inputs["labels"] = labels
+        inputs["prompt_texts"] = prompt_texts
+        inputs["completion_texts"] = completion_texts
+        inputs["_opsd_rollout_ready"] = True
+        return inputs
+
+    def get_batch_samples(self, epoch_iterator, num_batches, device):
+        """Prefetch gas microbatches, generate once, then return sliced loss batches.
+
+        Completions are slightly offline across the accumulation window (same student
+        weights for the whole window), which matches the requested generate-then-accumulate
+        schedule and avoids wake/generate/sleep on every micro-step.
+        """
+        batch_samples, num_items_in_batch = super().get_batch_samples(epoch_iterator, num_batches, device)
+        if (not self.use_vllm) or (not self.model.training) or len(batch_samples) <= 1:
+            return batch_samples, num_items_in_batch
+
+        merged = self._attach_rollouts_to_inputs(self._merge_prompt_batches(batch_samples))
+        prompt_texts = merged.pop("prompt_texts", None)
+        completion_texts = merged.pop("completion_texts", None)
+        merged.pop("_opsd_rollout_ready", None)
+        # Keep only tensor / list fields that split cleanly along the batch dim.
+        splittable = {
+            k: v
+            for k, v in merged.items()
+            if torch.is_tensor(v) or isinstance(v, list)
+        }
+        prepared = split_tensor_dict(splittable, len(batch_samples))
+        if isinstance(prompt_texts, list) and isinstance(completion_texts, list):
+            chunk = len(prompt_texts) // len(prepared)
+            for i, batch in enumerate(prepared):
+                batch["prompt_texts"] = prompt_texts[i * chunk : (i + 1) * chunk]
+                batch["completion_texts"] = completion_texts[i * chunk : (i + 1) * chunk]
+                batch["_opsd_rollout_ready"] = True
+                if "student_prompts" in batch:
+                    batch["student_prompt_length"] = int(batch["student_prompts"].shape[-1])
+                if "teacher_prompts" in batch:
+                    batch["teacher_prompt_length"] = int(batch["teacher_prompts"].shape[-1])
+        return prepared, num_items_in_batch
+
     @profiling_decorator
     def training_step(
         self, model: nn.Module, inputs: dict[str, torch.Tensor | Any], num_items_in_batch: int | None = None
@@ -1387,11 +1494,14 @@ class OPSDTrainer(SFTTrainer):
         4. Compute JSD loss
 
         Otherwise:
-        1. Generate completions from student prompts
+        1. Generate completions from student prompts (or reuse buffered rollouts)
         2. Construct full sequences for both student and teacher with the generation
         3. Compute JSD loss on the generation tokens
         """
         on_policy = True
+        rollout_ready = bool(inputs.pop("_opsd_rollout_ready", False)) and (
+            "student_input_ids" in inputs and "teacher_input_ids" in inputs and "labels" in inputs
+        )
 
         # === REASONING PHASE (if enabled) ===
         if self.reason_first:
@@ -1400,28 +1510,24 @@ class OPSDTrainer(SFTTrainer):
             print(f"{'='*80}\n")
 
             with unwrap_model_for_generation(model, self.accelerator) as unwrapped_model:
-                # Generate teacher's reasoning
                 teacher_reasoning_ids = self.generate_teacher_reasoning(
                     unwrapped_model,
                     inputs["teacher_reasoning_prompts"],
                     inputs.get("teacher_reasoning_attention_mask"),
                 )
 
-                # Decode reasoning
                 reasoning_prompt_len = inputs["teacher_reasoning_prompt_length"]
                 reasoning_completions = teacher_reasoning_ids[:, reasoning_prompt_len:]
                 reasoning_texts = self.processing_class.batch_decode(
                     reasoning_completions, skip_special_tokens=True
                 )
 
-                # Occasionally print reasoning
                 if random.random() < 0.01:
                     print(f"\n{'='*80}")
                     print(f"TEACHER REASONING SAMPLE (Step {self.state.global_step}):")
                     print(f"{'='*80}")
                     sample_idx = random.randint(0, len(reasoning_texts) - 1)
                     print(f"\n{'='*80}")
-                    # Decode the prompt from token IDs to text
                     sample_prompt = self.processing_class.decode(
                         inputs["teacher_reasoning_prompts"][sample_idx], skip_special_tokens=False
                     )
@@ -1429,8 +1535,6 @@ class OPSDTrainer(SFTTrainer):
                     print(f"\nReasoning:\n{reasoning_texts[sample_idx]}")
                     print(f"{'='*80}\n")
 
-                # Update teacher prompts with reasoning
-                # Construct: [teacher_reasoning_prompt][reasoning][transition_to_teaching]
                 teacher_prompts_with_reasoning = torch.cat(
                     [
                         inputs["teacher_reasoning_prompts"],
@@ -1440,7 +1544,6 @@ class OPSDTrainer(SFTTrainer):
                     dim=1,
                 )
 
-                # Update inputs with new teacher prompts
                 inputs["teacher_prompts"] = teacher_prompts_with_reasoning
                 teacher_attention_mask = torch.ones_like(teacher_prompts_with_reasoning)
                 if self.processing_class.pad_token_id is not None:
@@ -1449,21 +1552,31 @@ class OPSDTrainer(SFTTrainer):
                     ] = 0
                 inputs["teacher_prompt_attention_mask"] = teacher_attention_mask
                 inputs["teacher_prompt_length"] = teacher_prompts_with_reasoning.shape[1]
+                rollout_ready = False
 
         # === GENERATION PHASE ===
-        if self.use_vllm:
-            self._wake_vllm_if_needed()
-            result = self._generate_on_policy_outputs_vllm(
-                inputs, self.generation_config, self.processing_class.pad_token_id
-            )
-            generated_ids, generated_attention_mask, _, prompt_texts, completion_texts = result
+        if rollout_ready:
+            prompt_texts = inputs.pop("prompt_texts", None)
+            completion_texts = inputs.pop("completion_texts", None)
+            if prompt_texts is None or completion_texts is None:
+                prompt_texts = self.processing_class.batch_decode(
+                    inputs["student_prompts"], skip_special_tokens=False
+                )
+                student_prompt_len = int(inputs["student_prompt_length"])
+                completion_texts = self.processing_class.batch_decode(
+                    inputs["student_input_ids"][:, student_prompt_len:], skip_special_tokens=False
+                )
+        elif self.use_vllm:
+            inputs = self._attach_rollouts_to_inputs(inputs)
+            prompt_texts = inputs.pop("prompt_texts")
+            completion_texts = inputs.pop("completion_texts")
+            inputs.pop("_opsd_rollout_ready", None)
         else:
             with unwrap_model_for_generation(model, self.accelerator) as unwrapped_model:
                 result = self.generate_on_policy_outputs(
                     unwrapped_model, inputs, self.generation_config, self.processing_class.pad_token_id
                 )
                 generated_ids, generated_attention_mask, _ = result
-                # Decode for logging
                 prompt_texts = self.processing_class.batch_decode(
                     inputs["student_prompts"], skip_special_tokens=False
                 )
@@ -1472,56 +1585,30 @@ class OPSDTrainer(SFTTrainer):
                 completion_texts = self.processing_class.batch_decode(
                     completion_ids, skip_special_tokens=False
                 )
+            generation_ids = generated_ids[:, student_prompt_len:]
+            inputs["student_input_ids"] = generated_ids
+            inputs["student_attention_mask"] = generated_attention_mask
+            teacher_full_ids = torch.cat([inputs["teacher_prompts"], generation_ids], dim=1)
+            response_attention_mask = generated_attention_mask[:, student_prompt_len:]
+            inputs["teacher_input_ids"] = teacher_full_ids
+            inputs["teacher_attention_mask"] = torch.cat(
+                [inputs["teacher_prompt_attention_mask"], response_attention_mask],
+                dim=1,
+            )
+            labels = torch.full_like(generated_ids, -100)
+            response_mask = generated_attention_mask[:, student_prompt_len:].bool()
+            labels[:, student_prompt_len:][response_mask] = generation_ids[response_mask]
+            inputs["labels"] = labels
 
-        # Get batch-level student prompt length
-        student_prompt_len = inputs["student_prompt_length"]
-
-        # Extract generation part (same slice for all examples since prompts are padded)
-        generation_ids = generated_ids[:, student_prompt_len:]
-
-        # Construct student full sequence: [student_prompt][generation]
-        inputs["student_input_ids"] = generated_ids
-        inputs["student_attention_mask"] = generated_attention_mask
-
-        # Construct teacher full sequence: [teacher_prompt][generation]
-        teacher_prompts = inputs["teacher_prompts"]
-        teacher_full_ids = torch.cat([teacher_prompts, generation_ids], dim=1)
-
-        # Preserve real EOS/chat-boundary tokens when pad_token_id == eos_token_id
-        # (the standard Qwen3 setup). Equality-based masking would incorrectly
-        # hide every <|im_end|> in the teacher prompt.
-        response_attention_mask = generated_attention_mask[:, student_prompt_len:]
-        teacher_attention_mask = torch.cat(
-            [inputs["teacher_prompt_attention_mask"], response_attention_mask],
-            dim=1,
-        )
-
-        inputs["teacher_input_ids"] = teacher_full_ids
-        inputs["teacher_attention_mask"] = teacher_attention_mask
-
-        # Only completion positions participate in OPSD. Use the explicit
-        # attention mask so a real EOS remains supervised even when EOS is
-        # also configured as the padding token.
-        labels = torch.full_like(generated_ids, -100)
-        response_mask = generated_attention_mask[:, student_prompt_len:].bool()
-        response_labels = labels[:, student_prompt_len:]
-        response_tokens = generated_ids[:, student_prompt_len:]
-        response_labels[response_mask] = response_tokens[response_mask]
-
-        inputs["labels"] = labels
-
-        # Log prompt and completion texts
         self._textual_logs["prompt"].extend(gather_object(prompt_texts))
         self._textual_logs["completion"].extend(gather_object(completion_texts))
 
-        # Collect generation outputs for saving
         for prompt, completion in zip(prompt_texts, completion_texts):
             self._generation_outputs_buffer.append(
                 {"step": self.state.global_step, "prompt": prompt, "completion": completion}
             )
 
-        # Occasionally print student's generation with 1% probability
-        if random.random() < 0.01:
+        if random.random() < 0.01 and self.accelerator.is_main_process:
             print(f"\n{'='*80}")
             print(f"STUDENT GENERATION SAMPLE (Step {self.state.global_step}):")
             print(f"{'='*80}")
@@ -1544,7 +1631,6 @@ class OPSDTrainer(SFTTrainer):
                 torch.cuda.max_memory_allocated() / gib
             )
 
-        # Save generation outputs every N steps
         if (
             self.state.global_step > 0
             and self.state.global_step % self._generation_save_frequency == 0

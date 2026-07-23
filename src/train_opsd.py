@@ -2,91 +2,23 @@ from __future__ import annotations
 
 import argparse
 import os
-import re
 from pathlib import Path
-from typing import Any
 
 import torch
-from datasets import load_dataset, load_from_disk
 from transformers import AutoTokenizer, set_seed
 
 # Enforce the no-FlashAttention requirement even when this entry point is
-# invoked directly instead of through scripts/train_common.sh.
+# invoked directly instead of through scripts/train/*.sh.
 os.environ.setdefault("VLLM_ATTENTION_BACKEND", "XFORMERS")
 os.environ.setdefault("VLLM_USE_V1", "0")
 
 from data_collator import SelfDistillationDataCollator
 from opsd_config import OPSDConfig
+from opsd_dataset import load_training_dataset, normalize_dataset, prompt_length_filter_applied
 from opsd_trainer import OPSDTrainer
 
 
 DEFAULT_MODEL = "/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b"
-
-
-def _content_to_text(content: Any) -> str:
-    if isinstance(content, list):
-        parts = []
-        for item in content:
-            if isinstance(item, dict):
-                parts.append(str(item.get("text", item.get("content", ""))))
-            elif item is not None:
-                parts.append(str(item))
-        return "\n".join(x for x in parts if x).strip()
-    return "" if content is None else str(content).strip()
-
-
-def _extract_problem(prompt: Any) -> str:
-    if isinstance(prompt, list):
-        users = [x for x in prompt if isinstance(x, dict) and str(x.get("role", "user")).lower() == "user"]
-        text = _content_to_text((users[-1] if users else prompt[-1]).get("content", "")) if prompt else ""
-    elif isinstance(prompt, dict):
-        text = _content_to_text(prompt.get("content", prompt))
-    else:
-        text = str(prompt or "").strip()
-    text = re.sub(
-        r"^\s*Solve\s+the\s+following(?:\s+math)?\s+problem\s*,?\s+step\s+by\s+step\s*[.:]?\s*",
-        "",
-        text,
-        flags=re.IGNORECASE | re.DOTALL,
-    )
-    text = re.sub(
-        r"\s*Please\s+reason\s+step\s+by\s+step.*$",
-        "",
-        text,
-        flags=re.IGNORECASE | re.DOTALL,
-    )
-    return text.strip()
-
-
-def _extract_solution(row: dict[str, Any]) -> str:
-    reward_model = row.get("reward_model")
-    if isinstance(reward_model, dict) and reward_model.get("ground_truth") is not None:
-        return str(reward_model["ground_truth"]).strip()
-    for key in ("ground_truth", "answer", "solution", "target"):
-        if row.get(key) is not None and str(row[key]).strip():
-            return str(row[key]).strip()
-    return ""
-
-
-def _load_training_dataset(path: str):
-    source = Path(path)
-    if source.is_dir() and (source / "dataset_info.json").exists():
-        dataset = load_from_disk(str(source))
-        return dataset["train"] if hasattr(dataset, "keys") and "train" in dataset else dataset
-    files = [x.strip() for x in path.split(",") if x.strip()]
-    return load_dataset("parquet", data_files=files, split="train")
-
-
-def _normalize_dataset(dataset):
-    def convert(row: dict[str, Any]) -> dict[str, str]:
-        prompt = row.get("prompt", row.get("problem", row.get("question", "")))
-        return {"problem": _extract_problem(prompt), "solution": _extract_solution(row)}
-
-    dataset = dataset.map(convert, desc="Normalizing DAPO fields")
-    return dataset.filter(
-        lambda row: bool(str(row["problem"]).strip()) and bool(str(row["solution"]).strip()),
-        desc="Dropping empty problems/answers",
-    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -101,10 +33,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--save-steps", type=int, default=25)
     parser.add_argument("--max-prompt-length", type=int, default=1024)
     parser.add_argument("--max-completion-length", type=int, default=8192)
-    parser.add_argument("--per-device-batch-size", type=int, default=1)
+    parser.add_argument("--per-device-batch-size", type=int, default=4)
     parser.add_argument("--gradient-accumulation-steps", type=int, default=4)
-    parser.add_argument("--learning-rate", type=float, default=5e-6)
-    parser.add_argument("--vllm-gpu-memory-utilization", type=float, default=0.45)
+    parser.add_argument("--learning-rate", type=float, default=1e-6)
+    parser.add_argument("--vllm-gpu-memory-utilization", type=float, default=0.6)
     parser.add_argument("--deepspeed", default="configs/deepspeed_zero3.json")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
@@ -134,10 +66,22 @@ def main() -> None:
         student_thinking=args.enable_thinking,
         teacher_thinking=args.enable_thinking,
     )
-    train_dataset = _normalize_dataset(_load_training_dataset(args.dataset_path))
+    train_dataset = normalize_dataset(load_training_dataset(args.dataset_path))
     before = len(train_dataset)
-    train_dataset = train_dataset.filter(collator.fits, desc="Enforcing student/teacher prompt length")
-    print(f"[dataset] prompt cap kept {len(train_dataset)}/{before} examples", flush=True)
+    if prompt_length_filter_applied(
+        args.dataset_path,
+        privilege_mode=args.privilege_mode,
+        enable_thinking=args.enable_thinking,
+        max_prompt_length=args.max_prompt_length,
+        model_path=args.model_path,
+    ):
+        print(
+            f"[dataset] prompt length already filtered offline; keep {before} examples",
+            flush=True,
+        )
+    else:
+        train_dataset = train_dataset.filter(collator.fits, desc="Enforcing student/teacher prompt length")
+        print(f"[dataset] prompt cap kept {len(train_dataset)}/{before} examples", flush=True)
     if len(train_dataset) == 0:
         raise RuntimeError("no training rows remain after prompt filtering")
 
