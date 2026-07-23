@@ -21,13 +21,17 @@ MODEL_PATH=${MODEL_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/q
 DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/dapo/preprocessed/dapo-math-17k.opsd.correct.nothink.maxprompt1024.parquet}
 : "${DATASET_PATH:?Set DATASET_PATH to the server-side DAPO parquet path}"
 OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs}
-OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}}
+# One folder per run (Slurm job id); avoid overwriting previous checkpoints.
+JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
+OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/${JOB_TAG}}
+RUN_NAME_WITH_JOB=${RUN_NAME}_${JOB_TAG}
 
 cd "${BASE_DIR}"
 # conda activate scripts reference unset vars; keep nounset elsewhere
 set +u
 source activate anchor
 set -u
+export LD_LIBRARY_PATH="${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
 export PYTHONPATH="${BASE_DIR}/src:${PYTHONPATH:-}"
 export TOKENIZERS_PARALLELISM=false
@@ -55,9 +59,9 @@ fi
 
 # per-device=4 with 1024-token rollouts keeps full-vocab KL under memory on 2xA800-80G.
 # Generate once for the full accumulation window, then accumulate loss slices.
-echo "[launch] run=${RUN_NAME} mode=${MODE} thinking=${THINKING}"
+echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} thinking=${THINKING}"
 echo "[launch] model=${MODEL_PATH} dataset=${DATASET_PATH} output=${OUTPUT_DIR}"
-echo "[launch] 2 GPUs, microbatch=4, gas=4, global batch=32, vLLM util=0.55, gen-once-per-step"
+echo "[launch] 2 GPUs, microbatch=4, gas=4, global batch=32, vLLM util=0.4, gen-once-per-step"
 
 accelerate launch \
   --config_file "${BASE_DIR}/configs/accelerate_zero3.yaml" \
@@ -67,7 +71,7 @@ accelerate launch \
   --model-path "${MODEL_PATH}" \
   --dataset-path "${DATASET_PATH}" \
   --output-dir "${OUTPUT_DIR}" \
-  --run-name "${RUN_NAME}" \
+  --run-name "${RUN_NAME_WITH_JOB}" \
   --privilege-mode "${MODE}" \
   --max-steps 100 \
   --save-steps 25 \
@@ -76,6 +80,6 @@ accelerate launch \
   --per-device-batch-size 4 \
   --gradient-accumulation-steps 4 \
   --learning-rate 5e-6 \
-  --vllm-gpu-memory-utilization 0.55 \
+  --vllm-gpu-memory-utilization 0.4 \
   --deepspeed "${BASE_DIR}/configs/deepspeed_zero3.json" \
   "${THINK_ARGS[@]}"

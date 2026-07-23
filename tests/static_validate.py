@@ -57,6 +57,14 @@ for name, (mode, thinking) in matrix.items():
     require("--privilege-mode" in text, f"{name}: privilege-mode arg missing")
     require("accelerate launch" in text, f"{name}: must launch training directly")
 
+asymmetric = (ROOT / "scripts/train/opsd_student_nothink_teacher_think_4b.sh").read_text(encoding="utf-8")
+require("#SBATCH --gres=gpu:2" in asymmetric, "asymmetric script must request two GPUs")
+require("MODE=correct" in asymmetric, "asymmetric script must use correct privilege")
+require("STUDENT_THINKING=0" in asymmetric and "TEACHER_THINKING=1" in asymmetric, "asymmetric thinking flags wrong")
+require("--no-student-thinking" in asymmetric and "--teacher-thinking" in asymmetric, "asymmetric CLI flags missing")
+require("VLLM_ATTENTION_BACKEND=XFORMERS" in asymmetric, "asymmetric script must use XFormers")
+require("--student-thinking" in train_source and "--teacher-thinking" in train_source, "train entry must expose split thinking flags")
+
 for name, thinking in (("eval_nothink.sh", "0"), ("eval_think.sh", "1")):
     text = (ROOT / "scripts" / "eval" / name).read_text(encoding="utf-8")
     require("#SBATCH --gres=gpu:1" in text, f"{name}: must request one GPU")

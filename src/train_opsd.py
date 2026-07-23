@@ -28,20 +28,40 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", default=os.environ.get("OUTPUT_DIR", "outputs/opsd"))
     parser.add_argument("--run-name", default=os.environ.get("RUN_NAME", "opsd_qwen3_4b"))
     parser.add_argument("--privilege-mode", choices=("correct", "pi", "instruction"), required=True)
-    parser.add_argument("--enable-thinking", action="store_true")
+    parser.add_argument(
+        "--enable-thinking",
+        action="store_true",
+        help="Convenience flag: turn on thinking for both student and teacher.",
+    )
+    parser.add_argument(
+        "--student-thinking",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Qwen3 enable_thinking for the student prompt (default: follows --enable-thinking).",
+    )
+    parser.add_argument(
+        "--teacher-thinking",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Qwen3 enable_thinking for the teacher prompt (default: follows --enable-thinking).",
+    )
     parser.add_argument("--max-steps", type=int, default=100)
     parser.add_argument("--save-steps", type=int, default=25)
     parser.add_argument("--max-prompt-length", type=int, default=1024)
     parser.add_argument("--max-completion-length", type=int, default=1024)
     parser.add_argument("--per-device-batch-size", type=int, default=4)
     parser.add_argument("--gradient-accumulation-steps", type=int, default=4)
-    parser.add_argument("--learning-rate", type=float, default=1e-6)
-    parser.add_argument("--vllm-gpu-memory-utilization", type=float, default=0.6)
+    parser.add_argument("--learning-rate", type=float, default=5e-6)
+    parser.add_argument("--vllm-gpu-memory-utilization", type=float, default=0.4)
     parser.add_argument("--deepspeed", default="configs/deepspeed_zero3.json")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
     if not args.dataset_path:
         parser.error("--dataset-path or DATASET_PATH is required")
+    if args.student_thinking is None:
+        args.student_thinking = bool(args.enable_thinking)
+    if args.teacher_thinking is None:
+        args.teacher_thinking = bool(args.enable_thinking)
     return args
 
 
@@ -63,15 +83,16 @@ def main() -> None:
         max_length=max_length,
         max_prompt_length=args.max_prompt_length,
         privilege_mode=args.privilege_mode,
-        student_thinking=args.enable_thinking,
-        teacher_thinking=args.enable_thinking,
+        student_thinking=args.student_thinking,
+        teacher_thinking=args.teacher_thinking,
     )
     train_dataset = normalize_dataset(load_training_dataset(args.dataset_path))
     before = len(train_dataset)
     if prompt_length_filter_applied(
         args.dataset_path,
         privilege_mode=args.privilege_mode,
-        enable_thinking=args.enable_thinking,
+        student_thinking=args.student_thinking,
+        teacher_thinking=args.teacher_thinking,
         max_prompt_length=args.max_prompt_length,
         model_path=args.model_path,
     ):
@@ -140,7 +161,8 @@ def main() -> None:
     )
 
     print(
-        f"[config] mode={args.privilege_mode} thinking={args.enable_thinking} "
+        f"[config] mode={args.privilege_mode} "
+        f"student_thinking={args.student_thinking} teacher_thinking={args.teacher_thinking} "
         f"global_batch={args.per_device_batch_size * args.gradient_accumulation_steps * int(os.environ.get('WORLD_SIZE', '1'))} "
         f"prompt={args.max_prompt_length} response={args.max_completion_length}",
         flush=True,
@@ -157,8 +179,8 @@ def main() -> None:
         use_thinking_machines_loss=False,
         top_k_loss=None,
         jsd_token_clip=1e-6,
-        student_thinking=args.enable_thinking,
-        teacher_thinking=args.enable_thinking,
+        student_thinking=args.student_thinking,
+        teacher_thinking=args.teacher_thinking,
     )
     trainer.train()
     trainer.save_model(str(Path(args.output_dir) / "final"))

@@ -77,9 +77,11 @@ def prompt_length_filter_applied(
     path: str,
     *,
     privilege_mode: str,
-    enable_thinking: bool,
     max_prompt_length: int,
     model_path: str,
+    enable_thinking: bool | None = None,
+    student_thinking: bool | None = None,
+    teacher_thinking: bool | None = None,
 ) -> bool:
     """True when sibling .meta.json records a matching offline prompt-length filter."""
     meta_file = dataset_meta_path(path)
@@ -91,9 +93,35 @@ def prompt_length_filter_applied(
         return False
     if not meta.get("prompt_length_filtered"):
         return False
+
+    if student_thinking is None and teacher_thinking is None:
+        student_thinking = teacher_thinking = bool(enable_thinking)
+    elif student_thinking is None:
+        student_thinking = bool(enable_thinking)
+    elif teacher_thinking is None:
+        teacher_thinking = bool(enable_thinking)
+
+    if "student_thinking" in meta or "teacher_thinking" in meta:
+        meta_student = bool(meta.get("student_thinking", meta.get("enable_thinking", False)))
+        meta_teacher = bool(meta.get("teacher_thinking", meta.get("enable_thinking", False)))
+    else:
+        meta_student = meta_teacher = bool(meta.get("enable_thinking"))
+
+    thinking_ok = meta_student == bool(student_thinking) and meta_teacher == bool(teacher_thinking)
+    # Qwen3 no-think templates inject empty <think></think>, so dual-nothink offline
+    # filtering is a strict superset of student-nothink + teacher-think length checks.
+    if (
+        not thinking_ok
+        and meta_student is False
+        and meta_teacher is False
+        and student_thinking is False
+        and teacher_thinking is True
+    ):
+        thinking_ok = True
+
     return (
         str(meta.get("privilege_mode")) == str(privilege_mode)
-        and bool(meta.get("enable_thinking")) == bool(enable_thinking)
+        and thinking_ok
         and int(meta.get("max_prompt_length", -1)) == int(max_prompt_length)
         and str(meta.get("model_path", "")) == str(model_path)
     )

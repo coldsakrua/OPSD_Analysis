@@ -6,14 +6,15 @@ This directory implements paper-style on-policy self-distillation for Qwen3-4B. 
 
 | Script | Teacher context | Qwen3 thinking |
 |---|---|---|
-| `scripts/train/opsd_nothink_4b.sh` | verified integer answer | off |
-| `scripts/train/opsd_think_4b.sh` | verified integer answer | on |
-| `scripts/train/opsd_pi_nothink_4b.sh` | fixed wrong answer `π` | off |
-| `scripts/train/opsd_pi_think_4b.sh` | fixed wrong answer `π` | on |
-| `scripts/train/opsd_instruction_nothink_4b.sh` | detailed instruction, no answer | off |
-| `scripts/train/opsd_instruction_think_4b.sh` | detailed instruction, no answer | on |
+| `scripts/train/opsd_nothink_4b.sh` | verified integer answer | student/teacher off |
+| `scripts/train/opsd_think_4b.sh` | verified integer answer | student/teacher on |
+| `scripts/train/opsd_student_nothink_teacher_think_4b.sh` | verified integer answer | **student off, teacher on** (paper-preferred) |
+| `scripts/train/opsd_pi_nothink_4b.sh` | fixed wrong answer `π` | student/teacher off |
+| `scripts/train/opsd_pi_think_4b.sh` | fixed wrong answer `π` | student/teacher on |
+| `scripts/train/opsd_instruction_nothink_4b.sh` | detailed instruction, no answer | student/teacher off |
+| `scripts/train/opsd_instruction_think_4b.sh` | detailed instruction, no answer | student/teacher on |
 
-Student and teacher use the Qwen3 chat template with the same explicit `enable_thinking` value. In the instruction-shift variants, the student is instructed to be concise and the teacher to be detailed.
+By default student and teacher share one `enable_thinking` switch. The asymmetric script sets `--no-student-thinking --teacher-thinking` to match the paper's preferred TM-off student / TM-on teacher pairing. In the instruction-shift variants, the student is instructed to be concise and the teacher to be detailed.
 
 ## Training configuration
 
@@ -43,10 +44,14 @@ Submit from the repository root so Slurm writes job logs under `log/opsd_<jobnam
 
 Default training data for `opsd_nothink_4b` is
 `${BASE_DIR}/data/dapo/preprocessed/dapo-math-17k.opsd.correct.nothink.maxprompt1024.parquet`
-(offline `{problem, solution}` + prompt-length filter). Rebuild with:
+(offline `{problem, solution}` + prompt-length filter). The paper-preferred asymmetric script
+`opsd_student_nothink_teacher_think_4b.sh` uses
+`dapo-math-17k.opsd.correct.snothink_tthink.maxprompt1024.parquet`. Rebuild with:
 
 ```bash
 python scripts/data/preprocess_opsd_dapo.py --privilege-mode correct
+# student TM-off + teacher TM-on:
+python scripts/data/preprocess_opsd_dapo.py --privilege-mode correct --no-student-thinking --teacher-thinking
 # field-only (no length filter):
 python scripts/data/preprocess_opsd_dapo.py --skip-prompt-length-filter
 ```

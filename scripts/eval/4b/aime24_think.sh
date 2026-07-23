@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=opsd_eval_nt
-#SBATCH --output=log/opsd_%x.%j.out
+#SBATCH --job-name=eval_4b_aime24_th
+#SBATCH --output=log/eval/4b/aime24/%x.%j.out
 #SBATCH --partition=GPUA800
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
@@ -10,46 +10,59 @@
 #SBATCH --time=24:00:00
 set -euo pipefail
 
-THINKING=0
+THINKING=1
+DATASET=aime24
+MODEL_TAG=4b
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BASE_DIR=${BASE_DIR:-$(cd "${SCRIPT_DIR}/../.." && pwd)}
+# Slurm copies the batch script under /var/spool/...; prefer submit dir.
+if [[ -n "${BASE_DIR:-}" ]]; then
+  :
+elif [[ -n "${SLURM_SUBMIT_DIR:-}" ]]; then
+  BASE_DIR="${SLURM_SUBMIT_DIR}"
+else
+  BASE_DIR="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+fi
 : "${CHECKPOINT_PATH:?Set CHECKPOINT_PATH to a full saved model directory}"
 EVAL_DATA_ROOT=${EVAL_DATA_ROOT:-${BASE_DIR}/data}
 : "${EVAL_DATA_ROOT:?Set EVAL_DATA_ROOT to the server test-data root}"
 EVAL_TAG=${EVAL_TAG:-$(basename "${CHECKPOINT_PATH}")}
-OUTPUT_JSON=${OUTPUT_JSON:-${BASE_DIR}/eval_outputs/${EVAL_TAG}_think${THINKING}.json}
+OUTPUT_JSON=${OUTPUT_JSON:-${BASE_DIR}/eval_outputs/${EVAL_TAG}/${DATASET}_${MODEL_TAG}_think.json}
 
 cd "${BASE_DIR}"
 # conda activate scripts reference unset vars; keep nounset elsewhere
 set +u
 source activate anchor
 set -u
+# Prefer conda libstdc++ (GLIBCXX_3.4.29) over system /lib64
+export LD_LIBRARY_PATH="${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 export PYTHONPATH="${BASE_DIR}/vendor/verl:${BASE_DIR}/eval:${PYTHONPATH:-}"
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export VLLM_USE_V1=0
 export VLLM_ATTENTION_BACKEND=XFORMERS
 export TOKENIZERS_PARALLELISM=false
-mkdir -p "$(dirname "${OUTPUT_JSON}")"
+mkdir -p "$(dirname "${OUTPUT_JSON}")" "log/eval/4b/aime24"
 
 THINK_ARGS=(--no-thinking)
 if [[ "${THINKING}" == "1" ]]; then
   THINK_ARGS=(--enable-thinking)
 fi
 
+echo "[eval] base_dir=${BASE_DIR}"
+echo "[eval] checkpoint=${CHECKPOINT_PATH}"
+echo "[eval] dataset=${DATASET} thinking=${THINKING}"
+echo "[eval] output=${OUTPUT_JSON}"
+echo "[eval] conda_prefix=${CONDA_PREFIX}"
+
 python "${BASE_DIR}/eval/eval_math_vllm_local.py" \
   --model-path "${CHECKPOINT_PATH}" \
   --data-root "${EVAL_DATA_ROOT}" \
   --data-format auto \
   --output-json "${OUTPUT_JSON}" \
-  --dataset aime24 \
-  --dataset aime25 \
-  --dataset aime26 \
-  --dataset hmmt25 \
-  --dataset math500 \
+  --dataset "${DATASET}" \
   --num-samples 0 \
-  --val-n 16 \
-  --pass-at-k 1,4,8,16 \
+  --val-n 8 \
+  --pass-at-k 1,4,8 \
   --max-new-tokens 32768 \
   --temperature 0.7 \
   --top-p 0.8 \
@@ -60,7 +73,7 @@ python "${BASE_DIR}/eval/eval_math_vllm_local.py" \
   --tensor-parallel-size 1 \
   --gpu-memory-utilization 0.9 \
   --max-model-len 40960 \
-  --generate-batch-size 16 \
+  --generate-batch-size 8 \
   --disable-custom-all-reduce \
   --force-base-tokenizer \
   "${THINK_ARGS[@]}"
