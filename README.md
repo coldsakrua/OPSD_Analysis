@@ -18,13 +18,13 @@ Student and teacher use the Qwen3 chat template with the same explicit `enable_t
 ## Training configuration
 
 - Model: `/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b`
-- 4×A800, DeepSpeed ZeRO-3, full student parameter updates
+- 2×A800, DeepSpeed ZeRO-3, full student parameter updates
 - Frozen full-model teacher initialized from step 0
-- Per-device batch 1, gradient accumulation 4, global batch 16
-- Prompt cap 1024, response cap 8192
+- Per-device batch 4, gradient accumulation 4, global batch 32 on 2 GPUs
+- Prompt cap 1024, response cap 1024
 - 100 optimizer steps; full checkpoints at 25, 50, 75, and 100
 - AdamW, learning rate `5e-6`, cosine decay, 10% warmup, bf16
-- vLLM colocate, TP=1 per rank, utilization `0.45`, sleep mode enabled
+- vLLM colocate, TP=1 per rank, utilization `0.55`, sleep mode enabled
 - Training attention: PyTorch SDPA; vLLM backend: XFormers; no FlashAttention execution
 - WandB offline plus Trainer/Slurm logs
 - No task reward, correctness signal, advantage, or training-time validation

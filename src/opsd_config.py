@@ -17,7 +17,7 @@ class OPSDConfig(SFTConfig):
     presence_penalty: float = 0.0
     lmbda: float = 1.0
     beta: float = 0.0
-    max_completion_length: int = 8192
+    max_completion_length: int = 1024
     student_model_revision: str | None = None
     disable_dropout: bool = True
     seq_kd: bool = False

@@ -4,9 +4,9 @@
 #SBATCH --partition=GPUA800
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=28
-#SBATCH --gres=gpu:4
-#SBATCH --mem=440G
+#SBATCH --cpus-per-task=16
+#SBATCH --gres=gpu:2
+#SBATCH --mem=240G
 #SBATCH --time=72:00:00
 #SBATCH --exclude=gpua800n09,gpua800n11,gpua800n12,gpua800n16
 set -euo pipefail
@@ -53,11 +53,11 @@ fi
 
 echo "[launch] run=${RUN_NAME} mode=${MODE} thinking=${THINKING}"
 echo "[launch] model=${MODEL_PATH} dataset=${DATASET_PATH} output=${OUTPUT_DIR}"
-echo "[launch] 4 GPUs, full parameters, global batch=32, vLLM util=0.6"
+echo "[launch] 2 GPUs, full parameters, microbatch=4, gas=4, global batch=32, vLLM util=0.55"
 
 accelerate launch \
   --config_file "${BASE_DIR}/configs/accelerate_zero3.yaml" \
-  --num_processes 4 \
+  --num_processes 2 \
   --main_process_port "${MASTER_PORT:-29500}" \
   "${BASE_DIR}/src/train_opsd.py" \
   --model-path "${MODEL_PATH}" \
@@ -68,10 +68,10 @@ accelerate launch \
   --max-steps 100 \
   --save-steps 25 \
   --max-prompt-length 1024 \
-  --max-completion-length 6144 \
-  --per-device-batch-size 2 \
+  --max-completion-length 1024 \
+  --per-device-batch-size 4 \
   --gradient-accumulation-steps 4 \
   --learning-rate 1e-6 \
-  --vllm-gpu-memory-utilization 0.6 \
+  --vllm-gpu-memory-utilization 0.55 \
   --deepspeed "${BASE_DIR}/configs/deepspeed_zero3.json" \
   "${THINK_ARGS[@]}"

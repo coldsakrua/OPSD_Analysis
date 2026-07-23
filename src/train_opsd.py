@@ -32,7 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-steps", type=int, default=100)
     parser.add_argument("--save-steps", type=int, default=25)
     parser.add_argument("--max-prompt-length", type=int, default=1024)
-    parser.add_argument("--max-completion-length", type=int, default=8192)
+    parser.add_argument("--max-completion-length", type=int, default=1024)
     parser.add_argument("--per-device-batch-size", type=int, default=4)
     parser.add_argument("--gradient-accumulation-steps", type=int, default=4)
     parser.add_argument("--learning-rate", type=float, default=1e-6)
@@ -141,7 +141,7 @@ def main() -> None:
 
     print(
         f"[config] mode={args.privilege_mode} thinking={args.enable_thinking} "
-        f"global_batch={args.per_device_batch_size * args.gradient_accumulation_steps * 4} "
+        f"global_batch={args.per_device_batch_size * args.gradient_accumulation_steps * int(os.environ.get('WORLD_SIZE', '1'))} "
         f"prompt={args.max_prompt_length} response={args.max_completion_length}",
         flush=True,
     )

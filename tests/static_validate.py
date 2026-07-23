@@ -22,7 +22,7 @@ require(ds["zero_optimization"]["stage3_gather_16bit_weights_on_model_save"], "f
 
 accelerate_yaml = (ROOT / "configs/accelerate_zero3.yaml").read_text(encoding="utf-8")
 require("distributed_type: DEEPSPEED" in accelerate_yaml, "Accelerate must use DeepSpeed")
-require("num_processes: 4" in accelerate_yaml, "Accelerate must launch four ranks")
+require("num_processes: 2" in accelerate_yaml, "Accelerate must launch two ranks")
 
 train_source = (ROOT / "src/train_opsd.py").read_text(encoding="utf-8")
 trainer_source = (ROOT / "src/opsd_trainer.py").read_text(encoding="utf-8")
@@ -46,14 +46,14 @@ matrix = {
 }
 for name, (mode, thinking) in matrix.items():
     text = (ROOT / "scripts" / "train" / name).read_text(encoding="utf-8")
-    require("#SBATCH --gres=gpu:4" in text, f"{name}: must request four GPUs")
+    require("#SBATCH --gres=gpu:2" in text, f"{name}: must request two GPUs")
     require(f"MODE={mode}" in text, f"{name}: wrong privilege mode")
     require(f"THINKING={thinking}" in text, f"{name}: wrong thinking flag")
     require("train_common.sh" not in text, f"{name}: must be self-contained")
     require("VLLM_ATTENTION_BACKEND=XFORMERS" in text, f"{name}: vLLM must use XFormers")
     require("--max-steps 100" in text and "--save-steps 25" in text, f"{name}: step/save schedule mismatch")
     require("--max-prompt-length 1024" in text, f"{name}: prompt length mismatch")
-    require("--max-completion-length 8192" in text, f"{name}: response length mismatch")
+    require("--max-completion-length 1024" in text, f"{name}: response length mismatch")
     require("--privilege-mode" in text, f"{name}: privilege-mode arg missing")
     require("accelerate launch" in text, f"{name}: must launch training directly")
 

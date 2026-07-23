@@ -4,9 +4,9 @@
 #SBATCH --partition=GPUA800
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=28
-#SBATCH --gres=gpu:4
-#SBATCH --mem=440G
+#SBATCH --cpus-per-task=16
+#SBATCH --gres=gpu:2
+#SBATCH --mem=240G
 #SBATCH --time=72:00:00
 #SBATCH --exclude=gpua800n06,gpua800n09,gpua800n11,gpua800n12,gpua800n13,gpua800n16
 set -euo pipefail
@@ -53,15 +53,15 @@ if [[ "${THINKING}" == "1" ]]; then
   THINK_ARGS+=(--enable-thinking)
 fi
 
-# per-device=2 keeps KL loss under memory; gas=8 raises optimizer-step batch to 64.
+# per-device=4 with 1024-token rollouts keeps full-vocab KL under memory on 2xA800-80G.
 # Generate once for the full accumulation window, then accumulate loss slices.
 echo "[launch] run=${RUN_NAME} mode=${MODE} thinking=${THINKING}"
 echo "[launch] model=${MODEL_PATH} dataset=${DATASET_PATH} output=${OUTPUT_DIR}"
-echo "[launch] 4 GPUs, microbatch=2, gas=8, global batch=64, vLLM util=0.45, gen-once-per-step"
+echo "[launch] 2 GPUs, microbatch=4, gas=4, global batch=32, vLLM util=0.55, gen-once-per-step"
 
 accelerate launch \
   --config_file "${BASE_DIR}/configs/accelerate_zero3.yaml" \
-  --num_processes 4 \
+  --num_processes 2 \
   --main_process_port "${MASTER_PORT:-29500}" \
   "${BASE_DIR}/src/train_opsd.py" \
   --model-path "${MODEL_PATH}" \
@@ -72,10 +72,10 @@ accelerate launch \
   --max-steps 100 \
   --save-steps 25 \
   --max-prompt-length 1024 \
-  --max-completion-length 6144 \
-  --per-device-batch-size 2 \
-  --gradient-accumulation-steps 8 \
+  --max-completion-length 1024 \
+  --per-device-batch-size 4 \
+  --gradient-accumulation-steps 4 \
   --learning-rate 5e-6 \
-  --vllm-gpu-memory-utilization 0.45 \
+  --vllm-gpu-memory-utilization 0.55 \
   --deepspeed "${BASE_DIR}/configs/deepspeed_zero3.json" \
   "${THINK_ARGS[@]}"
