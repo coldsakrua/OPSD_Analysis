@@ -139,8 +139,11 @@ class OPSDTrainer(SFTTrainer):
         ema_decay: float = 0.999,
         student_thinking: bool = False,
         teacher_thinking: bool = True,
+        teacher_model_path: str | None = None,
     ):
         self.model_name_or_path = model if isinstance(model, str) else model.config._name_or_path
+        # Cross-model distillation: frozen teacher from a different checkpoint than the student.
+        self.teacher_model_path = teacher_model_path or self.model_name_or_path
         self.model_revision = getattr(args, "student_model_revision", None)
         if isinstance(model, str) and self.model_revision is not None:
             args.model_init_kwargs = args.model_init_kwargs or {}
@@ -190,13 +193,13 @@ class OPSDTrainer(SFTTrainer):
         self.teacher_model = None
         if self.fixed_teacher and peft_config is None:
             # Paper-faithful full-parameter mode: the student is optimized in full,
-            # while a second copy of the initial checkpoint is frozen and sharded
-            # across the same four ranks for teacher-only forward passes.
+            # while a frozen teacher (same init or a separate checkpoint) is sharded
+            # across ranks for teacher-only forward passes.
             teacher_kwargs = dict(args.model_init_kwargs or {})
             teacher_kwargs["use_cache"] = False
             teacher_kwargs["attn_implementation"] = "sdpa"
             self.teacher_model = AutoModelForCausalLM.from_pretrained(
-                self.model_name_or_path,
+                self.teacher_model_path,
                 **teacher_kwargs,
             )
             self.teacher_model.requires_grad_(False)
@@ -231,7 +234,11 @@ class OPSDTrainer(SFTTrainer):
             print(f"\n{'='*80}")
             print("FIXED TEACHER MODE ENABLED")
             if self.teacher_model is not None:
-                print("Teacher is an independent frozen copy of the initial checkpoint")
+                if self.teacher_model_path != self.model_name_or_path:
+                    print(f"Teacher is a frozen separate model: {self.teacher_model_path}")
+                    print(f"Student is trainable: {self.model_name_or_path}")
+                else:
+                    print("Teacher is an independent frozen copy of the initial checkpoint")
                 print("Student updates all parameters; teacher receives no gradients")
             else:
                 print("Teacher uses the initial base model with student LoRA adapters disabled")

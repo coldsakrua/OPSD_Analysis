@@ -24,6 +24,15 @@ DEFAULT_MODEL = "/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b"
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Full-parameter OPSD on Qwen3-4B")
     parser.add_argument("--model-path", default=os.environ.get("MODEL_PATH", DEFAULT_MODEL))
+    parser.add_argument(
+        "--teacher-model-path",
+        default=os.environ.get("TEACHER_MODEL_PATH"),
+        help=(
+            "Optional frozen teacher checkpoint. Defaults to --model-path (self-distillation). "
+            "Use a different path for cross-model distillation "
+            "(e.g. student=Instruct, teacher=qwen3-4b think)."
+        ),
+    )
     parser.add_argument("--dataset-path", default=os.environ.get("DATASET_PATH"), required=False)
     parser.add_argument("--output-dir", default=os.environ.get("OUTPUT_DIR", "outputs/opsd"))
     parser.add_argument("--run-name", default=os.environ.get("RUN_NAME", "opsd_qwen3_4b"))
@@ -91,6 +100,8 @@ def parse_args() -> argparse.Namespace:
         args.student_thinking = bool(args.enable_thinking)
     if args.teacher_thinking is None:
         args.teacher_thinking = bool(args.enable_thinking)
+    if not args.teacher_model_path:
+        args.teacher_model_path = args.model_path
     return args
 
 
@@ -107,8 +118,19 @@ def main() -> None:
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
 
+    teacher_tokenizer = tokenizer
+    if args.teacher_model_path != args.model_path:
+        teacher_tokenizer = AutoTokenizer.from_pretrained(
+            args.teacher_model_path,
+            trust_remote_code=True,
+            padding_side="right",
+        )
+        if teacher_tokenizer.pad_token_id is None:
+            teacher_tokenizer.pad_token = teacher_tokenizer.eos_token
+
     collator = SelfDistillationDataCollator(
         tokenizer=tokenizer,
+        teacher_tokenizer=teacher_tokenizer,
         max_length=max_length,
         max_prompt_length=args.max_prompt_length,
         privilege_mode=args.privilege_mode,
@@ -118,15 +140,20 @@ def main() -> None:
     )
     train_dataset = normalize_dataset(load_training_dataset(args.dataset_path))
     before = len(train_dataset)
-    if prompt_length_filter_applied(
-        args.dataset_path,
-        privilege_mode=args.privilege_mode,
-        student_thinking=args.student_thinking,
-        teacher_thinking=args.teacher_thinking,
-        max_prompt_length=args.max_prompt_length,
-        model_path=args.model_path,
-        teacher_privilege_field=args.teacher_privilege_field,
-    ):
+    # Offline length meta is only trusted for same-model self-distillation.
+    offline_ok = (
+        args.teacher_model_path == args.model_path
+        and prompt_length_filter_applied(
+            args.dataset_path,
+            privilege_mode=args.privilege_mode,
+            student_thinking=args.student_thinking,
+            teacher_thinking=args.teacher_thinking,
+            max_prompt_length=args.max_prompt_length,
+            model_path=args.model_path,
+            teacher_privilege_field=args.teacher_privilege_field,
+        )
+    )
+    if offline_ok:
         print(
             f"[dataset] prompt length already filtered offline; keep {before} examples",
             flush=True,
@@ -193,6 +220,7 @@ def main() -> None:
 
     print(
         f"[config] mode={args.privilege_mode} privilege_field={args.teacher_privilege_field} "
+        f"student={args.model_path} teacher={args.teacher_model_path} "
         f"student_thinking={args.student_thinking} teacher_thinking={args.teacher_thinking} "
         f"global_batch={args.per_device_batch_size * args.gradient_accumulation_steps * int(os.environ.get('WORLD_SIZE', '1'))} "
         f"prompt={args.max_prompt_length} response={args.max_completion_length}",
@@ -212,6 +240,7 @@ def main() -> None:
         jsd_token_clip=1e-6,
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,
+        teacher_model_path=args.teacher_model_path,
     )
     trainer.train()
     trainer.save_model(str(Path(args.output_dir) / "final"))

@@ -14,6 +14,13 @@ OFFICIAL_TRANSITION_PROMPT = (
     "or reconsider if something doesn't work out:\n"
 )
 
+# No-GT variant: keep the transition intent, but never mention a reference solution.
+NO_GT_TRANSITION_PROMPT = (
+    "\n\nMake sure you truly understand the problem. Using your own words and independent "
+    "reasoning, derive the final answer. Think step by step, explore different approaches, "
+    "and don't be afraid to backtrack or reconsider if something doesn't work out:\n"
+)
+
 PRIVILEGE_FIELDS = {"solution", "answer", "none"}
 
 # No-GT teacher prefixes (no answer / solution leakage).
@@ -61,6 +68,7 @@ class SelfDistillationDataCollator:
         teacher_privilege_field: str = "solution",
         student_thinking: bool = False,
         teacher_thinking: bool = False,
+        teacher_tokenizer: Any | None = None,
         **_: Any,
     ) -> None:
         if privilege_mode not in self.MODES:
@@ -68,6 +76,8 @@ class SelfDistillationDataCollator:
         if teacher_privilege_field not in PRIVILEGE_FIELDS:
             raise ValueError(f"teacher_privilege_field must be one of {sorted(PRIVILEGE_FIELDS)}")
         self.tokenizer = tokenizer
+        # Optional separate tokenizer for cross-model distillation (e.g. Instruct student + 4b teacher).
+        self.teacher_tokenizer = teacher_tokenizer if teacher_tokenizer is not None else tokenizer
         self.max_length = int(max_length)
         self.max_prompt_length = int(max_prompt_length)
         self.privilege_mode = privilege_mode
@@ -76,6 +86,7 @@ class SelfDistillationDataCollator:
         self.teacher_thinking = bool(teacher_thinking)
         self.reason_first = False
         self.tokenizer.padding_side = "right"
+        self.teacher_tokenizer.padding_side = "right"
 
     def privilege_text(self, feature: dict[str, Any]) -> str:
         """Select teacher privilege content: full trajectory (`solution`) or short `answer`."""
@@ -102,12 +113,25 @@ class SelfDistillationDataCollator:
 
     @staticmethod
     def _opsd_teacher_user(problem: str, privileged: str) -> str:
-        """Official OPSD teacher scaffold; `privileged` may be empty (no-GT control)."""
+        """Official OPSD teacher scaffold. Empty `privileged` → no reference-solution block."""
+        if str(privileged).strip():
+            return (
+                f"Problem: {problem}\n\n"
+                "Here is a reference solution to this problem:\n"
+                f"=== Reference Solution Begin ===\n{privileged}\n=== Reference Solution End ===\n"
+                f"{OFFICIAL_TRANSITION_PROMPT}\n"
+                "Please reason step by step, and put your final answer within \\boxed{}."
+            )
+        # No-GT: never emit reference-solution header/body.
+        return SelfDistillationDataCollator._nogt_transition_teacher_user(problem)
+
+    @staticmethod
+    def _nogt_transition_teacher_user(problem: str, prefix: str = "") -> str:
+        """Problem (+ optional prefix) + no-GT transition; no reference-solution scaffold."""
         return (
-            f"Problem: {problem}\n\n"
-            "Here is a reference solution to this problem:\n"
-            f"=== Reference Solution Begin ===\n{privileged}\n=== Reference Solution End ===\n"
-            f"{OFFICIAL_TRANSITION_PROMPT}\n"
+            f"{prefix}"
+            f"Problem: {problem}\n"
+            f"{NO_GT_TRANSITION_PROMPT}\n"
             "Please reason step by step, and put your final answer within \\boxed{}."
         )
 
@@ -125,28 +149,14 @@ class SelfDistillationDataCollator:
             elif self.privilege_mode == "irrelevant":
                 teacher_user = f"{IRRELEVANT_PREFIX}{student_user}"
             elif self.privilege_mode == "same_trans":
-                teacher_user = (
-                    f"Problem: {problem}\n"
-                    f"{OFFICIAL_TRANSITION_PROMPT}\n"
-                    "Please reason step by step, and put your final answer within \\boxed{}."
-                )
+                teacher_user = self._nogt_transition_teacher_user(problem)
             elif self.privilege_mode == "encourage_trans":
-                # Prefix + transition only (no reference solution header/body).
-                teacher_user = (
-                    f"{ENCOURAGE_PREFIX}"
-                    f"Problem: {problem}\n"
-                    f"{OFFICIAL_TRANSITION_PROMPT}\n"
-                    "Please reason step by step, and put your final answer within \\boxed{}."
-                )
+                teacher_user = self._nogt_transition_teacher_user(problem, prefix=ENCOURAGE_PREFIX)
             else:  # irrelevant_trans
-                teacher_user = (
-                    f"{IRRELEVANT_PREFIX}"
-                    f"Problem: {problem}\n"
-                    f"{OFFICIAL_TRANSITION_PROMPT}\n"
-                    "Please reason step by step, and put your final answer within \\boxed{}."
-                )
+                teacher_user = self._nogt_transition_teacher_user(problem, prefix=IRRELEVANT_PREFIX)
         elif self.privilege_mode == "opsd":
             # Official OPSD student / teacher templates (siyan-zhao/OPSD).
+            # privilege_field=none → same no-GT transition template (no reference block).
             student_user = self._standard_student_user(problem)
             teacher_user = self._opsd_teacher_user(problem, privileged)
         elif self.privilege_mode == "instruction":
@@ -183,7 +193,7 @@ class SelfDistillationDataCollator:
             add_generation_prompt=True,
             enable_thinking=self.student_thinking,
         )
-        teacher_prompt = self.tokenizer.apply_chat_template(
+        teacher_prompt = self.teacher_tokenizer.apply_chat_template(
             [{"role": "user", "content": teacher_user}],
             tokenize=False,
             add_generation_prompt=True,
@@ -195,22 +205,28 @@ class SelfDistillationDataCollator:
         student, teacher = self.format_prompts(feature)
         return (
             len(self.tokenizer(student, add_special_tokens=False)["input_ids"]),
-            len(self.tokenizer(teacher, add_special_tokens=False)["input_ids"]),
+            len(self.teacher_tokenizer(teacher, add_special_tokens=False)["input_ids"]),
         )
 
     def fits(self, feature: dict[str, Any]) -> bool:
         student_len, teacher_len = self.prompt_lengths(feature)
         return student_len <= self.max_prompt_length and teacher_len <= self.max_prompt_length
 
-    def _encode(self, prompts: list[str]) -> tuple[torch.Tensor, torch.Tensor, list[int]]:
-        no_pad = self.tokenizer(prompts, padding=False, truncation=False, add_special_tokens=False)
+    def _encode(
+        self,
+        prompts: list[str],
+        *,
+        tokenizer: Any | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor, list[int]]:
+        tok = self.tokenizer if tokenizer is None else tokenizer
+        no_pad = tok(prompts, padding=False, truncation=False, add_special_tokens=False)
         lengths = [len(ids) for ids in no_pad["input_ids"]]
         if max(lengths) > self.max_prompt_length:
             raise ValueError(
                 f"prompt exceeds max_prompt_length={self.max_prompt_length}; "
                 "filter the dataset with collator.fits before training"
             )
-        encoded = self.tokenizer(
+        encoded = tok(
             prompts,
             padding="longest",
             truncation=False,
@@ -221,8 +237,12 @@ class SelfDistillationDataCollator:
 
     def __call__(self, features: list[dict[str, Any]]) -> dict[str, Any]:
         pairs = [self.format_prompts(feature) for feature in features]
-        student_ids, student_mask, student_lengths = self._encode([x[0] for x in pairs])
-        teacher_ids, teacher_mask, teacher_lengths = self._encode([x[1] for x in pairs])
+        student_ids, student_mask, student_lengths = self._encode(
+            [x[0] for x in pairs], tokenizer=self.tokenizer
+        )
+        teacher_ids, teacher_mask, teacher_lengths = self._encode(
+            [x[1] for x in pairs], tokenizer=self.teacher_tokenizer
+        )
         return {
             "student_prompts": student_ids,
             "student_prompt_attention_mask": student_mask,
