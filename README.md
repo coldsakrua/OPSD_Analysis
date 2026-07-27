@@ -58,6 +58,27 @@ python scripts/data/preprocess_opsd_dapo.py --skip-prompt-length-filter
 
 Override with `DATASET_PATH` if needed.
 
+### OpenThoughts (official OPSD prompts)
+
+Full-parameter training on the local OpenThoughts dump (`data/openthoughts/`, same schema as
+[`siyanzhao/Openthoughts_math_30k_opsd`](https://huggingface.co/datasets/siyanzhao/Openthoughts_math_30k_opsd))
+uses `privilege_mode=opsd` — the official student / reference-solution teacher templates from
+[siyan-zhao/OPSD](https://github.com/siyan-zhao/OPSD).
+
+```bash
+# full trajectory privilege (official OPSD template)
+python scripts/data/preprocess_opsd_openthoughts.py --teacher-privilege-field solution --no-student-thinking --teacher-thinking
+sbatch scripts/train/opsd_student_nothink_teacher_think_4b_1e_6_openthoughts.sh
+
+# answer-only privilege (same codepath; switch --teacher-privilege-field answer)
+python scripts/data/preprocess_opsd_openthoughts.py --teacher-privilege-field answer --no-student-thinking --teacher-thinking
+sbatch scripts/train/opsd_student_nothink_teacher_think_4b_1e_6_openthoughts_answer.sh
+```
+
+Both preprocessed parquets keep `problem` / `solution` / `answer`. Training selects privilege content with `--teacher-privilege-field {solution,answer}`.
+
+Hyperparameters match `opsd_student_nothink_teacher_think_4b_1e_6.sh` (lr=`1e-6`, 100 steps, etc.).
+
 Optional overrides are `BASE_DIR`, `DATASET_PATH`, `OUTPUT_ROOT`, `WANDB_DIR`, `HF_HOME`, and `MASTER_PORT`.
 
 Before the first training job, verify the existing `anchor` environment without installing anything:

@@ -27,7 +27,36 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset-path", default=os.environ.get("DATASET_PATH"), required=False)
     parser.add_argument("--output-dir", default=os.environ.get("OUTPUT_DIR", "outputs/opsd"))
     parser.add_argument("--run-name", default=os.environ.get("RUN_NAME", "opsd_qwen3_4b"))
-    parser.add_argument("--privilege-mode", choices=("correct", "pi", "instruction"), required=True)
+    parser.add_argument(
+        "--privilege-mode",
+        choices=(
+            "correct",
+            "pi",
+            "instruction",
+            "opsd",
+            "same",
+            "encourage",
+            "irrelevant",
+            "same_trans",
+            "encourage_trans",
+            "irrelevant_trans",
+        ),
+        required=True,
+        help=(
+            "Teacher template: correct/pi/instruction/opsd (with GT privilege), or "
+            "same/encourage/irrelevant (no-GT), or "
+            "same_trans/encourage_trans/irrelevant_trans (no-GT + transition, no reference solution)."
+        ),
+    )
+    parser.add_argument(
+        "--teacher-privilege-field",
+        choices=("solution", "answer", "none"),
+        default="solution",
+        help=(
+            "Teacher privilege content: full trajectory (`solution`), short answer (`answer`), "
+            "or `none` for no-GT modes."
+        ),
+    )
     parser.add_argument(
         "--enable-thinking",
         action="store_true",
@@ -83,6 +112,7 @@ def main() -> None:
         max_length=max_length,
         max_prompt_length=args.max_prompt_length,
         privilege_mode=args.privilege_mode,
+        teacher_privilege_field=args.teacher_privilege_field,
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,
     )
@@ -95,6 +125,7 @@ def main() -> None:
         teacher_thinking=args.teacher_thinking,
         max_prompt_length=args.max_prompt_length,
         model_path=args.model_path,
+        teacher_privilege_field=args.teacher_privilege_field,
     ):
         print(
             f"[dataset] prompt length already filtered offline; keep {before} examples",
@@ -161,7 +192,7 @@ def main() -> None:
     )
 
     print(
-        f"[config] mode={args.privilege_mode} "
+        f"[config] mode={args.privilege_mode} privilege_field={args.teacher_privilege_field} "
         f"student_thinking={args.student_thinking} teacher_thinking={args.teacher_thinking} "
         f"global_batch={args.per_device_batch_size * args.gradient_accumulation_steps * int(os.environ.get('WORLD_SIZE', '1'))} "
         f"prompt={args.max_prompt_length} response={args.max_completion_length}",

@@ -5,10 +5,52 @@ from typing import Any
 import torch
 
 
+# Matches https://github.com/siyan-zhao/OPSD data_collator.py (non reason_first).
+OFFICIAL_TRANSITION_PROMPT = (
+    "\n\nAfter reading the reference solution above, make sure you truly understand "
+    "the reasoning behind each step — do not copy or paraphrase it. Now, using your "
+    "own words and independent reasoning, derive the same final answer to the problem above. "
+    "Think step by step, explore different approaches, and don't be afraid to backtrack "
+    "or reconsider if something doesn't work out:\n"
+)
+
+PRIVILEGE_FIELDS = {"solution", "answer", "none"}
+
+# No-GT teacher prefixes (no answer / solution leakage).
+ENCOURAGE_PREFIX = (
+    "You are an outstanding mathematics teacher with deep insight and patient guidance. "
+    "Stay confident, think carefully, and solve the problem well.\n\n"
+)
+IRRELEVANT_PREFIX = (
+    "The weather is nice today. Let's work on a problem together.\n\n"
+)
+
+# Modes that never inject ground-truth privilege text.
+NO_GT_MODES = {
+    "same",
+    "encourage",
+    "irrelevant",
+    "same_trans",
+    "encourage_trans",
+    "irrelevant_trans",
+}
+
+
 class SelfDistillationDataCollator:
     """Build Qwen3 student/privileged-teacher prompts for an OPSD batch."""
 
-    MODES = {"correct", "pi", "instruction"}
+    MODES = {
+        "correct",
+        "pi",
+        "instruction",
+        "opsd",
+        "same",
+        "encourage",
+        "irrelevant",
+        "same_trans",
+        "encourage_trans",
+        "irrelevant_trans",
+    }
 
     def __init__(
         self,
@@ -16,26 +58,98 @@ class SelfDistillationDataCollator:
         max_length: int = 9216,
         max_prompt_length: int = 1024,
         privilege_mode: str = "correct",
+        teacher_privilege_field: str = "solution",
         student_thinking: bool = False,
         teacher_thinking: bool = False,
         **_: Any,
     ) -> None:
         if privilege_mode not in self.MODES:
             raise ValueError(f"privilege_mode must be one of {sorted(self.MODES)}")
+        if teacher_privilege_field not in PRIVILEGE_FIELDS:
+            raise ValueError(f"teacher_privilege_field must be one of {sorted(PRIVILEGE_FIELDS)}")
         self.tokenizer = tokenizer
         self.max_length = int(max_length)
         self.max_prompt_length = int(max_prompt_length)
         self.privilege_mode = privilege_mode
+        self.teacher_privilege_field = teacher_privilege_field
         self.student_thinking = bool(student_thinking)
         self.teacher_thinking = bool(teacher_thinking)
         self.reason_first = False
         self.tokenizer.padding_side = "right"
 
+    def privilege_text(self, feature: dict[str, Any]) -> str:
+        """Select teacher privilege content: full trajectory (`solution`) or short `answer`."""
+        field = self.teacher_privilege_field
+        if field == "none" or self.privilege_mode in NO_GT_MODES:
+            return ""
+        if field == "answer":
+            for key in ("answer", "Answer"):
+                if feature.get(key) is not None and str(feature[key]).strip():
+                    return str(feature[key]).strip()
+            # Backward compatible: answer-only parquet may store Answer in `solution`.
+            return str(feature.get("solution", "")).strip()
+        if feature.get("solution") is not None and str(feature["solution"]).strip():
+            return str(feature["solution"]).strip()
+        return ""
+
+    @staticmethod
+    def _standard_student_user(problem: str) -> str:
+        """Official-style user content: problem + boxed instruction (no GT)."""
+        return (
+            f"Problem: {problem}\n\n"
+            "Please reason step by step, and put your final answer within \\boxed{}."
+        )
+
+    @staticmethod
+    def _opsd_teacher_user(problem: str, privileged: str) -> str:
+        """Official OPSD teacher scaffold; `privileged` may be empty (no-GT control)."""
+        return (
+            f"Problem: {problem}\n\n"
+            "Here is a reference solution to this problem:\n"
+            f"=== Reference Solution Begin ===\n{privileged}\n=== Reference Solution End ===\n"
+            f"{OFFICIAL_TRANSITION_PROMPT}\n"
+            "Please reason step by step, and put your final answer within \\boxed{}."
+        )
+
     def format_prompts(self, feature: dict[str, Any]) -> tuple[str, str]:
         problem = str(feature["problem"]).strip()
-        solution = str(feature.get("solution", "")).strip()
+        privileged = self.privilege_text(feature)
 
-        if self.privilege_mode == "instruction":
+        if self.privilege_mode in NO_GT_MODES:
+            # Student: plain problem prompt. Teacher: same / prefix / (+ transition, no GT).
+            student_user = self._standard_student_user(problem)
+            if self.privilege_mode == "same":
+                teacher_user = student_user
+            elif self.privilege_mode == "encourage":
+                teacher_user = f"{ENCOURAGE_PREFIX}{student_user}"
+            elif self.privilege_mode == "irrelevant":
+                teacher_user = f"{IRRELEVANT_PREFIX}{student_user}"
+            elif self.privilege_mode == "same_trans":
+                teacher_user = (
+                    f"Problem: {problem}\n"
+                    f"{OFFICIAL_TRANSITION_PROMPT}\n"
+                    "Please reason step by step, and put your final answer within \\boxed{}."
+                )
+            elif self.privilege_mode == "encourage_trans":
+                # Prefix + transition only (no reference solution header/body).
+                teacher_user = (
+                    f"{ENCOURAGE_PREFIX}"
+                    f"Problem: {problem}\n"
+                    f"{OFFICIAL_TRANSITION_PROMPT}\n"
+                    "Please reason step by step, and put your final answer within \\boxed{}."
+                )
+            else:  # irrelevant_trans
+                teacher_user = (
+                    f"{IRRELEVANT_PREFIX}"
+                    f"Problem: {problem}\n"
+                    f"{OFFICIAL_TRANSITION_PROMPT}\n"
+                    "Please reason step by step, and put your final answer within \\boxed{}."
+                )
+        elif self.privilege_mode == "opsd":
+            # Official OPSD student / teacher templates (siyan-zhao/OPSD).
+            student_user = self._standard_student_user(problem)
+            teacher_user = self._opsd_teacher_user(problem, privileged)
+        elif self.privilege_mode == "instruction":
             student_instruction = (
                 "Give a concise solution with only the essential reasoning, and put the final answer "
                 "within \\boxed{}."
@@ -45,23 +159,24 @@ class SelfDistillationDataCollator:
                 "Give a detailed, rigorous solution. Explain every important derivation, check the result, "
                 "and put the final answer within \\boxed{}."
             )
+            student_user = f"Problem: {problem}\n\n{student_instruction}"
         else:
             student_instruction = (
                 "Please reason step by step and put the final answer within \\boxed{}."
             )
-            privileged = solution if self.privilege_mode == "correct" else "π"
+            content = privileged if self.privilege_mode == "correct" else "π"
             label = "verified answer" if self.privilege_mode == "correct" else "privileged answer"
             teacher_user = (
                 f"Problem: {problem}\n\n"
                 f"Here is the {label}:\n"
                 "=== Privileged Information Begin ===\n"
-                f"{privileged}\n"
+                f"{content}\n"
                 "=== Privileged Information End ===\n\n"
                 "After understanding the privileged information, solve the problem using your own reasoning. "
                 "Please reason step by step and put the final answer within \\boxed{}."
             )
+            student_user = f"Problem: {problem}\n\n{student_instruction}"
 
-        student_user = f"Problem: {problem}\n\n{student_instruction}"
         student_prompt = self.tokenizer.apply_chat_template(
             [{"role": "user", "content": student_user}],
             tokenize=False,

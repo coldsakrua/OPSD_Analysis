@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=eval_4b_aime26_nt
-#SBATCH --output=log/eval/4b/aime26/%x.%j.out
+#SBATCH --output=log/eval/4b/aime26/nothink/%x.%j.out
 #SBATCH --partition=GPUA800
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
@@ -41,7 +41,7 @@ export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export VLLM_USE_V1=0
 export VLLM_ATTENTION_BACKEND=XFORMERS
 export TOKENIZERS_PARALLELISM=false
-mkdir -p "$(dirname "${OUTPUT_JSON}")" "log/eval/4b/aime26"
+mkdir -p "$(dirname "${OUTPUT_JSON}")" "log/eval/4b/aime26/nothink"
 
 THINK_ARGS=(--no-thinking)
 if [[ "${THINKING}" == "1" ]]; then
@@ -73,7 +73,7 @@ python "${BASE_DIR}/eval/eval_math_vllm_local.py" \
   --tensor-parallel-size 1 \
   --gpu-memory-utilization 0.9 \
   --max-model-len 40960 \
-  --generate-batch-size 16 \
+  --generate-batch-size 8 \
   --disable-custom-all-reduce \
   --force-base-tokenizer \
   "${THINK_ARGS[@]}"

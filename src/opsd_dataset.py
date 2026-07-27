@@ -82,6 +82,7 @@ def prompt_length_filter_applied(
     enable_thinking: bool | None = None,
     student_thinking: bool | None = None,
     teacher_thinking: bool | None = None,
+    teacher_privilege_field: str = "solution",
 ) -> bool:
     """True when sibling .meta.json records a matching offline prompt-length filter."""
     meta_file = dataset_meta_path(path)
@@ -119,9 +120,38 @@ def prompt_length_filter_applied(
     ):
         thinking_ok = True
 
+    # Older metas used solution_field; prefer teacher_privilege_field.
+    meta_priv_field = str(
+        meta.get("teacher_privilege_field", meta.get("solution_field", "solution"))
+    )
+    # Filtering with full `solution` is a stricter length check than `answer`.
+    # No-GT modes ignore privilege text; any offline filter for a longer template is fine.
+    no_gt_modes = {
+        "same",
+        "encourage",
+        "irrelevant",
+        "same_trans",
+        "encourage_trans",
+        "irrelevant_trans",
+    }
+    field_ok = (
+        str(privilege_mode) in no_gt_modes
+        or meta_priv_field == str(teacher_privilege_field)
+        or (meta_priv_field == "solution" and str(teacher_privilege_field) == "answer")
+        or (str(teacher_privilege_field) == "none")
+    )
+
     return (
-        str(meta.get("privilege_mode")) == str(privilege_mode)
+        (
+            str(meta.get("privilege_mode")) == str(privilege_mode)
+            # Longer GT templates are a strict superset of no-GT prompt lengths.
+            or (
+                str(privilege_mode) in no_gt_modes
+                and str(meta.get("privilege_mode")) in {"correct", "opsd"}
+            )
+        )
         and thinking_ok
+        and field_ok
         and int(meta.get("max_prompt_length", -1)) == int(max_prompt_length)
         and str(meta.get("model_path", "")) == str(model_path)
     )
