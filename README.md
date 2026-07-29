@@ -110,3 +110,30 @@ Use `scripts/eval/eval_think.sh` for a thinking checkpoint. No LoRA adapter argu
 - `vendor/verl`: safely extracted CAST `verl.zip`
 - `vendor/OPSD_official`: upstream OPSD reference snapshot
 - `vendor/trl_v0.22.1`: server-version API reference used for static compatibility checks
+
+## Olmo-3-7B-Instruct (SGLang rollout)
+
+Olmo training stays on the same accelerate + DeepSpeed ZeRO-3 + full-parameter OPSD path as Qwen3-4B-Instruct, but uses **SGLang** for on-policy generation (vLLM does not run Olmo-3 well here).
+
+- Conda env: `sglang` (torch 2.8 + sglang 0.5.4 + accelerate/trl/deepspeed/ray/verl)
+- Smoke imports: `bash scripts/smoke_test_sglang_train_env.sh`
+- Model: `/gpfs/share/home/2501210611/labShare/2501210611/model/olmo3-7b-it`
+- Hyperparams match 4b-it OpenThoughts baseline (`lr=1e-6`, `jsd_clip=1e-6`, micro=4, gas=4, 100 steps) on **4 GPUs** (global batch 64)
+- Train script: `scripts/train/olmo3_7b_instruct/openthoughts/opsd_student_nothink_teacher_nothink_1e_6_openthoughts.sh`
+
+```bash
+# preprocess (Olmo tokenizer length filter)
+PYTHONPATH=src:vendor/verl python scripts/data/preprocess_opsd_openthoughts.py \
+  --privilege-mode opsd --teacher-privilege-field solution \
+  --no-student-thinking --no-teacher-thinking \
+  --model-path /gpfs/share/home/2501210611/labShare/2501210611/model/olmo3-7b-it \
+  --output data/openthoughts/preprocessed/openthoughts.opsd.solution.nothink.olmo7bit.maxprompt1024.parquet
+
+# 2-step smoke
+MAX_STEPS=2 sbatch scripts/train/olmo3_7b_instruct/openthoughts/opsd_student_nothink_teacher_nothink_1e_6_openthoughts.sh
+
+# full 100-step run
+sbatch scripts/train/olmo3_7b_instruct/openthoughts/opsd_student_nothink_teacher_nothink_1e_6_openthoughts.sh
+```
+
+If OOM, keep lr/jsd_clip fixed and lower `PER_DEVICE_BATCH_SIZE` or `SGLANG_MEM_FRACTION_STATIC`.

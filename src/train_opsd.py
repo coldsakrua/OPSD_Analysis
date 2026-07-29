@@ -49,12 +49,14 @@ def parse_args() -> argparse.Namespace:
             "same_trans",
             "encourage_trans",
             "irrelevant_trans",
+            "sample_irrelevant_trans",
         ),
         required=True,
         help=(
             "Teacher template: correct/pi/instruction/opsd (with GT privilege), or "
             "same/encourage/irrelevant (no-GT), or "
-            "same_trans/encourage_trans/irrelevant_trans (no-GT + transition, no reference solution)."
+            "same_trans/encourage_trans/irrelevant_trans (no-GT + transition, no reference solution), or "
+            "sample_irrelevant_trans (per-row irrelevant_prefix + transition)."
         ),
     )
     parser.add_argument(
@@ -90,7 +92,28 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--per-device-batch-size", type=int, default=4)
     parser.add_argument("--gradient-accumulation-steps", type=int, default=4)
     parser.add_argument("--learning-rate", type=float, default=5e-6)
+    parser.add_argument("--jsd-token-clip", type=float, default=1e-6,
+        help=(
+            "Per-token JSD clip (siyan-zhao/OPSD default is 0.05). "
+            "Set <=0 to disable clipping. Current repo default 1e-6 is very aggressive."
+        ),
+    )
+    parser.add_argument(
+        "--rollout-backend",
+        choices=("vllm", "sglang"),
+        default=os.environ.get("ROLLOUT_BACKEND", "vllm"),
+        help="On-policy generation backend. Use sglang for Olmo-3.",
+    )
     parser.add_argument("--vllm-gpu-memory-utilization", type=float, default=0.4)
+    parser.add_argument(
+        "--sglang-mem-fraction-static",
+        type=float,
+        default=float(os.environ.get("SGLANG_MEM_FRACTION_STATIC", "0.40")),
+    )
+    parser.add_argument(
+        "--sglang-attention-backend",
+        default=os.environ.get("SGLANG_ATTENTION_BACKEND", "triton"),
+    )
     parser.add_argument("--deepspeed", default="configs/deepspeed_zero3.json")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
@@ -102,7 +125,18 @@ def parse_args() -> argparse.Namespace:
         args.teacher_thinking = bool(args.enable_thinking)
     if not args.teacher_model_path:
         args.teacher_model_path = args.model_path
+    # <=0 disables clip (trainer expects None).
+    if args.jsd_token_clip is not None and args.jsd_token_clip <= 0:
+        args.jsd_token_clip = None
     return args
+
+
+def _maybe_install_olmo_chat_template(tokenizer) -> None:
+    try:
+        from verl_rlsd.olmo_chat_template import maybe_install_olmo_chat_template
+    except ImportError:
+        return
+    maybe_install_olmo_chat_template(tokenizer)
 
 
 def main() -> None:
@@ -117,6 +151,7 @@ def main() -> None:
     )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
+    _maybe_install_olmo_chat_template(tokenizer)
 
     teacher_tokenizer = tokenizer
     if args.teacher_model_path != args.model_path:
@@ -127,6 +162,7 @@ def main() -> None:
         )
         if teacher_tokenizer.pad_token_id is None:
             teacher_tokenizer.pad_token = teacher_tokenizer.eos_token
+        _maybe_install_olmo_chat_template(teacher_tokenizer)
 
     collator = SelfDistillationDataCollator(
         tokenizer=tokenizer,
@@ -198,11 +234,16 @@ def main() -> None:
         beta=0.0,
         lmbda=1.0,
         use_vllm=True,
+        rollout_backend=args.rollout_backend,
         vllm_mode="colocate",
         vllm_gpu_memory_utilization=args.vllm_gpu_memory_utilization,
         vllm_tensor_parallel_size=1,
         vllm_sync_frequency=1,
         vllm_enable_sleep_mode=True,
+        sglang_mem_fraction_static=args.sglang_mem_fraction_static,
+        sglang_attention_backend=args.sglang_attention_backend,
+        sglang_context_length=max_length,
+        sglang_enable_memory_saver=True,
         steps_per_generation=args.gradient_accumulation_steps,
         log_completions=False,
         wandb_project=os.environ.get("WANDB_PROJECT", "OPSD"),
@@ -218,11 +259,16 @@ def main() -> None:
         },
     )
 
+    world = int(os.environ.get("WORLD_SIZE", "1"))
+    global_batch = args.per_device_batch_size * args.gradient_accumulation_steps * world
     print(
         f"[config] mode={args.privilege_mode} privilege_field={args.teacher_privilege_field} "
         f"student={args.model_path} teacher={args.teacher_model_path} "
         f"student_thinking={args.student_thinking} teacher_thinking={args.teacher_thinking} "
-        f"global_batch={args.per_device_batch_size * args.gradient_accumulation_steps * int(os.environ.get('WORLD_SIZE', '1'))} "
+        f"rollout_backend={args.rollout_backend} "
+        f"lr={args.learning_rate} jsd_token_clip={args.jsd_token_clip} "
+        f"global_batch={global_batch} "
+        f"(micro={args.per_device_batch_size} gas={args.gradient_accumulation_steps} world={world}) "
         f"prompt={args.max_prompt_length} response={args.max_completion_length}",
         flush=True,
     )
@@ -237,7 +283,7 @@ def main() -> None:
         fixed_teacher=True,
         use_thinking_machines_loss=False,
         top_k_loss=None,
-        jsd_token_clip=1e-6,
+        jsd_token_clip=args.jsd_token_clip,
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,
         teacher_model_path=args.teacher_model_path,

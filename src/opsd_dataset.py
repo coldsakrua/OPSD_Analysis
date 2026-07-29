@@ -133,6 +133,7 @@ def prompt_length_filter_applied(
         "same_trans",
         "encourage_trans",
         "irrelevant_trans",
+        "sample_irrelevant_trans",
     }
     field_ok = (
         str(privilege_mode) in no_gt_modes

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=snt_tnt_1e6_oti
+#SBATCH --job-name=snt_tnt_oti
 #SBATCH --output=log/train/4b-instruct/opsd_%x.%j.out
 #SBATCH --partition=GPUA800
 #SBATCH --nodes=1
@@ -8,34 +8,46 @@
 #SBATCH --gres=gpu:2
 #SBATCH --mem=220G
 #SBATCH --time=72:00:00
-# Avoid currently occupied nodes + reference excludes.
 #SBATCH --exclude=gpua800n02,gpua800n03,gpua800n04,gpua800n06,gpua800n09,gpua800n10,gpua800n13,gpua800n14
 set -euo pipefail
 
-# Same as opsd_student_nothink_teacher_think_4b_1e_6_openthoughts.sh, except:
-# - base model = Qwen3-4B-Instruct (no native think mode)
-# - student/teacher both enable_thinking=0; teacher still gets full solution privilege
-MODE=opsd
-TEACHER_PRIVILEGE_FIELD=solution
-STUDENT_THINKING=0
-TEACHER_THINKING=0
-RUN_NAME=snt_tnt_1e_6_openthoughts_instruct
-LEARNING_RATE=1e-6
+# Qwen3-4B-Instruct OPSD (student/teacher both no-think, teacher gets full solution).
+# Hyperparams are env-overridable so thin variant wrappers can sweep lr / jsd_clip / batch.
+#
+# Defaults match the original 1e-6 run:
+#   LR=1e-6, JSD_TOKEN_CLIP=1e-6, micro=4, gas=4, 2 GPU → global_batch=32
+#
+# Examples:
+#   LEARNING_RATE=5e-6 JSD_TOKEN_CLIP=0.05 sbatch this.sh
+#   PER_DEVICE_BATCH_SIZE=2 GRADIENT_ACCUMULATION_STEPS=4 sbatch this.sh   # gbs=16
 
-# Slurm copies the batch script to /var/spool; prefer submit dir over BASH_SOURCE.
-BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}}
+MODE=${MODE:-opsd}
+TEACHER_PRIVILEGE_FIELD=${TEACHER_PRIVILEGE_FIELD:-solution}
+STUDENT_THINKING=${STUDENT_THINKING:-0}
+TEACHER_THINKING=${TEACHER_THINKING:-0}
+
+LEARNING_RATE=${LEARNING_RATE:-1e-6}
+# Official OPSD uses 0.05; repo historical default was 1e-6 (very aggressive).
+# Set JSD_TOKEN_CLIP=0 or "none" to disable clipping.
+JSD_TOKEN_CLIP=${JSD_TOKEN_CLIP:-1e-6}
+PER_DEVICE_BATCH_SIZE=${PER_DEVICE_BATCH_SIZE:-4}
+GRADIENT_ACCUMULATION_STEPS=${GRADIENT_ACCUMULATION_STEPS:-4}
+MAX_STEPS=${MAX_STEPS:-100}
+SAVE_STEPS=${SAVE_STEPS:-25}
+VLLM_GPU_MEMORY_UTILIZATION=${VLLM_GPU_MEMORY_UTILIZATION:-0.4}
+
+RUN_NAME=${RUN_NAME:-snt_tnt_1e_6_openthoughts_instruct}
+
+BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)}}
 MODEL_PATH=${MODEL_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b-instruct}
-# Instruct tokenizer length-filtered (dual-nothink + full-solution privilege).
 DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/openthoughts/preprocessed/openthoughts.opsd.solution.nothink.instruct.maxprompt1024.parquet}
 : "${DATASET_PATH:?Set DATASET_PATH to the preprocessed OpenThoughts parquet path}"
 OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs}
-# One folder per run (Slurm job id); avoid overwriting previous checkpoints.
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
 OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/${JOB_TAG}}
 RUN_NAME_WITH_JOB=${RUN_NAME}_${JOB_TAG}
 
 cd "${BASE_DIR}"
-# conda activate scripts reference unset vars; keep nounset elsewhere
 set +u
 source activate anchor
 set -u
@@ -58,7 +70,8 @@ export NCCL_DEBUG=${NCCL_DEBUG:-WARN}
 export HYDRA_FULL_ERROR=1
 unset PYTORCH_CUDA_ALLOC_CONF
 
-mkdir -p "${OUTPUT_DIR}" "${WANDB_DIR}" "${HF_HOME}"
+mkdir -p "${OUTPUT_DIR}" "${WANDB_DIR}" "${HF_HOME}" \
+  "${BASE_DIR}/log/train/4b-instruct"
 
 if [[ ! -f "${DATASET_PATH}" ]]; then
   echo "[error] missing preprocessed dataset: ${DATASET_PATH}" >&2
@@ -67,17 +80,26 @@ if [[ ! -f "${DATASET_PATH}" ]]; then
 fi
 
 THINK_ARGS=(--no-student-thinking --no-teacher-thinking)
-
-# Avoid fixed 29500 collisions when multiple train jobs share a node.
 MASTER_PORT=${MASTER_PORT:-$((20000 + (${SLURM_JOB_ID:-$$} % 20000)))}
 
-echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_PRIVILEGE_FIELD} student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING} lr=${LEARNING_RATE}"
+NUM_GPUS=2
+GLOBAL_BATCH=$((PER_DEVICE_BATCH_SIZE * GRADIENT_ACCUMULATION_STEPS * NUM_GPUS))
+
+if [[ "${JSD_TOKEN_CLIP}" == "none" || "${JSD_TOKEN_CLIP}" == "None" || "${JSD_TOKEN_CLIP}" == "NONE" ]]; then
+  JSD_TOKEN_CLIP=0
+fi
+
+echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_PRIVILEGE_FIELD}"
+echo "[launch] student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING}"
+echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP}"
+echo "[launch] micro=${PER_DEVICE_BATCH_SIZE} gas=${GRADIENT_ACCUMULATION_STEPS} gpus=${NUM_GPUS} → global_batch=${GLOBAL_BATCH}"
+echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS}"
 echo "[launch] model=${MODEL_PATH} dataset=${DATASET_PATH} output=${OUTPUT_DIR}"
-echo "[launch] master_port=${MASTER_PORT} 2 GPUs, microbatch=4, gas=4, global batch=32, vLLM util=0.4, gen-once-per-step"
+echo "[launch] master_port=${MASTER_PORT} vLLM util=${VLLM_GPU_MEMORY_UTILIZATION}"
 
 accelerate launch \
   --config_file "${BASE_DIR}/configs/accelerate_zero3.yaml" \
-  --num_processes 2 \
+  --num_processes "${NUM_GPUS}" \
   --main_process_port "${MASTER_PORT}" \
   "${BASE_DIR}/src/train_opsd.py" \
   --model-path "${MODEL_PATH}" \
@@ -86,13 +108,14 @@ accelerate launch \
   --run-name "${RUN_NAME_WITH_JOB}" \
   --privilege-mode "${MODE}" \
   --teacher-privilege-field "${TEACHER_PRIVILEGE_FIELD}" \
-  --max-steps 100 \
-  --save-steps 25 \
+  --max-steps "${MAX_STEPS}" \
+  --save-steps "${SAVE_STEPS}" \
   --max-prompt-length 1024 \
   --max-completion-length 1024 \
-  --per-device-batch-size 4 \
-  --gradient-accumulation-steps 4 \
+  --per-device-batch-size "${PER_DEVICE_BATCH_SIZE}" \
+  --gradient-accumulation-steps "${GRADIENT_ACCUMULATION_STEPS}" \
   --learning-rate "${LEARNING_RATE}" \
-  --vllm-gpu-memory-utilization 0.4 \
+  --jsd-token-clip "${JSD_TOKEN_CLIP}" \
+  --vllm-gpu-memory-utilization "${VLLM_GPU_MEMORY_UTILIZATION}" \
   --deepspeed "${BASE_DIR}/configs/deepspeed_zero3.json" \
   "${THINK_ARGS[@]}"

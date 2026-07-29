@@ -25,6 +25,9 @@ class OPSDConfig(SFTConfig):
     use_transformers_paged: bool = False
 
     use_vllm: bool = True
+    # Rollout backend: "vllm" (default, Qwen path) or "sglang" (Olmo path).
+    # When rollout_backend == "sglang", use_vllm stays True for shared generate/sync hooks.
+    rollout_backend: str = "vllm"
     vllm_mode: str = "colocate"
     vllm_server_host: str = "0.0.0.0"
     vllm_server_port: int = 8001
@@ -34,6 +37,11 @@ class OPSDConfig(SFTConfig):
     vllm_guided_decoding_regex: str | None = None
     vllm_sync_frequency: int = 1
     vllm_enable_sleep_mode: bool = True
+    # SGLang Engine (used when rollout_backend == "sglang")
+    sglang_mem_fraction_static: float = 0.40
+    sglang_attention_backend: str = "triton"
+    sglang_context_length: int | None = None
+    sglang_enable_memory_saver: bool = True
 
     log_completions: bool = False
     log_completions_steps: int = 25
@@ -50,4 +58,6 @@ class OPSDConfig(SFTConfig):
             raise ValueError("max_length must exceed max_completion_length")
         if self.steps_per_generation is None:
             self.steps_per_generation = self.gradient_accumulation_steps
+        if self.rollout_backend not in {"vllm", "sglang"}:
+            raise ValueError(f"rollout_backend must be vllm|sglang, got {self.rollout_backend}")
         super().__post_init__()

@@ -89,7 +89,7 @@ class EMAUpdateCallback(TrainerCallback):
 
 
 class GOLDVLLMSyncCallback(TrainerCallback):
-    """Sync the model weights to vLLM after training steps when it's safe to do so."""
+    """Sync the model weights to the rollout engine after training steps when it's safe to do so."""
 
     def __init__(self, trainer):
         self.trainer = trainer
@@ -107,7 +107,7 @@ class GOLDVLLMSyncCallback(TrainerCallback):
                 hasattr(self.trainer.accelerator, "sync_gradients")
                 and self.trainer.accelerator.sync_gradients
             ):
-                self.trainer._move_model_to_vllm()
+                self.trainer._move_model_to_rollout()
                 self.trainer._last_vllm_sync_step = state.global_step
 
 
@@ -312,7 +312,10 @@ class OPSDTrainer(SFTTrainer):
         }
 
         self.use_vllm = args.use_vllm
-        if self.use_vllm:
+        self.rollout_backend = getattr(args, "rollout_backend", "vllm") or "vllm"
+        if self.use_vllm and self.rollout_backend == "sglang":
+            self._init_sglang_rollout(args)
+        elif self.use_vllm:
             if not is_vllm_available():
                 raise ImportError(
                     "vLLM is not available and use_vllm is set to True. Please install vLLM with "
@@ -395,6 +398,8 @@ class OPSDTrainer(SFTTrainer):
             self._last_vllm_sync_step = -1
 
             self.add_callback(GOLDVLLMSyncCallback(self))
+        elif self.rollout_backend == "sglang":
+            raise ValueError("rollout_backend=sglang requires use_vllm=True (shared rollout hooks).")
 
     def _set_signature_columns_if_needed(self):
         super()._set_signature_columns_if_needed()
@@ -935,6 +940,273 @@ class OPSDTrainer(SFTTrainer):
 
         return generated_tokens, new_attention_mask, new_labels
 
+    def _init_sglang_rollout(self, args: OPSDConfig) -> None:
+        """Colocate one SGLang Engine per rank (TP=1), then release GPU memory for DeepSpeed."""
+        try:
+            from sglang import Engine
+        except ImportError as exc:
+            raise ImportError(
+                "sglang is not available and rollout_backend=sglang. "
+                "Use conda env `sglang` with sglang installed."
+            ) from exc
+
+        self.vllm_mode = "colocate"
+        self.vllm_tensor_parallel_size = 1
+        self.vllm_gpu_memory_utilization = getattr(args, "sglang_mem_fraction_static", 0.4)
+        self.vllm_enable_sleep_mode = bool(getattr(args, "sglang_enable_memory_saver", True))
+        self.vllm_guided_decoding_regex = None
+        self.vllm_sync_frequency = args.vllm_sync_frequency
+        self._last_vllm_sync_step = -1
+        self.sglang_attention_backend = getattr(args, "sglang_attention_backend", "triton")
+        self.sglang_mem_fraction_static = float(getattr(args, "sglang_mem_fraction_static", 0.4))
+        ctx_len = getattr(args, "sglang_context_length", None)
+        self.sglang_context_length = int(ctx_len) if ctx_len else int(args.max_length)
+
+        # Isolate each rank onto its local GPU for the Engine process group.
+        local_rank = int(self.accelerator.local_process_index)
+        visible = [x for x in os.environ.get("CUDA_VISIBLE_DEVICES", "").split(",") if x.strip() != ""]
+        # When the launcher remaps so each process sees a single GPU, use gpu 0.
+        base_gpu_id = 0 if len(visible) == 1 else local_rank
+        # Unique HTTP/NCCL ports per rank to avoid collisions under accelerate.
+        base_port = 30000 + (int(os.environ.get("SLURM_JOB_ID", "0")) % 20000) + local_rank * 10
+
+        if self.accelerator.is_main_process:
+            print(
+                f"[sglang] init Engine model={self.model_name_or_path} "
+                f"attn={self.sglang_attention_backend} "
+                f"mem_fraction_static={self.sglang_mem_fraction_static} "
+                f"context_length={self.sglang_context_length} "
+                f"world={self.accelerator.num_processes}",
+                flush=True,
+            )
+
+        engine_kwargs: dict[str, Any] = {
+            "model_path": self.model_name_or_path,
+            "tokenizer_path": self.model_name_or_path,
+            "trust_remote_code": True,
+            "attention_backend": self.sglang_attention_backend,
+            "disable_hybrid_swa_memory": True,
+            "mem_fraction_static": self.sglang_mem_fraction_static,
+            "tp_size": 1,
+            "context_length": self.sglang_context_length,
+            "base_gpu_id": base_gpu_id,
+            "port": base_port,
+            "log_level": "warning",
+            "enable_memory_saver": self.vllm_enable_sleep_mode,
+        }
+        self.sglang_engine = Engine(**engine_kwargs)
+        if self.vllm_enable_sleep_mode:
+            self.sglang_engine.release_memory_occupation()
+            self._sglang_weights_resident = False
+        else:
+            self._sglang_weights_resident = True
+
+        self.accelerator.wait_for_everyone()
+        self.add_callback(GOLDVLLMSyncCallback(self))
+
+    @staticmethod
+    def _sglang_output_ids(sample: dict[str, Any], tokenizer: PreTrainedTokenizerBase) -> list[int]:
+        ids = sample.get("output_ids")
+        if isinstance(ids, list) and ids:
+            return [int(x) for x in ids]
+        text = sample.get("text") or ""
+        if isinstance(text, list):
+            text = text[0] if text else ""
+        return tokenizer.encode(str(text), add_special_tokens=False)
+
+    def _wake_sglang_if_needed(self, *, need_weights: bool = True) -> None:
+        if not self.vllm_enable_sleep_mode:
+            return
+        empty_cache()
+        tags = ["kv_cache"]
+        if need_weights and not getattr(self, "_sglang_weights_resident", True):
+            tags.insert(0, "weights")
+        self.sglang_engine.resume_memory_occupation(tags=tags)
+        if need_weights:
+            self._sglang_weights_resident = True
+
+    def _sleep_sglang(self) -> None:
+        if not self.vllm_enable_sleep_mode:
+            return
+        self.sglang_engine.release_memory_occupation()
+        self._sglang_weights_resident = False
+
+    def _move_model_to_rollout(self) -> None:
+        if self.rollout_backend == "sglang":
+            self._move_model_to_sglang()
+        else:
+            self._move_model_to_vllm()
+
+    def _move_model_to_sglang(self) -> None:
+        """Synchronize student weights into the colocated SGLang Engine."""
+        deepspeed_plugin = self.accelerator.state.deepspeed_plugin
+        zero_stage_3 = deepspeed_plugin is not None and deepspeed_plugin.zero_stage == 3
+        if zero_stage_3:
+            import deepspeed
+
+            gather_if_zero3 = deepspeed.zero.GatheredParameters
+        else:
+            gather_if_zero3 = nullcontext
+
+        self._wake_sglang_if_needed(need_weights=True)
+
+        named_tensors: list[tuple[str, torch.Tensor]] = []
+        if is_peft_model(self.model):
+            with gather_if_zero3(list(self.model.parameters())):
+                self.model.merge_adapter()
+                for name, param in self.model.named_parameters():
+                    name = name.removeprefix("base_model.model.").replace(".base_layer", "")
+                    if self.model.prefix in name:
+                        continue
+                    if "original_module" in name:
+                        continue
+                    name = name.replace("modules_to_save.default.", "")
+                    name = self._fix_param_name_to_vllm(name)
+                    named_tensors.append((name, param.data.detach().contiguous()))
+                if named_tensors:
+                    self.sglang_engine.update_weights_from_tensor(named_tensors, flush_cache=False)
+                self.model.unmerge_adapter()
+        else:
+            # ZeRO-3: gather one param at a time to limit peak memory.
+            for name, param in self.model.named_parameters():
+                name = self._fix_param_name_to_vllm(name)
+                with gather_if_zero3([param]):
+                    self.sglang_engine.update_weights_from_tensor(
+                        [(name, param.data.detach().contiguous())],
+                        flush_cache=False,
+                    )
+        self.sglang_engine.flush_cache()
+        # Keep weights resident until generate finishes; sleep after generate.
+
+    @profiling_decorator
+    def _generate_on_policy_outputs_sglang(self, inputs, generation_config, pad_token_id=None):
+        """Generate on-policy outputs from student prompts using SGLang Engine."""
+        import time
+
+        device = self.accelerator.device
+        prompts_text_for_sgl: list[str] = []
+        for ids, attention in zip(inputs["student_prompts"], inputs["student_prompt_attention_mask"]):
+            valid_ids = ids[attention.bool()].detach().cpu().tolist()
+            prompts_text_for_sgl.append(
+                self.processing_class.decode(valid_ids, skip_special_tokens=False)
+            )
+        prompts_text_with_special = list(prompts_text_for_sgl)
+
+        max_completion_length = generation_config.max_new_tokens
+        temperature = generation_config.temperature
+        top_k = generation_config.top_k if generation_config.top_k and generation_config.top_k > 0 else -1
+        top_p = self.args.top_p if hasattr(self.args, "top_p") else 1.0
+        presence_penalty = self.args.presence_penalty if hasattr(self.args, "presence_penalty") else 0.0
+        repetition_penalty = (
+            self.args.repetition_penalty if hasattr(self.args, "repetition_penalty") else 1.0
+        )
+
+        stop_ids: list[int] = []
+        eos = getattr(self.processing_class, "eos_token_id", None)
+        if isinstance(eos, int):
+            stop_ids.append(eos)
+        elif isinstance(eos, list):
+            stop_ids.extend(int(x) for x in eos if isinstance(x, int))
+        for tok in ("<|im_end|>", "<|endoftext|>"):
+            try:
+                tid = self.processing_class.convert_tokens_to_ids(tok)
+                if isinstance(tid, int) and tid >= 0 and tid not in stop_ids:
+                    stop_ids.append(tid)
+            except Exception:
+                pass
+
+        sampling_params: dict[str, Any] = {
+            "n": 1,
+            "temperature": float(temperature),
+            "top_p": float(top_p),
+            "max_new_tokens": int(max_completion_length),
+            "presence_penalty": float(presence_penalty),
+            "repetition_penalty": float(repetition_penalty),
+            "skip_special_tokens": False,
+        }
+        if top_k > 0:
+            sampling_params["top_k"] = int(top_k)
+        if stop_ids:
+            sampling_params["stop_token_ids"] = stop_ids
+
+        start_time = time.time()
+        self._wake_sglang_if_needed(need_weights=True)
+        raw = self.sglang_engine.generate(prompts_text_for_sgl, sampling_params=sampling_params)
+        if isinstance(raw, dict):
+            raw = [raw]
+        if not isinstance(raw, list) or len(raw) != len(prompts_text_for_sgl):
+            raise RuntimeError(
+                f"SGLang generate returned unexpected shape: type={type(raw)} "
+                f"len={len(raw) if isinstance(raw, list) else 'n/a'} "
+                f"expected={len(prompts_text_for_sgl)}"
+            )
+        completion_ids = [self._sglang_output_ids(sample, self.processing_class) for sample in raw]
+        if self.vllm_enable_sleep_mode:
+            self._sleep_sglang()
+
+        elapsed_time = time.time() - start_time
+        total_completion_tokens = sum(len(ids) for ids in completion_ids)
+        num_prompts = len(completion_ids)
+        avg_completion_length = total_completion_tokens / num_prompts if num_prompts > 0 else 0
+        tokens_per_sec = total_completion_tokens / elapsed_time if elapsed_time > 0 else 0
+        if self.accelerator.is_main_process:
+            print(
+                f"SGLang generation done - elapsed time: {elapsed_time:.2f}s, prompts: {num_prompts}, "
+                f"total tokens: {total_completion_tokens}, avg length: {avg_completion_length:.1f}, "
+                f"speed: {tokens_per_sec:.1f} tok/s",
+                flush=True,
+            )
+        self._metrics["train"]["rollout/tokens_per_second"].append(tokens_per_sec)
+        self._metrics["train"]["rollout/mean_response_length"].append(avg_completion_length)
+        self._metrics["train"]["rollout/generated_tokens"].append(float(total_completion_tokens))
+
+        prompt_ids = inputs["student_prompts"].to(device)
+        prompt_attention = inputs["student_prompt_attention_mask"].to(device)
+
+        completion_ids_tensors = [torch.tensor(ids, device=device) for ids in completion_ids]
+        padded_completion_ids_list = []
+        for completion_tensor in completion_ids_tensors:
+            if len(completion_tensor) > max_completion_length:
+                padded_completion_ids_list.append(completion_tensor[:max_completion_length])
+            elif len(completion_tensor) < max_completion_length:
+                padding_needed = max_completion_length - len(completion_tensor)
+                padded_tensor = torch.cat(
+                    [
+                        completion_tensor,
+                        torch.full(
+                            (padding_needed,), pad_token_id, device=device, dtype=completion_tensor.dtype
+                        ),
+                    ]
+                )
+                padded_completion_ids_list.append(padded_tensor)
+            else:
+                padded_completion_ids_list.append(completion_tensor)
+
+        padded_completion_ids = torch.stack(padded_completion_ids_list)
+        if prompt_ids.ndim == 1:
+            prompt_ids = prompt_ids.unsqueeze(0)
+            prompt_attention = prompt_attention.unsqueeze(0)
+        if padded_completion_ids.ndim == 1:
+            padded_completion_ids = padded_completion_ids.unsqueeze(0)
+
+        new_input_ids = torch.cat([prompt_ids, padded_completion_ids], dim=1)
+        completion_attention = torch.zeros_like(padded_completion_ids, device=device)
+        for row, comp_ids in enumerate(completion_ids):
+            completion_attention[row, : min(len(comp_ids), max_completion_length)] = 1
+        new_attention_mask = torch.cat([prompt_attention, completion_attention], dim=1)
+        new_labels = torch.cat(
+            [torch.full_like(prompt_ids, -100), padded_completion_ids.clone()],
+            dim=1,
+        )
+        new_labels[:, prompt_ids.shape[1] :][completion_attention == 0] = -100
+
+        completion_texts = []
+        for comp_ids in completion_ids:
+            completion_texts.append(
+                self.processing_class.decode(comp_ids, skip_special_tokens=False)
+            )
+        return new_input_ids, new_attention_mask, new_labels, prompts_text_with_special, completion_texts
+
     @profiling_decorator
     def _generate_on_policy_outputs_vllm(self, inputs, generation_config, pad_token_id=None):
         """Generate on-policy outputs from student prompts using vLLM."""
@@ -1423,13 +1695,20 @@ class OPSDTrainer(SFTTrainer):
         return merged
 
     def _attach_rollouts_to_inputs(self, inputs: dict[str, Any]) -> dict[str, Any]:
-        """Run vLLM once and attach student/teacher full sequences + labels."""
-        self._wake_vllm_if_needed()
-        generated_ids, generated_attention_mask, _, prompt_texts, completion_texts = (
-            self._generate_on_policy_outputs_vllm(
-                inputs, self.generation_config, self.processing_class.pad_token_id
+        """Run rollout engine once and attach student/teacher full sequences + labels."""
+        if self.rollout_backend == "sglang":
+            generated_ids, generated_attention_mask, _, prompt_texts, completion_texts = (
+                self._generate_on_policy_outputs_sglang(
+                    inputs, self.generation_config, self.processing_class.pad_token_id
+                )
             )
-        )
+        else:
+            self._wake_vllm_if_needed()
+            generated_ids, generated_attention_mask, _, prompt_texts, completion_texts = (
+                self._generate_on_policy_outputs_vllm(
+                    inputs, self.generation_config, self.processing_class.pad_token_id
+                )
+            )
         student_prompt_len = int(inputs["student_prompt_length"])
         generation_ids = generated_ids[:, student_prompt_len:]
         response_attention_mask = generated_attention_mask[:, student_prompt_len:]

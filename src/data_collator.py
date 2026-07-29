@@ -40,6 +40,7 @@ NO_GT_MODES = {
     "same_trans",
     "encourage_trans",
     "irrelevant_trans",
+    "sample_irrelevant_trans",
 }
 
 
@@ -57,6 +58,7 @@ class SelfDistillationDataCollator:
         "same_trans",
         "encourage_trans",
         "irrelevant_trans",
+        "sample_irrelevant_trans",
     }
 
     def __init__(
@@ -126,6 +128,14 @@ class SelfDistillationDataCollator:
         return SelfDistillationDataCollator._nogt_transition_teacher_user(problem)
 
     @staticmethod
+    def _normalize_prefix(prefix: str) -> str:
+        """Ensure teacher prefix ends with a blank line before Problem:."""
+        text = str(prefix or "").strip()
+        if not text:
+            return ""
+        return text + "\n\n"
+
+    @staticmethod
     def _nogt_transition_teacher_user(problem: str, prefix: str = "") -> str:
         """Problem (+ optional prefix) + no-GT transition; no reference-solution scaffold."""
         return (
@@ -134,6 +144,13 @@ class SelfDistillationDataCollator:
             f"{NO_GT_TRANSITION_PROMPT}\n"
             "Please reason step by step, and put your final answer within \\boxed{}."
         )
+
+    def _sampled_irrelevant_prefix(self, feature: dict[str, Any]) -> str:
+        """Prefer per-row `irrelevant_prefix` from preprocessed data; else fixed IRRELEVANT_PREFIX."""
+        raw = feature.get("irrelevant_prefix")
+        if raw is None or not str(raw).strip():
+            return IRRELEVANT_PREFIX
+        return self._normalize_prefix(str(raw))
 
     def format_prompts(self, feature: dict[str, Any]) -> tuple[str, str]:
         problem = str(feature["problem"]).strip()
@@ -152,8 +169,12 @@ class SelfDistillationDataCollator:
                 teacher_user = self._nogt_transition_teacher_user(problem)
             elif self.privilege_mode == "encourage_trans":
                 teacher_user = self._nogt_transition_teacher_user(problem, prefix=ENCOURAGE_PREFIX)
-            else:  # irrelevant_trans
+            elif self.privilege_mode == "irrelevant_trans":
                 teacher_user = self._nogt_transition_teacher_user(problem, prefix=IRRELEVANT_PREFIX)
+            else:  # sample_irrelevant_trans
+                teacher_user = self._nogt_transition_teacher_user(
+                    problem, prefix=self._sampled_irrelevant_prefix(feature)
+                )
         elif self.privilege_mode == "opsd":
             # Official OPSD student / teacher templates (siyan-zhao/OPSD).
             # privilege_field=none → same no-GT transition template (no reference block).
@@ -187,19 +208,31 @@ class SelfDistillationDataCollator:
             )
             student_user = f"Problem: {problem}\n\n{student_instruction}"
 
-        student_prompt = self.tokenizer.apply_chat_template(
+        student_prompt = self._apply_chat_template(
+            self.tokenizer,
             [{"role": "user", "content": student_user}],
-            tokenize=False,
-            add_generation_prompt=True,
             enable_thinking=self.student_thinking,
         )
-        teacher_prompt = self.teacher_tokenizer.apply_chat_template(
+        teacher_prompt = self._apply_chat_template(
+            self.teacher_tokenizer,
             [{"role": "user", "content": teacher_user}],
-            tokenize=False,
-            add_generation_prompt=True,
             enable_thinking=self.teacher_thinking,
         )
         return student_prompt, teacher_prompt
+
+    @staticmethod
+    def _apply_chat_template(tokenizer: Any, messages: list[dict[str, str]], *, enable_thinking: bool) -> str:
+        """apply_chat_template with enable_thinking when supported (Qwen3); Olmo ignores it."""
+        kwargs = {
+            "tokenize": False,
+            "add_generation_prompt": True,
+            "enable_thinking": enable_thinking,
+        }
+        try:
+            return tokenizer.apply_chat_template(messages, **kwargs)
+        except TypeError:
+            kwargs.pop("enable_thinking", None)
+            return tokenizer.apply_chat_template(messages, **kwargs)
 
     def prompt_lengths(self, feature: dict[str, Any]) -> tuple[int, int]:
         student, teacher = self.format_prompts(feature)

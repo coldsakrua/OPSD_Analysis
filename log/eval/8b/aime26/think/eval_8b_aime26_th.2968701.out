@@ -1,0 +1,104 @@
+[eval] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[eval] checkpoint=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-8b
+[eval] dataset=aime26 thinking=1
+[eval] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/qwen3-8b/aime26_8b_think.json
+[eval] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/anchor
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[eval] +30 problems from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/AIME26/test.parquet (tag=aime26)
+[eval] total 30 problems from 1 file(s)
+[eval] math_verify=yes, thinking=True
+[eval] tokenizer_source=/dfs/share/maleiLab/2501210611/model/qwen3-8b
+[eval] vLLM model=/dfs/share/maleiLab/2501210611/model/qwen3-8b
+INFO 07-28 16:18:58 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 07-28 16:19:02 [__init__.py:239] Automatically detected platform cuda.
+INFO 07-28 16:19:13 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 07-28 16:19:13 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 07-28 16:19:13 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 07-28 16:19:13 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 07-28 16:19:13 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO 07-28 16:19:21 [config.py:717] This model supports multiple tasks: {'embed', 'generate', 'classify', 'reward', 'score'}. Defaulting to 'generate'.
+WARNING 07-28 16:19:21 [arg_utils.py:1525] Chunked prefill is enabled by default for models with max_model_len > 32K. Chunked prefill might not work with some features or models. If you encounter any issues, please disable by launching with --enable-chunked-prefill=False.
+INFO 07-28 16:19:21 [config.py:2003] Chunked prefill is enabled with max_num_batched_tokens=2048.
+INFO 07-28 16:19:21 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/dfs/share/maleiLab/2501210611/model/qwen3-8b', speculative_config=None, tokenizer='/dfs/share/maleiLab/2501210611/model/qwen3-8b', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=False, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/dfs/share/maleiLab/2501210611/model/qwen3-8b, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=True, use_async_output_proc=True, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[256,248,240,232,224,216,208,200,192,184,176,168,160,152,144,136,128,120,112,104,96,88,80,72,64,56,48,40,32,24,16,8,4,2,1],"max_capture_size":256}, use_cached_outputs=False, 
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/uniproc_executor.py:29: UserWarning: Failed to get the IP address, using 0.0.0.0 by default.The value can be set by the environment variable VLLM_HOST_IP or HOST_IP.
+  get_ip(), get_open_port())
+INFO 07-28 16:19:22 [cuda.py:228] Using XFormers backend.
+INFO 07-28 16:19:23 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 07-28 16:19:23 [model_runner.py:1108] Starting to load model /dfs/share/maleiLab/2501210611/model/qwen3-8b...
+Loading safetensors checkpoint shards:   0% Completed | 0/5 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards:  20% Completed | 1/5 [00:05<00:21,  5.28s/it]
+Loading safetensors checkpoint shards:  40% Completed | 2/5 [00:12<00:18,  6.32s/it]
+Loading safetensors checkpoint shards:  60% Completed | 3/5 [00:14<00:09,  4.54s/it]
+Loading safetensors checkpoint shards:  80% Completed | 4/5 [00:21<00:05,  5.42s/it]
+Loading safetensors checkpoint shards: 100% Completed | 5/5 [00:28<00:00,  5.98s/it]
+Loading safetensors checkpoint shards: 100% Completed | 5/5 [00:28<00:00,  5.70s/it]
+
+INFO 07-28 16:19:52 [loader.py:458] Loading weights took 28.76 seconds
+INFO 07-28 16:19:53 [model_runner.py:1140] Model loading took 15.2683 GiB and 29.056258 seconds
+INFO 07-28 16:19:53 [worker.py:287] Memory profiling takes 0.59 seconds
+INFO 07-28 16:19:53 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+INFO 07-28 16:19:53 [worker.py:287] model weights take 15.27GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.40GiB; the rest of the memory reserved for KV Cache is 54.56GiB.
+INFO 07-28 16:19:54 [executor_base.py:112] # cuda blocks: 24832, # CPU blocks: 1820
+INFO 07-28 16:19:54 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 9.70x
+INFO 07-28 16:19:56 [model_runner.py:1450] Capturing cudagraphs for decoding. This may lead to unexpected consequences if the model is not static. To run the model in eager mode, set 'enforce_eager=True' or use '--enforce-eager' in the CLI. If out-of-memory error occurs during cudagraph capture, consider decreasing `gpu_memory_utilization` or switching to eager mode. You can also reduce the `max_num_seqs` as needed to decrease memory usage.
+Capturing CUDA graph shapes:   0%|          | 0/35 [00:00<?, ?it/s]Capturing CUDA graph shapes:   3%|▎         | 1/35 [00:00<00:17,  1.91it/s]Capturing CUDA graph shapes:   6%|▌         | 2/35 [00:00<00:15,  2.09it/s]Capturing CUDA graph shapes:   9%|▊         | 3/35 [00:01<00:14,  2.16it/s]Capturing CUDA graph shapes:  11%|█▏        | 4/35 [00:01<00:14,  2.18it/s]Capturing CUDA graph shapes:  14%|█▍        | 5/35 [00:02<00:13,  2.22it/s]Capturing CUDA graph shapes:  17%|█▋        | 6/35 [00:02<00:13,  2.23it/s]Capturing CUDA graph shapes:  20%|██        | 7/35 [00:03<00:12,  2.23it/s]Capturing CUDA graph shapes:  23%|██▎       | 8/35 [00:03<00:12,  2.24it/s]Capturing CUDA graph shapes:  26%|██▌       | 9/35 [00:04<00:11,  2.25it/s]Capturing CUDA graph shapes:  29%|██▊       | 10/35 [00:04<00:11,  2.25it/s]Capturing CUDA graph shapes:  31%|███▏      | 11/35 [00:04<00:10,  2.26it/s]Capturing CUDA graph shapes:  34%|███▍      | 12/35 [00:05<00:10,  2.26it/s]Capturing CUDA graph shapes:  37%|███▋      | 13/35 [00:05<00:09,  2.26it/s]Capturing CUDA graph shapes:  40%|████      | 14/35 [00:06<00:09,  2.26it/s]Capturing CUDA graph shapes:  43%|████▎     | 15/35 [00:06<00:08,  2.27it/s]Capturing CUDA graph shapes:  46%|████▌     | 16/35 [00:07<00:08,  2.29it/s]Capturing CUDA graph shapes:  49%|████▊     | 17/35 [00:07<00:07,  2.31it/s]Capturing CUDA graph shapes:  51%|█████▏    | 18/35 [00:08<00:07,  2.32it/s]Capturing CUDA graph shapes:  54%|█████▍    | 19/35 [00:08<00:06,  2.34it/s]Capturing CUDA graph shapes:  57%|█████▋    | 20/35 [00:08<00:06,  2.34it/s]Capturing CUDA graph shapes:  60%|██████    | 21/35 [00:09<00:05,  2.34it/s]Capturing CUDA graph shapes:  63%|██████▎   | 22/35 [00:09<00:05,  2.36it/s]Capturing CUDA graph shapes:  66%|██████▌   | 23/35 [00:10<00:05,  2.36it/s]Capturing CUDA graph shapes:  69%|██████▊   | 24/35 [00:10<00:04,  2.36it/s]Capturing CUDA graph shapes:  71%|███████▏  | 25/35 [00:10<00:04,  2.37it/s]Capturing CUDA graph shapes:  74%|███████▍  | 26/35 [00:11<00:03,  2.37it/s]Capturing CUDA graph shapes:  77%|███████▋  | 27/35 [00:11<00:03,  2.36it/s]Capturing CUDA graph shapes:  80%|████████  | 28/35 [00:12<00:02,  2.38it/s]Capturing CUDA graph shapes:  83%|████████▎ | 29/35 [00:12<00:02,  2.37it/s]Capturing CUDA graph shapes:  86%|████████▌ | 30/35 [00:13<00:02,  2.37it/s]Capturing CUDA graph shapes:  89%|████████▊ | 31/35 [00:13<00:01,  2.26it/s]Capturing CUDA graph shapes:  91%|█████████▏| 32/35 [00:13<00:01,  2.29it/s]Capturing CUDA graph shapes:  94%|█████████▍| 33/35 [00:14<00:00,  2.31it/s]Capturing CUDA graph shapes:  97%|█████████▋| 34/35 [00:14<00:00,  2.34it/s]Capturing CUDA graph shapes: 100%|██████████| 35/35 [00:15<00:00,  2.27it/s]Capturing CUDA graph shapes: 100%|██████████| 35/35 [00:15<00:00,  2.29it/s]
+INFO 07-28 16:20:11 [model_runner.py:1592] Graph capturing finished in 15 secs, took 0.42 GiB
+INFO 07-28 16:20:11 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 18.11 seconds
+[eval] generating 30 prompts x n=8 (pass-at-k=[1, 4, 8], generate_batch_size=8) ...
+prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s][eval] wrote partial json: 8/30 metrics=aime26_8b_think.metrics.json results=aime26_8b_think.results.json
+prompt_batches:  25%|██▌       | 1/4 [11:37<34:51, 697.05s/it]WARNING 07-28 16:38:38 [scheduler.py:1768] Sequence group 15_parallel_sample_7 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=1
+WARNING 07-28 17:11:36 [scheduler.py:1768] Sequence group 14_parallel_sample_6 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=51
+[eval] wrote partial json: 16/30 metrics=aime26_8b_think.metrics.json results=aime26_8b_think.results.json
+prompt_batches:  50%|█████     | 2/4 [1:14:43<1:23:48, 2514.28s/it][eval] wrote partial json: 24/30 metrics=aime26_8b_think.metrics.json results=aime26_8b_think.results.json
+prompt_batches:  75%|███████▌  | 3/4 [1:59:11<43:04, 2584.56s/it]  WARNING 07-28 18:28:57 [scheduler.py:1768] Sequence group 29_parallel_sample_6 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=101
+[eval] wrote partial json: 30/30 metrics=aime26_8b_think.metrics.json results=aime26_8b_think.results.json
+prompt_batches: 100%|██████████| 4/4 [2:47:49<00:00, 2716.04s/it]prompt_batches: 100%|██████████| 4/4 [2:47:49<00:00, 2517.30s/it]
+[eval] wrote partial json: 30/30 metrics=aime26_8b_think.metrics.json results=aime26_8b_think.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/qwen3-8b/aime26_8b_think.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/qwen3-8b/aime26_8b_think.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 76.67% (23/30)
+  Pass@4: 83.33% (25/30)
+  Pass@8: 86.67% (26/30)
+  Avg1(one-shot hit rate): 76.67%
+  Avg16(overall correctness): 66.67%
+  Avg output tokens: 16295.7
+[aime26] n=30
+  Pass@1: 76.67% (23/30)
+  Pass@4: 83.33% (25/30)
+  Pass@8: 86.67% (26/30)
+  Avg1(one-shot hit rate): 76.67%
+  Avg16(overall correctness): 66.67%
+  Avg output tokens: 16295.7
+[BY_CATEGORY]
+[__uncategorized__] n=30
+  Pass@1: 76.67% (23/30)
+  Pass@4: 83.33% (25/30)
+  Pass@8: 86.67% (26/30)
+  Avg1(one-shot hit rate): 76.67%
+  Avg16(overall correctness): 66.67%
+  Avg output tokens: 16295.7
+Avg correct / sample: 66.67%
+Majority vote: 70.00%
+Boxed format rate: 92.08%
+Avg output tokens: 16295.7
+[TOKEN_BUDGET]
+[aime26] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=3.33% (1/30)  Avg16=0.42%
+  @4k: Pass@8=10.00% (3/30)  Avg16=5.00%
+  @8k: Pass@8=36.67% (11/30)  Avg16=24.58%
+  @16k: Pass@8=80.00% (24/30)  Avg16=55.00%
+  @32k: Pass@8=86.67% (26/30)  Avg16=66.67%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime26] n=30  P@16=0.00%  Avg16=66.67%  L=16295.7  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime26] n=30  P@16=0.00%  Avg16=66.67%  L=16295.7  pass/log2(16L)=0.0000  avg/log2(16L)=3.7053
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/qwen3-8b/aime26_8b_think.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/qwen3-8b/aime26_8b_think.results.json
+============================================================
+[rank0]:[W728 19:08:46.092633727 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
