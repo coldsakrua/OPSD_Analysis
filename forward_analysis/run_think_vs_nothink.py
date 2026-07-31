@@ -59,9 +59,26 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--temperature", type=float, default=0.6)
     p.add_argument("--top-p", type=float, default=0.95)
     p.add_argument("--top-k", type=int, default=20)
+    p.add_argument("--presence-penalty", type=float, default=0.0)
     p.add_argument("--batch-size", type=int, default=4, help="HF activation batch size")
-    p.add_argument("--gen-batch-size", type=int, default=32, help="vLLM continuous-batch hint")
-    p.add_argument("--gpu-memory-utilization", type=float, default=0.9)
+    p.add_argument("--gen-batch-size", type=int, default=32, help="vLLM continuous-batch hint / SGLang prompt batch")
+    p.add_argument("--gpu-memory-utilization", type=float, default=0.9, help="vLLM GPU util")
+    p.add_argument(
+        "--backend",
+        choices=("vllm", "sglang"),
+        default="vllm",
+        help="Generation backend. Qwen3.5 eval uses sglang.",
+    )
+    p.add_argument("--attention-backend", type=str, default="triton", help="SGLang attention backend")
+    p.add_argument(
+        "--sampling-backend",
+        type=str,
+        default="pytorch",
+        choices=("pytorch", "flashinfer", "ascend"),
+        help="SGLang sampling backend (eval default: pytorch)",
+    )
+    p.add_argument("--mem-fraction-static", type=float, default=0.80, help="SGLang mem_fraction_static")
+    p.add_argument("--reasoning-parser", type=str, default="", help="SGLang reasoning_parser (e.g. qwen3)")
     p.add_argument("--skip-generate", action="store_true")
     p.add_argument("--skip-activations", action="store_true")
     p.add_argument("--activation-only-n", type=int, default=0, help="0 = all samples")
@@ -128,7 +145,51 @@ def load_problems(path: str, n: int, seed: int, tokenizer: Any, max_prompt_lengt
     return out
 
 
-def run_generation(
+def _normalize_sglang_outputs(raw: Any, n_prompts: int, gen_n: int = 1) -> list[list[dict[str, Any]]]:
+    """Map Engine.generate return value to [prompt][sample] dicts (same as eval)."""
+    if isinstance(raw, dict):
+        raw = [raw]
+    if not isinstance(raw, list):
+        raise RuntimeError(f"unexpected SGLang generate return type: {type(raw)}")
+    if len(raw) == n_prompts * gen_n:
+        return [raw[i * gen_n : (i + 1) * gen_n] for i in range(n_prompts)]
+    if len(raw) == n_prompts:
+        grouped: list[list[dict[str, Any]]] = []
+        for item in raw:
+            texts = item.get("text")
+            meta = item.get("meta_info") or {}
+            if isinstance(texts, list):
+                samples = [{"text": t, "meta_info": meta, "output_ids": item.get("output_ids")} for t in texts]
+                if len(samples) < gen_n:
+                    raise RuntimeError(f"expected {gen_n} texts, got {len(samples)}")
+                grouped.append(samples[:gen_n])
+            else:
+                if gen_n != 1:
+                    raise RuntimeError(f"expected n={gen_n} samples, got single text")
+                grouped.append([item])
+        return grouped
+    raise RuntimeError(f"cannot reshape SGLang outputs: len={len(raw)} n_prompts={n_prompts} gen_n={gen_n}")
+
+
+def _sglang_text_and_n_tokens(sample: dict[str, Any], tokenizer: Any) -> tuple[str, int]:
+    text = sample.get("text") or ""
+    if isinstance(text, list):
+        text = text[0] if text else ""
+    text = str(text)
+    ids = sample.get("output_ids")
+    if isinstance(ids, list) and ids:
+        return text, len(ids)
+    meta = sample.get("meta_info") or {}
+    for key in ("completion_tokens", "completion_tokens_count", "output_tokens"):
+        if key in meta and meta[key] is not None:
+            return text, int(meta[key])
+    usage = meta.get("usage") or {}
+    if isinstance(usage, dict) and usage.get("completion_tokens") is not None:
+        return text, int(usage["completion_tokens"])
+    return text, len(tokenizer.encode(text, add_special_tokens=False)) if text else 0
+
+
+def run_generation_vllm(
     model_path: str,
     samples: list[dict],
     output_dir: Path,
@@ -153,11 +214,11 @@ def run_generation(
         seed=args.seed,
     )
 
-    summary: dict[str, Any] = {}
+    summary: dict[str, Any] = {"backend": "vllm"}
     for mode, key in [("think", "prompt_think"), ("nothink", "prompt_nothink")]:
         prompts = [s[key] for s in samples]
         t0 = time.time()
-        print(f"[gen] mode={mode} n={len(prompts)} max_new_tokens={args.max_new_tokens}")
+        print(f"[gen] backend=vllm mode={mode} n={len(prompts)} max_new_tokens={args.max_new_tokens}")
         outputs = llm.generate(prompts, sampling, use_tqdm=True)
         path = output_dir / f"generations_{mode}.jsonl"
         lengths = []
@@ -186,10 +247,116 @@ def run_generation(
             "path": str(path),
         }
         print(f"[gen] {mode} done: mean_len={summary[mode]['mean_gen_tokens']:.1f}")
-    # free vLLM before HF load
     del llm
     torch.cuda.empty_cache()
     return summary
+
+
+def run_generation_sglang(
+    model_path: str,
+    samples: list[dict],
+    output_dir: Path,
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    from sglang import Engine
+
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+    context_length = args.max_prompt_length + args.max_new_tokens + 64
+    engine_kwargs: dict[str, Any] = {
+        "model_path": model_path,
+        "tokenizer_path": model_path,
+        "trust_remote_code": True,
+        "attention_backend": args.attention_backend,
+        "sampling_backend": args.sampling_backend,
+        "mem_fraction_static": args.mem_fraction_static,
+        "tp_size": 1,
+        "context_length": context_length,
+        "log_level": "error",
+    }
+    if args.reasoning_parser:
+        engine_kwargs["reasoning_parser"] = args.reasoning_parser
+    print(
+        f"[gen] launching SGLang Engine attention={args.attention_backend} "
+        f"sampling={args.sampling_backend} mem={args.mem_fraction_static}",
+        flush=True,
+    )
+    llm = Engine(**engine_kwargs)
+
+    sampling_params: dict[str, Any] = {
+        "temperature": args.temperature,
+        "top_p": args.top_p,
+        "max_new_tokens": args.max_new_tokens,
+        "n": 1,
+        "sampling_seed": args.seed,
+        "skip_special_tokens": True,
+    }
+    if args.top_k > 0:
+        sampling_params["top_k"] = args.top_k
+    if args.presence_penalty != 0.0:
+        sampling_params["presence_penalty"] = args.presence_penalty
+
+    gbs = max(1, int(args.gen_batch_size))
+    summary: dict[str, Any] = {
+        "backend": "sglang",
+        "attention_backend": args.attention_backend,
+        "sampling_backend": args.sampling_backend,
+    }
+    try:
+        for mode, key in [("think", "prompt_think"), ("nothink", "prompt_nothink")]:
+            prompts = [s[key] for s in samples]
+            t0 = time.time()
+            print(
+                f"[gen] backend=sglang mode={mode} n={len(prompts)} "
+                f"batch={gbs} max_new_tokens={args.max_new_tokens}",
+                flush=True,
+            )
+            path = output_dir / f"generations_{mode}.jsonl"
+            lengths: list[int] = []
+            with path.open("w", encoding="utf-8") as f:
+                for start in tqdm(range(0, len(prompts), gbs), desc=f"sglang_{mode}"):
+                    end = min(start + gbs, len(prompts))
+                    chunk_prompts = prompts[start:end]
+                    chunk_samples = samples[start:end]
+                    raw = llm.generate(chunk_prompts, sampling_params=sampling_params)
+                    grouped = _normalize_sglang_outputs(raw, len(chunk_prompts), gen_n=1)
+                    for s, outs in zip(chunk_samples, grouped):
+                        text, n_tok = _sglang_text_and_n_tokens(outs[0], tokenizer)
+                        lengths.append(n_tok)
+                        rec = {
+                            "row_id": s["row_id"],
+                            "mode": mode,
+                            "prompt_len": s[f"prompt_len_{mode}"],
+                            "gen_tokens": n_tok,
+                            "text": text,
+                        }
+                        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            arr = np.asarray(lengths, dtype=np.float64)
+            summary[mode] = {
+                "n": int(len(arr)),
+                "mean_gen_tokens": float(arr.mean()) if len(arr) else 0.0,
+                "median_gen_tokens": float(np.median(arr)) if len(arr) else 0.0,
+                "p90_gen_tokens": float(np.percentile(arr, 90)) if len(arr) else 0.0,
+                "max_gen_tokens": float(arr.max()) if len(arr) else 0.0,
+                "frac_hit_max": float((arr >= args.max_new_tokens - 1).mean()) if len(arr) else 0.0,
+                "seconds": float(time.time() - t0),
+                "path": str(path),
+            }
+            print(f"[gen] {mode} done: mean_len={summary[mode]['mean_gen_tokens']:.1f}")
+    finally:
+        llm.shutdown()
+        torch.cuda.empty_cache()
+    return summary
+
+
+def run_generation(
+    model_path: str,
+    samples: list[dict],
+    output_dir: Path,
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    if args.backend == "sglang":
+        return run_generation_sglang(model_path, samples, output_dir, args)
+    return run_generation_vllm(model_path, samples, output_dir, args)
 
 
 @torch.no_grad()

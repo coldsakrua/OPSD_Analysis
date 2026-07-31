@@ -890,17 +890,20 @@ def summarize_result_subset(
     fmt = sum(sum(1 for g in r.get("generations", []) if g.get("formatted")) for r in rows)
     tot_correct = sum(r.get("num_correct", 0) for r in rows)
     avg1_pct = pass_at_k.get("1", {}).get("pct", 0.0)
-    avg16_pct = 100.0 * tot_correct / total_sol if total_sol else 0.0
-    return {
+    avg_n_pct = 100.0 * tot_correct / total_sol if total_sol else 0.0
+    out = {
         "num_problems": n_d,
         "pass_at_k": pass_at_k,
         "avg1_pct": avg1_pct,
-        "avg16_pct": avg16_pct,
+        # Historical alias (kept for old dashboards); equals mean accuracy over gen_n samples.
+        "avg16_pct": avg_n_pct,
+        f"avg{gen_n}_pct": avg_n_pct,
         "majority_vote_pct": 100.0 * maj / n_d if n_d else 0.0,
-        "average_correct_pct": 100.0 * tot_correct / total_sol if total_sol else 0.0,
+        "average_correct_pct": avg_n_pct,
         "format_rate_pct": 100.0 * fmt / total_sol if total_sol else 0.0,
         "avg_output_tokens_mean": _avg_output_tokens(rows),
     }
+    return out
 
 
 DEFAULT_TOKEN_BUDGETS = [1024, 2048, 4096, 8192, 16384, 32768]

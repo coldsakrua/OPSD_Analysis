@@ -43,7 +43,6 @@ from transformers.utils import (
 )
 
 from trl.extras.profiling import profiling_decorator
-from trl.extras.vllm_client import VLLMClient
 from trl.import_utils import is_vllm_available
 from trl.models import prepare_deepspeed
 from trl.models.utils import unwrap_model_for_generation
@@ -59,15 +58,49 @@ def ensure_master_addr_port() -> None:
     os.environ.setdefault("MASTER_PORT", "29500")
 
 
+def _config_get_use_cache(config) -> bool:
+    text_cfg = getattr(config, "text_config", None)
+    if text_cfg is not None and hasattr(text_cfg, "use_cache"):
+        return bool(text_cfg.use_cache)
+    return bool(getattr(config, "use_cache", True))
+
+
+def _config_set_use_cache(config, value: bool) -> None:
+    """Qwen3.5 keeps use_cache on text_config; CausalLMs keep it on the root config."""
+    text_cfg = getattr(config, "text_config", None)
+    if text_cfg is not None and hasattr(text_cfg, "use_cache"):
+        text_cfg.use_cache = value
+    if hasattr(config, "use_cache"):
+        config.use_cache = value
+    else:
+        try:
+            config.use_cache = value
+        except Exception:
+            pass
+
+
+# Lazy: trl.extras.vllm_client imports vllm at module import time.
+# Prefer try/except — is_vllm_available() can be true while import still fails.
+VLLMClient = None
+LLM = None
+SamplingParams = None
+GuidedDecodingParams = None
+try:
+    if is_vllm_available():
+        from trl.extras.vllm_client import VLLMClient  # noqa: F401
+        from vllm import LLM, SamplingParams
+        from vllm.sampling_params import GuidedDecodingParams
+except Exception:
+    VLLMClient = None
+    LLM = None
+    SamplingParams = None
+    GuidedDecodingParams = None
+
 if is_peft_available():
     from peft import PeftConfig
 
 if is_wandb_available():
     import wandb
-
-if is_vllm_available():
-    from vllm import LLM, SamplingParams
-    from vllm.sampling_params import GuidedDecodingParams
 
 if is_rich_available():
     from rich.console import Console
@@ -149,6 +182,12 @@ class OPSDTrainer(SFTTrainer):
             args.model_init_kwargs = args.model_init_kwargs or {}
             args.model_init_kwargs.setdefault("revision", self.model_revision)
 
+        # Qwen3.5 (and similar composite configs) store use_cache on text_config only.
+        # Passing use_cache into from_pretrained leaves it as an unused kwarg that DeepSpeed
+        # then forwards into __init__, which rejects it.
+        args.model_init_kwargs = dict(args.model_init_kwargs or {})
+        pending_use_cache = args.model_init_kwargs.pop("use_cache", False)
+
         # Custom data collator for self-distillation
         if data_collator is None:
             data_collator = SelfDistillationDataCollator(
@@ -172,6 +211,7 @@ class OPSDTrainer(SFTTrainer):
             preprocess_logits_for_metrics=preprocess_logits_for_metrics,
             peft_config=peft_config,
         )
+        _config_set_use_cache(self.model.config, pending_use_cache)
 
         if args.disable_dropout:
             disable_dropout_in_model(self.model)
@@ -196,12 +236,16 @@ class OPSDTrainer(SFTTrainer):
             # while a frozen teacher (same init or a separate checkpoint) is sharded
             # across ranks for teacher-only forward passes.
             teacher_kwargs = dict(args.model_init_kwargs or {})
-            teacher_kwargs["use_cache"] = False
+            teacher_kwargs.pop("use_cache", None)
             teacher_kwargs["attn_implementation"] = "sdpa"
-            self.teacher_model = AutoModelForCausalLM.from_pretrained(
+            # Match student class (e.g. Qwen3_5ForConditionalGeneration) so text/VLM
+            # checkpoints load consistently; AutoModelForCausalLM alone can mismatch.
+            teacher_cls = type(self.accelerator.unwrap_model(self.model))
+            self.teacher_model = teacher_cls.from_pretrained(
                 self.teacher_model_path,
                 **teacher_kwargs,
             )
+            _config_set_use_cache(self.teacher_model.config, False)
             self.teacher_model.requires_grad_(False)
             disable_dropout_in_model(self.teacher_model)
             if self.is_deepspeed_enabled:
@@ -852,10 +896,10 @@ class OPSDTrainer(SFTTrainer):
             # Use transformers generation (slower)
             with torch.no_grad():
                 # Temporarily enable KV cache
-                original_use_cache = model.config.use_cache
+                original_use_cache = _config_get_use_cache(model.config)
                 original_gen_use_cache = self.reasoning_generation_config.use_cache
 
-                model.config.use_cache = True
+                _config_set_use_cache(model.config, True)
                 self.reasoning_generation_config.use_cache = True
 
                 # If fixed_teacher=True, disable LoRA adapters
@@ -876,7 +920,7 @@ class OPSDTrainer(SFTTrainer):
                         )
                         reasoning_ids = reasoning_outputs.sequences
                 finally:
-                    model.config.use_cache = original_use_cache
+                    _config_set_use_cache(model.config, original_use_cache)
                     self.reasoning_generation_config.use_cache = original_gen_use_cache
 
                 return reasoning_ids
@@ -888,16 +932,16 @@ class OPSDTrainer(SFTTrainer):
         start_time = time.time()
 
         # Temporarily enable KV cache for generation if it was disabled for training
-        original_use_cache = model.config.use_cache
+        original_use_cache = _config_get_use_cache(model.config)
         original_gen_use_cache = generation_config.use_cache
 
-        model.config.use_cache = True
+        _config_set_use_cache(model.config, True)
         generation_config.use_cache = True
 
         print(f"\n{'='*80}")
         print(f"GENERATION DEBUG INFO:")
         print(f"  Model dtype: {model.dtype}")
-        print(f"  Model config use_cache: {model.config.use_cache}")
+        print(f"  Model config use_cache: {_config_get_use_cache(model.config)}")
         print(f"  Attention implementation: {getattr(model.config, '_attn_implementation', 'unknown')}")
         print(f"  Generation config use_cache: {generation_config.use_cache}")
         print(f"  Batch size: {inputs['student_prompts'].shape[0]}")
@@ -918,7 +962,7 @@ class OPSDTrainer(SFTTrainer):
             generated_tokens = generated_outputs.sequences
         finally:
             # Restore original settings
-            model.config.use_cache = original_use_cache
+            _config_set_use_cache(model.config, original_use_cache)
             generation_config.use_cache = original_gen_use_cache
 
         elapsed_time = time.time() - start_time
@@ -950,6 +994,10 @@ class OPSDTrainer(SFTTrainer):
                 "Use conda env `sglang` with sglang installed."
             ) from exc
 
+        # Ensure pip nvidia cudart (with cudaGetDriverEntryPointByVersion) stays ahead of
+        # any node /usr/local/cuda/lib64 that SGLang/JIT may inject into LD_LIBRARY_PATH.
+        self._ensure_nvidia_cudart_on_ld_path()
+
         self.vllm_mode = "colocate"
         self.vllm_tensor_parallel_size = 1
         self.vllm_gpu_memory_utilization = getattr(args, "sglang_mem_fraction_static", 0.4)
@@ -958,6 +1006,7 @@ class OPSDTrainer(SFTTrainer):
         self.vllm_sync_frequency = args.vllm_sync_frequency
         self._last_vllm_sync_step = -1
         self.sglang_attention_backend = getattr(args, "sglang_attention_backend", "triton")
+        self.sglang_sampling_backend = getattr(args, "sglang_sampling_backend", "pytorch")
         self.sglang_mem_fraction_static = float(getattr(args, "sglang_mem_fraction_static", 0.4))
         ctx_len = getattr(args, "sglang_context_length", None)
         self.sglang_context_length = int(ctx_len) if ctx_len else int(args.max_length)
@@ -969,13 +1018,20 @@ class OPSDTrainer(SFTTrainer):
         base_gpu_id = 0 if len(visible) == 1 else local_rank
         # Unique HTTP/NCCL ports per rank to avoid collisions under accelerate.
         base_port = 30000 + (int(os.environ.get("SLURM_JOB_ID", "0")) % 20000) + local_rank * 10
+        nccl_port = base_port + 1
+
+        # Qwen3.5 needs hybrid SWA memory; Olmo path keeps it disabled.
+        model_type = str(getattr(getattr(self.model, "config", None), "model_type", "") or "")
+        disable_hybrid_swa = "qwen3_5" not in model_type
 
         if self.accelerator.is_main_process:
             print(
                 f"[sglang] init Engine model={self.model_name_or_path} "
                 f"attn={self.sglang_attention_backend} "
+                f"sampling={self.sglang_sampling_backend} "
                 f"mem_fraction_static={self.sglang_mem_fraction_static} "
                 f"context_length={self.sglang_context_length} "
+                f"disable_hybrid_swa_memory={disable_hybrid_swa} "
                 f"world={self.accelerator.num_processes}",
                 flush=True,
             )
@@ -985,24 +1041,101 @@ class OPSDTrainer(SFTTrainer):
             "tokenizer_path": self.model_name_or_path,
             "trust_remote_code": True,
             "attention_backend": self.sglang_attention_backend,
-            "disable_hybrid_swa_memory": True,
+            "sampling_backend": self.sglang_sampling_backend,
+            "disable_hybrid_swa_memory": disable_hybrid_swa,
             "mem_fraction_static": self.sglang_mem_fraction_static,
             "tp_size": 1,
             "context_length": self.sglang_context_length,
             "base_gpu_id": base_gpu_id,
             "port": base_port,
+            "nccl_port": nccl_port,
+            # warning+: suppress Prefill/Decode batch spam that floods train .out logs
             "log_level": "warning",
             "enable_memory_saver": self.vllm_enable_sleep_mode,
         }
-        self.sglang_engine = Engine(**engine_kwargs)
+        # Critical: SGLang scheduler subprocesses inherit accelerate's RANK/WORLD_SIZE/
+        # MASTER_* and then try to join the *training* TCPStore (hangs ~10min then dies).
+        # Isolate env so each Engine boots as a standalone TP=1 process group.
+        with self._isolated_sglang_dist_env():
+            self.sglang_engine = Engine(**engine_kwargs)
         if self.vllm_enable_sleep_mode:
             self.sglang_engine.release_memory_occupation()
             self._sglang_weights_resident = False
+            self._sglang_kv_resident = False
         else:
             self._sglang_weights_resident = True
+            self._sglang_kv_resident = True
 
         self.accelerator.wait_for_everyone()
+        if self.accelerator.is_main_process:
+            print("[sglang] Engine init done", flush=True)
         self.add_callback(GOLDVLLMSyncCallback(self))
+
+    @staticmethod
+    def _ensure_nvidia_cudart_on_ld_path() -> None:
+        """Prepend pip nvidia/*/lib so Engine spawn children resolve a modern libcudart."""
+        conda_prefix = os.environ.get("CONDA_PREFIX") or ""
+        nvidia_root = os.path.join(conda_prefix, "lib", "python3.12", "site-packages", "nvidia")
+        if not os.path.isdir(nvidia_root):
+            return
+        extra: list[str] = []
+        try:
+            for name in sorted(os.listdir(nvidia_root)):
+                lib_dir = os.path.join(nvidia_root, name, "lib")
+                if os.path.isdir(lib_dir):
+                    extra.append(lib_dir)
+        except OSError:
+            return
+        if not extra:
+            return
+        current = [p for p in (os.environ.get("LD_LIBRARY_PATH") or "").split(":") if p]
+        # Keep nvidia dirs first; drop duplicates that appear later.
+        extra_set = set(extra)
+        rest = [p for p in current if p not in extra_set]
+        os.environ["LD_LIBRARY_PATH"] = ":".join(extra + rest)
+
+    @staticmethod
+    @contextmanager
+    def _isolated_sglang_dist_env():
+        """Strip accelerate/torchrun env so SGLang child procs don't join the trainer PG."""
+        keys = (
+            "RANK",
+            "WORLD_SIZE",
+            "LOCAL_RANK",
+            "LOCAL_WORLD_SIZE",
+            "GROUP_RANK",
+            "GROUP_WORLD_SIZE",
+            "ROLE_RANK",
+            "ROLE_NAME",
+            "MASTER_ADDR",
+            "MASTER_PORT",
+            "TORCHELASTIC_RUN_ID",
+            "TORCHELASTIC_USE_AGENT_STORE",
+            "TORCHELASTIC_MAX_RESTARTS",
+            "TORCHELASTIC_RESTART_COUNT",
+            "PET_RANK",
+            "PET_LOCAL_RANK",
+            "PET_WORLD_SIZE",
+            "PET_NNODES",
+            "PET_MASTER_ADDR",
+            "PET_MASTER_PORT",
+        )
+        saved = {k: os.environ.pop(k) for k in keys if k in os.environ}
+        # Force a clean single-process view for Engine(tp_size=1).
+        os.environ["RANK"] = "0"
+        os.environ["LOCAL_RANK"] = "0"
+        os.environ["WORLD_SIZE"] = "1"
+        os.environ["LOCAL_WORLD_SIZE"] = "1"
+        os.environ["MASTER_ADDR"] = "127.0.0.1"
+        # Leave MASTER_PORT unset so SGLang picks its own nccl_port.
+        try:
+            # Re-assert cudart path inside the isolated env (children inherit this).
+            OPSDTrainer._ensure_nvidia_cudart_on_ld_path()
+            yield
+        finally:
+            for k in ("RANK", "LOCAL_RANK", "WORLD_SIZE", "LOCAL_WORLD_SIZE", "MASTER_ADDR", "MASTER_PORT"):
+                os.environ.pop(k, None)
+            os.environ.update(saved)
 
     @staticmethod
     def _sglang_output_ids(sample: dict[str, Any], tokenizer: PreTrainedTokenizerBase) -> list[int]:
@@ -1017,12 +1150,23 @@ class OPSDTrainer(SFTTrainer):
     def _wake_sglang_if_needed(self, *, need_weights: bool = True) -> None:
         if not self.vllm_enable_sleep_mode:
             return
-        empty_cache()
-        tags = ["kv_cache"]
-        if need_weights and not getattr(self, "_sglang_weights_resident", True):
+        # Only resume tags that are currently offloaded. Unconditionally requesting
+        # kv_cache after GOLDVLLMSyncCallback left the engine awake causes:
+        # KeyError: 'kv_cache' in resume_memory_occupation (offload_tags.remove).
+        weights_resident = bool(getattr(self, "_sglang_weights_resident", True))
+        kv_resident = bool(getattr(self, "_sglang_kv_resident", False))
+        tags: list[str] = []
+        if not kv_resident:
+            tags.append("kv_cache")
+        if need_weights and not weights_resident:
             tags.insert(0, "weights")
+        if not tags:
+            return
+        empty_cache()
         self.sglang_engine.resume_memory_occupation(tags=tags)
-        if need_weights:
+        if "kv_cache" in tags:
+            self._sglang_kv_resident = True
+        if "weights" in tags:
             self._sglang_weights_resident = True
 
     def _sleep_sglang(self) -> None:
@@ -1030,6 +1174,7 @@ class OPSDTrainer(SFTTrainer):
             return
         self.sglang_engine.release_memory_occupation()
         self._sglang_weights_resident = False
+        self._sglang_kv_resident = False
 
     def _move_model_to_rollout(self) -> None:
         if self.rollout_backend == "sglang":
@@ -1096,6 +1241,7 @@ class OPSDTrainer(SFTTrainer):
         temperature = generation_config.temperature
         top_k = generation_config.top_k if generation_config.top_k and generation_config.top_k > 0 else -1
         top_p = self.args.top_p if hasattr(self.args, "top_p") else 1.0
+        min_p = self.args.min_p if hasattr(self.args, "min_p") else 0.0
         presence_penalty = self.args.presence_penalty if hasattr(self.args, "presence_penalty") else 0.0
         repetition_penalty = (
             self.args.repetition_penalty if hasattr(self.args, "repetition_penalty") else 1.0
@@ -1126,6 +1272,8 @@ class OPSDTrainer(SFTTrainer):
         }
         if top_k > 0:
             sampling_params["top_k"] = int(top_k)
+        if min_p and float(min_p) > 0.0:
+            sampling_params["min_p"] = float(min_p)
         if stop_ids:
             sampling_params["stop_token_ids"] = stop_ids
 

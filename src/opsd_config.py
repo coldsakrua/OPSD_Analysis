@@ -40,6 +40,8 @@ class OPSDConfig(SFTConfig):
     # SGLang Engine (used when rollout_backend == "sglang")
     sglang_mem_fraction_static: float = 0.40
     sglang_attention_backend: str = "triton"
+    # Match eval scripts: pytorch avoids flashinfer sampling JIT (needs cuda/functional / CCCL).
+    sglang_sampling_backend: str = "pytorch"
     sglang_context_length: int | None = None
     sglang_enable_memory_saver: bool = True
 

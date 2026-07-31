@@ -2,10 +2,23 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
+import sys
 from pathlib import Path
 
+# Local offline store at <repo>/wandb can shadow the installed wandb package.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_LOCAL_WANDB = _REPO_ROOT / "wandb"
+if _LOCAL_WANDB.is_dir() and not (_LOCAL_WANDB / "__init__.py").exists():
+    _repo = str(_REPO_ROOT.resolve())
+    sys.path[:] = [
+        p
+        for p in sys.path
+        if p not in ("", ".") and str(Path(p or ".").resolve()) != _repo
+    ]
+
 import torch
-from transformers import AutoTokenizer, set_seed
+from transformers import AutoTokenizer, TrainerCallback, set_seed
 
 # Enforce the no-FlashAttention requirement even when this entry point is
 # invoked directly instead of through scripts/train/*.sh.
@@ -19,6 +32,39 @@ from opsd_trainer import OPSDTrainer
 
 
 DEFAULT_MODEL = "/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b"
+
+# Qwen3.5 multimodal assets that HF Trainer/tokenizer.save_pretrained omit.
+_PROCESSOR_ASSET_NAMES = (
+    "preprocessor_config.json",
+    "video_preprocessor_config.json",
+    "merges.txt",
+    "vocab.json",
+)
+
+
+def _copy_processor_assets(src_model: str | Path, dst_dir: str | Path) -> None:
+    """Copy image/video processor + vocab files needed by SGLang AutoProcessor."""
+    src = Path(src_model)
+    dst = Path(dst_dir)
+    if not src.is_dir() or not dst.is_dir():
+        return
+    for name in _PROCESSOR_ASSET_NAMES:
+        src_f = src / name
+        dst_f = dst / name
+        if src_f.is_file() and not dst_f.exists():
+            shutil.copy2(src_f, dst_f)
+
+
+class _CopyProcessorAssetsCallback(TrainerCallback):
+    """Backfill multimodal processor files into each Trainer checkpoint."""
+
+    def __init__(self, model_path: str):
+        self.model_path = model_path
+
+    def on_save(self, args, state, control, **kwargs):
+        ckpt = Path(args.output_dir) / f"checkpoint-{state.global_step}"
+        _copy_processor_assets(self.model_path, ckpt)
+        return control
 
 
 def parse_args() -> argparse.Namespace:
@@ -99,6 +145,17 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--temperature",
+        type=float,
+        default=1.1,
+        help="Shared softmax / rollout temperature (OPSD historical default 1.1).",
+    )
+    parser.add_argument("--top-p", type=float, default=0.95)
+    parser.add_argument("--top-k", type=int, default=20)
+    parser.add_argument("--min-p", type=float, default=0.0)
+    parser.add_argument("--presence-penalty", type=float, default=0.0)
+    parser.add_argument("--repetition-penalty", type=float, default=1.0)
+    parser.add_argument(
         "--rollout-backend",
         choices=("vllm", "sglang"),
         default=os.environ.get("ROLLOUT_BACKEND", "vllm"),
@@ -113,6 +170,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--sglang-attention-backend",
         default=os.environ.get("SGLANG_ATTENTION_BACKEND", "triton"),
+    )
+    parser.add_argument(
+        "--sglang-sampling-backend",
+        choices=("pytorch", "flashinfer"),
+        default=os.environ.get("SGLANG_SAMPLING_BACKEND", "pytorch"),
+        help="SGLang token sampling backend. pytorch avoids flashinfer JIT on incomplete CUDA/CCCL nodes.",
     )
     parser.add_argument("--deepspeed", default="configs/deepspeed_zero3.json")
     parser.add_argument("--seed", type=int, default=42)
@@ -228,9 +291,12 @@ def main() -> None:
         dataset_kwargs={"skip_prepare_dataset": True},
         max_length=max_length,
         max_completion_length=args.max_completion_length,
-        temperature=1.1,
-        top_p=0.95,
-        top_k=20,
+        temperature=args.temperature,
+        top_p=args.top_p,
+        top_k=args.top_k,
+        min_p=args.min_p,
+        presence_penalty=args.presence_penalty,
+        repetition_penalty=args.repetition_penalty,
         beta=0.0,
         lmbda=1.0,
         use_vllm=True,
@@ -242,6 +308,7 @@ def main() -> None:
         vllm_enable_sleep_mode=True,
         sglang_mem_fraction_static=args.sglang_mem_fraction_static,
         sglang_attention_backend=args.sglang_attention_backend,
+        sglang_sampling_backend=args.sglang_sampling_backend,
         sglang_context_length=max_length,
         sglang_enable_memory_saver=True,
         steps_per_generation=args.gradient_accumulation_steps,
@@ -267,6 +334,8 @@ def main() -> None:
         f"student_thinking={args.student_thinking} teacher_thinking={args.teacher_thinking} "
         f"rollout_backend={args.rollout_backend} "
         f"lr={args.learning_rate} jsd_token_clip={args.jsd_token_clip} "
+        f"temp={args.temperature} top_p={args.top_p} top_k={args.top_k} "
+        f"min_p={args.min_p} presence_penalty={args.presence_penalty} "
         f"global_batch={global_batch} "
         f"(micro={args.per_device_batch_size} gas={args.gradient_accumulation_steps} world={world}) "
         f"prompt={args.max_prompt_length} response={args.max_completion_length}",
@@ -287,10 +356,13 @@ def main() -> None:
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,
         teacher_model_path=args.teacher_model_path,
+        callbacks=[_CopyProcessorAssetsCallback(args.model_path)],
     )
     trainer.train()
-    trainer.save_model(str(Path(args.output_dir) / "final"))
-    tokenizer.save_pretrained(str(Path(args.output_dir) / "final"))
+    final_dir = Path(args.output_dir) / "final"
+    trainer.save_model(str(final_dir))
+    tokenizer.save_pretrained(str(final_dir))
+    _copy_processor_assets(args.model_path, final_dir)
 
 
 if __name__ == "__main__":

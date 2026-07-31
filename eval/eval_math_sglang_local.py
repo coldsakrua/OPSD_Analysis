@@ -116,6 +116,8 @@ def main() -> None:
     parser.add_argument("--temperature", type=float, default=0.6)
     parser.add_argument("--top-p", type=float, default=0.95)
     parser.add_argument("--top-k", type=int, default=-1)
+    parser.add_argument("--min-p", type=float, default=0.0)
+    parser.add_argument("--presence-penalty", type=float, default=0.0)
     parser.add_argument("--val-n", type=int, default=8)
     parser.add_argument("--pass-at-k", type=str, default="1,4,8")
     parser.add_argument(
@@ -135,9 +137,46 @@ def main() -> None:
         default="triton",
         help="SGLang attention backend. Olmo3: prefer triton when fa3 is unavailable.",
     )
+    parser.add_argument(
+        "--sampling-backend",
+        type=str,
+        default="pytorch",
+        choices=["pytorch", "flashinfer", "ascend"],
+        help=(
+            "SGLang sampling backend. Default pytorch avoids FlashInfer JIT "
+            "(fails on nodes with old /usr/local/cuda nvcc)."
+        ),
+    )
     parser.add_argument("--mem-fraction-static", type=float, default=0.80)
     parser.add_argument("--tp-size", type=int, default=1)
     parser.add_argument("--context-length", type=int, default=40960)
+    parser.add_argument(
+        "--disable-multimodal",
+        action="store_true",
+        default=False,
+        help=(
+            "Pass enable_multimodal=False to SGLang. "
+            "NOTE: currently breaks Qwen3.5 on sglang 0.5.10 (mrope positions=None); "
+            "leave unset for Qwen3.5 text eval."
+        ),
+    )
+    parser.add_argument(
+        "--reasoning-parser",
+        type=str,
+        default="",
+        help="SGLang reasoning parser name (e.g. qwen3). Empty disables.",
+    )
+    parser.add_argument(
+        "--disable-hybrid-swa-memory",
+        action="store_true",
+        default=True,
+        help="Pass disable_hybrid_swa_memory to Engine (needed for some models).",
+    )
+    parser.add_argument(
+        "--enable-hybrid-swa-memory",
+        dest="disable_hybrid_swa_memory",
+        action="store_false",
+    )
     args = parser.parse_args()
 
     data_root = Path(args.data_root).expanduser().resolve() if args.data_root else default_data_root()
@@ -198,11 +237,15 @@ def main() -> None:
 
     print(
         f"[eval] backend=sglang attention_backend={args.attention_backend} "
+        f"sampling_backend={args.sampling_backend} "
+        f"disable_multimodal={args.disable_multimodal} "
+        f"reasoning_parser={args.reasoning_parser or 'none'} "
         f"total={len(examples)} thinking={enable_thinking}",
         flush=True,
     )
     print(
         f"[eval] temp={temperature} top_p={top_p} top_k={top_k} "
+        f"min_p={args.min_p} presence_penalty={args.presence_penalty} "
         f"max_new_tokens={max_new_tokens} n={gen_n} prompt_batch={gbs}",
         flush=True,
     )
@@ -222,17 +265,25 @@ def main() -> None:
     from sglang import Engine
 
     print(f"[eval] launching SGLang Engine for {model_path} ...", flush=True)
-    llm = Engine(
-        model_path=model_path,
-        tokenizer_path=model_path,
-        trust_remote_code=True,
-        attention_backend=args.attention_backend,
-        disable_hybrid_swa_memory=True,
-        mem_fraction_static=args.mem_fraction_static,
-        tp_size=args.tp_size,
-        context_length=args.context_length,
-        log_level="warning",  # suppress Prefill/Decode batch info spam
-    )
+    engine_kwargs: Dict[str, Any] = {
+        "model_path": model_path,
+        "tokenizer_path": model_path,
+        "trust_remote_code": True,
+        "attention_backend": args.attention_backend,
+        "sampling_backend": args.sampling_backend,
+        "mem_fraction_static": args.mem_fraction_static,
+        "tp_size": args.tp_size,
+        "context_length": args.context_length,
+        "log_level": "warning",  # suppress Prefill/Decode batch info spam
+    }
+    if args.disable_hybrid_swa_memory:
+        engine_kwargs["disable_hybrid_swa_memory"] = True
+    if args.disable_multimodal:
+        # Text-only eval: skip multimodal path / VLM mem reserve (not SGLang language_only EPD).
+        engine_kwargs["enable_multimodal"] = False
+    if args.reasoning_parser:
+        engine_kwargs["reasoning_parser"] = args.reasoning_parser
+    llm = Engine(**engine_kwargs)
 
     out_path = Path(args.output_json)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -291,6 +342,10 @@ def main() -> None:
     }
     if top_k > 0:
         sampling_params["top_k"] = top_k
+    if args.min_p and args.min_p > 0:
+        sampling_params["min_p"] = args.min_p
+    if args.presence_penalty != 0.0:
+        sampling_params["presence_penalty"] = args.presence_penalty
     if stop_ids:
         sampling_params["stop_token_ids"] = stop_ids
 
@@ -343,7 +398,9 @@ def main() -> None:
             "pass_at_k_list": pass_at_k_list,
             "pass_at_k": pass_at_k_summary,
             "avg1_pct": pass_at_k_summary.get("1", {}).get("pct", 0.0),
+            # avg16_pct: legacy alias; avg{gen_n}_pct is the canonical mean-over-n accuracy.
             "avg16_pct": 100.0 * total_correct / total_solutions if total_solutions else 0.0,
+            f"avg{gen_n}_pct": 100.0 * total_correct / total_solutions if total_solutions else 0.0,
             "metrics_by_dataset": metrics_by_dataset,
             "metrics_by_category": metrics_by_category,
             "num_problems": processed,
@@ -471,12 +528,18 @@ def main() -> None:
             pass
 
     processed = len(results)
+    avg_n_pct = 100.0 * total_correct / total_solutions if total_solutions else 0.0
     print("=" * 60, flush=True)
     print(f"Problems: {processed}/{n_prompts_total}", flush=True)
     for k in pass_at_k_list:
         c = pass_at_k_counts[k]
         pct = 100.0 * c / processed if processed else 0.0
         print(f"pass@{k}: {c}/{processed} = {pct:.2f}%", flush=True)
+    print(f"avg{gen_n}: {avg_n_pct:.2f}%", flush=True)
+    print(
+        f"majority_vote: {100.0 * majority_correct / processed if processed else 0.0:.2f}%",
+        flush=True,
+    )
     print(
         f"format_rate: {100.0 * formatted_total / total_solutions if total_solutions else 0.0:.2f}%",
         flush=True,

@@ -102,9 +102,26 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--temperature", type=float, default=1.1, help="Gen + logprob temperature (train default)")
     p.add_argument("--top-p", type=float, default=0.95)
     p.add_argument("--top-k", type=int, default=20)
-    p.add_argument("--gen-batch-hint", type=int, default=64)
+    p.add_argument("--presence-penalty", type=float, default=0.0, help="Generation presence_penalty (qwen3.5 eval: 1.5)")
+    p.add_argument("--gen-batch-hint", type=int, default=64, help="vLLM continuous-batch hint / SGLang prompt batch")
     p.add_argument("--score-batch-size", type=int, default=2, help="HF score microbatch (prompt+completion)")
-    p.add_argument("--gpu-memory-utilization", type=float, default=0.90)
+    p.add_argument("--gpu-memory-utilization", type=float, default=0.90, help="vLLM GPU util")
+    p.add_argument(
+        "--backend",
+        choices=("vllm", "sglang"),
+        default="vllm",
+        help="Generation backend. Qwen3.5 eval uses sglang.",
+    )
+    p.add_argument("--attention-backend", type=str, default="triton", help="SGLang attention backend")
+    p.add_argument(
+        "--sampling-backend",
+        type=str,
+        default="pytorch",
+        choices=("pytorch", "flashinfer", "ascend"),
+        help="SGLang sampling backend (eval default: pytorch)",
+    )
+    p.add_argument("--mem-fraction-static", type=float, default=0.80, help="SGLang mem_fraction_static")
+    p.add_argument("--reasoning-parser", type=str, default="", help="SGLang reasoning_parser (e.g. qwen3)")
     p.add_argument("--top-token-k", type=int, default=100, help="How many top tokens to dump per class")
     p.add_argument("--skip-generate", action="store_true", help="Reuse rollouts.jsonl in output-dir")
     p.add_argument("--skip-score", action="store_true", help="Only generate rollouts")
@@ -221,7 +238,73 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def run_generation(
+def _normalize_sglang_outputs(raw: Any, n_prompts: int, gen_n: int) -> list[list[dict[str, Any]]]:
+    if isinstance(raw, dict):
+        raw = [raw]
+    if not isinstance(raw, list):
+        raise RuntimeError(f"unexpected SGLang generate return type: {type(raw)}")
+    if len(raw) == n_prompts * gen_n:
+        return [raw[i * gen_n : (i + 1) * gen_n] for i in range(n_prompts)]
+    if len(raw) == n_prompts:
+        grouped: list[list[dict[str, Any]]] = []
+        for item in raw:
+            texts = item.get("text")
+            meta = item.get("meta_info") or {}
+            if isinstance(texts, list):
+                samples = []
+                for t in texts:
+                    samples.append({"text": t, "meta_info": meta, "output_ids": item.get("output_ids")})
+                if len(samples) < gen_n:
+                    raise RuntimeError(f"expected {gen_n} texts, got {len(samples)}")
+                grouped.append(samples[:gen_n])
+            else:
+                if gen_n != 1:
+                    raise RuntimeError(f"expected n={gen_n} samples, got single text")
+                grouped.append([item])
+        return grouped
+    raise RuntimeError(f"cannot reshape SGLang outputs: len={len(raw)} n_prompts={n_prompts} gen_n={gen_n}")
+
+
+def _sglang_output_ids(sample: dict[str, Any], tokenizer: Any) -> list[int]:
+    ids = sample.get("output_ids")
+    if isinstance(ids, list) and ids:
+        return [int(x) for x in ids]
+    text = sample.get("text") or ""
+    if isinstance(text, list):
+        text = text[0] if text else ""
+    return tokenizer.encode(str(text), add_special_tokens=False)
+
+
+def _sglang_text(sample: dict[str, Any]) -> str:
+    text = sample.get("text") or ""
+    if isinstance(text, list):
+        text = text[0] if text else ""
+    return str(text)
+
+
+def _rollout_rec(s: dict[str, Any], ri: int, tok_ids: list[int], text: str, finish_reason: Any) -> dict[str, Any]:
+    return {
+        "row_id": s["row_id"],
+        "rollout_idx": ri,
+        "problem": s["problem"],
+        "solution": s["solution"],
+        "answer": s["answer"],
+        "student_prompt": s["student_prompt"],
+        "student_prompt_len": s["student_prompt_len"],
+        "teacher_prompt_opsd_sol": s["teacher_prompt_opsd_sol"],
+        "teacher_prompt_opsd_nogt": s["teacher_prompt_opsd_nogt"],
+        "teacher_prompt_same": s["teacher_prompt_same"],
+        "teacher_prompt_len_opsd_sol": s["teacher_prompt_len_opsd_sol"],
+        "teacher_prompt_len_opsd_nogt": s["teacher_prompt_len_opsd_nogt"],
+        "teacher_prompt_len_same": s["teacher_prompt_len_same"],
+        "completion_token_ids": tok_ids,
+        "completion_len": len(tok_ids),
+        "completion_text": text,
+        "finish_reason": finish_reason,
+    }
+
+
+def run_generation_vllm(
     model_path: str,
     samples: list[dict[str, Any]],
     args: argparse.Namespace,
@@ -248,7 +331,7 @@ def run_generation(
 
     prompts = [s["student_prompt"] for s in samples]
     print(
-        f"[gen] prompts={len(prompts)} n_rollouts={args.n_rollouts} "
+        f"[gen] backend=vllm prompts={len(prompts)} n_rollouts={args.n_rollouts} "
         f"→ total={len(prompts) * args.n_rollouts} max_tokens={args.max_completion_length}",
         flush=True,
     )
@@ -262,25 +345,7 @@ def run_generation(
             tok_ids = list(cand.token_ids)
             lengths.append(len(tok_ids))
             rollouts.append(
-                {
-                    "row_id": s["row_id"],
-                    "rollout_idx": ri,
-                    "problem": s["problem"],
-                    "solution": s["solution"],
-                    "answer": s["answer"],
-                    "student_prompt": s["student_prompt"],
-                    "student_prompt_len": s["student_prompt_len"],
-                    "teacher_prompt_opsd_sol": s["teacher_prompt_opsd_sol"],
-                    "teacher_prompt_opsd_nogt": s["teacher_prompt_opsd_nogt"],
-                    "teacher_prompt_same": s["teacher_prompt_same"],
-                    "teacher_prompt_len_opsd_sol": s["teacher_prompt_len_opsd_sol"],
-                    "teacher_prompt_len_opsd_nogt": s["teacher_prompt_len_opsd_nogt"],
-                    "teacher_prompt_len_same": s["teacher_prompt_len_same"],
-                    "completion_token_ids": tok_ids,
-                    "completion_len": len(tok_ids),
-                    "completion_text": cand.text,
-                    "finish_reason": getattr(cand, "finish_reason", None),
-                }
+                _rollout_rec(s, ri, tok_ids, cand.text, getattr(cand, "finish_reason", None))
             )
     arr = np.asarray(lengths, dtype=np.float64)
     print(
@@ -292,6 +357,97 @@ def run_generation(
     del llm
     torch.cuda.empty_cache()
     return rollouts
+
+
+def run_generation_sglang(
+    model_path: str,
+    samples: list[dict[str, Any]],
+    args: argparse.Namespace,
+) -> list[dict[str, Any]]:
+    from sglang import Engine
+
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+    context_length = args.max_prompt_length + args.max_completion_length + 64
+    engine_kwargs: dict[str, Any] = {
+        "model_path": model_path,
+        "tokenizer_path": model_path,
+        "trust_remote_code": True,
+        "attention_backend": args.attention_backend,
+        "sampling_backend": args.sampling_backend,
+        "mem_fraction_static": args.mem_fraction_static,
+        "tp_size": 1,
+        "context_length": context_length,
+        "log_level": "error",
+    }
+    if args.reasoning_parser:
+        engine_kwargs["reasoning_parser"] = args.reasoning_parser
+    print(
+        f"[gen] launching SGLang Engine attention={args.attention_backend} "
+        f"sampling={args.sampling_backend} mem={args.mem_fraction_static}",
+        flush=True,
+    )
+    llm = Engine(**engine_kwargs)
+
+    gen_n = int(args.n_rollouts)
+    sampling_params: dict[str, Any] = {
+        "temperature": args.temperature,
+        "top_p": args.top_p,
+        "max_new_tokens": args.max_completion_length,
+        "n": gen_n,
+        "sampling_seed": args.seed,
+        "skip_special_tokens": True,
+    }
+    if args.top_k > 0:
+        sampling_params["top_k"] = args.top_k
+    if args.presence_penalty != 0.0:
+        sampling_params["presence_penalty"] = args.presence_penalty
+
+    prompts = [s["student_prompt"] for s in samples]
+    gbs = max(1, int(args.gen_batch_hint))
+    print(
+        f"[gen] backend=sglang prompts={len(prompts)} n_rollouts={gen_n} "
+        f"batch={gbs} → total={len(prompts) * gen_n} max_tokens={args.max_completion_length}",
+        flush=True,
+    )
+    t0 = time.time()
+    rollouts: list[dict[str, Any]] = []
+    lengths: list[int] = []
+    try:
+        for start in tqdm(range(0, len(prompts), gbs), desc="sglang_gen"):
+            end = min(start + gbs, len(prompts))
+            chunk_prompts = prompts[start:end]
+            chunk_samples = samples[start:end]
+            raw = llm.generate(chunk_prompts, sampling_params=sampling_params)
+            grouped = _normalize_sglang_outputs(raw, len(chunk_prompts), gen_n)
+            for s, outs in zip(chunk_samples, grouped):
+                for ri, sample in enumerate(outs):
+                    tok_ids = _sglang_output_ids(sample, tokenizer)
+                    text = _sglang_text(sample)
+                    lengths.append(len(tok_ids))
+                    meta = sample.get("meta_info") or {}
+                    rollouts.append(_rollout_rec(s, ri, tok_ids, text, meta.get("finish_reason")))
+    finally:
+        llm.shutdown()
+        torch.cuda.empty_cache()
+
+    arr = np.asarray(lengths, dtype=np.float64)
+    print(
+        f"[gen] done in {time.time() - t0:.1f}s | n={len(rollouts)} "
+        f"mean_len={arr.mean():.1f} median={np.median(arr):.1f} "
+        f"frac_hit_max={(arr >= args.max_completion_length - 1).mean():.3f}",
+        flush=True,
+    )
+    return rollouts
+
+
+def run_generation(
+    model_path: str,
+    samples: list[dict[str, Any]],
+    args: argparse.Namespace,
+) -> list[dict[str, Any]]:
+    if args.backend == "sglang":
+        return run_generation_sglang(model_path, samples, args)
+    return run_generation_vllm(model_path, samples, args)
 
 
 @torch.no_grad()

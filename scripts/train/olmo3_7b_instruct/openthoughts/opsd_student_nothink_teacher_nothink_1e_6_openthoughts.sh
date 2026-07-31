@@ -1,14 +1,15 @@
 #!/bin/bash
 #SBATCH --job-name=snt_tnt_olmo7bi
 #SBATCH --output=log/train/olmo3-7b-instruct/opsd_%x.%j.out
-#SBATCH --partition=GPUA800
+#SBATCH --partition=GPUA800,GPUA800L,GPUA800S
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=28
 #SBATCH --gres=gpu:4
 #SBATCH --mem=400G
-#SBATCH --time=72:00:00
-#SBATCH --exclude=gpua800n02,gpua800n03,gpua800n04,gpua800n06,gpua800n09,gpua800n10,gpua800n13,gpua800n14
+#SBATCH --time=03:00:00
+# Exclude n13/n21: known bad/old CUDA runtime that breaks torch+cu126 (same as qwen3.5 scripts).
+#SBATCH --exclude=gpua800n03,gpua800n10,gpua800n13,gpua800n21
 set -euo pipefail
 
 # Olmo-3-7B-Instruct OPSD (student/teacher both no-think, teacher gets full solution).
@@ -50,7 +51,76 @@ cd "${BASE_DIR}"
 set +u
 source activate sglang
 set -u
-export LD_LIBRARY_PATH="${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+# Torch 2.8+cu126 needs nvidia pip cudart (cudaGetDriverEntryPointByVersion).
+# Putting only CONDA_PREFIX/lib first lets node /usr/local/cuda/lib64 (older) win via LD_LIBRARY_PATH
+# over torch RUNPATH → ImportError in SGLang spawn children.
+_NVIDIA_LIB_ROOT="${CONDA_PREFIX}/lib/python3.12/site-packages/nvidia"
+_NVIDIA_LD=""
+if [[ -d "${_NVIDIA_LIB_ROOT}" ]]; then
+  for _lib in "${_NVIDIA_LIB_ROOT}"/*/lib; do
+    [[ -d "${_lib}" ]] && _NVIDIA_LD="${_NVIDIA_LD:+${_NVIDIA_LD}:}${_lib}"
+  done
+fi
+export LD_LIBRARY_PATH="${_NVIDIA_LD:+${_NVIDIA_LD}:}${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+# Prefer a CUDA toolkit matching torch (cu126) when present on the compute node (for nvcc/JIT).
+# Keep nvidia pip libs first — do not let toolkit lib64 shadow cudaGetDriverEntryPointByVersion.
+if [[ -d /usr/local/cuda-12.6 ]]; then
+  export CUDA_HOME=/usr/local/cuda-12.6
+  export PATH="${CUDA_HOME}/bin:${PATH}"
+  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CUDA_HOME}/lib64"
+elif [[ -d /usr/local/cuda-12.8 ]]; then
+  export CUDA_HOME=/usr/local/cuda-12.8
+  export PATH="${CUDA_HOME}/bin:${PATH}"
+  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CUDA_HOME}/lib64"
+elif command -v module >/dev/null 2>&1; then
+  module load cuda/12.6 2>/dev/null || module load cuda/12.8 2>/dev/null || true
+fi
+# Re-assert nvidia libs at the front after any module load that may prepend system CUDA.
+if [[ -n "${_NVIDIA_LD}" ]]; then
+  export LD_LIBRARY_PATH="${_NVIDIA_LD}:${LD_LIBRARY_PATH}"
+fi
+# Prefer newer GCC for optional torch JIT extensions (c_dlpack); system GCC 8 is too old.
+if command -v module >/dev/null 2>&1; then
+  module load gcc/11 2>/dev/null || module load gcc/9 2>/dev/null || true
+fi
+
+# #region agent log
+_DBG_LOG="/gpfs/share/home/2501210611/opsd_analysis/.cursor/debug-470747.log"
+mkdir -p "$(dirname "${_DBG_LOG}")"
+python - <<'PY' >>"${_DBG_LOG}" 2>/dev/null || true
+import json, os, socket, subprocess, time
+from pathlib import Path
+payload = {
+    "sessionId": "470747",
+    "runId": "post-fix",
+    "hypothesisId": "A",
+    "location": "opsd_student_nothink_teacher_nothink_1e_6_openthoughts.sh:cuda_env",
+    "message": "olmo train CUDA env at launch",
+    "timestamp": int(time.time() * 1000),
+    "data": {
+        "hostname": socket.gethostname(),
+        "conda_prefix": os.environ.get("CONDA_PREFIX"),
+        "cuda_home": os.environ.get("CUDA_HOME"),
+        "ld_library_path_head": (os.environ.get("LD_LIBRARY_PATH") or "")[:500],
+        "nvidia_cudart": str(Path(os.environ.get("CONDA_PREFIX","")) / "lib/python3.12/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12"),
+        "nvidia_cudart_exists": (Path(os.environ.get("CONDA_PREFIX","")) / "lib/python3.12/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12").exists(),
+        "usr_local_cuda_exists": Path("/usr/local/cuda").exists(),
+        "usr_local_cuda126_exists": Path("/usr/local/cuda-12.6").exists(),
+        "usr_local_cuda128_exists": Path("/usr/local/cuda-12.8").exists(),
+        "gcc": subprocess.getoutput("gcc --version").splitlines()[:1],
+    },
+}
+# resolve libcudart via a tiny probe
+try:
+    import ctypes
+    lib = ctypes.CDLL("libcudart.so.12")
+    payload["data"]["cudart_load"] = "ok"
+    payload["data"]["has_cudaGetDriverEntryPointByVersion"] = hasattr(lib, "cudaGetDriverEntryPointByVersion")
+except Exception as e:
+    payload["data"]["cudart_load"] = f"fail:{type(e).__name__}:{e}"
+print(json.dumps(payload, ensure_ascii=False))
+PY
+# #endregion
 
 export PYTHONPATH="${BASE_DIR}/src:${BASE_DIR}/vendor/verl:${PYTHONPATH:-}"
 export TOKENIZERS_PARALLELISM=false
@@ -66,6 +136,7 @@ export ROLLOUT_BACKEND
 export SGLANG_MEM_FRACTION_STATIC
 export SGLANG_ATTENTION_BACKEND
 unset PYTORCH_CUDA_ALLOC_CONF
+echo "[launch] CUDA_HOME=${CUDA_HOME:-unset} LD_head=$(echo "${LD_LIBRARY_PATH}" | cut -d: -f1-3)"
 
 mkdir -p "${OUTPUT_DIR}" "${WANDB_DIR}" "${HF_HOME}" \
   "${BASE_DIR}/log/train/olmo3-7b-instruct"
