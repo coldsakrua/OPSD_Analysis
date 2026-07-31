@@ -51,7 +51,7 @@ status_report() {
     meta="${JOBS[$j]}"
     tag="${meta%%:*}"
     subdir="${meta##*:}"
-    out="$BASE/outputs/${subdir}/${j}"
+    out="$BASE/outputs/qwen3.5_4b/${subdir}/${j}"
     ckpt="$out/checkpoint-100"
     st=$(squeue -j "$j" -h -o '%T %R' 2>/dev/null || echo 'GONE')
     step=$(rg -o '[0-9]+%/100' "$BASE/log/train/qwen3.5_4b/"*"${j}.out" 2>/dev/null | tail -1 || true)
@@ -67,13 +67,13 @@ submit_evals() {
     meta="${JOBS[$j]}"
     tag="${meta%%:*}"
     subdir="${meta##*:}"
-    ckpt="$BASE/outputs/${subdir}/${j}/checkpoint-100"
+    ckpt="$BASE/outputs/qwen3.5_4b/${subdir}/${j}/checkpoint-100"
     if [[ ! -d "$ckpt" ]]; then
       # fallback to final/
-      if [[ -d "$BASE/outputs/${subdir}/${j}/final" ]]; then
-        ckpt="$BASE/outputs/${subdir}/${j}/final"
+      if [[ -d "$BASE/outputs/qwen3.5_4b/${subdir}/${j}/final" ]]; then
+        ckpt="$BASE/outputs/qwen3.5_4b/${subdir}/${j}/final"
       else
-        echo "[watch][ERROR] missing checkpoint for $tag job=$j under $BASE/outputs/${subdir}/${j}"
+        echo "[watch][ERROR] missing checkpoint for $tag job=$j under $BASE/outputs/qwen3.5_4b/${subdir}/${j}"
         continue
       fi
     fi
@@ -104,7 +104,7 @@ while true; do
     for j in 2986790 2986870 2986975 2986983; do
       meta="${JOBS[$j]}"
       subdir="${meta##*:}"
-      if [[ ! -d "$BASE/outputs/${subdir}/${j}/checkpoint-100" && ! -d "$BASE/outputs/${subdir}/${j}/final" ]]; then
+      if [[ ! -d "$BASE/outputs/qwen3.5_4b/${subdir}/${j}/checkpoint-100" && ! -d "$BASE/outputs/qwen3.5_4b/${subdir}/${j}/final" ]]; then
         echo "[watch][WARN] job $j finished but no checkpoint-100/final"
         missing=1
       fi

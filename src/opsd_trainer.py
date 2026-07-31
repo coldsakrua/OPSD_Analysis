@@ -121,6 +121,24 @@ class EMAUpdateCallback(TrainerCallback):
             self.trainer._update_ema()
 
 
+class TeacherHardUpdateCallback(TrainerCallback):
+    """Periodically hard-copy student weights into the frozen teacher model."""
+
+    def __init__(self, trainer):
+        self.trainer = trainer
+
+    def on_step_end(self, args, state: TrainerState, control: TrainerControl, **kwargs):
+        steps = self.trainer.teacher_update_steps
+        if not steps or self.trainer.teacher_model is None:
+            return
+        if (
+            self.trainer.accelerator.sync_gradients
+            and state.global_step > 0
+            and state.global_step % steps == 0
+        ):
+            self.trainer._sync_student_to_teacher(global_step=state.global_step)
+
+
 class GOLDVLLMSyncCallback(TrainerCallback):
     """Sync the model weights to the rollout engine after training steps when it's safe to do so."""
 
@@ -170,6 +188,7 @@ class OPSDTrainer(SFTTrainer):
         jsd_token_clip: float | None = None,
         use_ema_teacher: bool = False,
         ema_decay: float = 0.999,
+        teacher_update_steps: int | None = None,
         student_thinking: bool = False,
         teacher_thinking: bool = True,
         teacher_model_path: str | None = None,
@@ -228,10 +247,12 @@ class OPSDTrainer(SFTTrainer):
         self.jsd_token_clip = jsd_token_clip
         self.use_ema_teacher = use_ema_teacher
         self.ema_decay = ema_decay
+        self.teacher_update_steps = teacher_update_steps if teacher_update_steps and teacher_update_steps > 0 else None
         self._ema_params = None  # lazily initialized on first optimizer step
 
         self.teacher_model = None
-        if self.fixed_teacher and peft_config is None:
+        # Separate teacher copy: fixed (never updated) or periodically hard-synced from student.
+        if (self.fixed_teacher or self.teacher_update_steps) and peft_config is None:
             # Paper-faithful full-parameter mode: the student is optimized in full,
             # while a frozen teacher (same init or a separate checkpoint) is sharded
             # across ranks for teacher-only forward passes.
@@ -260,9 +281,9 @@ class OPSDTrainer(SFTTrainer):
                     evaluation_mode=True,
                 )
 
-        if self.use_ema_teacher and self.fixed_teacher:
+        if self.use_ema_teacher and (self.fixed_teacher or self.teacher_update_steps):
             raise ValueError(
-                "use_ema_teacher=True and fixed_teacher=True are mutually exclusive teacher strategies."
+                "use_ema_teacher is mutually exclusive with fixed_teacher / teacher_update_steps."
             )
 
         if self.use_ema_teacher:
@@ -274,7 +295,14 @@ class OPSDTrainer(SFTTrainer):
             print("EMA parameters are initialized on the first optimizer step.")
             print(f"{'='*80}\n")
 
-        if self.fixed_teacher:
+        if self.teacher_update_steps:
+            self.add_callback(TeacherHardUpdateCallback(self))
+            print(f"\n{'='*80}")
+            print("PERIODIC TEACHER UPDATE MODE ENABLED")
+            print(f"Hard-copy student → teacher every {self.teacher_update_steps} optimizer steps")
+            print("Teacher starts from the initial checkpoint and receives no gradients")
+            print(f"{'='*80}\n")
+        elif self.fixed_teacher:
             print(f"\n{'='*80}")
             print("FIXED TEACHER MODE ENABLED")
             if self.teacher_model is not None:
@@ -633,6 +661,60 @@ class OPSDTrainer(SFTTrainer):
                     self._ema_params[name] = ema
                 ema.mul_(decay).add_(param.data, alpha=1.0 - decay)
 
+    def _sync_student_to_teacher(self, global_step: int | None = None) -> None:
+        """Hard-copy current student weights into the frozen teacher model.
+
+        Used by periodic teacher updates (`teacher_update_steps`). Under ZeRO-3 both
+        models are sharded, so each parameter is gathered before the copy; only rank 0
+        writes and DeepSpeed broadcasts the update.
+        """
+        if self.teacher_model is None:
+            return
+
+        student = self.accelerator.unwrap_model(self.model)
+        teacher = self.accelerator.unwrap_model(self.teacher_model)
+        student_params = dict(student.named_parameters())
+        teacher_params = dict(teacher.named_parameters())
+
+        deepspeed_plugin = self.accelerator.state.deepspeed_plugin
+        zero_stage_3 = deepspeed_plugin is not None and deepspeed_plugin.zero_stage == 3
+
+        n_copied = 0
+        if zero_stage_3:
+            import deepspeed
+
+            for name, s_param in student_params.items():
+                t_param = teacher_params.get(name)
+                if t_param is None:
+                    continue
+                # Gather student (read-only), then write into teacher on rank 0.
+                with deepspeed.zero.GatheredParameters([s_param], modifier_rank=None):
+                    s_data = s_param.data.detach().clone()
+                with deepspeed.zero.GatheredParameters([t_param], modifier_rank=0):
+                    if self.accelerator.is_main_process:
+                        t_param.data.copy_(s_data)
+                del s_data
+                n_copied += 1
+        else:
+            for name, s_param in student_params.items():
+                t_param = teacher_params.get(name)
+                if t_param is None:
+                    continue
+                t_param.data.copy_(s_param.data.detach())
+                n_copied += 1
+
+        # Keep non-trainable buffers (if any) aligned as well.
+        student_buffers = dict(student.named_buffers())
+        for name, s_buf in student_buffers.items():
+            for t_name, t_buf in teacher.named_buffers():
+                if t_name == name and t_buf.shape == s_buf.shape:
+                    t_buf.data.copy_(s_buf.data.detach())
+                    break
+
+        if self.accelerator.is_main_process:
+            step_msg = f" at step={global_step}" if global_step is not None else ""
+            print(f"[teacher-update] hard-copied {n_copied} parameter tensors student→teacher{step_msg}", flush=True)
+
     @contextmanager
     def _ema_teacher_context(self, model):
         """Context manager that temporarily loads EMA weights for the teacher forward pass.
@@ -794,9 +876,10 @@ class OPSDTrainer(SFTTrainer):
 
         # === TEACHER FORWARD - Extract log-probs immediately ===
         # Choose teacher context based on mode:
-        #   use_ema_teacher  → swap in EMA weights temporarily
-        #   fixed_teacher    → disable LoRA adapters (base model = initial policy)
-        #   default (dynamic)→ no-op, use current student weights
+        #   use_ema_teacher       → swap in EMA weights temporarily
+        #   teacher_model set     → frozen/periodic copy (fixed or hard-updated)
+        #   fixed_teacher + PEFT  → disable LoRA adapters (base model = initial policy)
+        #   default (dynamic)     → no-op, use current student weights
         teacher_forward_model = self.teacher_model if self.teacher_model is not None else model
         if self.use_ema_teacher:
             adapter_context = self._ema_teacher_context(model)

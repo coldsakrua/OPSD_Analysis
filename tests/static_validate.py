@@ -34,7 +34,13 @@ require('else "Ï€"' in collator_source, "fixed wrong privileged answer must be Ï
 require("enable_thinking=self.student_thinking" in collator_source, "student template switch missing")
 require("enable_thinking=self.teacher_thinking" in collator_source, "teacher template switch missing")
 require("self.teacher_model.requires_grad_(False)" in trainer_source, "teacher must be frozen")
-require("top_k_loss=None" in train_source, "full-vocabulary loss must not set top-k")
+require('"--top-k-loss"' in train_source, "CLI must expose --top-k-loss")
+require('"--use-thinking-machines-loss"' in train_source, "CLI must expose --use-thinking-machines-loss")
+require("top_k_loss=args.top_k_loss" in train_source, "trainer must receive args.top_k_loss")
+require(
+    "use_thinking_machines_loss=args.use_thinking_machines_loss" in train_source,
+    "trainer must receive args.use_thinking_machines_loss",
+)
 
 matrix = {
     "opsd_nothink_4b.sh": ("correct", "0"),

@@ -35,6 +35,8 @@ GRADIENT_ACCUMULATION_STEPS=${GRADIENT_ACCUMULATION_STEPS:-4}
 MAX_STEPS=${MAX_STEPS:-100}
 SAVE_STEPS=${SAVE_STEPS:-25}
 VLLM_GPU_MEMORY_UTILIZATION=${VLLM_GPU_MEMORY_UTILIZATION:-0.4}
+# Empty = fixed teacher (default). Set e.g. 25 to hard-copy student→teacher every N steps.
+TEACHER_UPDATE_STEPS=${TEACHER_UPDATE_STEPS:-}
 
 RUN_NAME=${RUN_NAME:-snt_tnt_1e_6_openthoughts_instruct}
 
@@ -42,7 +44,8 @@ BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/..
 MODEL_PATH=${MODEL_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b-instruct}
 DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/openthoughts/preprocessed/openthoughts.opsd.solution.nothink.instruct.maxprompt1024.parquet}
 : "${DATASET_PATH:?Set DATASET_PATH to the preprocessed OpenThoughts parquet path}"
-OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs}
+MODEL_TAG=${MODEL_TAG:-qwen3_4b_instruct}
+OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
 OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/${JOB_TAG}}
 RUN_NAME_WITH_JOB=${RUN_NAME}_${JOB_TAG}
@@ -80,6 +83,10 @@ if [[ ! -f "${DATASET_PATH}" ]]; then
 fi
 
 THINK_ARGS=(--no-student-thinking --no-teacher-thinking)
+TEACHER_UPDATE_ARGS=()
+if [[ -n "${TEACHER_UPDATE_STEPS}" ]]; then
+  TEACHER_UPDATE_ARGS+=(--teacher-update-steps "${TEACHER_UPDATE_STEPS}")
+fi
 MASTER_PORT=${MASTER_PORT:-$((20000 + (${SLURM_JOB_ID:-$$} % 20000)))}
 
 NUM_GPUS=2
@@ -92,6 +99,7 @@ fi
 echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_PRIVILEGE_FIELD}"
 echo "[launch] student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING}"
 echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP}"
+echo "[launch] teacher_update_steps=${TEACHER_UPDATE_STEPS:-fixed}"
 echo "[launch] micro=${PER_DEVICE_BATCH_SIZE} gas=${GRADIENT_ACCUMULATION_STEPS} gpus=${NUM_GPUS} → global_batch=${GLOBAL_BATCH}"
 echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS}"
 echo "[launch] model=${MODEL_PATH} dataset=${DATASET_PATH} output=${OUTPUT_DIR}"
@@ -118,4 +126,5 @@ accelerate launch \
   --jsd-token-clip "${JSD_TOKEN_CLIP}" \
   --vllm-gpu-memory-utilization "${VLLM_GPU_MEMORY_UTILIZATION}" \
   --deepspeed "${BASE_DIR}/configs/deepspeed_zero3.json" \
+  "${TEACHER_UPDATE_ARGS[@]}" \
   "${THINK_ARGS[@]}"

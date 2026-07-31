@@ -145,6 +145,35 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--top-k-loss",
+        type=int,
+        default=None,
+        help=(
+            "If set, restrict JSD/KL to teacher top-K tokens (renormalized). "
+            "Default None = full-vocabulary forward KL. Mutually exclusive with "
+            "--use-thinking-machines-loss."
+        ),
+    )
+    parser.add_argument(
+        "--use-thinking-machines-loss",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Replace full-vocab JSD/KL with sampled-token logprob-diff PG loss: "
+            "loss = -E[(log π_T - log π_S).detach() * log π_S]. "
+            "Mutually exclusive with --top-k-loss."
+        ),
+    )
+    parser.add_argument(
+        "--teacher-update-steps",
+        type=int,
+        default=None,
+        help=(
+            "If set (e.g. 25), hard-copy student weights into the frozen teacher every N "
+            "optimizer steps. Default None keeps a fixed initial teacher."
+        ),
+    )
+    parser.add_argument(
         "--temperature",
         type=float,
         default=1.1,
@@ -191,6 +220,12 @@ def parse_args() -> argparse.Namespace:
     # <=0 disables clip (trainer expects None).
     if args.jsd_token_clip is not None and args.jsd_token_clip <= 0:
         args.jsd_token_clip = None
+    if args.top_k_loss is not None and args.top_k_loss <= 0:
+        parser.error("--top-k-loss must be a positive integer when set")
+    if args.use_thinking_machines_loss and args.top_k_loss is not None:
+        parser.error("--use-thinking-machines-loss and --top-k-loss are mutually exclusive")
+    if args.teacher_update_steps is not None and args.teacher_update_steps <= 0:
+        parser.error("--teacher-update-steps must be a positive integer when set")
     return args
 
 
@@ -334,6 +369,8 @@ def main() -> None:
         f"student_thinking={args.student_thinking} teacher_thinking={args.teacher_thinking} "
         f"rollout_backend={args.rollout_backend} "
         f"lr={args.learning_rate} jsd_token_clip={args.jsd_token_clip} "
+        f"top_k_loss={args.top_k_loss} use_thinking_machines_loss={args.use_thinking_machines_loss} "
+        f"teacher_update_steps={args.teacher_update_steps} "
         f"temp={args.temperature} top_p={args.top_p} top_k={args.top_k} "
         f"min_p={args.min_p} presence_penalty={args.presence_penalty} "
         f"global_batch={global_batch} "
@@ -350,9 +387,10 @@ def main() -> None:
         processing_class=tokenizer,
         peft_config=None,
         fixed_teacher=True,
-        use_thinking_machines_loss=False,
-        top_k_loss=None,
+        use_thinking_machines_loss=args.use_thinking_machines_loss,
+        top_k_loss=args.top_k_loss,
         jsd_token_clip=args.jsd_token_clip,
+        teacher_update_steps=args.teacher_update_steps,
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,
         teacher_model_path=args.teacher_model_path,

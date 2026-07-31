@@ -48,7 +48,8 @@ BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/..
 MODEL_PATH=${MODEL_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b}
 DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/openthoughts/preprocessed/openthoughts.opsd.solution.snothink_tthink.qwen35_4b.maxprompt1024.parquet}
 : "${DATASET_PATH:?Set DATASET_PATH to the preprocessed OpenThoughts parquet path}"
-OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs}
+MODEL_TAG=${MODEL_TAG:-qwen3.5_4b}
+OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
 OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/${JOB_TAG}}
 RUN_NAME_WITH_JOB=${RUN_NAME}_${JOB_TAG}

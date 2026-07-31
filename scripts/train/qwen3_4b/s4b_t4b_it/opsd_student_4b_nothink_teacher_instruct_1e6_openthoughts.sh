@@ -28,7 +28,8 @@ TEACHER_MODEL_PATH=${TEACHER_MODEL_PATH:-/gpfs/share/home/2501210611/labShare/25
 # Prefer unfiltered dual parquet so online length filter uses 4b student + Instruct teacher templates.
 DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/openthoughts/preprocessed/openthoughts.dual.problem_solution_answer.parquet}
 : "${DATASET_PATH:?Set DATASET_PATH to an OpenThoughts parquet with problem/solution}"
-OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs}
+MODEL_TAG=${MODEL_TAG:-qwen3_4b}
+OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
 OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/${JOB_TAG}}
 RUN_NAME_WITH_JOB=${RUN_NAME}_${JOB_TAG}

@@ -20,7 +20,8 @@ BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/..
 MODEL_PATH=${MODEL_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b}
 DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/dapo/preprocessed/dapo-math-17k.opsd.problem_solution.parquet}
 : "${DATASET_PATH:?Set DATASET_PATH to the server-side DAPO parquet path}"
-OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs}
+MODEL_TAG=${MODEL_TAG:-qwen3_4b}
+OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
 # One folder per run (Slurm job id); avoid overwriting previous checkpoints.
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
 OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/${JOB_TAG}}

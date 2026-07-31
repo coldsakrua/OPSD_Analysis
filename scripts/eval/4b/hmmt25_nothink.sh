@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=eval_4b_hmmt25_nt
 #SBATCH --output=log/eval/4b/hmmt25/nothink/%x.%j.out
-#SBATCH --partition=GPUA800
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=7
 #SBATCH --gres=gpu:1
 #SBATCH --mem=80G
-#SBATCH --time=24:00:00
+#SBATCH --time=06:00:00
 set -euo pipefail
 
 THINKING=0

@@ -27,7 +27,8 @@ MODEL_PATH=${MODEL_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/q
 # Prefer length-filtered answer parquet (strict superset for shorter no-GT prompts).
 DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/openthoughts/preprocessed/openthoughts.correct.answer.snothink_tthink.maxprompt1024.parquet}
 : "${DATASET_PATH:?Set DATASET_PATH to an OpenThoughts parquet with a problem column}"
-OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs}
+MODEL_TAG=${MODEL_TAG:-qwen3_4b}
+OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
 OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/${JOB_TAG}}
 RUN_NAME_WITH_JOB=${RUN_NAME}_${JOB_TAG}
