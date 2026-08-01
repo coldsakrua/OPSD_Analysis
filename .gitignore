@@ -1,5 +1,5 @@
-# Checkpoints & training outputs
-outputs/
+# Checkpoints & training outputs (repo-root only; not */outputs/)
+/outputs/
 checkpoint-*/
 *.pt
 *.pth
@@ -45,4 +45,16 @@ build/
 data/
 iclr2026/
 
-data_analysis/outputs
+# Analysis outputs: ignore bulky dumps, keep conclusion JSONs
+data_analysis/outputs/**
+!data_analysis/outputs/**/
+!data_analysis/outputs/**/topk_hit_summary.json
+!data_analysis/outputs/**/top_tokens_*.json
+!data_analysis/outputs/**/prompt_audit.json
+
+forward_analysis/outputs/**
+!forward_analysis/outputs/**/
+!forward_analysis/outputs/**/summary.json
+!forward_analysis/outputs/**/generation_summary.json
+!forward_analysis/outputs/**/activation_stats.json
+!forward_analysis/outputs/**/args.json

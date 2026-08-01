@@ -1,0 +1,126 @@
+{
+  "num_samples": 4096,
+  "generation": {
+    "backend": "sglang",
+    "attention_backend": "triton",
+    "sampling_backend": "pytorch",
+    "think": {
+      "n": 4096,
+      "mean_gen_tokens": 2037.4775390625,
+      "median_gen_tokens": 2048.0,
+      "p90_gen_tokens": 2048.0,
+      "max_gen_tokens": 2048.0,
+      "frac_hit_max": 0.98046875,
+      "seconds": 3792.3910291194916,
+      "path": "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/forward_analysis/outputs/qwen3.5_4b/think_vs_nothink_3006522/generations_think.jsonl"
+    },
+    "nothink": {
+      "n": 4096,
+      "mean_gen_tokens": 1513.888916015625,
+      "median_gen_tokens": 1627.0,
+      "p90_gen_tokens": 2048.0,
+      "max_gen_tokens": 2048.0,
+      "frac_hit_max": 0.389404296875,
+      "seconds": 3446.1191895008087,
+      "path": "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/forward_analysis/outputs/qwen3.5_4b/think_vs_nothink_3006522/generations_nothink.jsonl"
+    }
+  },
+  "activation": {
+    "n_samples": 4096,
+    "logit_kl_think_to_nothink": 9.668690906036318,
+    "logit_kl_nothink_to_think": 12.312548161312407,
+    "logit_js_divergence": 0.6611716280015969,
+    "logit_top1_agree_rate": 0.011962890625,
+    "per_sample_summary": {
+      "hidden_cosine_last_mean": {
+        "mean": 0.4378236964812183,
+        "std": 0.008013734909299759,
+        "median": 0.4383687277634939,
+        "p10": 0.42698138229774707,
+        "p90": 0.4480739588087255
+      },
+      "hidden_cosine_last_mid": {
+        "mean": 0.3517174738517497,
+        "std": 0.010677142799604617,
+        "median": 0.35202471911907196,
+        "p10": 0.3378693759441376,
+        "p90": 0.36512482166290283
+      },
+      "hidden_cosine_last_late": {
+        "mean": 0.3719329005889449,
+        "std": 0.01479635178450716,
+        "median": 0.37195509672164917,
+        "p10": 0.35266209269563353,
+        "p90": 0.391301766037941
+      },
+      "ffn_cosine_last_mean": {
+        "mean": 0.23720905125526315,
+        "std": 0.008631577025265109,
+        "median": 0.23742032644804567,
+        "p10": 0.2258938706945628,
+        "p90": 0.2482520848279819
+      },
+      "ffn_cosine_last_late": {
+        "mean": 0.44269287407435814,
+        "std": 0.022669560802036696,
+        "median": 0.44133252153793967,
+        "p10": 0.4155570032695929,
+        "p90": 0.47251468524336815
+      },
+      "logit_js": {
+        "mean": 0.6611716280015969,
+        "std": 0.07900784575865803,
+        "median": 0.6861776262521744,
+        "p10": 0.6165864318609238,
+        "p90": 0.6927507966756821
+      },
+      "shared_prefix_len": {
+        "mean": 102.519287109375,
+        "std": 42.05023524616018,
+        "median": 93.0,
+        "p10": 63.0,
+        "p90": 153.0
+      }
+    }
+  },
+  "verdict": {
+    "claim": "think vs no-think induce large internal differences",
+    "activation": {
+      "shared_prefix_early_cosine": 1.0000000328836904,
+      "late_hidden_cosine": 0.3719329005889449,
+      "late_ffn_cosine": 0.44269287407435814,
+      "logit_js": 0.6611716280015969,
+      "logit_top1_agree": 0.011962890625,
+      "min_hidden_cosine_layer": 30,
+      "min_hidden_cosine": 0.2452066884325177,
+      "min_ffn_cosine_layer": 8,
+      "min_ffn_cosine": 0.08209118087961542,
+      "large_difference": false
+    },
+    "generation": {
+      "backend": "sglang",
+      "attention_backend": "triton",
+      "sampling_backend": "pytorch",
+      "think": {
+        "n": 4096,
+        "mean_gen_tokens": 2037.4775390625,
+        "median_gen_tokens": 2048.0,
+        "p90_gen_tokens": 2048.0,
+        "max_gen_tokens": 2048.0,
+        "frac_hit_max": 0.98046875,
+        "seconds": 3792.3910291194916,
+        "path": "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/forward_analysis/outputs/qwen3.5_4b/think_vs_nothink_3006522/generations_think.jsonl"
+      },
+      "nothink": {
+        "n": 4096,
+        "mean_gen_tokens": 1513.888916015625,
+        "median_gen_tokens": 1627.0,
+        "p90_gen_tokens": 2048.0,
+        "max_gen_tokens": 2048.0,
+        "frac_hit_max": 0.389404296875,
+        "seconds": 3446.1191895008087,
+        "path": "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/forward_analysis/outputs/qwen3.5_4b/think_vs_nothink_3006522/generations_nothink.jsonl"
+      }
+    }
+  }
+}

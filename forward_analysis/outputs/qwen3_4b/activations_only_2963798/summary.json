@@ -1,0 +1,89 @@
+{
+  "num_samples": 4096,
+  "generation": null,
+  "activation": {
+    "n_samples": 4096,
+    "logit_kl_think_to_nothink": 45.35707092611119,
+    "logit_kl_nothink_to_think": 34.57543209288269,
+    "logit_js_divergence": 0.6931471783827874,
+    "logit_top1_agree_rate": 0.0,
+    "per_sample_summary": {
+      "hidden_cosine_last_mean": {
+        "mean": 0.5195816154475847,
+        "std": 0.008752670179890523,
+        "median": 0.5190542403205827,
+        "p10": 0.5086460098422863,
+        "p90": 0.5315804675825544
+      },
+      "hidden_cosine_last_mid": {
+        "mean": 0.5713278838084079,
+        "std": 0.012530638718520363,
+        "median": 0.5713627636432648,
+        "p10": 0.5553534030914307,
+        "p90": 0.5876428782939911
+      },
+      "hidden_cosine_last_late": {
+        "mean": 0.21734111497191577,
+        "std": 0.01612410049561431,
+        "median": 0.21634645511706668,
+        "p10": 0.19762791506946087,
+        "p90": 0.23991812703510126
+      },
+      "ffn_cosine_last_mean": {
+        "mean": 0.1610169651860202,
+        "std": 0.005558734597515208,
+        "median": 0.16078326840781504,
+        "p10": 0.15415736254201168,
+        "p90": 0.16844307106091744
+      },
+      "ffn_cosine_last_late": {
+        "mean": 0.0893682425518326,
+        "std": 0.005054903239688918,
+        "median": 0.08902000573774178,
+        "p10": 0.08334468165412545,
+        "p90": 0.09549091733060777
+      },
+      "logit_js": {
+        "mean": 0.6931471783827874,
+        "std": 6.118471037442423e-08,
+        "median": 0.6931471824645996,
+        "p10": 0.6931471228599548,
+        "p90": 0.6931472420692444
+      },
+      "shared_prefix_len": {
+        "mean": 100.1162109375,
+        "std": 41.22852981612679,
+        "median": 91.0,
+        "p10": 61.0,
+        "p90": 149.0
+      }
+    }
+  },
+  "verdict": {
+    "claim": "think vs no-think induce large internal differences",
+    "activation": {
+      "shared_prefix_early_cosine": 1.000000067457222,
+      "shared_prefix_mean_cosine": 0.9999994971766608,
+      "late_hidden_cosine": 0.21734111497191577,
+      "final_hidden_cosine": -0.1055225845989014,
+      "late_ffn_cosine": 0.08936824255183258,
+      "min_hidden_cosine": -0.1055225845989014,
+      "min_hidden_cosine_layer": 36,
+      "min_ffn_cosine": 0.010986919550191487,
+      "min_ffn_cosine_layer": 32,
+      "logit_js": 0.6931471783827874,
+      "logit_js_is_maximum_ln2": true,
+      "logit_kl_think_to_nothink": 45.35707092611119,
+      "logit_kl_nothink_to_think": 34.57543209288269,
+      "logit_top1_agree": 0.0,
+      "large_difference": true,
+      "evidence": [
+        "shared-prefix control cosine ≈ 1.0 (methodology validated)",
+        "final-layer last-token hidden cosine = -0.106 (anti-correlated)",
+        "late FFN intermediate cosine = 0.089",
+        "next-token top-1 agree rate = 0.0% over 4096 prompts",
+        "JS divergence = 0.693147 ≈ ln(2) (theoretical maximum)"
+      ]
+    }
+  }
+}

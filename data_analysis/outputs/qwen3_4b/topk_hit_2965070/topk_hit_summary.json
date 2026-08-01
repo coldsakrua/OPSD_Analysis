@@ -1,0 +1,202 @@
+{
+  "config": {
+    "model_path": "/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b",
+    "rollouts_path": "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data_analysis/outputs/token_pref_2963814/rollouts.jsonl",
+    "n_rollouts": 16384,
+    "temperature": 1.1,
+    "ks": [
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "metric": "For each on-policy sampled token x_t: whether x_t ∈ TopK_π(K) for student and teacher. Matches verl/OPSD: temperature then topk on logits.",
+    "not_computed": "Full TopK_T ∩ TopK_S overlap_ratio (needs entire top-k sets; user requested sampled-token-only stats)."
+  },
+  "settings": {
+    "opsd_sol": {
+      "desc": "official OPSD: problem + reference solution + transition",
+      "n_rollouts": 16384,
+      "n_tokens": 11977835,
+      "mean_student_logp": -0.2322504455171016,
+      "mean_teacher_logp": -0.37315266820626186,
+      "mean_advantage": -0.14090222516572806,
+      "per_k": {
+        "4": {
+          "frac_sampled_in_student_topk": 0.9925059912747171,
+          "frac_sampled_in_teacher_topk": 0.983483993559771,
+          "n_hit_student": 11888073,
+          "n_hit_teacher": 11780009
+        },
+        "8": {
+          "frac_sampled_in_student_topk": 0.9989316934153794,
+          "frac_sampled_in_teacher_topk": 0.9941053621126021,
+          "n_hit_student": 11965039,
+          "n_hit_teacher": 11907230
+        },
+        "16": {
+          "frac_sampled_in_student_topk": 0.999991651245822,
+          "frac_sampled_in_teacher_topk": 0.997386756454735,
+          "n_hit_student": 11977735,
+          "n_hit_teacher": 11946534
+        },
+        "32": {
+          "frac_sampled_in_student_topk": 1.0,
+          "frac_sampled_in_teacher_topk": 0.9982188767836592,
+          "n_hit_student": 11977835,
+          "n_hit_teacher": 11956501
+        },
+        "64": {
+          "frac_sampled_in_student_topk": 1.0,
+          "frac_sampled_in_teacher_topk": 0.9984559814023152,
+          "n_hit_student": 11977835,
+          "n_hit_teacher": 11959341
+        }
+      },
+      "teacher_hit_at_max_k": {
+        "k": 64,
+        "frac_hit": 0.9984559814023152,
+        "mean_adv_when_hit": -0.09492561915737778,
+        "mean_adv_when_miss": -29.872162059331387,
+        "position_hit_frac": {
+          "early": 0.9957338698830315,
+          "mid": 0.999944873360327,
+          "late": 0.9996965247823882
+        }
+      },
+      "rank_within_topk_max": {
+        "max_k": 64,
+        "frac_sampled_in_student_top_maxk": 1.0,
+        "frac_sampled_in_teacher_top_maxk": 0.9984559814023152,
+        "mean_rank_student_when_in_top_maxk": 1.1518247663288066,
+        "mean_rank_teacher_when_in_top_maxk": 1.248733772203669,
+        "mean_rank_student_capped": 1.1518247663288066,
+        "mean_rank_teacher_capped": 1.347166912885342,
+        "note": "capped rank uses max_k+1 when token is outside TopK(max_k)"
+      }
+    },
+    "opsd_nogt": {
+      "desc": "official-style without reference solution (NO_GT transition)",
+      "n_rollouts": 16384,
+      "n_tokens": 11977835,
+      "mean_student_logp": -0.2322504455171016,
+      "mean_teacher_logp": -0.33424032010237126,
+      "mean_advantage": -0.10198987648475225,
+      "per_k": {
+        "4": {
+          "frac_sampled_in_student_topk": 0.9925059912747171,
+          "frac_sampled_in_teacher_topk": 0.9872123802005955,
+          "n_hit_student": 11888073,
+          "n_hit_teacher": 11824667
+        },
+        "8": {
+          "frac_sampled_in_student_topk": 0.9989316934153794,
+          "frac_sampled_in_teacher_topk": 0.9959407522311002,
+          "n_hit_student": 11965039,
+          "n_hit_teacher": 11929214
+        },
+        "16": {
+          "frac_sampled_in_student_topk": 0.999991651245822,
+          "frac_sampled_in_teacher_topk": 0.9981368085300891,
+          "n_hit_student": 11977735,
+          "n_hit_teacher": 11955518
+        },
+        "32": {
+          "frac_sampled_in_student_topk": 1.0,
+          "frac_sampled_in_teacher_topk": 0.9984931333584074,
+          "n_hit_student": 11977835,
+          "n_hit_teacher": 11959786
+        },
+        "64": {
+          "frac_sampled_in_student_topk": 1.0,
+          "frac_sampled_in_teacher_topk": 0.9985751181244357,
+          "n_hit_student": 11977835,
+          "n_hit_teacher": 11960768
+        }
+      },
+      "teacher_hit_at_max_k": {
+        "k": 64,
+        "frac_hit": 0.9985751181244357,
+        "mean_adv_when_hit": -0.05853711902583197,
+        "mean_adv_when_miss": -30.554228513376458,
+        "position_hit_frac": {
+          "early": 0.995832372887373,
+          "mid": 0.9999989976974605,
+          "late": 0.9999014332557674
+        }
+      },
+      "rank_within_topk_max": {
+        "max_k": 64,
+        "frac_sampled_in_student_top_maxk": 1.0,
+        "frac_sampled_in_teacher_top_maxk": 0.9985751181244357,
+        "mean_rank_student_when_in_top_maxk": 1.1518247663288066,
+        "mean_rank_teacher_when_in_top_maxk": 1.202001075516221,
+        "mean_rank_student_capped": 1.1518247663288066,
+        "mean_rank_teacher_capped": 1.2929056878809901,
+        "note": "capped rank uses max_k+1 when token is outside TopK(max_k)"
+      }
+    },
+    "same": {
+      "desc": "same user prompt as student (problem + boxed only)",
+      "n_rollouts": 16384,
+      "n_tokens": 11977835,
+      "mean_student_logp": -0.2322504455171016,
+      "mean_teacher_logp": -0.3196819490480512,
+      "mean_advantage": -0.0874315057813968,
+      "per_k": {
+        "4": {
+          "frac_sampled_in_student_topk": 0.9925059912747171,
+          "frac_sampled_in_teacher_topk": 0.9886576330363542,
+          "n_hit_student": 11888073,
+          "n_hit_teacher": 11841978
+        },
+        "8": {
+          "frac_sampled_in_student_topk": 0.9989316934153794,
+          "frac_sampled_in_teacher_topk": 0.9966386245928417,
+          "n_hit_student": 11965039,
+          "n_hit_teacher": 11937573
+        },
+        "16": {
+          "frac_sampled_in_student_topk": 0.999991651245822,
+          "frac_sampled_in_teacher_topk": 0.9983624753555213,
+          "n_hit_student": 11977735,
+          "n_hit_teacher": 11958221
+        },
+        "32": {
+          "frac_sampled_in_student_topk": 1.0,
+          "frac_sampled_in_teacher_topk": 0.9985516581251954,
+          "n_hit_student": 11977835,
+          "n_hit_teacher": 11960487
+        },
+        "64": {
+          "frac_sampled_in_student_topk": 1.0,
+          "frac_sampled_in_teacher_topk": 0.9985946542092122,
+          "n_hit_student": 11977835,
+          "n_hit_teacher": 11961002
+        }
+      },
+      "teacher_hit_at_max_k": {
+        "k": 64,
+        "frac_hit": 0.9985946542092122,
+        "mean_adv_when_hit": -0.043980076591490294,
+        "mean_adv_when_miss": -30.962655073845866,
+        "position_hit_frac": {
+          "early": 0.9958678739701561,
+          "mid": 1.0,
+          "late": 0.9999235041806847
+        }
+      },
+      "rank_within_topk_max": {
+        "max_k": 64,
+        "frac_sampled_in_student_top_maxk": 1.0,
+        "frac_sampled_in_teacher_top_maxk": 0.9985946542092122,
+        "mean_rank_student_when_in_top_maxk": 1.1518247663288066,
+        "mean_rank_teacher_when_in_top_maxk": 1.184658191679928,
+        "mean_rank_student_capped": 1.1518247663288066,
+        "mean_rank_teacher_capped": 1.2743408136779308,
+        "note": "capped rank uses max_k+1 when token is outside TopK(max_k)"
+      }
+    }
+  }
+}
