@@ -49,6 +49,7 @@ class SelfDistillationDataCollator:
 
     MODES = {
         "correct",
+        "correct_simple",
         "pi",
         "instruction",
         "opsd",
@@ -110,6 +111,15 @@ class SelfDistillationDataCollator:
         """Official-style user content: problem + boxed instruction (no GT)."""
         return (
             f"Problem: {problem}\n\n"
+            "Please reason step by step, and put your final answer within \\boxed{}."
+        )
+
+    @staticmethod
+    def _concise_answer_teacher_user(problem: str, answer: str) -> str:
+        """Minimal privileged teacher: problem + answer + Qwen3 boxed instruction."""
+        return (
+            f"Problem: {problem}\n\n"
+            f"Answer: {answer}\n\n"
             "Please reason step by step, and put your final answer within \\boxed{}."
         )
 
@@ -191,6 +201,10 @@ class SelfDistillationDataCollator:
                 "and put the final answer within \\boxed{}."
             )
             student_user = f"Problem: {problem}\n\n{student_instruction}"
+        elif self.privilege_mode == "correct_simple":
+            # Concise answer privilege: problem + answer + please reason step by step
+            student_user = self._standard_student_user(problem)
+            teacher_user = self._concise_answer_teacher_user(problem, privileged)
         else:
             student_instruction = (
                 "Please reason step by step and put the final answer within \\boxed{}."
@@ -200,9 +214,7 @@ class SelfDistillationDataCollator:
             teacher_user = (
                 f"Problem: {problem}\n\n"
                 f"Here is the {label}:\n"
-                "=== Privileged Information Begin ===\n"
-                f"{content}\n"
-                "=== Privileged Information End ===\n\n"
+                f"{content}\n\n"
                 "After understanding the privileged information, solve the problem using your own reasoning. "
                 "Please reason step by step and put the final answer within \\boxed{}."
             )

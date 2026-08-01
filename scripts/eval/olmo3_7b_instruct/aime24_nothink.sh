@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=eval_olmo37bi_aime24_hf
 #SBATCH --output=log/eval/olmo3_7b_instruct/aime24/nothink/%x.%j.out
-#SBATCH --partition=GPUA800
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=7

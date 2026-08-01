@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=smoke_q35_sgl
 #SBATCH --output=log/eval/qwen3.5_4b/smoke/%x.%j.out
-#SBATCH --partition=GPUA800S
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=7

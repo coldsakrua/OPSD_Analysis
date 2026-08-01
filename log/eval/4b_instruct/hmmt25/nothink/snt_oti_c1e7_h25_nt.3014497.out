@@ -44,4 +44,55 @@ INFO 07-31 18:50:35 [model_runner.py:1450] Capturing cudagraphs for decoding. Th
 INFO 07-31 18:50:50 [model_runner.py:1592] Graph capturing finished in 15 secs, took 0.43 GiB
 INFO 07-31 18:50:50 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 17.69 seconds
 [eval] generating 30 prompts x n=8 (pass-at-k=[1, 4, 8], generate_batch_size=8) ...
-prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s]
+prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s][eval] wrote partial json: 8/30 metrics=hmmt25_4b_instruct_nothink.metrics.json results=hmmt25_4b_instruct_nothink.results.json
+prompt_batches:  25%|██▌       | 1/4 [16:31<49:33, 991.32s/it][eval] wrote partial json: 16/30 metrics=hmmt25_4b_instruct_nothink.metrics.json results=hmmt25_4b_instruct_nothink.results.json
+prompt_batches:  50%|█████     | 2/4 [34:04<34:15, 1027.73s/it][eval] wrote partial json: 24/30 metrics=hmmt25_4b_instruct_nothink.metrics.json results=hmmt25_4b_instruct_nothink.results.json
+prompt_batches:  75%|███████▌  | 3/4 [42:20<13:05, 785.13s/it] [eval] wrote partial json: 30/30 metrics=hmmt25_4b_instruct_nothink.metrics.json results=hmmt25_4b_instruct_nothink.results.json
+prompt_batches: 100%|██████████| 4/4 [1:00:21<00:00, 901.94s/it]prompt_batches: 100%|██████████| 4/4 [1:00:21<00:00, 905.50s/it]
+[eval] wrote partial json: 30/30 metrics=hmmt25_4b_instruct_nothink.metrics.json results=hmmt25_4b_instruct_nothink.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_oti_c1e7_ckpt100/hmmt25_4b_instruct_nothink.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_oti_c1e7_ckpt100/hmmt25_4b_instruct_nothink.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 26.67% (8/30)
+  Pass@4: 40.00% (12/30)
+  Pass@8: 50.00% (15/30)
+  Avg1(one-shot hit rate): 26.67%
+  Avg16(overall correctness): 31.25%
+  Avg output tokens: 7785.2
+[hmmt25] n=30
+  Pass@1: 26.67% (8/30)
+  Pass@4: 40.00% (12/30)
+  Pass@8: 50.00% (15/30)
+  Avg1(one-shot hit rate): 26.67%
+  Avg16(overall correctness): 31.25%
+  Avg output tokens: 7785.2
+[BY_CATEGORY]
+[__uncategorized__] n=30
+  Pass@1: 26.67% (8/30)
+  Pass@4: 40.00% (12/30)
+  Pass@8: 50.00% (15/30)
+  Avg1(one-shot hit rate): 26.67%
+  Avg16(overall correctness): 31.25%
+  Avg output tokens: 7785.2
+Avg correct / sample: 31.25%
+Majority vote: 33.33%
+Boxed format rate: 99.17%
+Avg output tokens: 7785.2
+[TOKEN_BUDGET]
+[hmmt25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=10.00% (3/30)  Avg16=7.08%
+  @4k: Pass@8=26.67% (8/30)  Avg16=10.42%
+  @8k: Pass@8=50.00% (15/30)  Avg16=27.92%
+  @16k: Pass@8=50.00% (15/30)  Avg16=31.25%
+  @32k: Pass@8=50.00% (15/30)  Avg16=31.25%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[hmmt25] n=30  P@16=0.00%  Avg16=31.25%  L=7785.2  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[hmmt25] n=30  P@16=0.00%  Avg16=31.25%  L=7785.2  pass/log2(16L)=0.0000  avg/log2(16L)=1.8462
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_oti_c1e7_ckpt100/hmmt25_4b_instruct_nothink.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_oti_c1e7_ckpt100/hmmt25_4b_instruct_nothink.results.json
+============================================================
+[rank0]:[W731 19:51:34.705400279 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())

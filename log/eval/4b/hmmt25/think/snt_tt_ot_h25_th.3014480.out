@@ -47,3 +47,55 @@ INFO 07-31 17:16:09 [llm_engine.py:437] init engine (profile, create kv cache, w
 prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s]WARNING 07-31 17:24:46 [scheduler.py:1768] Sequence group 7_parallel_sample_7 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=1
 [eval] wrote partial json: 8/30 metrics=hmmt25_4b_think.metrics.json results=hmmt25_4b_think.results.json
 prompt_batches:  25%|██▌       | 1/4 [51:24<2:34:13, 3084.63s/it]WARNING 07-31 18:18:18 [scheduler.py:1768] Sequence group 13_parallel_sample_6 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=51
+[eval] wrote partial json: 16/30 metrics=hmmt25_4b_think.metrics.json results=hmmt25_4b_think.results.json
+prompt_batches:  50%|█████     | 2/4 [1:59:11<2:02:05, 3662.70s/it]WARNING 07-31 19:32:11 [scheduler.py:1768] Sequence group 23_parallel_sample_4 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=101
+[eval] wrote partial json: 24/30 metrics=hmmt25_4b_think.metrics.json results=hmmt25_4b_think.results.json
+prompt_batches:  75%|███████▌  | 3/4 [2:42:55<53:08, 3188.19s/it]  [eval] wrote partial json: 30/30 metrics=hmmt25_4b_think.metrics.json results=hmmt25_4b_think.results.json
+prompt_batches: 100%|██████████| 4/4 [3:32:34<00:00, 3105.76s/it]prompt_batches: 100%|██████████| 4/4 [3:32:34<00:00, 3188.72s/it]
+[eval] wrote partial json: 30/30 metrics=hmmt25_4b_think.metrics.json results=hmmt25_4b_think.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tt_1e6_ot_ckpt100/hmmt25_4b_think.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tt_1e6_ot_ckpt100/hmmt25_4b_think.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 36.67% (11/30)
+  Pass@4: 50.00% (15/30)
+  Pass@8: 63.33% (19/30)
+  Avg1(one-shot hit rate): 36.67%
+  Avg16(overall correctness): 42.08%
+  Avg output tokens: 19583.7
+[hmmt25] n=30
+  Pass@1: 36.67% (11/30)
+  Pass@4: 50.00% (15/30)
+  Pass@8: 63.33% (19/30)
+  Avg1(one-shot hit rate): 36.67%
+  Avg16(overall correctness): 42.08%
+  Avg output tokens: 19583.7
+[BY_CATEGORY]
+[__uncategorized__] n=30
+  Pass@1: 36.67% (11/30)
+  Pass@4: 50.00% (15/30)
+  Pass@8: 63.33% (19/30)
+  Avg1(one-shot hit rate): 36.67%
+  Avg16(overall correctness): 42.08%
+  Avg output tokens: 19583.7
+Avg correct / sample: 42.08%
+Majority vote: 50.00%
+Boxed format rate: 85.42%
+Avg output tokens: 19583.7
+[TOKEN_BUDGET]
+[hmmt25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=10.00% (3/30)  Avg16=4.58%
+  @8k: Pass@8=30.00% (9/30)  Avg16=13.33%
+  @16k: Pass@8=46.67% (14/30)  Avg16=35.00%
+  @32k: Pass@8=63.33% (19/30)  Avg16=42.08%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[hmmt25] n=30  P@16=0.00%  Avg16=42.08%  L=19583.7  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[hmmt25] n=30  P@16=0.00%  Avg16=42.08%  L=19583.7  pass/log2(16L)=0.0000  avg/log2(16L)=2.3050
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tt_1e6_ot_ckpt100/hmmt25_4b_think.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tt_1e6_ot_ckpt100/hmmt25_4b_think.results.json
+============================================================
+[rank0]:[W731 20:49:38.509049303 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())

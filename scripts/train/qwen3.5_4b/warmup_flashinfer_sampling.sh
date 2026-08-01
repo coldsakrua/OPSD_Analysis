@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=warmup_fi_samp
 #SBATCH --output=log/train/qwen3.5_4b/warmup_flashinfer.%j.out
-#SBATCH --partition=GPUA800
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=7

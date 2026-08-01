@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=fwd_tn_1.7b
 #SBATCH --output=log/forward_analysis/qwen3_1.7b/%x.%j.out
-#SBATCH --partition=GPUA800
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=7

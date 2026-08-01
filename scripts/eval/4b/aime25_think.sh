@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=eval_4b_aime25_th
 #SBATCH --output=log/eval/4b/aime25/think/%x.%j.out
-#SBATCH --partition=GPUA800
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=7

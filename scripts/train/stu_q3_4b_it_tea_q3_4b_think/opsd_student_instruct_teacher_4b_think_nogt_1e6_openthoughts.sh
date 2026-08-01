@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=sit_tbt_opsd_nogt_1e6
 #SBATCH --output=log/train/stu_q3_4b_it_tea_q3_4b_think/opsd_%x.%j.out
-#SBATCH --partition=GPUA800
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=14

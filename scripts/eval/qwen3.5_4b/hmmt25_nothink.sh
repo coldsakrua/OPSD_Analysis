@@ -1,14 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=eval_q35_4b_hmmt25_nt
 #SBATCH --output=log/eval/qwen3.5_4b/hmmt25/nothink/%x.%j.out
-#SBATCH --partition=GPUA800
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --exclude=gpua800n03,gpua800n10,gpua800n05,gpua800n07,gpua800n08
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=7
 #SBATCH --gres=gpu:1
 #SBATCH --mem=80G
-#SBATCH --time=06:00:00
+#SBATCH --time=12:00:00
 set -euo pipefail
 
 # Qwen3.5-4B via SGLang 0.5.10 (vLLM failed: missing flash-attn CUDA ext on glibc 2.28).

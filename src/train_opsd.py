@@ -86,6 +86,7 @@ def parse_args() -> argparse.Namespace:
         "--privilege-mode",
         choices=(
             "correct",
+            "correct_simple",
             "pi",
             "instruction",
             "opsd",
@@ -99,10 +100,11 @@ def parse_args() -> argparse.Namespace:
         ),
         required=True,
         help=(
-            "Teacher template: correct/pi/instruction/opsd (with GT privilege), or "
+            "Teacher template: correct/correct_simple/pi/instruction/opsd (with GT privilege), or "
             "same/encourage/irrelevant (no-GT), or "
             "same_trans/encourage_trans/irrelevant_trans (no-GT + transition, no reference solution), or "
-            "sample_irrelevant_trans (per-row irrelevant_prefix + transition)."
+            "sample_irrelevant_trans (per-row irrelevant_prefix + transition). "
+            "correct_simple = problem + answer + Qwen3 boxed instruction."
         ),
     )
     parser.add_argument(

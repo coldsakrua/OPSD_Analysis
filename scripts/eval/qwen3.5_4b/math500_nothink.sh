@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=eval_q35_4b_math500_nt
 #SBATCH --output=log/eval/qwen3.5_4b/math500/nothink/%x.%j.out
-#SBATCH --partition=GPUA800
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --exclude=gpua800n03,gpua800n10,gpua800n05,gpua800n07,gpua800n08
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1

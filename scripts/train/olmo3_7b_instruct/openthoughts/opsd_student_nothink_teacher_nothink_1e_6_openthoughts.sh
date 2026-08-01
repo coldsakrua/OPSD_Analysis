@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=snt_tnt_olmo7bi
 #SBATCH --output=log/train/olmo3-7b-instruct/opsd_%x.%j.out
-#SBATCH --partition=GPUA800,GPUA800L,GPUA800S
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=28

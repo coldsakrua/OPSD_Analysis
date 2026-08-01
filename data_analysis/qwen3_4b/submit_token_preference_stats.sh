@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=tokpref_4b
 #SBATCH --output=log/data_analysis/qwen3_4b/%x.%j.out
-#SBATCH --partition=GPUA800
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=7

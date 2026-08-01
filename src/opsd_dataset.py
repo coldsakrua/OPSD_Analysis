@@ -142,15 +142,17 @@ def prompt_length_filter_applied(
         or (str(teacher_privilege_field) == "none")
     )
 
+    meta_mode = str(meta.get("privilege_mode"))
+    mode_ok = meta_mode == str(privilege_mode) or (
+        # Longer GT templates are a strict superset of no-GT prompt lengths.
+        str(privilege_mode) in no_gt_modes and meta_mode in {"correct", "opsd"}
+    ) or (
+        # Concise answer teacher is shorter than verified-answer `correct` template.
+        str(privilege_mode) == "correct_simple" and meta_mode == "correct"
+    )
+
     return (
-        (
-            str(meta.get("privilege_mode")) == str(privilege_mode)
-            # Longer GT templates are a strict superset of no-GT prompt lengths.
-            or (
-                str(privilege_mode) in no_gt_modes
-                and str(meta.get("privilege_mode")) in {"correct", "opsd"}
-            )
-        )
+        mode_ok
         and thinking_ok
         and field_ok
         and int(meta.get("max_prompt_length", -1)) == int(max_prompt_length)
