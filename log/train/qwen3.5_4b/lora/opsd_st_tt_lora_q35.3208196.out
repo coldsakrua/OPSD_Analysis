@@ -1,0 +1,147 @@
+[launch] run=st_tt_lora_clip005_lr5e6_openthoughts_q35_4b_3208196 mode=opsd privilege_field=solution
+[launch] student_thinking=1 teacher_thinking=1
+[launch] LoRA r=64 alpha=128 fixed_teacher=1 (official PEFT path)
+[launch] lr=5e-6 jsd_token_clip=0.05
+[launch] micro=4 gas=4 gpus=2 → global_batch=32
+[launch] max_steps=100 save_steps=25 → total_samples=3200
+[launch] prompt=1024 completion=1024 max_seq=2048
+[launch] sampling temp=1.0 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=1.5
+[launch] model=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b dataset=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/openthoughts/preprocessed/openthoughts.opsd.solution.sthink_tthink.qwen35_4b.maxprompt1024.parquet output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3.5_4b/st_tt_lora_clip005_lr5e6_openthoughts_q35_4b/3208196
+[launch] accelerate=zero2 deepspeed=zero2 rollout=sglang sglang_mem=0.40
+[launch] master_port=28196
+W0810 13:14:01.407000 3787713 site-packages/torch/distributed/run.py:803] 
+W0810 13:14:01.407000 3787713 site-packages/torch/distributed/run.py:803] *****************************************
+W0810 13:14:01.407000 3787713 site-packages/torch/distributed/run.py:803] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0810 13:14:01.407000 3787713 site-packages/torch/distributed/run.py:803] *****************************************
+[INFO] Running in WANDB offline mode
+[INFO] Running in WANDB offline mode
+[dataset] already has problem/solution; skip field normalization[dataset] already has problem/solution; skip field normalization
+
+[dataset] prompt length already filtered offline; keep 20557 examples[dataset] prompt length already filtered offline; keep 20557 examples
+
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+NCCL version 2.27.5+cuda12.9
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b student_thinking=True teacher_thinking=True rollout_backend=sglang use_peft=True fixed_teacher=True lora_r=64 lora_alpha=128 lr=5e-06 jsd_token_clip=0.05 top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.0 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=1.5 global_batch=32 (micro=4 gas=4 world=2) prompt=1024 response=1024
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b student_thinking=True teacher_thinking=True rollout_backend=sglang use_peft=True fixed_teacher=True lora_r=64 lora_alpha=128 lr=5e-06 jsd_token_clip=0.05 top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.0 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=1.5 global_batch=32 (micro=4 gas=4 world=2) prompt=1024 response=1024
+[transformers] The fast path is not available because one of the required library is not installed. Falling back to torch implementation. To install follow https://github.com/fla-org/flash-linear-attention#installation and https://github.com/Dao-AILab/causal-conv1d
+[transformers] The fast path is not available because one of the required library is not installed. Falling back to torch implementation. To install follow https://github.com/fla-org/flash-linear-attention#installation and https://github.com/Dao-AILab/causal-conv1d
+Loading weights:   0%|          | 0/723 [00:00<?, ?it/s]Loading weights:   0%|          | 3/723 [00:00<00:33, 21.53it/s]Loading weights:   2%|▏         | 16/723 [00:00<00:17, 40.24it/s]Loading weights:   4%|▍         | 32/723 [00:00<00:15, 44.73it/s]Loading weights:   5%|▌         | 37/723 [00:00<00:15, 45.46it/s]Loading weights:   6%|▌         | 42/723 [00:01<00:18, 36.32it/s]Loading weights:   6%|▋         | 46/723 [00:01<00:23, 28.74it/s]Loading weights:   7%|▋         | 50/723 [00:01<00:22, 29.43it/s]Loading weights:   0%|          | 0/723 [00:00<?, ?it/s]Loading weights:   2%|▏         | 12/723 [00:00<00:21, 32.84it/s]Loading weights:   2%|▏         | 16/723 [00:00<00:25, 27.72it/s]Loading weights:   6%|▌         | 43/723 [00:00<00:11, 59.24it/s]Loading weights:   7%|▋         | 54/723 [00:02<00:56, 11.87it/s]Loading weights:  14%|█▍        | 100/723 [00:02<00:11, 53.58it/s]Loading weights:   7%|▋         | 49/723 [00:01<00:14, 45.14it/s]Loading weights:   8%|▊         | 59/723 [00:01<00:14, 47.08it/s]Loading weights:   9%|▉         | 64/723 [00:01<00:20, 32.76it/s]Loading weights:  16%|█▌        | 114/723 [00:03<00:22, 27.14it/s]Loading weights:   9%|▉         | 68/723 [00:02<00:32, 20.36it/s]Loading weights:  18%|█▊        | 131/723 [00:04<00:18, 31.59it/s]Loading weights:  10%|▉         | 71/723 [00:02<00:45, 14.22it/s]Loading weights:  10%|█         | 73/723 [00:02<00:47, 13.68it/s]Loading weights:  19%|█▉        | 140/723 [00:05<00:27, 21.22it/s]Loading weights:  10%|█         | 75/723 [00:03<01:11,  9.05it/s]Loading weights:  13%|█▎        | 92/723 [00:03<00:29, 21.66it/s]Loading weights:  20%|██        | 148/723 [00:05<00:29, 19.42it/s]Loading weights:  22%|██▏       | 156/723 [00:05<00:24, 22.82it/s]Loading weights:  23%|██▎       | 165/723 [00:06<00:23, 23.27it/s]Loading weights:  25%|██▍       | 180/723 [00:06<00:17, 31.77it/s]Loading weights:  13%|█▎        | 96/723 [00:04<00:55, 11.31it/s]Loading weights:  27%|██▋       | 195/723 [00:06<00:13, 39.01it/s]Loading weights:  14%|█▍        | 103/723 [00:05<00:41, 14.92it/s]Loading weights:  28%|██▊       | 201/723 [00:07<00:17, 30.15it/s]Loading weights:  15%|█▌        | 111/723 [00:05<00:38, 15.88it/s]Loading weights:  28%|██▊       | 206/723 [00:07<00:22, 22.61it/s]Loading weights:  29%|██▉       | 210/723 [00:07<00:21, 24.15it/s]Loading weights:  17%|█▋        | 123/723 [00:06<00:39, 15.35it/s]Loading weights:  30%|██▉       | 214/723 [00:08<00:28, 18.01it/s]Loading weights:  19%|█▉        | 136/723 [00:06<00:28, 20.32it/s]Loading weights:  31%|███▏      | 226/723 [00:08<00:25, 19.58it/s]Loading weights:  34%|███▍      | 246/723 [00:08<00:14, 33.99it/s]Loading weights:  20%|█▉        | 144/723 [00:07<00:37, 15.41it/s]Loading weights:  36%|███▌      | 261/723 [00:09<00:15, 30.77it/s]Loading weights:  22%|██▏       | 156/723 [00:07<00:30, 18.65it/s]Loading weights:  30%|██▉       | 214/723 [00:08<00:12, 42.28it/s]Loading weights:  40%|███▉      | 288/723 [00:10<00:13, 31.75it/s]Loading weights:  30%|███       | 219/723 [00:08<00:12, 39.64it/s]Loading weights:  32%|███▏      | 231/723 [00:09<00:12, 40.77it/s]Loading weights:  41%|████      | 293/723 [00:10<00:15, 27.25it/s]Loading weights:  33%|███▎      | 239/723 [00:09<00:11, 41.47it/s]Loading weights:  44%|████▍     | 321/723 [00:11<00:11, 34.78it/s]Loading weights:  34%|███▎      | 244/723 [00:10<00:20, 22.83it/s]Loading weights:  46%|████▌     | 332/723 [00:11<00:14, 27.39it/s]Loading weights:  37%|███▋      | 271/723 [00:10<00:12, 36.79it/s]Loading weights:  39%|███▉      | 284/723 [00:10<00:09, 44.47it/s]Loading weights:  40%|████      | 291/723 [00:10<00:09, 43.53it/s]Loading weights:  46%|████▋     | 336/723 [00:12<00:16, 22.79it/s]Loading weights:  47%|████▋     | 340/723 [00:12<00:17, 22.33it/s]Loading weights:  41%|████      | 297/723 [00:11<00:12, 34.67it/s]Loading weights:  48%|████▊     | 344/723 [00:12<00:18, 19.97it/s]Loading weights:  48%|████▊     | 346/723 [00:13<00:20, 18.61it/s]Loading weights:  45%|████▍     | 323/723 [00:11<00:09, 42.00it/s]Loading weights:  48%|████▊     | 348/723 [00:13<00:29, 12.91it/s]Loading weights:  45%|████▌     | 328/723 [00:12<00:13, 29.17it/s]Loading weights:  49%|████▉     | 354/723 [00:13<00:23, 15.51it/s]Loading weights:  51%|█████     | 368/723 [00:13<00:13, 25.94it/s]Loading weights:  46%|████▌     | 332/723 [00:12<00:17, 21.91it/s]Loading weights:  51%|█████▏    | 372/723 [00:14<00:14, 24.31it/s]Loading weights:  54%|█████▎    | 388/723 [00:14<00:08, 39.05it/s]Loading weights:  50%|████▉     | 360/723 [00:12<00:09, 38.57it/s]Loading weights:  55%|█████▌    | 400/723 [00:13<00:05, 64.42it/s]Loading weights:  57%|█████▋    | 409/723 [00:13<00:05, 60.63it/s]Loading weights:  56%|█████▌    | 404/723 [00:14<00:09, 34.44it/s]Loading weights:  62%|██████▏   | 447/723 [00:13<00:03, 85.37it/s]Loading weights:  61%|██████▏   | 443/723 [00:15<00:04, 67.94it/s]Loading weights:  66%|██████▌   | 475/723 [00:13<00:02, 106.04it/s]Loading weights:  63%|██████▎   | 453/723 [00:15<00:03, 69.40it/s]Loading weights:  71%|███████   | 510/723 [00:13<00:01, 138.66it/s]Loading weights:  77%|███████▋  | 556/723 [00:15<00:00, 201.24it/s]Loading weights:  73%|███████▎  | 530/723 [00:14<00:01, 121.27it/s]Loading weights:  76%|███████▌  | 546/723 [00:14<00:01, 116.36it/s]Loading weights:  81%|████████  | 584/723 [00:15<00:00, 144.10it/s]Loading weights:  84%|████████▍ | 606/723 [00:15<00:00, 130.86it/s]Loading weights:  77%|███████▋  | 560/723 [00:14<00:01, 86.70it/s] Loading weights:  96%|█████████▌| 693/723 [00:16<00:00, 237.07it/s]Loading weights:  81%|████████  | 585/723 [00:14<00:01, 102.03it/s]Loading weights: 100%|██████████| 723/723 [00:16<00:00, 44.59it/s] 
+Loading weights: 100%|██████████| 723/723 [00:14<00:00, 49.31it/s] 
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 473, in <module>
+[rank0]:     main()
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 447, in main
+[rank0]:     trainer = OPSDTrainer(
+[rank0]:               ^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/opsd_trainer.py", line 222, in __init__
+[rank0]:     super().__init__(
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/trl/trainer/sft_trainer.py", line 694, in __init__
+[rank0]:     model = prepare_peft_model(model, peft_config, args)
+[rank0]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/trl/models/utils.py", line 558, in prepare_peft_model
+[rank0]:     model = get_peft_model(model, peft_config)
+[rank0]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/mapping_func.py", line 122, in get_peft_model
+[rank0]:     return MODEL_TYPE_TO_PEFT_MODEL_MAPPING[peft_config.task_type](
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/peft_model.py", line 2063, in __init__
+[rank0]:     super().__init__(model, peft_config, adapter_name, **kwargs)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/peft_model.py", line 164, in __init__
+[rank0]:     self.base_model = cls(model, {adapter_name: peft_config}, adapter_name)
+[rank0]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/tuners/tuners_utils.py", line 318, in __init__
+[rank0]:     self.inject_adapter(self.model, adapter_name, low_cpu_mem_usage=low_cpu_mem_usage, state_dict=state_dict)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/tuners/tuners_utils.py", line 917, in inject_adapter
+[rank0]:     self._create_and_replace(
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/tuners/lora/model.py", line 281, in _create_and_replace
+[rank0]:     new_module = self._create_new_module(lora_config, adapter_name, target, device_map=device_map, **kwargs)
+[rank0]:                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/tuners/lora/model.py", line 430, in _create_new_module
+[rank0]:     new_module = dispatcher(target, adapter_name, config=lora_config, **kwargs)
+[rank0]:                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/tuners/lora/torchao.py", line 160, in dispatch_torchao
+[rank0]:     if not is_torchao_available():
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/import_utils.py", line 147, in is_torchao_available
+[rank0]:     raise ImportError(
+[rank0]: ImportError: Found an incompatible version of torchao. Found version 0.9.0, but only versions above 0.16.0 are supported
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 473, in <module>
+[rank1]:     main()
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 447, in main
+[rank1]:     trainer = OPSDTrainer(
+[rank1]:               ^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/opsd_trainer.py", line 222, in __init__
+[rank1]:     super().__init__(
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/trl/trainer/sft_trainer.py", line 694, in __init__
+[rank1]:     model = prepare_peft_model(model, peft_config, args)
+[rank1]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/trl/models/utils.py", line 558, in prepare_peft_model
+[rank1]:     model = get_peft_model(model, peft_config)
+[rank1]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/mapping_func.py", line 122, in get_peft_model
+[rank1]:     return MODEL_TYPE_TO_PEFT_MODEL_MAPPING[peft_config.task_type](
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/peft_model.py", line 2063, in __init__
+[rank1]:     super().__init__(model, peft_config, adapter_name, **kwargs)
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/peft_model.py", line 164, in __init__
+[rank1]:     self.base_model = cls(model, {adapter_name: peft_config}, adapter_name)
+[rank1]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/tuners/tuners_utils.py", line 318, in __init__
+[rank1]:     self.inject_adapter(self.model, adapter_name, low_cpu_mem_usage=low_cpu_mem_usage, state_dict=state_dict)
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/tuners/tuners_utils.py", line 917, in inject_adapter
+[rank1]:     self._create_and_replace(
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/tuners/lora/model.py", line 281, in _create_and_replace
+[rank1]:     new_module = self._create_new_module(lora_config, adapter_name, target, device_map=device_map, **kwargs)
+[rank1]:                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/tuners/lora/model.py", line 430, in _create_new_module
+[rank1]:     new_module = dispatcher(target, adapter_name, config=lora_config, **kwargs)
+[rank1]:                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/tuners/lora/torchao.py", line 160, in dispatch_torchao
+[rank1]:     if not is_torchao_available():
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/peft/import_utils.py", line 147, in is_torchao_available
+[rank1]:     raise ImportError(
+[rank1]: ImportError: Found an incompatible version of torchao. Found version 0.9.0, but only versions above 0.16.0 are supported
+[rank0]:[W810 13:14:55.187671213 ProcessGroupNCCL.cpp:1524] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+E0810 13:14:57.286000 3787713 site-packages/torch/distributed/elastic/multiprocessing/api.py:882] failed (exitcode: 1) local_rank: 0 (pid: 3788086) of binary: /gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/bin/python3.11
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/bin/accelerate", line 6, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 50, in main
+    args.func(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1392, in launch_command
+    deepspeed_launcher(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1076, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/distributed/run.py", line 927, in run
+    elastic_launch(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 156, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 293, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-08-10_13:14:57
+  host      : gpua800n10.hpc.pku.edu.cn
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 3788087)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-08-10_13:14:57
+  host      : gpua800n10.hpc.pku.edu.cn
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 3788086)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

@@ -1,0 +1,218 @@
+[launch] run=st_tt_lora_clip005_lr5e6_openthoughts_q35_4b_3208227 mode=opsd privilege_field=solution
+[launch] student_thinking=1 teacher_thinking=1
+[launch] LoRA r=64 alpha=128 fixed_teacher=1 (official PEFT path)
+[launch] lr=5e-6 jsd_token_clip=0.05
+[launch] micro=4 gas=4 gpus=2 → global_batch=32
+[launch] max_steps=100 save_steps=25 → total_samples=3200
+[launch] prompt=1024 completion=1024 max_seq=2048
+[launch] sampling temp=1.0 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=1.5
+[launch] model=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b dataset=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/openthoughts/preprocessed/openthoughts.opsd.solution.sthink_tthink.qwen35_4b.maxprompt1024.parquet output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3.5_4b/st_tt_lora_clip005_lr5e6_openthoughts_q35_4b/3208227
+[launch] accelerate=zero2 deepspeed=zero2 rollout=sglang sglang_mem=0.40
+[launch] master_port=28227
+W0810 13:23:03.635000 3902257 site-packages/torch/distributed/run.py:803] 
+W0810 13:23:03.635000 3902257 site-packages/torch/distributed/run.py:803] *****************************************
+W0810 13:23:03.635000 3902257 site-packages/torch/distributed/run.py:803] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0810 13:23:03.635000 3902257 site-packages/torch/distributed/run.py:803] *****************************************
+[INFO] Running in WANDB offline mode
+[INFO] Running in WANDB offline mode
+[dataset] already has problem/solution; skip field normalization[dataset] already has problem/solution; skip field normalization
+
+[dataset] prompt length already filtered offline; keep 20557 examples
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+[dataset] prompt length already filtered offline; keep 20557 examples
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+NCCL version 2.27.5+cuda12.9
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b student_thinking=True teacher_thinking=True rollout_backend=sglang use_peft=True fixed_teacher=True lora_r=64 lora_alpha=128 lr=5e-06 jsd_token_clip=0.05 top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.0 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=1.5 global_batch=32 (micro=4 gas=4 world=2) prompt=1024 response=1024
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b student_thinking=True teacher_thinking=True rollout_backend=sglang use_peft=True fixed_teacher=True lora_r=64 lora_alpha=128 lr=5e-06 jsd_token_clip=0.05 top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.0 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=1.5 global_batch=32 (micro=4 gas=4 world=2) prompt=1024 response=1024
+[transformers] The fast path is not available because one of the required library is not installed. Falling back to torch implementation. To install follow https://github.com/fla-org/flash-linear-attention#installation and https://github.com/Dao-AILab/causal-conv1d
+[transformers] The fast path is not available because one of the required library is not installed. Falling back to torch implementation. To install follow https://github.com/fla-org/flash-linear-attention#installation and https://github.com/Dao-AILab/causal-conv1d
+Loading weights:   0%|          | 0/723 [00:00<?, ?it/s]Loading weights:   2%|▏         | 16/723 [00:00<00:16, 42.92it/s]Loading weights:   3%|▎         | 21/723 [00:02<02:00,  5.83it/s]Loading weights:   3%|▎         | 23/723 [00:03<02:06,  5.55it/s]Loading weights:   3%|▎         | 25/723 [00:04<02:31,  4.61it/s]Loading weights:   5%|▍         | 33/723 [00:04<01:30,  7.67it/s]Loading weights:   5%|▌         | 37/723 [00:04<01:15,  9.12it/s]Loading weights:   7%|▋         | 47/723 [00:05<01:00, 11.19it/s]Loading weights:  11%|█         | 77/723 [00:05<00:23, 27.01it/s]Loading weights:  14%|█▍        | 101/723 [00:05<00:14, 43.37it/s]Loading weights:  18%|█▊        | 127/723 [00:07<00:21, 27.16it/s]Loading weights:  19%|█▊        | 134/723 [00:08<00:31, 18.90it/s]Loading weights:   0%|          | 0/723 [00:00<?, ?it/s]Loading weights:  22%|██▏       | 156/723 [00:08<00:24, 23.58it/s]Loading weights:   3%|▎         | 23/723 [00:00<00:07, 89.25it/s]Loading weights:   4%|▍         | 32/723 [00:00<00:16, 40.98it/s]Loading weights:  22%|██▏       | 161/723 [00:09<00:28, 19.52it/s]Loading weights:   5%|▌         | 38/723 [00:00<00:18, 37.13it/s]Loading weights:  28%|██▊       | 204/723 [00:09<00:12, 41.58it/s]Loading weights:   6%|▌         | 42/723 [00:01<00:19, 35.11it/s]Loading weights:   6%|▋         | 46/723 [00:01<00:28, 23.53it/s]Loading weights:  10%|█         | 73/723 [00:01<00:10, 61.49it/s]Loading weights:  30%|██▉       | 215/723 [00:10<00:14, 34.53it/s]Loading weights:  13%|█▎        | 96/723 [00:01<00:10, 59.93it/s]Loading weights:  15%|█▍        | 108/723 [00:02<00:13, 47.22it/s]Loading weights:  16%|█▋        | 119/723 [00:02<00:12, 47.13it/s]Loading weights:  31%|███       | 223/723 [00:11<00:24, 20.59it/s]Loading weights:  17%|█▋        | 126/723 [00:02<00:17, 34.53it/s]Loading weights:  32%|███▏      | 229/723 [00:11<00:22, 22.39it/s]Loading weights:  18%|█▊        | 131/723 [00:03<00:16, 34.83it/s]Loading weights:  21%|██▏       | 154/723 [00:03<00:09, 59.50it/s]Loading weights:  23%|██▎       | 163/723 [00:03<00:12, 46.21it/s]Loading weights:  33%|███▎      | 235/723 [00:12<00:27, 17.77it/s]Loading weights:  36%|███▌      | 260/723 [00:12<00:13, 33.08it/s]Loading weights:  24%|██▎       | 170/723 [00:03<00:12, 44.51it/s]Loading weights:  40%|███▉      | 286/723 [00:12<00:08, 49.71it/s]Loading weights:  27%|██▋       | 196/723 [00:04<00:08, 62.61it/s]Loading weights:  42%|████▏     | 301/723 [00:12<00:07, 58.79it/s]Loading weights:  31%|███       | 225/723 [00:04<00:05, 95.98it/s]Loading weights:  44%|████▎     | 316/723 [00:12<00:06, 67.38it/s]Loading weights:  33%|███▎      | 239/723 [00:04<00:04, 101.95it/s]Loading weights:  46%|████▌     | 329/723 [00:13<00:05, 71.53it/s]Loading weights:  36%|███▋      | 263/723 [00:04<00:03, 127.98it/s]Loading weights:  52%|█████▏    | 377/723 [00:13<00:02, 135.23it/s]Loading weights:  39%|███▊      | 280/723 [00:04<00:03, 129.04it/s]Loading weights:  43%|████▎     | 310/723 [00:04<00:02, 165.49it/s]Loading weights:  55%|█████▌    | 398/723 [00:13<00:02, 139.54it/s]Loading weights:  58%|█████▊    | 417/723 [00:13<00:02, 144.66it/s]Loading weights:  54%|█████▎    | 388/723 [00:04<00:01, 279.96it/s]Loading weights:  60%|██████    | 435/723 [00:13<00:02, 141.84it/s]Loading weights:  58%|█████▊    | 417/723 [00:05<00:01, 194.73it/s]Loading weights:  63%|██████▎   | 452/723 [00:13<00:02, 126.72it/s]Loading weights:  63%|██████▎   | 457/723 [00:05<00:01, 214.72it/s]Loading weights:  65%|██████▍   | 467/723 [00:13<00:02, 120.22it/s]Loading weights: 100%|██████████| 723/723 [00:05<00:00, 137.66it/s]
+Loading weights: 100%|██████████| 723/723 [00:13<00:00, 51.72it/s] 
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher uses the initial base model with student LoRA adapters disabled
+================================================================================
+
+[RANK 0] Detected kernel version 4.18.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher uses the initial base model with student LoRA adapters disabled
+================================================================================
+
+[sglang] init Engine model=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b attn=triton sampling=pytorch mem_fraction_static=0.4 context_length=2048 disable_hybrid_swa_memory=False world=2
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-08-10 13:24:14] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[2026-08-10 13:24:14] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[2026-08-10 13:24:24] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+[2026-08-10 13:24:24] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-08-10 13:24:26] using attn output gate!
+[2026-08-10 13:24:26] using attn output gate!
+[INFO] Running in WANDB offline mode
+[INFO] Running in WANDB offline mode
+Multi-thread loading shards:   0% Completed | 0/2 [00:00<?, ?it/s]Multi-thread loading shards:   0% Completed | 0/2 [00:00<?, ?it/s]Multi-thread loading shards:  50% Completed | 1/2 [00:08<00:08,  8.63s/it]Multi-thread loading shards:  50% Completed | 1/2 [00:08<00:08,  8.63s/it]Multi-thread loading shards: 100% Completed | 2/2 [00:21<00:00, 11.07s/it]Multi-thread loading shards: 100% Completed | 2/2 [00:21<00:00, 11.07s/it]Multi-thread loading shards: 100% Completed | 2/2 [00:21<00:00, 10.71s/it]
+Multi-thread loading shards: 100% Completed | 2/2 [00:21<00:00, 10.71s/it]
+  0%|          | 0/14 [00:00<?, ?it/s]Capturing batches (bs=74 avail_mem=46.69 GB):   0%|          | 0/14 [00:00<?, ?it/s]  0%|          | 0/14 [00:00<?, ?it/s]Capturing batches (bs=74 avail_mem=46.69 GB):   0%|          | 0/14 [00:00<?, ?it/s]Capturing batches (bs=74 avail_mem=46.69 GB):   7%|▋         | 1/14 [00:07<01:32,  7.09s/it]Capturing batches (bs=72 avail_mem=46.55 GB):   7%|▋         | 1/14 [00:07<01:32,  7.09s/it]Capturing batches (bs=74 avail_mem=46.69 GB):   7%|▋         | 1/14 [00:07<01:32,  7.13s/it]Capturing batches (bs=72 avail_mem=46.55 GB):   7%|▋         | 1/14 [00:07<01:32,  7.13s/it]Capturing batches (bs=64 avail_mem=46.54 GB):   7%|▋         | 1/14 [00:07<01:32,  7.09s/it]Capturing batches (bs=64 avail_mem=46.54 GB):   7%|▋         | 1/14 [00:07<01:32,  7.13s/it]Capturing batches (bs=64 avail_mem=46.54 GB):  21%|██▏       | 3/14 [00:07<00:22,  2.06s/it]Capturing batches (bs=56 avail_mem=46.54 GB):  21%|██▏       | 3/14 [00:07<00:22,  2.06s/it]Capturing batches (bs=64 avail_mem=46.54 GB):  21%|██▏       | 3/14 [00:07<00:22,  2.07s/it]Capturing batches (bs=56 avail_mem=46.54 GB):  21%|██▏       | 3/14 [00:07<00:22,  2.07s/it]Capturing batches (bs=48 avail_mem=46.53 GB):  21%|██▏       | 3/14 [00:07<00:22,  2.06s/it]Capturing batches (bs=48 avail_mem=46.53 GB):  21%|██▏       | 3/14 [00:07<00:22,  2.07s/it]Capturing batches (bs=48 avail_mem=46.53 GB):  36%|███▌      | 5/14 [00:07<00:09,  1.03s/it]Capturing batches (bs=40 avail_mem=46.53 GB):  36%|███▌      | 5/14 [00:07<00:09,  1.03s/it]Capturing batches (bs=48 avail_mem=46.53 GB):  36%|███▌      | 5/14 [00:07<00:09,  1.04s/it]Capturing batches (bs=40 avail_mem=46.53 GB):  36%|███▌      | 5/14 [00:07<00:09,  1.04s/it]Capturing batches (bs=32 avail_mem=46.52 GB):  36%|███▌      | 5/14 [00:07<00:09,  1.03s/it]Capturing batches (bs=32 avail_mem=46.52 GB):  36%|███▌      | 5/14 [00:07<00:09,  1.04s/it]Capturing batches (bs=32 avail_mem=46.52 GB):  50%|█████     | 7/14 [00:07<00:04,  1.60it/s]Capturing batches (bs=24 avail_mem=46.52 GB):  50%|█████     | 7/14 [00:07<00:04,  1.60it/s]Capturing batches (bs=32 avail_mem=46.52 GB):  50%|█████     | 7/14 [00:07<00:04,  1.59it/s]Capturing batches (bs=24 avail_mem=46.52 GB):  50%|█████     | 7/14 [00:07<00:04,  1.59it/s]Capturing batches (bs=16 avail_mem=46.52 GB):  50%|█████     | 7/14 [00:08<00:04,  1.60it/s]Capturing batches (bs=16 avail_mem=46.52 GB):  50%|█████     | 7/14 [00:08<00:04,  1.59it/s]Capturing batches (bs=16 avail_mem=46.52 GB):  64%|██████▍   | 9/14 [00:08<00:02,  2.35it/s]Capturing batches (bs=16 avail_mem=46.52 GB):  64%|██████▍   | 9/14 [00:08<00:02,  2.36it/s]Capturing batches (bs=12 avail_mem=46.51 GB):  64%|██████▍   | 9/14 [00:08<00:02,  2.35it/s]Capturing batches (bs=12 avail_mem=46.51 GB):  64%|██████▍   | 9/14 [00:08<00:02,  2.36it/s]Capturing batches (bs=8 avail_mem=46.50 GB):  64%|██████▍   | 9/14 [00:08<00:02,  2.35it/s] Capturing batches (bs=8 avail_mem=46.50 GB):  64%|██████▍   | 9/14 [00:08<00:02,  2.36it/s] Capturing batches (bs=8 avail_mem=46.50 GB):  79%|███████▊  | 11/14 [00:08<00:00,  3.09it/s]Capturing batches (bs=4 avail_mem=46.50 GB):  79%|███████▊  | 11/14 [00:08<00:00,  3.09it/s]Capturing batches (bs=8 avail_mem=46.50 GB):  79%|███████▊  | 11/14 [00:08<00:00,  3.10it/s]Capturing batches (bs=4 avail_mem=46.50 GB):  79%|███████▊  | 11/14 [00:08<00:00,  3.10it/s]Capturing batches (bs=4 avail_mem=46.50 GB):  86%|████████▌ | 12/14 [00:08<00:00,  3.35it/s]Capturing batches (bs=4 avail_mem=46.50 GB):  86%|████████▌ | 12/14 [00:08<00:00,  3.34it/s]Capturing batches (bs=2 avail_mem=46.49 GB):  86%|████████▌ | 12/14 [00:08<00:00,  3.35it/s]Capturing batches (bs=2 avail_mem=46.49 GB):  86%|████████▌ | 12/14 [00:08<00:00,  3.34it/s]Capturing batches (bs=1 avail_mem=46.49 GB):  86%|████████▌ | 12/14 [00:08<00:00,  3.34it/s]Capturing batches (bs=1 avail_mem=46.49 GB):  86%|████████▌ | 12/14 [00:08<00:00,  3.35it/s]Capturing batches (bs=1 avail_mem=46.49 GB): 100%|██████████| 14/14 [00:09<00:00,  3.37it/s]Capturing batches (bs=1 avail_mem=46.49 GB): 100%|██████████| 14/14 [00:09<00:00,  1.52it/s]
+Capturing batches (bs=1 avail_mem=46.49 GB): 100%|██████████| 14/14 [00:09<00:00,  3.37it/s]Capturing batches (bs=1 avail_mem=46.49 GB): 100%|██████████| 14/14 [00:09<00:00,  1.52it/s]
+[sglang] Engine init done
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'eos_token_id': 248046, 'pad_token_id': 248044}.
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'eos_token_id': 248046, 'pad_token_id': 248044}.
+[2026-08-10 13:25:01] [RANK 0] Gradient accumulation steps mismatch: GradientAccumulationPlugin has 1, DeepSpeed config has 4. Using DeepSpeed's value.
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 473, in <module>
+[rank1]:     main()
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 465, in main
+[rank1]:     trainer.train()
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1437, in train
+[rank1]:     return inner_training_loop(
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1476, in _inner_training_loop
+[rank1]:     model, train_dataloader = self._prepare_for_training(max_steps, train_dataloader, resume_from_checkpoint)
+[rank1]:                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1612, in _prepare_for_training
+[rank1]:     model, self.optimizer = self.accelerator.prepare(self.model, self.optimizer)
+[rank1]:                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/accelerator.py", line 1549, in prepare
+[rank1]:     result = self._prepare_deepspeed(*args)
+[rank1]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/accelerator.py", line 2374, in _prepare_deepspeed
+[rank1]:     optimizer = map_pytorch_optim_to_deepspeed(optimizer)
+[rank1]:                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/utils/deepspeed.py", line 97, in map_pytorch_optim_to_deepspeed
+[rank1]:     return optimizer_class(optimizer.param_groups, **defaults)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/ops/adam/cpu_adam.py", line 94, in __init__
+[rank1]:     self.ds_opt_adam = CPUAdamBuilder().load()
+[rank1]:                        ^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/ops/op_builder/builder.py", line 543, in load
+[rank1]:     return self.jit_load(verbose)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/ops/op_builder/builder.py", line 593, in jit_load
+[rank1]:     op_module = load(name=self.name,
+[rank1]:                 ^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/cpp_extension.py", line 1692, in load
+[rank1]:     return _jit_compile(
+[rank1]:            ^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/cpp_extension.py", line 2160, in _jit_compile
+[rank1]:     return _import_module_from_library(name, build_directory, is_python_module)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/cpp_extension.py", line 2634, in _import_module_from_library
+[rank1]:     module = importlib.util.module_from_spec(spec)
+[rank1]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "<frozen importlib._bootstrap>", line 573, in module_from_spec
+[rank1]:   File "<frozen importlib._bootstrap_external>", line 1233, in create_module
+[rank1]:   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+[rank1]: ImportError: /gpfs/share/home/2501210611/.cache/torch_extensions/py311_cu128/cpu_adam/cpu_adam.so: cannot open shared object file: No such file or directory
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 473, in <module>
+[rank0]:     main()
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 465, in main
+[rank0]:     trainer.train()
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1437, in train
+[rank0]:     return inner_training_loop(
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1476, in _inner_training_loop
+[rank0]:     model, train_dataloader = self._prepare_for_training(max_steps, train_dataloader, resume_from_checkpoint)
+[rank0]:                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1612, in _prepare_for_training
+[rank0]:     model, self.optimizer = self.accelerator.prepare(self.model, self.optimizer)
+[rank0]:                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/accelerator.py", line 1549, in prepare
+[rank0]:     result = self._prepare_deepspeed(*args)
+[rank0]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/accelerator.py", line 2374, in _prepare_deepspeed
+[rank0]:     optimizer = map_pytorch_optim_to_deepspeed(optimizer)
+[rank0]:                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/utils/deepspeed.py", line 97, in map_pytorch_optim_to_deepspeed
+[rank0]:     return optimizer_class(optimizer.param_groups, **defaults)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/ops/adam/cpu_adam.py", line 94, in __init__
+[rank0]:     self.ds_opt_adam = CPUAdamBuilder().load()
+[rank0]:                        ^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/ops/op_builder/builder.py", line 543, in load
+[rank0]:     return self.jit_load(verbose)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/ops/op_builder/builder.py", line 593, in jit_load
+[rank0]:     op_module = load(name=self.name,
+[rank0]:                 ^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/cpp_extension.py", line 1692, in load
+[rank0]:     return _jit_compile(
+[rank0]:            ^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/cpp_extension.py", line 2160, in _jit_compile
+[rank0]:     return _import_module_from_library(name, build_directory, is_python_module)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/cpp_extension.py", line 2634, in _import_module_from_library
+[rank0]:     module = importlib.util.module_from_spec(spec)
+[rank0]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "<frozen importlib._bootstrap>", line 573, in module_from_spec
+[rank0]:   File "<frozen importlib._bootstrap_external>", line 1233, in create_module
+[rank0]:   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+[rank0]: ImportError: /gpfs/share/home/2501210611/.cache/torch_extensions/py311_cu128/cpu_adam/cpu_adam.so: cannot open shared object file: No such file or directory
+Exception ignored in: <function DeepSpeedCPUAdam.__del__ at 0x7f8450fbeb60>
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/ops/adam/cpu_adam.py", line 102, in __del__
+    self.ds_opt_adam.destroy_adam(self.opt_id)
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'DeepSpeedCPUAdam' object has no attribute 'ds_opt_adam'
+Exception ignored in: <function DeepSpeedCPUAdam.__del__ at 0x7f9adf772b60>
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/ops/adam/cpu_adam.py", line 102, in __del__
+    self.ds_opt_adam.destroy_adam(self.opt_id)
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'DeepSpeedCPUAdam' object has no attribute 'ds_opt_adam'
+[rank0]:[W810 13:25:34.106448288 ProcessGroupNCCL.cpp:1524] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+W0810 13:25:36.871000 3902257 site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 3902530 closing signal SIGTERM
+E0810 13:25:37.086000 3902257 site-packages/torch/distributed/elastic/multiprocessing/api.py:882] failed (exitcode: 1) local_rank: 0 (pid: 3902529) of binary: /gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/bin/python3.11
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/bin/accelerate", line 6, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 50, in main
+    args.func(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1392, in launch_command
+    deepspeed_launcher(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1076, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/distributed/run.py", line 927, in run
+    elastic_launch(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 156, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 293, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-08-10_13:25:36
+  host      : gpua800n26.hpc.pku.edu.cn
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 3902529)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

@@ -48,6 +48,8 @@ from trl.models import prepare_deepspeed
 from trl.models.utils import unwrap_model_for_generation
 from trl.trainer.sft_trainer import SFTTrainer
 from trl.trainer.utils import disable_dropout_in_model, empty_cache, pad, split_tensor_dict
+
+from opsd_sequence import left_align_prompt_completion
 from opsd_config import OPSDConfig
 from data_collator import SelfDistillationDataCollator
 
@@ -1926,7 +1928,12 @@ class OPSDTrainer(SFTTrainer):
         return merged
 
     def _attach_rollouts_to_inputs(self, inputs: dict[str, Any]) -> dict[str, Any]:
-        """Run rollout engine once and attach student/teacher full sequences + labels."""
+        """Run rollout engine once and attach student/teacher full sequences + labels.
+
+        Completions are extracted with the batch prompt width, then both student and
+        teacher sequences are rebuilt with left-aligned prompts so response tokens
+        immediately follow the last real prompt token (no right-pad gap).
+        """
         if self.rollout_backend == "sglang":
             generated_ids, generated_attention_mask, _, prompt_texts, completion_texts = (
                 self._generate_on_policy_outputs_sglang(
@@ -1943,21 +1950,53 @@ class OPSDTrainer(SFTTrainer):
         student_prompt_len = int(inputs["student_prompt_length"])
         generation_ids = generated_ids[:, student_prompt_len:]
         response_attention_mask = generated_attention_mask[:, student_prompt_len:]
-        teacher_full_ids = torch.cat([inputs["teacher_prompts"], generation_ids], dim=1)
-        teacher_attention_mask = torch.cat(
-            [inputs["teacher_prompt_attention_mask"], response_attention_mask],
-            dim=1,
+        pad_id = int(self.processing_class.pad_token_id or 0)
+
+        student_lengths = inputs.get("student_prompt_lengths_per_example")
+        if student_lengths is None:
+            student_lengths = torch.full(
+                (generation_ids.shape[0],),
+                student_prompt_len,
+                device=generation_ids.device,
+                dtype=torch.long,
+            )
+        teacher_prompt_len = int(inputs["teacher_prompt_length"])
+        teacher_lengths = inputs.get("teacher_prompt_lengths_per_example")
+        if teacher_lengths is None:
+            teacher_lengths = torch.full(
+                (generation_ids.shape[0],),
+                teacher_prompt_len,
+                device=generation_ids.device,
+                dtype=torch.long,
+            )
+
+        student_full_ids, student_attention_mask, labels, packed_student_prompt_len = (
+            left_align_prompt_completion(
+                inputs["student_prompts"].to(generation_ids.device),
+                student_lengths,
+                generation_ids,
+                response_attention_mask,
+                pad_id,
+            )
         )
-        labels = torch.full_like(generated_ids, -100)
-        response_mask = response_attention_mask.bool()
-        labels[:, student_prompt_len:][response_mask] = generation_ids[response_mask]
+        teacher_full_ids, teacher_attention_mask, _, packed_teacher_prompt_len = (
+            left_align_prompt_completion(
+                inputs["teacher_prompts"].to(generation_ids.device),
+                teacher_lengths,
+                generation_ids,
+                response_attention_mask,
+                pad_id,
+            )
+        )
 
         inputs = dict(inputs)
-        inputs["student_input_ids"] = generated_ids
-        inputs["student_attention_mask"] = generated_attention_mask
+        inputs["student_input_ids"] = student_full_ids
+        inputs["student_attention_mask"] = student_attention_mask
         inputs["teacher_input_ids"] = teacher_full_ids
         inputs["teacher_attention_mask"] = teacher_attention_mask
         inputs["labels"] = labels
+        inputs["student_prompt_length"] = packed_student_prompt_len
+        inputs["teacher_prompt_length"] = packed_teacher_prompt_len
         inputs["prompt_texts"] = prompt_texts
         inputs["completion_texts"] = completion_texts
         inputs["_opsd_rollout_ready"] = True
@@ -1991,6 +2030,7 @@ class OPSDTrainer(SFTTrainer):
                 batch["prompt_texts"] = prompt_texts[i * chunk : (i + 1) * chunk]
                 batch["completion_texts"] = completion_texts[i * chunk : (i + 1) * chunk]
                 batch["_opsd_rollout_ready"] = True
+                # Packed prompt width equals collator prompt width after left-align.
                 if "student_prompts" in batch:
                     batch["student_prompt_length"] = int(batch["student_prompts"].shape[-1])
                 if "teacher_prompts" in batch:

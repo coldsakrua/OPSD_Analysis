@@ -1,0 +1,103 @@
+[launch] run=snt_tt_lora_clip005_lr5e6_openthoughts_1p7b_3203833 mode=opsd privilege_field=solution
+[launch] student_thinking=0 teacher_thinking=1
+[launch] LoRA r=64 alpha=128 fixed_teacher=1 (official PEFT path)
+[launch] lr=5e-6 jsd_token_clip=0.05
+[launch] micro=4 gas=4 gpus=2 → global_batch=32
+[launch] max_steps=100 save_steps=25
+[launch] model=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b dataset=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/openthoughts/preprocessed/openthoughts.opsd.solution.snothink_tthink.maxprompt1024.parquet output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/snt_tt_lora_clip005_lr5e6_openthoughts_1p7b/3203833
+[launch] accelerate=zero2 deepspeed=zero2 vLLM util=0.45
+[launch] master_port=23833
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+W0809 21:08:00.242000 1951304 site-packages/torch/distributed/run.py:792] 
+W0809 21:08:00.242000 1951304 site-packages/torch/distributed/run.py:792] *****************************************
+W0809 21:08:00.242000 1951304 site-packages/torch/distributed/run.py:792] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0809 21:08:00.242000 1951304 site-packages/torch/distributed/run.py:792] *****************************************
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+⚙️  Running in WANDB offline mode
+⚙️  Running in WANDB offline mode
+[dataset] already has problem/solution; skip field normalization[dataset] already has problem/solution; skip field normalization
+
+[dataset] prompt cap kept 21981/21981 examples[dataset] prompt cap kept 21981/21981 examples
+
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 473, in <module>
+[rank0]:     main()
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 348, in main
+[rank0]:     training_args = OPSDConfig(
+[rank0]:   File "<string>", line 188, in __init__
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/opsd_config.py", line 65, in __post_init__
+[rank0]:     super().__post_init__()
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/trl/trainer/sft_config.py", line 256, in __post_init__
+[rank0]:     super().__post_init__()
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/transformers/training_args.py", line 2081, in __post_init__
+[rank0]:     self.deepspeed_plugin = DeepSpeedPlugin(hf_ds_config=self.hf_deepspeed_config)
+[rank0]:   File "<string>", line 17, in __init__
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/utils/dataclasses.py", line 1206, in __post_init__
+[rank0]:     self._deepspeed_config_checks()
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/utils/dataclasses.py", line 1420, in _deepspeed_config_checks
+[rank0]:     raise ValueError(
+[rank0]: ValueError: When using `deepspeed_config_file`, the following accelerate config variables will be ignored: ['gradient_accumulation_steps', 'gradient_clipping', 'zero_stage', 'offload_optimizer_device', 'offload_param_device', 'offload_param_nvme_path', 'offload_optimizer_nvme_path', 'zero3_save_16bit_model', 'mixed_precision'].
+[rank0]: Please specify them appropriately in the DeepSpeed config file.
+[rank0]: If you are using an accelerate config file, remove others config variables mentioned in the above specified list.
+[rank0]: The easiest method is to create a new config following the questionnaire via `accelerate config`.
+[rank0]: It will only ask for the necessary config variables when using `deepspeed_config_file`.
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 473, in <module>
+[rank1]:     main()
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 348, in main
+[rank1]:     training_args = OPSDConfig(
+[rank1]:   File "<string>", line 188, in __init__
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/opsd_config.py", line 65, in __post_init__
+[rank1]:     super().__post_init__()
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/trl/trainer/sft_config.py", line 256, in __post_init__
+[rank1]:     super().__post_init__()
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/transformers/training_args.py", line 2081, in __post_init__
+[rank1]:     self.deepspeed_plugin = DeepSpeedPlugin(hf_ds_config=self.hf_deepspeed_config)
+[rank1]:   File "<string>", line 17, in __init__
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/utils/dataclasses.py", line 1206, in __post_init__
+[rank1]:     self._deepspeed_config_checks()
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/utils/dataclasses.py", line 1420, in _deepspeed_config_checks
+[rank1]:     raise ValueError(
+[rank1]: ValueError: When using `deepspeed_config_file`, the following accelerate config variables will be ignored: ['gradient_accumulation_steps', 'gradient_clipping', 'zero_stage', 'offload_optimizer_device', 'offload_param_device', 'offload_param_nvme_path', 'offload_optimizer_nvme_path', 'zero3_save_16bit_model', 'mixed_precision'].
+[rank1]: Please specify them appropriately in the DeepSpeed config file.
+[rank1]: If you are using an accelerate config file, remove others config variables mentioned in the above specified list.
+[rank1]: The easiest method is to create a new config following the questionnaire via `accelerate config`.
+[rank1]: It will only ask for the necessary config variables when using `deepspeed_config_file`.
+[rank0]:[W809 21:08:55.877144772 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+W0809 21:08:56.239000 1951304 site-packages/torch/distributed/elastic/multiprocessing/api.py:897] Sending process 1952098 closing signal SIGTERM
+E0809 21:08:56.353000 1951304 site-packages/torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: 1) local_rank: 0 (pid: 1952094) of binary: /gpfs/share/home/2501210611/miniconda3/envs/anchor/bin/python
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/accelerate_cli.py", line 50, in main
+    args.func(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/launch.py", line 1183, in launch_command
+    deepspeed_launcher(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/launch.py", line 868, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/run.py", line 909, in run
+    elastic_launch(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-08-09_21:08:56
+  host      : gpua800n06.hpc.pku.edu.cn
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 1952094)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

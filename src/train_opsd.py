@@ -97,13 +97,15 @@ def parse_args() -> argparse.Namespace:
             "encourage_trans",
             "irrelevant_trans",
             "sample_irrelevant_trans",
+            "irrelevant_other_sol",
         ),
         required=True,
         help=(
             "Teacher template: correct/correct_simple/pi/instruction/opsd (with GT privilege), or "
             "same/encourage/irrelevant (no-GT), or "
             "same_trans/encourage_trans/irrelevant_trans (no-GT + transition, no reference solution), or "
-            "sample_irrelevant_trans (per-row irrelevant_prefix + transition). "
+            "sample_irrelevant_trans (per-row irrelevant_prefix + transition), or "
+            "irrelevant_other_sol (unrelated problem_B+solution_B then problem_A; no 'B solves A' claim). "
             "correct_simple = problem + answer + Qwen3 boxed instruction."
         ),
     )
@@ -209,6 +211,34 @@ def parse_args() -> argparse.Namespace:
         help="SGLang token sampling backend. pytorch avoids flashinfer JIT on incomplete CUDA/CCCL nodes.",
     )
     parser.add_argument("--deepspeed", default="configs/deepspeed_zero3.json")
+    parser.add_argument(
+        "--use-peft",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Enable LoRA/PEFT student updates (siyan-zhao/OPSD main setup). "
+            "With --fixed-teacher, teacher forward uses disable_adapter() on the base model."
+        ),
+    )
+    parser.add_argument(
+        "--fixed-teacher",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Fixed teacher at init policy. Full-param: frozen teacher copy. "
+            "PEFT: disable LoRA adapters (official OPSD). Default True."
+        ),
+    )
+    parser.add_argument("--lora-r", type=int, default=64, help="LoRA rank (official run_opsd_1b.sh: 64).")
+    parser.add_argument(
+        "--lora-alpha", type=int, default=128, help="LoRA alpha (official run_opsd_1b.sh: 128)."
+    )
+    parser.add_argument("--lora-dropout", type=float, default=0.0)
+    parser.add_argument(
+        "--lora-target-modules",
+        default="q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj",
+        help="Comma-separated LoRA target modules (official Qwen3 list).",
+    )
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
     if not args.dataset_path:
@@ -228,6 +258,21 @@ def parse_args() -> argparse.Namespace:
         parser.error("--use-thinking-machines-loss and --top-k-loss are mutually exclusive")
     if args.teacher_update_steps is not None and args.teacher_update_steps <= 0:
         parser.error("--teacher-update-steps must be a positive integer when set")
+    if args.use_peft and args.fixed_teacher is False:
+        # Allowed but unstable per official README; keep as explicit opt-in only.
+        pass
+    if args.fixed_teacher and not args.use_peft and args.teacher_update_steps:
+        # full-param path already supports periodic hard sync; no conflict.
+        pass
+    if args.use_peft and args.teacher_update_steps is not None:
+        parser.error("--teacher-update-steps is incompatible with --use-peft (use --fixed-teacher)")
+    if args.use_peft and args.teacher_model_path != args.model_path:
+        parser.error(
+            "--use-peft fixed-teacher uses disable_adapter() on the student base; "
+            "cross-model --teacher-model-path is not supported"
+        )
+    if args.use_peft and args.lora_r <= 0:
+        parser.error("--lora-r must be positive when --use-peft is set")
     return args
 
 
@@ -363,6 +408,22 @@ def main() -> None:
         },
     )
 
+    peft_config = None
+    if args.use_peft:
+        from peft import LoraConfig
+
+        target_modules = [m.strip() for m in str(args.lora_target_modules).split(",") if m.strip()]
+        if not target_modules:
+            raise ValueError("--lora-target-modules must list at least one module")
+        peft_config = LoraConfig(
+            r=int(args.lora_r),
+            lora_alpha=int(args.lora_alpha),
+            lora_dropout=float(args.lora_dropout),
+            target_modules=target_modules,
+            bias="none",
+            task_type="CAUSAL_LM",
+        )
+
     world = int(os.environ.get("WORLD_SIZE", "1"))
     global_batch = args.per_device_batch_size * args.gradient_accumulation_steps * world
     print(
@@ -370,6 +431,9 @@ def main() -> None:
         f"student={args.model_path} teacher={args.teacher_model_path} "
         f"student_thinking={args.student_thinking} teacher_thinking={args.teacher_thinking} "
         f"rollout_backend={args.rollout_backend} "
+        f"use_peft={args.use_peft} fixed_teacher={args.fixed_teacher} "
+        f"lora_r={args.lora_r if args.use_peft else None} "
+        f"lora_alpha={args.lora_alpha if args.use_peft else None} "
         f"lr={args.learning_rate} jsd_token_clip={args.jsd_token_clip} "
         f"top_k_loss={args.top_k_loss} use_thinking_machines_loss={args.use_thinking_machines_loss} "
         f"teacher_update_steps={args.teacher_update_steps} "
@@ -387,8 +451,8 @@ def main() -> None:
         train_dataset=train_dataset,
         eval_dataset=None,
         processing_class=tokenizer,
-        peft_config=None,
-        fixed_teacher=True,
+        peft_config=peft_config,
+        fixed_teacher=bool(args.fixed_teacher),
         use_thinking_machines_loss=args.use_thinking_machines_loss,
         top_k_loss=args.top_k_loss,
         jsd_token_clip=args.jsd_token_clip,

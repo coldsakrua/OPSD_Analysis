@@ -43,6 +43,11 @@ NO_GT_MODES = {
     "sample_irrelevant_trans",
 }
 
+# Teacher gets an unrelated (problem_B, solution_B) block, not A's GT.
+OTHER_PROBLEM_MODES = {
+    "irrelevant_other_sol",
+}
+
 
 class SelfDistillationDataCollator:
     """Build Qwen3 student/privileged-teacher prompts for an OPSD batch."""
@@ -60,6 +65,7 @@ class SelfDistillationDataCollator:
         "encourage_trans",
         "irrelevant_trans",
         "sample_irrelevant_trans",
+        "irrelevant_other_sol",
     }
 
     def __init__(
@@ -94,7 +100,11 @@ class SelfDistillationDataCollator:
     def privilege_text(self, feature: dict[str, Any]) -> str:
         """Select teacher privilege content: full trajectory (`solution`) or short `answer`."""
         field = self.teacher_privilege_field
-        if field == "none" or self.privilege_mode in NO_GT_MODES:
+        if (
+            field == "none"
+            or self.privilege_mode in NO_GT_MODES
+            or self.privilege_mode in OTHER_PROBLEM_MODES
+        ):
             return ""
         if field == "answer":
             for key in ("answer", "Answer"):
@@ -122,6 +132,47 @@ class SelfDistillationDataCollator:
             f"Answer: {answer}\n\n"
             "Please reason step by step, and put your final answer within \\boxed{}."
         )
+
+    @staticmethod
+    def _irrelevant_other_sol_teacher_user(
+        problem_a: str,
+        distractors: list[tuple[str, str]],
+    ) -> str:
+        """Unrelated B1..Bk (problem+solution) then A; never claims they solve A."""
+        blocks: list[str] = []
+        for problem_b, solution_b in distractors:
+            blocks.append(f"Problem: {problem_b}\n\nSolution: {solution_b}")
+        body = "\n\n".join(blocks)
+        return (
+            f"{body}\n\n"
+            f"Problem: {problem_a}\n\n"
+            "Please reason step by step, and put your final answer within \\boxed{}."
+        )
+
+    @staticmethod
+    def _extract_distractors(feature: dict[str, Any]) -> list[tuple[str, str]]:
+        """Read multi-distractor lists, with singular-field backward compatibility."""
+        problems = feature.get("distractor_problems")
+        solutions = feature.get("distractor_solutions")
+        out: list[tuple[str, str]] = []
+        if isinstance(problems, list) and isinstance(solutions, list) and problems and solutions:
+            for p, s in zip(problems, solutions):
+                p = str(p or "").strip()
+                s = str(s or "").strip()
+                if p and s:
+                    out.append((p, s))
+            if out:
+                return out
+        # Singular columns (older parquet).
+        problem_b = str(
+            feature.get("distractor_problem") or feature.get("irrelevant_problem") or ""
+        ).strip()
+        solution_b = str(
+            feature.get("distractor_solution") or feature.get("irrelevant_solution") or ""
+        ).strip()
+        if problem_b and solution_b:
+            return [(problem_b, solution_b)]
+        return []
 
     @staticmethod
     def _opsd_teacher_user(problem: str, privileged: str) -> str:
@@ -185,6 +236,16 @@ class SelfDistillationDataCollator:
                 teacher_user = self._nogt_transition_teacher_user(
                     problem, prefix=self._sampled_irrelevant_prefix(feature)
                 )
+        elif self.privilege_mode == "irrelevant_other_sol":
+            # Unrelated B1..Bk (problem+solution) inserted before A; no claim they solve A.
+            student_user = self._standard_student_user(problem)
+            distractors = self._extract_distractors(feature)
+            if not distractors:
+                raise ValueError(
+                    "irrelevant_other_sol requires distractor_problems/distractor_solutions "
+                    "(or singular distractor_problem/distractor_solution)"
+                )
+            teacher_user = self._irrelevant_other_sol_teacher_user(problem, distractors)
         elif self.privilege_mode == "opsd":
             # Official OPSD student / teacher templates (siyan-zhao/OPSD).
             # privilege_field=none → same no-GT transition template (no reference block).

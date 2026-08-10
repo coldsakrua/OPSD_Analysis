@@ -1,0 +1,370 @@
+[launch] run=snt_tt_lora_clip005_lr5e6_openthoughts_q35_4b_3208238 mode=opsd privilege_field=solution
+[launch] student_thinking=0 teacher_thinking=1
+[launch] LoRA r=64 alpha=128 fixed_teacher=1 (official PEFT path)
+[launch] lr=5e-6 jsd_token_clip=0.05
+[launch] micro=4 gas=4 gpus=2 → global_batch=32
+[launch] max_steps=100 save_steps=25
+[launch] sampling temp=1.0 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=1.5
+[launch] model=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b dataset=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/openthoughts/preprocessed/openthoughts.opsd.solution.snothink_tthink.qwen35_4b.maxprompt1024.parquet output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3.5_4b/snt_tt_lora_clip005_lr5e6_openthoughts_q35_4b/3208238
+[launch] accelerate=zero3 deepspeed=zero3 rollout=sglang sglang_mem=0.40
+[launch] master_port=28238
+W0810 13:37:32.742000 753538 site-packages/torch/distributed/run.py:803] 
+W0810 13:37:32.742000 753538 site-packages/torch/distributed/run.py:803] *****************************************
+W0810 13:37:32.742000 753538 site-packages/torch/distributed/run.py:803] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0810 13:37:32.742000 753538 site-packages/torch/distributed/run.py:803] *****************************************
+[INFO] Running in WANDB offline mode
+[INFO] Running in WANDB offline mode
+[dataset] already has problem/solution; skip field normalization
+[dataset] prompt length already filtered offline; keep 20557 examples
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+[dataset] already has problem/solution; skip field normalization
+[dataset] prompt length already filtered offline; keep 20557 examples
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+NCCL version 2.27.5+cuda12.9
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b student_thinking=False teacher_thinking=True rollout_backend=sglang use_peft=True fixed_teacher=True lora_r=64 lora_alpha=128 lr=5e-06 jsd_token_clip=0.05 top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.0 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=1.5 global_batch=32 (micro=4 gas=4 world=2) prompt=1024 response=1024
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b student_thinking=False teacher_thinking=True rollout_backend=sglang use_peft=True fixed_teacher=True lora_r=64 lora_alpha=128 lr=5e-06 jsd_token_clip=0.05 top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.0 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=1.5 global_batch=32 (micro=4 gas=4 world=2) prompt=1024 response=1024
+[transformers] The fast path is not available because one of the required library is not installed. Falling back to torch implementation. To install follow https://github.com/fla-org/flash-linear-attention#installation and https://github.com/Dao-AILab/causal-conv1d
+[transformers] The fast path is not available because one of the required library is not installed. Falling back to torch implementation. To install follow https://github.com/fla-org/flash-linear-attention#installation and https://github.com/Dao-AILab/causal-conv1d
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher uses the initial base model with student LoRA adapters disabled
+================================================================================
+
+[RANK 0] Detected kernel version 4.18.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher uses the initial base model with student LoRA adapters disabled
+================================================================================
+
+[sglang] init Engine model=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen35_4b attn=triton sampling=pytorch mem_fraction_static=0.4 context_length=2048 disable_hybrid_swa_memory=False world=2
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-08-10 13:38:36] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-08-10 13:38:36] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[2026-08-10 13:38:46] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[2026-08-10 13:38:46] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-08-10 13:38:48] using attn output gate!
+[2026-08-10 13:38:48] using attn output gate!
+[INFO] Running in WANDB offline mode
+Multi-thread loading shards:   0% Completed | 0/2 [00:00<?, ?it/s][INFO] Running in WANDB offline mode
+Multi-thread loading shards:   0% Completed | 0/2 [00:00<?, ?it/s]Multi-thread loading shards:  50% Completed | 1/2 [00:10<00:10, 10.04s/it]Multi-thread loading shards:  50% Completed | 1/2 [00:09<00:09,  9.97s/it]Multi-thread loading shards: 100% Completed | 2/2 [00:19<00:00,  9.51s/it]Multi-thread loading shards: 100% Completed | 2/2 [00:19<00:00,  9.54s/it]Multi-thread loading shards: 100% Completed | 2/2 [00:19<00:00,  9.58s/it]
+Multi-thread loading shards: 100% Completed | 2/2 [00:19<00:00,  9.61s/it]
+  0%|          | 0/13 [00:00<?, ?it/s]Capturing batches (bs=65 avail_mem=42.70 GB):   0%|          | 0/13 [00:00<?, ?it/s]  0%|          | 0/12 [00:00<?, ?it/s]Capturing batches (bs=64 avail_mem=41.99 GB):   0%|          | 0/12 [00:00<?, ?it/s]Capturing batches (bs=64 avail_mem=41.99 GB):   8%|▊         | 1/12 [00:03<00:34,  3.13s/it]Capturing batches (bs=56 avail_mem=41.85 GB):   8%|▊         | 1/12 [00:03<00:34,  3.13s/it]Capturing batches (bs=65 avail_mem=42.70 GB):   8%|▊         | 1/13 [00:03<00:44,  3.72s/it]Capturing batches (bs=64 avail_mem=42.56 GB):   8%|▊         | 1/13 [00:03<00:44,  3.72s/it]Capturing batches (bs=64 avail_mem=42.56 GB):  15%|█▌        | 2/13 [00:04<00:20,  1.82s/it]Capturing batches (bs=56 avail_mem=42.56 GB):  15%|█▌        | 2/13 [00:04<00:20,  1.82s/it]Capturing batches (bs=56 avail_mem=41.85 GB):  17%|█▋        | 2/12 [00:03<00:15,  1.60s/it]Capturing batches (bs=48 avail_mem=41.85 GB):  17%|█▋        | 2/12 [00:03<00:15,  1.60s/it]Capturing batches (bs=48 avail_mem=42.55 GB):  15%|█▌        | 2/13 [00:04<00:20,  1.82s/it]Capturing batches (bs=40 avail_mem=41.84 GB):  17%|█▋        | 2/12 [00:03<00:15,  1.60s/it]Capturing batches (bs=48 avail_mem=42.55 GB):  31%|███       | 4/13 [00:04<00:06,  1.38it/s]Capturing batches (bs=40 avail_mem=42.55 GB):  31%|███       | 4/13 [00:04<00:06,  1.38it/s]Capturing batches (bs=40 avail_mem=41.84 GB):  33%|███▎      | 4/12 [00:03<00:05,  1.57it/s]Capturing batches (bs=32 avail_mem=41.84 GB):  33%|███▎      | 4/12 [00:03<00:05,  1.57it/s]Capturing batches (bs=32 avail_mem=42.54 GB):  31%|███       | 4/13 [00:04<00:06,  1.38it/s]Capturing batches (bs=24 avail_mem=41.83 GB):  33%|███▎      | 4/12 [00:03<00:05,  1.57it/s]Capturing batches (bs=32 avail_mem=42.54 GB):  46%|████▌     | 6/13 [00:04<00:02,  2.41it/s]Capturing batches (bs=24 avail_mem=42.54 GB):  46%|████▌     | 6/13 [00:04<00:02,  2.41it/s]Capturing batches (bs=24 avail_mem=41.83 GB):  50%|█████     | 6/12 [00:03<00:02,  2.71it/s]Capturing batches (bs=16 avail_mem=41.83 GB):  50%|█████     | 6/12 [00:03<00:02,  2.71it/s]Capturing batches (bs=16 avail_mem=42.53 GB):  46%|████▌     | 6/13 [00:04<00:02,  2.41it/s]Capturing batches (bs=12 avail_mem=41.82 GB):  50%|█████     | 6/12 [00:04<00:02,  2.71it/s]Capturing batches (bs=16 avail_mem=42.53 GB):  62%|██████▏   | 8/13 [00:04<00:01,  3.54it/s]Capturing batches (bs=12 avail_mem=42.53 GB):  62%|██████▏   | 8/13 [00:04<00:01,  3.54it/s]Capturing batches (bs=12 avail_mem=41.82 GB):  67%|██████▋   | 8/12 [00:04<00:01,  3.87it/s]Capturing batches (bs=8 avail_mem=41.82 GB):  67%|██████▋   | 8/12 [00:04<00:01,  3.87it/s] Capturing batches (bs=8 avail_mem=42.52 GB):  62%|██████▏   | 8/13 [00:04<00:01,  3.54it/s] Capturing batches (bs=4 avail_mem=41.81 GB):  67%|██████▋   | 8/12 [00:04<00:01,  3.87it/s]Capturing batches (bs=8 avail_mem=42.52 GB):  77%|███████▋  | 10/13 [00:04<00:00,  4.88it/s]Capturing batches (bs=4 avail_mem=42.52 GB):  77%|███████▋  | 10/13 [00:04<00:00,  4.88it/s]Capturing batches (bs=4 avail_mem=41.81 GB):  83%|████████▎ | 10/12 [00:04<00:00,  4.88it/s]Capturing batches (bs=2 avail_mem=41.80 GB):  83%|████████▎ | 10/12 [00:04<00:00,  4.88it/s]Capturing batches (bs=2 avail_mem=42.51 GB):  77%|███████▋  | 10/13 [00:04<00:00,  4.88it/s]Capturing batches (bs=1 avail_mem=41.80 GB):  83%|████████▎ | 10/12 [00:04<00:00,  4.88it/s]Capturing batches (bs=2 avail_mem=42.51 GB):  92%|█████████▏| 12/13 [00:05<00:00,  5.94it/s]Capturing batches (bs=1 avail_mem=42.51 GB):  92%|█████████▏| 12/13 [00:05<00:00,  5.94it/s]Capturing batches (bs=1 avail_mem=41.80 GB): 100%|██████████| 12/12 [00:04<00:00,  4.04it/s]Capturing batches (bs=1 avail_mem=41.80 GB): 100%|██████████| 12/12 [00:04<00:00,  2.40it/s]
+Capturing batches (bs=1 avail_mem=42.51 GB): 100%|██████████| 13/13 [00:05<00:00,  2.30it/s]
+[sglang] Engine init done
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'eos_token_id': 248046, 'pad_token_id': 248044}.
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'eos_token_id': 248046, 'pad_token_id': 248044}.
+[2026-08-10 13:39:16] [RANK 0] Gradient accumulation steps mismatch: GradientAccumulationPlugin has 1, DeepSpeed config has 4. Using DeepSpeed's value.
+wandb: Tracking run with wandb version 0.28.1
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/wandb_runs/wandb/offline-run-20260810_133918-ygzwe3c8
+wandb: View this run in the terminal with `wandb leet`
+wandb: Detected [openai] in use.
+wandb: Use W&B Weave for improved LLM call tracing. Install Weave with `pip install weave` then add `import weave` to the top of your script.
+wandb: For more information, check out the docs at: https://weave-docs.wandb.ai
+  0%|          | 0/100 [00:00<?, ?it/s]SGLang generation done - elapsed time: 13.29s, prompts: 16, total tokens: 16384, avg length: 1024.0, speed: 1232.9 tok/s
+Traceback (most recent call last):
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 473, in <module>
+[rank1]:     main()
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 465, in main
+[rank1]:     trainer.train()
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1437, in train
+[rank1]:     return inner_training_loop(
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1519, in _inner_training_loop
+[rank1]:     self._run_epoch(
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1747, in _run_epoch
+[rank1]:     tr_loss_step = self.training_step(model, inputs, num_items_in_batch)
+[rank1]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/trl/extras/profiling.py", line 98, in wrapper
+[rank1]:     return func(self, *args, **kwargs)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/opsd_trainer.py", line 2177, in training_step
+[rank1]:     loss = super().training_step(model, inputs, num_items_in_batch)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/trl/trainer/sft_trainer.py", line 1112, in training_step
+[rank1]:     return super().training_step(*args, **kwargs)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1949, in training_step
+[rank1]:     self.accelerator.backward(loss, **kwargs)
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/accelerator.py", line 2842, in backward
+[rank1]:     self.deepspeed_engine_wrapped.backward(loss, sync_gradients=self.sync_gradients, **kwargs)
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/utils/deepspeed.py", line 270, in backward
+[rank1]:     self.engine.backward(loss, **kwargs)
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/utils/nvtx.py", line 20, in wrapped_fn
+[rank1]:     ret_val = func(*args, **kwargs)
+[rank1]:               ^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/runtime/engine.py", line 2625, in backward
+[rank1]:     loss.backward(**backward_kwargs)
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/_tensor.py", line 625, in backward
+[rank1]:     torch.autograd.backward(
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/autograd/__init__.py", line 354, in backward
+[rank1]:     _engine_run_backward(
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/autograd/graph.py", line 841, in _engine_run_backward
+[rank1]:     return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/autograd/function.py", line 315, in apply
+[rank1]:     return user_fn(self, *args)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/amp/autocast_mode.py", line 573, in decorate_bwd
+[rank1]:     return bwd(*args, **kwargs)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/runtime/zero/linear.py", line 89, in backward
+[rank1]:     input, weight, bias = ctx.saved_tensors
+[rank1]:                           ^^^^^^^^^^^^^^^^^
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/checkpoint.py", line 1158, in unpack_hook
+[rank1]:     frame.check_recomputed_tensors_match(gid)
+[rank1]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/checkpoint.py", line 911, in check_recomputed_tensors_match
+[rank1]:     raise CheckpointError(
+[rank1]: torch.utils.checkpoint.CheckpointError: torch.utils.checkpoint: Recomputed values for the following tensors have different metadata than during the forward pass.
+[rank1]: tensor at position 6:
+[rank1]: saved metadata: {'shape': torch.Size([8192, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: tensor at position 17:
+[rank1]: saved metadata: {'shape': torch.Size([1024, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: tensor at position 28:
+[rank1]: saved metadata: {'shape': torch.Size([1024, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: tensor at position 49:
+[rank1]: saved metadata: {'shape': torch.Size([2560, 4096]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: tensor at position 60:
+[rank1]: saved metadata: {'shape': torch.Size([9216, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: tensor at position 67:
+[rank1]: saved metadata: {'shape': torch.Size([9216, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: tensor at position 75:
+[rank1]: saved metadata: {'shape': torch.Size([2560, 9216]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=1)}
+[rank1]: .
+
+[rank1]: Tip: To see a more detailed error message, either pass `debug=True` to
+[rank1]: `torch.utils.checkpoint.checkpoint(...)` or wrap the code block
+[rank1]: with `with torch.utils.checkpoint.set_checkpoint_debug_enabled(True):` to
+[rank1]: enable checkpoint‑debug mode globally.
+
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 473, in <module>
+    main()
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 465, in main
+    trainer.train()
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1437, in train
+    return inner_training_loop(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1519, in _inner_training_loop
+    self._run_epoch(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1747, in _run_epoch
+    tr_loss_step = self.training_step(model, inputs, num_items_in_batch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/trl/extras/profiling.py", line 98, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/opsd_trainer.py", line 2177, in training_step
+    loss = super().training_step(model, inputs, num_items_in_batch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/trl/trainer/sft_trainer.py", line 1112, in training_step
+    return super().training_step(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1949, in training_step
+    self.accelerator.backward(loss, **kwargs)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/accelerator.py", line 2842, in backward
+    self.deepspeed_engine_wrapped.backward(loss, sync_gradients=self.sync_gradients, **kwargs)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/utils/deepspeed.py", line 270, in backward
+    self.engine.backward(loss, **kwargs)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/utils/nvtx.py", line 20, in wrapped_fn
+    ret_val = func(*args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/runtime/engine.py", line 2625, in backward
+    loss.backward(**backward_kwargs)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/_tensor.py", line 625, in backward
+    torch.autograd.backward(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/autograd/__init__.py", line 354, in backward
+    _engine_run_backward(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/autograd/graph.py", line 841, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/autograd/function.py", line 315, in apply
+    return user_fn(self, *args)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/amp/autocast_mode.py", line 573, in decorate_bwd
+    return bwd(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/runtime/zero/linear.py", line 89, in backward
+    input, weight, bias = ctx.saved_tensors
+                          ^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/checkpoint.py", line 1158, in unpack_hook
+    frame.check_recomputed_tensors_match(gid)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/checkpoint.py", line 911, in check_recomputed_tensors_match
+    raise CheckpointError(
+torch.utils.checkpoint.CheckpointError: torch.utils.checkpoint: Recomputed values for the following tensors have different metadata than during the forward pass.
+tensor at position 6:
+saved metadata: {'shape': torch.Size([8192, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+tensor at position 17:
+saved metadata: {'shape': torch.Size([1024, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+tensor at position 28:
+saved metadata: {'shape': torch.Size([1024, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+tensor at position 49:
+saved metadata: {'shape': torch.Size([2560, 4096]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+tensor at position 60:
+saved metadata: {'shape': torch.Size([9216, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+tensor at position 67:
+saved metadata: {'shape': torch.Size([9216, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+tensor at position 75:
+saved metadata: {'shape': torch.Size([2560, 9216]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+.
+
+Tip: To see a more detailed error message, either pass `debug=True` to
+`torch.utils.checkpoint.checkpoint(...)` or wrap the code block
+with `with torch.utils.checkpoint.set_checkpoint_debug_enabled(True):` to
+enable checkpoint‑debug mode globally.
+
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 473, in <module>
+[rank0]:     main()
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py", line 465, in main
+[rank0]:     trainer.train()
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1437, in train
+[rank0]:     return inner_training_loop(
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1519, in _inner_training_loop
+[rank0]:     self._run_epoch(
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1747, in _run_epoch
+[rank0]:     tr_loss_step = self.training_step(model, inputs, num_items_in_batch)
+[rank0]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/trl/extras/profiling.py", line 98, in wrapper
+[rank0]:     return func(self, *args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/opsd_trainer.py", line 2177, in training_step
+[rank0]:     loss = super().training_step(model, inputs, num_items_in_batch)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/trl/trainer/sft_trainer.py", line 1112, in training_step
+[rank0]:     return super().training_step(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/transformers/trainer.py", line 1949, in training_step
+[rank0]:     self.accelerator.backward(loss, **kwargs)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/accelerator.py", line 2842, in backward
+[rank0]:     self.deepspeed_engine_wrapped.backward(loss, sync_gradients=self.sync_gradients, **kwargs)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/utils/deepspeed.py", line 270, in backward
+[rank0]:     self.engine.backward(loss, **kwargs)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/utils/nvtx.py", line 20, in wrapped_fn
+[rank0]:     ret_val = func(*args, **kwargs)
+[rank0]:               ^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/runtime/engine.py", line 2625, in backward
+[rank0]:     loss.backward(**backward_kwargs)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/_tensor.py", line 625, in backward
+[rank0]:     torch.autograd.backward(
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/autograd/__init__.py", line 354, in backward
+[rank0]:     _engine_run_backward(
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/autograd/graph.py", line 841, in _engine_run_backward
+[rank0]:     return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/autograd/function.py", line 315, in apply
+[rank0]:     return user_fn(self, *args)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/amp/autocast_mode.py", line 573, in decorate_bwd
+[rank0]:     return bwd(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/deepspeed/runtime/zero/linear.py", line 89, in backward
+[rank0]:     input, weight, bias = ctx.saved_tensors
+[rank0]:                           ^^^^^^^^^^^^^^^^^
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/checkpoint.py", line 1158, in unpack_hook
+[rank0]:     frame.check_recomputed_tensors_match(gid)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/utils/checkpoint.py", line 911, in check_recomputed_tensors_match
+[rank0]:     raise CheckpointError(
+[rank0]: torch.utils.checkpoint.CheckpointError: torch.utils.checkpoint: Recomputed values for the following tensors have different metadata than during the forward pass.
+[rank0]: tensor at position 6:
+[rank0]: saved metadata: {'shape': torch.Size([8192, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: tensor at position 17:
+[rank0]: saved metadata: {'shape': torch.Size([1024, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: tensor at position 28:
+[rank0]: saved metadata: {'shape': torch.Size([1024, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: tensor at position 49:
+[rank0]: saved metadata: {'shape': torch.Size([2560, 4096]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: tensor at position 60:
+[rank0]: saved metadata: {'shape': torch.Size([9216, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: tensor at position 67:
+[rank0]: saved metadata: {'shape': torch.Size([9216, 2560]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: tensor at position 75:
+[rank0]: saved metadata: {'shape': torch.Size([2560, 9216]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: recomputed metadata: {'shape': torch.Size([0]), 'dtype': torch.bfloat16, 'device': device(type='cuda', index=0)}
+[rank0]: .
+
+[rank0]: Tip: To see a more detailed error message, either pass `debug=True` to
+[rank0]: `torch.utils.checkpoint.checkpoint(...)` or wrap the code block
+[rank0]: with `with torch.utils.checkpoint.set_checkpoint_debug_enabled(True):` to
+[rank0]: enable checkpoint‑debug mode globally.
+
+[1;34mwandb[0m: 
+[1;34mwandb[0m: You can sync this run to the cloud by running:
+[1;34mwandb[0m: [1mwandb sync /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/wandb_runs/wandb/offline-run-20260810_133918-ygzwe3c8[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb_runs/wandb/offline-run-20260810_133918-ygzwe3c8/logs[0m
+W0810 13:39:39.153000 753538 site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 753719 closing signal SIGTERM
+E0810 13:39:39.217000 753538 site-packages/torch/distributed/elastic/multiprocessing/api.py:882] failed (exitcode: 1) local_rank: 1 (pid: 753720) of binary: /gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/bin/python3.11
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/bin/accelerate", line 6, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 50, in main
+    args.func(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1392, in launch_command
+    deepspeed_launcher(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1076, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/distributed/run.py", line 927, in run
+    elastic_launch(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 156, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/share/home/2501210611/miniconda3/envs/qwen3_5/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 293, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-08-10_13:39:39
+  host      : gpua800n25.hpc.pku.edu.cn
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 753720)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

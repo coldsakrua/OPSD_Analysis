@@ -34,6 +34,17 @@ require('else "Ï€"' in collator_source, "fixed wrong privileged answer must be Ï
 require("enable_thinking=self.student_thinking" in collator_source, "student template switch missing")
 require("enable_thinking=self.teacher_thinking" in collator_source, "teacher template switch missing")
 require("self.teacher_model.requires_grad_(False)" in trainer_source, "teacher must be frozen")
+require("left_align_prompt_completion" in trainer_source, "trainer must left-align prompt/completion packing")
+require((ROOT / "src/opsd_sequence.py").is_file(), "opsd_sequence helper missing")
+require((ROOT / "tests/test_token_alignment.py").is_file(), "token alignment tests missing")
+official_hyper = (
+    ROOT / "scripts/train/qwen3_1.7b/hyper/opsd_snt_tt_official_clip005_lr5e6.sh"
+)
+require(official_hyper.is_file(), "official-hyper ablation script missing")
+official_hyper_text = official_hyper.read_text(encoding="utf-8")
+require("JSD_TOKEN_CLIP=${JSD_TOKEN_CLIP:-0.05}" in official_hyper_text, "official-hyper clip default wrong")
+require("LEARNING_RATE=${LEARNING_RATE:-5e-6}" in official_hyper_text, "official-hyper lr default wrong")
+require("--no-student-thinking" in official_hyper_text and "--teacher-thinking" in official_hyper_text, "official-hyper thinking flags wrong")
 require('"--top-k-loss"' in train_source, "CLI must expose --top-k-loss")
 require('"--use-thinking-machines-loss"' in train_source, "CLI must expose --use-thinking-machines-loss")
 require("top_k_loss=args.top_k_loss" in train_source, "trainer must receive args.top_k_loss")

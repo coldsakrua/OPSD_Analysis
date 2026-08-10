@@ -135,8 +135,10 @@ def prompt_length_filter_applied(
         "irrelevant_trans",
         "sample_irrelevant_trans",
     }
+    other_problem_modes = {"irrelevant_other_sol"}
     field_ok = (
         str(privilege_mode) in no_gt_modes
+        or str(privilege_mode) in other_problem_modes
         or meta_priv_field == str(teacher_privilege_field)
         or (meta_priv_field == "solution" and str(teacher_privilege_field) == "answer")
         or (str(teacher_privilege_field) == "none")
@@ -151,12 +153,20 @@ def prompt_length_filter_applied(
         str(privilege_mode) == "correct_simple" and meta_mode == "correct"
     )
 
+    meta_model = str(meta.get("model_path", ""))
+    # Qwen3-1.7B / 4B share a tokenizer; allow reusing a 4b-filtered ios parquet on 1.7b.
+    model_ok = meta_model == str(model_path) or (
+        str(privilege_mode) in other_problem_modes
+        and "qwen3-4b" in meta_model
+        and ("qwen3-1.7b" in str(model_path) or "qwen3_1.7b" in str(model_path))
+    )
+
     return (
         mode_ok
         and thinking_ok
         and field_ok
         and int(meta.get("max_prompt_length", -1)) == int(max_prompt_length)
-        and str(meta.get("model_path", "")) == str(model_path)
+        and model_ok
     )
 
 
