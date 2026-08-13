@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=snt_tt_lora_clip005_lr5e6_instruct_h25_nt
+#SBATCH --job-name=lora_clip005_lr5e6_instruct_h25_nt
 #SBATCH --output=log/eval/4b_instruct/lora/hmmt25/nothink/%x.%j.out
 #SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
@@ -65,16 +65,14 @@ export VLLM_ATTENTION_BACKEND=XFORMERS
 export TOKENIZERS_PARALLELISM=false
 mkdir -p "$(dirname "${OUTPUT_JSON}")" "log/eval/4b_instruct/lora/hmmt25/nothink"
 
+# Instruct has no think mode.
 THINK_ARGS=(--no-thinking)
-if [[ "${THINKING}" == "1" ]]; then
-  THINK_ARGS=(--enable-thinking)
-fi
 
 echo "[eval] backend=vllm lora=1"
 echo "[eval] base_dir=${BASE_DIR}"
 echo "[eval] base_model=${BASE_MODEL_PATH}"
 echo "[eval] lora_adapter=${CHECKPOINT_PATH}"
-echo "[eval] dataset=${DATASET} thinking=${THINKING}"
+echo "[eval] dataset=${DATASET} thinking=off (Instruct has no think mode)"
 echo "[eval] eval_tag=${EVAL_TAG}"
 echo "[eval] output=${OUTPUT_JSON}"
 echo "[eval] conda_prefix=${CONDA_PREFIX}"

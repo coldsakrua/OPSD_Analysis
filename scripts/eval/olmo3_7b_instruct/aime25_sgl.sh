@@ -42,15 +42,13 @@ mkdir -p "$(dirname "${OUTPUT_JSON}")" "log/eval/olmo3_7b_instruct/aime25/sgl"
 # math-verify must be preinstalled in conda env `sglang` (compute nodes have no PyPI).
 python -c "import math_verify" >/dev/null
 
+# Instruct has no think mode.
 THINK_ARGS=(--no-thinking)
-if [[ "${THINKING}" == "1" ]]; then
-  THINK_ARGS=(--enable-thinking)
-fi
 
 echo "[eval] backend=sglang attention=triton"
 echo "[eval] base_dir=${BASE_DIR}"
 echo "[eval] checkpoint=${CHECKPOINT_PATH}"
-echo "[eval] dataset=${DATASET} thinking=${THINKING}"
+echo "[eval] dataset=${DATASET} thinking=off (Instruct has no think mode)"
 echo "[eval] output=${OUTPUT_JSON}"
 echo "[eval] conda_prefix=${CONDA_PREFIX}"
 

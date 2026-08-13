@@ -38,7 +38,7 @@ require("left_align_prompt_completion" in trainer_source, "trainer must left-ali
 require((ROOT / "src/opsd_sequence.py").is_file(), "opsd_sequence helper missing")
 require((ROOT / "tests/test_token_alignment.py").is_file(), "token alignment tests missing")
 official_hyper = (
-    ROOT / "scripts/train/qwen3_1.7b/hyper/opsd_snt_tt_official_clip005_lr5e6.sh"
+    ROOT / "scripts/train/qwen3_1.7b/jsd005/opsd_snt_tt_official_clip005_lr5e6.sh"
 )
 require(official_hyper.is_file(), "official-hyper ablation script missing")
 official_hyper_text = official_hyper.read_text(encoding="utf-8")

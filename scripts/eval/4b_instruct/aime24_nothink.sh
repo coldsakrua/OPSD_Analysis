@@ -43,14 +43,12 @@ export VLLM_ATTENTION_BACKEND=XFORMERS
 export TOKENIZERS_PARALLELISM=false
 mkdir -p "$(dirname "${OUTPUT_JSON}")" "log/eval/4b_instruct/aime24/nothink"
 
+# Instruct has no think mode.
 THINK_ARGS=(--no-thinking)
-if [[ "${THINKING}" == "1" ]]; then
-  THINK_ARGS=(--enable-thinking)
-fi
 
 echo "[eval] base_dir=${BASE_DIR}"
 echo "[eval] checkpoint=${CHECKPOINT_PATH}"
-echo "[eval] dataset=${DATASET} thinking=${THINKING}"
+echo "[eval] dataset=${DATASET} thinking=off (Instruct has no think mode)"
 echo "[eval] output=${OUTPUT_JSON}"
 echo "[eval] conda_prefix=${CONDA_PREFIX}"
 

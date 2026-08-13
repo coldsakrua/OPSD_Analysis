@@ -13,7 +13,7 @@
 set -euo pipefail
 
 # Olmo-3-7B-Instruct ios (irrelevant_other_sol):
-# - student AND teacher both nothink
+# - Instruct has no native think mode; thinking flags always off
 # - teacher prompt = Problem B + Solution B + Problem A (B from DAPO; never claims B solves A)
 # - Hyperparams aligned with olmo ot baseline: LR=1e-6, micro=4, gas=4, 4 GPU → gbs=64
 # - Rollout: SGLang Engine (triton), not vLLM
@@ -113,7 +113,7 @@ if [[ "${JSD_TOKEN_CLIP}" == "none" || "${JSD_TOKEN_CLIP}" == "None" || "${JSD_T
 fi
 
 echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_PRIVILEGE_FIELD}"
-echo "[launch] student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING}"
+echo "[launch] thinking=off (Instruct has no think mode)"
 echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP}"
 echo "[launch] micro=${PER_DEVICE_BATCH_SIZE} gas=${GRADIENT_ACCUMULATION_STEPS} gpus=${NUM_GPUS} → global_batch=${GLOBAL_BATCH}"
 echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS}"

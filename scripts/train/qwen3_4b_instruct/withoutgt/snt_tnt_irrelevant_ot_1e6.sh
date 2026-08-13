@@ -12,7 +12,7 @@
 set -euo pipefail
 
 # Instruct counterpart of qwen3_4b/withoutgt/snt_tt_irrelevant_ot_1e6.sh:
-# - No native think mode → student/teacher both enable_thinking=0
+# - Instruct has no native think mode; thinking flags always off
 # - Teacher: off-topic English cue (no solution/answer) + same student user content
 MODE=irrelevant
 TEACHER_PRIVILEGE_FIELD=none
@@ -64,7 +64,7 @@ fi
 THINK_ARGS=(--no-student-thinking --no-teacher-thinking)
 MASTER_PORT=${MASTER_PORT:-$((20000 + (${SLURM_JOB_ID:-$$} % 20000)))}
 
-echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_PRIVILEGE_FIELD} student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING} lr=${LEARNING_RATE}"
+echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_PRIVILEGE_FIELD} thinking=off lr=${LEARNING_RATE}"
 echo "[launch] model=${MODEL_PATH} dataset=${DATASET_PATH} output=${OUTPUT_DIR}"
 echo "[launch] master_port=${MASTER_PORT} 2 GPUs, microbatch=4, gas=4, global batch=32, vLLM util=0.4"
 

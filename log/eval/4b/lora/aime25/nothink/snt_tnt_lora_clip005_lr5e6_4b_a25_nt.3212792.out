@@ -49,4 +49,57 @@ INFO 08-10 21:25:11 [model_runner.py:1592] Graph capturing finished in 17 secs, 
 INFO 08-10 21:25:11 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 22.51 seconds
 [eval] LoRARequest -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/snt_tnt_lora_clip005_lr5e6_openthoughts_4b/3212546/checkpoint-100
 [eval] generating 30 prompts x n=8 (pass-at-k=[1, 4, 8], generate_batch_size=8) ...
-prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s]
+prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s]WARNING 08-10 21:53:04 [scheduler.py:1768] Sequence group 7_parallel_sample_6 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=1
+[eval] wrote partial json: 8/30 metrics=aime25_4b_nothink.metrics.json results=aime25_4b_nothink.results.json
+prompt_batches:  25%|██▌       | 1/4 [41:35<2:04:47, 2495.75s/it][eval] wrote partial json: 16/30 metrics=aime25_4b_nothink.metrics.json results=aime25_4b_nothink.results.json
+prompt_batches:  50%|█████     | 2/4 [2:14:14<2:23:14, 4297.33s/it]WARNING 08-11 00:11:02 [scheduler.py:1768] Sequence group 22_parallel_sample_5 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=51
+[eval] wrote partial json: 24/30 metrics=aime25_4b_nothink.metrics.json results=aime25_4b_nothink.results.json
+prompt_batches:  75%|███████▌  | 3/4 [2:58:54<59:19, 3559.14s/it]  [eval] wrote partial json: 30/30 metrics=aime25_4b_nothink.metrics.json results=aime25_4b_nothink.results.json
+prompt_batches: 100%|██████████| 4/4 [3:59:25<00:00, 3587.23s/it]prompt_batches: 100%|██████████| 4/4 [3:59:25<00:00, 3591.30s/it]
+[eval] wrote partial json: 30/30 metrics=aime25_4b_nothink.metrics.json results=aime25_4b_nothink.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tnt_lora_clip005_lr5e6_4b_ckpt100/aime25_4b_nothink.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tnt_lora_clip005_lr5e6_4b_ckpt100/aime25_4b_nothink.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 23.33% (7/30)
+  Pass@4: 26.67% (8/30)
+  Pass@8: 33.33% (10/30)
+  Avg1(one-shot hit rate): 23.33%
+  Avg16(overall correctness): 18.75%
+  Avg output tokens: 15663.9
+[aime25] n=30
+  Pass@1: 23.33% (7/30)
+  Pass@4: 26.67% (8/30)
+  Pass@8: 33.33% (10/30)
+  Avg1(one-shot hit rate): 23.33%
+  Avg16(overall correctness): 18.75%
+  Avg output tokens: 15663.9
+[BY_CATEGORY]
+[__uncategorized__] n=30
+  Pass@1: 23.33% (7/30)
+  Pass@4: 26.67% (8/30)
+  Pass@8: 33.33% (10/30)
+  Avg1(one-shot hit rate): 23.33%
+  Avg16(overall correctness): 18.75%
+  Avg output tokens: 15663.9
+Avg correct / sample: 18.75%
+Majority vote: 26.67%
+Boxed format rate: 60.00%
+Avg output tokens: 15663.9
+[TOKEN_BUDGET]
+[aime25] n=30
+  @1k: Pass@8=6.67% (2/30)  Avg16=2.92%
+  @2k: Pass@8=20.00% (6/30)  Avg16=12.50%
+  @4k: Pass@8=33.33% (10/30)  Avg16=18.75%
+  @8k: Pass@8=33.33% (10/30)  Avg16=18.75%
+  @16k: Pass@8=33.33% (10/30)  Avg16=18.75%
+  @32k: Pass@8=33.33% (10/30)  Avg16=18.75%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime25] n=30  P@16=0.00%  Avg16=18.75%  L=15663.9  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime25] n=30  P@16=0.00%  Avg16=18.75%  L=15663.9  pass/log2(16L)=0.0000  avg/log2(16L)=1.0454
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tnt_lora_clip005_lr5e6_4b_ckpt100/aime25_4b_nothink.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tnt_lora_clip005_lr5e6_4b_ckpt100/aime25_4b_nothink.results.json
+============================================================
+[rank0]:[W811 01:25:22.962975567 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())

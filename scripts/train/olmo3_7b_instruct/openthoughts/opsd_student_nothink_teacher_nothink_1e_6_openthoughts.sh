@@ -12,7 +12,7 @@
 #SBATCH --exclude=gpua800n03,gpua800n10,gpua800n13,gpua800n21
 set -euo pipefail
 
-# Olmo-3-7B-Instruct OPSD (student/teacher both no-think, teacher gets full solution).
+# Olmo-3-7B-Instruct OPSD (no native think mode; teacher gets full solution).
 # Hyperparams aligned with qwen3_4b_instruct OpenThoughts baseline:
 #   LR=1e-6, JSD_TOKEN_CLIP=1e-6, micro=4, gas=4, 4 GPU → global_batch=64
 # Rollout: SGLang Engine (triton), not vLLM.
@@ -159,7 +159,7 @@ if [[ "${JSD_TOKEN_CLIP}" == "none" || "${JSD_TOKEN_CLIP}" == "None" || "${JSD_T
 fi
 
 echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_PRIVILEGE_FIELD}"
-echo "[launch] student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING}"
+echo "[launch] thinking=off (Instruct has no think mode)"
 echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP}"
 echo "[launch] micro=${PER_DEVICE_BATCH_SIZE} gas=${GRADIENT_ACCUMULATION_STEPS} gpus=${NUM_GPUS} → global_batch=${GLOBAL_BATCH}"
 echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS}"

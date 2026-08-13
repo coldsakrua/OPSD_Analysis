@@ -11,7 +11,7 @@
 #SBATCH --exclude=gpua800n02,gpua800n03,gpua800n04,gpua800n06,gpua800n09,gpua800n10,gpua800n13,gpua800n14
 set -euo pipefail
 
-# Qwen3-4B-Instruct OPSD (student/teacher both no-think, teacher gets full solution).
+# Qwen3-4B-Instruct OPSD (no native think mode; teacher gets full solution).
 # Hyperparams are env-overridable so thin variant wrappers can sweep lr / jsd_clip / batch.
 #
 # Defaults match the original 1e-6 run:
@@ -97,7 +97,7 @@ if [[ "${JSD_TOKEN_CLIP}" == "none" || "${JSD_TOKEN_CLIP}" == "None" || "${JSD_T
 fi
 
 echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_PRIVILEGE_FIELD}"
-echo "[launch] student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING}"
+echo "[launch] thinking=off (Instruct has no think mode)"
 echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP}"
 echo "[launch] teacher_update_steps=${TEACHER_UPDATE_STEPS:-fixed}"
 echo "[launch] micro=${PER_DEVICE_BATCH_SIZE} gas=${GRADIENT_ACCUMULATION_STEPS} gpus=${NUM_GPUS} → global_batch=${GLOBAL_BATCH}"
