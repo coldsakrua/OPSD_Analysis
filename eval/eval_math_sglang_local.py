@@ -13,7 +13,12 @@ from typing import Any, Dict, List, Optional
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-from verl_rlsd.olmo_chat_template import is_olmo_model_path, maybe_install_olmo_chat_template
+from verl_rlsd.olmo_chat_template import (
+    is_olmo_instruct_model_path,
+    is_olmo_model_path,
+    is_olmo_think_model_path,
+    maybe_install_olmo_chat_template,
+)
 
 from eval_math_vllm_local import (
     _HAS_MATH_VERIFY,
@@ -225,9 +230,20 @@ def main() -> None:
     model_path = str(Path(args.model_path).expanduser().resolve())
     is_gemma3 = _is_gemma3_model(model_path)
     is_olmo = is_olmo_model_path(model_path)
-    enable_thinking = bool(args.enable_thinking) and not is_gemma3 and not is_olmo
-    if is_olmo and args.enable_thinking:
+    is_olmo_think = is_olmo_think_model_path(model_path)
+    is_olmo_instruct = is_olmo_instruct_model_path(model_path)
+    # Olmo-Instruct has no think mode; Olmo-Think uses chat_template.jinja that
+    # already opens with <think> (no HF enable_thinking switch).
+    enable_thinking = bool(args.enable_thinking) and not is_gemma3 and not is_olmo_instruct
+    if is_olmo_instruct and args.enable_thinking:
         print("[eval] Olmo-3-Instruct has no thinking mode; using instruct settings", flush=True)
+    if is_olmo_think:
+        print(
+            "[eval] Olmo-3-Think: using model chat_template.jinja "
+            "(generation prompt ends with <think>); "
+            f"official sampling temp=0.6 top_p=0.95 max_tokens=32768",
+            flush=True,
+        )
 
     temperature = args.temperature
     top_p = args.top_p
@@ -251,16 +267,34 @@ def main() -> None:
     )
 
     tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
-    maybe_install_olmo_chat_template(tokenizer)
+    maybe_install_olmo_chat_template(tokenizer, model_path=model_path)
     stop_ids = _stop_token_ids(tokenizer)
     print(f"[eval] stop_token_ids={stop_ids}", flush=True)
+    # Smoke-check Think template opens the assistant turn with <think>.
+    if is_olmo_think:
+        _probe = _apply_chat_prompt(
+            tokenizer, [{"role": "user", "content": "ping"}], enable_thinking=False
+        )
+        if not _probe.rstrip().endswith("<think>"):
+            print(
+                "[warn] Olmo-Think chat template did not end with <think>; "
+                f"prompt_tail={_probe[-120:]!r}",
+                flush=True,
+            )
+        else:
+            print("[eval] Think chat template OK (assistant opens with <think>)", flush=True)
 
     all_prompts: List[str] = []
     for ex in examples:
         eval_type = str(ex.get("eval_type", "boxed_math"))
         user_suffix = _math_user_suffix(eval_type, is_gemma3)
         messages = [{"role": "user", "content": ex["problem"] + user_suffix}]
-        all_prompts.append(_apply_chat_prompt(tokenizer, messages, enable_thinking))
+        # Olmo templates ignore enable_thinking; pass False to avoid unused jinja vars.
+        all_prompts.append(
+            _apply_chat_prompt(
+                tokenizer, messages, False if is_olmo else enable_thinking
+            )
+        )
 
     from sglang import Engine
 

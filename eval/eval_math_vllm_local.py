@@ -23,7 +23,12 @@ from verl_rlsd.ministral_tokenizer import (
     load_eval_tokenizer,
     patch_vllm_ministral_tokenizer,
 )
-from verl_rlsd.olmo_chat_template import is_olmo_model_path, maybe_install_olmo_chat_template
+from verl_rlsd.olmo_chat_template import (
+    is_olmo_instruct_model_path,
+    is_olmo_model_path,
+    is_olmo_think_model_path,
+    maybe_install_olmo_chat_template,
+)
 
 ensure_ministral_config_registered()
 
@@ -158,6 +163,23 @@ def extract_boxed_answer(text: str) -> Optional[str]:
     return None
 
 
+_THINK_BLOCK_RE = re.compile(r"<think>.*?</think>", flags=re.DOTALL | re.IGNORECASE)
+_THINK_OPENERS = ("<think>",)
+
+
+def _strip_thinking_for_eval(text: str) -> str:
+    """Prefer answer after </think> (Olmo-Think / Qwen-style CoT)."""
+    if not text:
+        return ""
+    cleaned = _THINK_BLOCK_RE.sub("", text)
+    for opener in _THINK_OPENERS:
+        idx = cleaned.lower().find(opener.lower())
+        if idx >= 0:
+            # Truncated mid-think: drop from opener onward.
+            cleaned = cleaned[:idx]
+    return cleaned.strip()
+
+
 _RELAXED_MATH_ANSWER_PATTERNS = (
     r"[Tt]he answer is:?\s*\$([^$]+)\$",
     r"[Tt]he answer is:?\s*\\boxed\{([^}]+)\}",
@@ -189,9 +211,19 @@ def extract_relaxed_math_answer(text: str) -> Optional[str]:
 
 
 def extract_math_answer(text: str, *, relaxed: bool = False) -> Optional[str]:
-    if relaxed:
-        return extract_relaxed_math_answer(text)
-    return extract_boxed_answer(text)
+    # Prefer final answer after thinking blocks; fall back to full text if none.
+    stripped = _strip_thinking_for_eval(text or "")
+    candidates = [stripped, text or ""] if stripped != (text or "") else [text or ""]
+    for cand in candidates:
+        if not cand:
+            continue
+        if relaxed:
+            ans = extract_relaxed_math_answer(cand)
+        else:
+            ans = extract_boxed_answer(cand)
+        if ans is not None:
+            return ans
+    return None
 
 
 def normalize_math_ground_truth(ground_truth: str) -> str:
@@ -1763,15 +1795,23 @@ def main() -> None:
     lora_dir_str = str(lora_dir) if lora_dir is not None else None
     is_gemma3 = _is_gemma3_model(vllm_model_path)
     is_olmo = is_olmo_model_path(vllm_model_path)
-    enable_thinking = bool(args.enable_thinking) and not is_gemma3 and not is_olmo
+    is_olmo_think = is_olmo_think_model_path(vllm_model_path)
+    is_olmo_instruct = is_olmo_instruct_model_path(vllm_model_path)
+    enable_thinking = bool(args.enable_thinking) and not is_gemma3 and not is_olmo_instruct
     if is_gemma3 and args.enable_thinking:
         print(
             "[eval] Gemma 3 has no enable_thinking chat-template switch; using thinking=False",
             flush=True,
         )
-    if is_olmo and args.enable_thinking:
+    if is_olmo_instruct and args.enable_thinking:
         print(
             "[eval] Olmo-3-Instruct has no thinking mode; using official instruct settings",
+            flush=True,
+        )
+    if is_olmo_think:
+        print(
+            "[eval] Olmo-3-Think: chat_template.jinja opens assistant with <think>; "
+            "official sampling temp=0.6 top_p=0.95 max_tokens=32768",
             flush=True,
         )
 
@@ -1808,14 +1848,18 @@ def main() -> None:
         tokenizer_src = str(lora_dir.resolve())
     print(f"[eval] tokenizer_source={tokenizer_src}")
     tokenizer = load_eval_tokenizer(tokenizer_src)
-    maybe_install_olmo_chat_template(tokenizer)
+    maybe_install_olmo_chat_template(tokenizer, model_path=vllm_model_path)
 
     all_prompts: List[str] = []
     for ex in examples:
         eval_type = str(ex.get("eval_type", "boxed_math"))
         user_suffix = _math_user_suffix(eval_type, is_gemma3)
         messages = [{"role": "user", "content": ex["problem"] + user_suffix}]
-        all_prompts.append(_apply_chat_prompt(tokenizer, messages, enable_thinking))
+        all_prompts.append(
+            _apply_chat_prompt(
+                tokenizer, messages, False if is_olmo else enable_thinking
+            )
+        )
 
     prompt_lens = [len(tokenizer.encode(p, add_special_tokens=False)) for p in all_prompts]
     max_prompt_tokens = max(prompt_lens) if prompt_lens else 0

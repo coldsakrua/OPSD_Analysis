@@ -18,9 +18,14 @@ set -euo pipefail
 #   LR=1e-6, JSD_TOKEN_CLIP=0.05, micro=4, gas=4, 4 GPU → global_batch=64
 # Rollout: SGLang Engine (triton), not vLLM.
 #
+# Length wrappers (jsd005/length/) may override:
+#   MAX_COMPLETION_LENGTH / PER_DEVICE_BATCH_SIZE / GRADIENT_ACCUMULATION_STEPS
+#   TARGET_GLOBAL_BATCH (default 64) is asserted: micro * gas * num_gpus == target.
+#
 # Examples:
 #   MAX_STEPS=2 sbatch this.sh
 #   PER_DEVICE_BATCH_SIZE=2 SGLANG_MEM_FRACTION_STATIC=0.35 sbatch this.sh
+#   MAX_COMPLETION_LENGTH=2048 PER_DEVICE_BATCH_SIZE=2 GRADIENT_ACCUMULATION_STEPS=8 sbatch this.sh
 
 MODE=${MODE:-opsd}
 TEACHER_PRIVILEGE_FIELD=${TEACHER_PRIVILEGE_FIELD:-solution}
@@ -29,8 +34,11 @@ TEACHER_THINKING=${TEACHER_THINKING:-0}
 
 LEARNING_RATE=${LEARNING_RATE:-1e-6}
 JSD_TOKEN_CLIP=${JSD_TOKEN_CLIP:-0.05}
+MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-1024}
+MAX_COMPLETION_LENGTH=${MAX_COMPLETION_LENGTH:-1024}
 PER_DEVICE_BATCH_SIZE=${PER_DEVICE_BATCH_SIZE:-4}
 GRADIENT_ACCUMULATION_STEPS=${GRADIENT_ACCUMULATION_STEPS:-4}
+TARGET_GLOBAL_BATCH=${TARGET_GLOBAL_BATCH:-64}
 MAX_STEPS=${MAX_STEPS:-100}
 SAVE_STEPS=${SAVE_STEPS:-25}
 SGLANG_MEM_FRACTION_STATIC=${SGLANG_MEM_FRACTION_STATIC:-0.40}
@@ -117,6 +125,13 @@ MASTER_PORT=${MASTER_PORT:-$((20000 + (${SLURM_JOB_ID:-$$} % 20000)))}
 
 NUM_GPUS=4
 GLOBAL_BATCH=$((PER_DEVICE_BATCH_SIZE * GRADIENT_ACCUMULATION_STEPS * NUM_GPUS))
+MAX_SEQ_LEN=$((MAX_PROMPT_LENGTH + MAX_COMPLETION_LENGTH))
+
+if [[ "${GLOBAL_BATCH}" -ne "${TARGET_GLOBAL_BATCH}" ]]; then
+  echo "[error] global_batch=${GLOBAL_BATCH} != TARGET_GLOBAL_BATCH=${TARGET_GLOBAL_BATCH}" >&2
+  echo "[error] keep samples/update fixed: micro * gas * gpus must equal ${TARGET_GLOBAL_BATCH}" >&2
+  exit 1
+fi
 
 if [[ "${JSD_TOKEN_CLIP}" == "none" || "${JSD_TOKEN_CLIP}" == "None" || "${JSD_TOKEN_CLIP}" == "NONE" ]]; then
   JSD_TOKEN_CLIP=0
@@ -126,6 +141,7 @@ echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_P
 echo "[launch] thinking=off (Instruct has no think mode)"
 echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP}"
 echo "[launch] micro=${PER_DEVICE_BATCH_SIZE} gas=${GRADIENT_ACCUMULATION_STEPS} gpus=${NUM_GPUS} → global_batch=${GLOBAL_BATCH}"
+echo "[launch] prompt=${MAX_PROMPT_LENGTH} completion=${MAX_COMPLETION_LENGTH} max_seq=${MAX_SEQ_LEN}"
 echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS}"
 echo "[launch] model=${MODEL_PATH} dataset=${DATASET_PATH} output=${OUTPUT_DIR}"
 echo "[launch] master_port=${MASTER_PORT} rollout=${ROLLOUT_BACKEND} sglang_mem=${SGLANG_MEM_FRACTION_STATIC} attn=${SGLANG_ATTENTION_BACKEND}"
@@ -143,8 +159,8 @@ accelerate launch \
   --teacher-privilege-field "${TEACHER_PRIVILEGE_FIELD}" \
   --max-steps "${MAX_STEPS}" \
   --save-steps "${SAVE_STEPS}" \
-  --max-prompt-length 1024 \
-  --max-completion-length 1024 \
+  --max-prompt-length "${MAX_PROMPT_LENGTH}" \
+  --max-completion-length "${MAX_COMPLETION_LENGTH}" \
   --per-device-batch-size "${PER_DEVICE_BATCH_SIZE}" \
   --gradient-accumulation-steps "${GRADIENT_ACCUMULATION_STEPS}" \
   --learning-rate "${LEARNING_RATE}" \

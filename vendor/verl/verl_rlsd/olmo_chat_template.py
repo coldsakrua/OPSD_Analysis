@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 OLMO_DEFAULT_SYSTEM_MESSAGE = (
@@ -7,6 +8,8 @@ OLMO_DEFAULT_SYSTEM_MESSAGE = (
     "You do not currently have access to any functions. <functions></functions>"
 )
 
+# Fallback for Olmo *base* / Instruct when chat_template.jinja is missing.
+# Think models ship chat_template.jinja that ends generation prompt with "<think>".
 OLMO_CHAT_TEMPLATE = """{%- set has_system = messages|selectattr('role', 'equalto', 'system')|list|length > 0 -%}
 {%- if not has_system -%}
 <|im_start|>system
@@ -48,6 +51,23 @@ def is_olmo_tokenizer(tokenizer: Any) -> bool:
     return "olmo" in init_name
 
 
+def is_olmo_model_path(model_path: str | None) -> bool:
+    return "olmo" in str(model_path or "").lower()
+
+
+def is_olmo_think_model_path(model_path: str | None) -> bool:
+    """True for Olmo-3-*Think* (path / HF id containing 'think')."""
+    p = str(model_path or "").lower()
+    return "olmo" in p and "think" in p
+
+
+def is_olmo_instruct_model_path(model_path: str | None) -> bool:
+    """True for Olmo Instruct / IT; False for Think."""
+    if not is_olmo_model_path(model_path):
+        return False
+    return not is_olmo_think_model_path(model_path)
+
+
 def install_olmo_chat_template(tokenizer: Any) -> None:
     """Install ChatML-style chat template for Olmo base models."""
     if tokenizer is None or not hasattr(tokenizer, "apply_chat_template"):
@@ -61,15 +81,29 @@ def install_olmo_chat_template(tokenizer: Any) -> None:
 
 
 def load_olmo_chat_template(model_path: str | None = None) -> str:
-    """Return Jinja chat template string for Olmo base/instruct models."""
-    _ = model_path
+    """Return Jinja chat template: prefer model-dir chat_template.jinja, else Instruct fallback."""
+    if model_path:
+        jinja = Path(model_path).expanduser() / "chat_template.jinja"
+        if jinja.is_file():
+            return jinja.read_text(encoding="utf-8")
     return OLMO_CHAT_TEMPLATE
 
 
-def is_olmo_model_path(model_path: str | None) -> bool:
-    return "olmo" in str(model_path or "").lower()
+def maybe_install_olmo_chat_template(tokenizer: Any, model_path: str | None = None) -> None:
+    """
+    Ensure Olmo tokenizer has a chat template.
 
-
-def maybe_install_olmo_chat_template(tokenizer: Any) -> None:
-    if is_olmo_tokenizer(tokenizer):
-        install_olmo_chat_template(tokenizer)
+    Prefer the model's shipped ``chat_template.jinja`` (Think prepends ``<think>``;
+    Instruct does not). Only fall back to the hard-coded Instruct template when neither
+    tokenizer.chat_template nor a jinja file is available.
+    """
+    if not is_olmo_tokenizer(tokenizer) and not is_olmo_model_path(model_path):
+        return
+    if getattr(tokenizer, "chat_template", None):
+        return
+    path = model_path or str(getattr(tokenizer, "name_or_path", "") or "")
+    template = load_olmo_chat_template(path if path else None)
+    tokenizer.chat_template = template
+    inner = getattr(tokenizer, "tokenizer", None)
+    if inner is not None and inner is not tokenizer and not getattr(inner, "chat_template", None):
+        inner.chat_template = template

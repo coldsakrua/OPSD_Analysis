@@ -15,7 +15,12 @@ import torch
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM
 
-from verl_rlsd.olmo_chat_template import is_olmo_model_path, maybe_install_olmo_chat_template
+from verl_rlsd.olmo_chat_template import (
+    is_olmo_instruct_model_path,
+    is_olmo_model_path,
+    is_olmo_think_model_path,
+    maybe_install_olmo_chat_template,
+)
 from verl_rlsd.ministral_tokenizer import load_eval_tokenizer
 
 # Reuse dataset loading + grading from the vLLM eval entrypoint.
@@ -212,9 +217,16 @@ def main() -> None:
     model_path = str(Path(args.model_path).expanduser().resolve())
     is_gemma3 = _is_gemma3_model(model_path)
     is_olmo = is_olmo_model_path(model_path)
-    enable_thinking = bool(args.enable_thinking) and not is_gemma3 and not is_olmo
-    if is_olmo and args.enable_thinking:
+    is_olmo_think = is_olmo_think_model_path(model_path)
+    is_olmo_instruct = is_olmo_instruct_model_path(model_path)
+    enable_thinking = bool(args.enable_thinking) and not is_gemma3 and not is_olmo_instruct
+    if is_olmo_instruct and args.enable_thinking:
         print("[eval] Olmo-3-Instruct has no thinking mode; using instruct settings", flush=True)
+    if is_olmo_think:
+        print(
+            "[eval] Olmo-3-Think: chat_template.jinja opens assistant with <think>",
+            flush=True,
+        )
 
     temperature = args.temperature
     top_p = args.top_p
@@ -225,7 +237,7 @@ def main() -> None:
     print(f"[eval] temp={temperature} top_p={top_p} top_k={top_k} max_new_tokens={max_new_tokens} n={gen_n}", flush=True)
 
     tokenizer = load_eval_tokenizer(model_path)
-    maybe_install_olmo_chat_template(tokenizer)
+    maybe_install_olmo_chat_template(tokenizer, model_path=model_path)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -248,7 +260,11 @@ def main() -> None:
         eval_type = str(ex.get("eval_type", "boxed_math"))
         user_suffix = _math_user_suffix(eval_type, is_gemma3)
         messages = [{"role": "user", "content": ex["problem"] + user_suffix}]
-        all_prompts.append(_apply_chat_prompt(tokenizer, messages, enable_thinking))
+        all_prompts.append(
+            _apply_chat_prompt(
+                tokenizer, messages, False if is_olmo else enable_thinking
+            )
+        )
 
     out_path = Path(args.output_json)
     out_path.parent.mkdir(parents=True, exist_ok=True)
