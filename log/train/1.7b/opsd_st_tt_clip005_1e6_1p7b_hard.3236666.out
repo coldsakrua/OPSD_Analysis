@@ -1,0 +1,759 @@
+[launch] run=st_tt_clip005_1e_6_mn_hard_1p7b_3236666 mode=opsd privilege_field=solution
+[launch] band=hard (MathNet gold CoT decile 8-9, long) student_thinking=1 teacher_thinking=1
+[launch] lr=1e-6 jsd_token_clip=0.05
+[launch] micro=8 gas=4 gpus=2 → global_batch=64
+[launch] max_steps=100 save_steps=25 → total_samples=6400
+[launch] prompt=4096 completion=1024 max_seq=5120
+[launch] model=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b dataset=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/mathnet_text/preprocessed/mathnet_text.cotlen_hard.opsd.solution.sthink_tthink.qwen3_1.7b.maxprompt4096.parquet output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666
+[launch] master_port=36666 vLLM util=0.4
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+W0815 22:03:16.810000 3583731 site-packages/torch/distributed/run.py:792] 
+W0815 22:03:16.810000 3583731 site-packages/torch/distributed/run.py:792] *****************************************
+W0815 22:03:16.810000 3583731 site-packages/torch/distributed/run.py:792] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0815 22:03:16.810000 3583731 site-packages/torch/distributed/run.py:792] *****************************************
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+⚙️  Running in WANDB offline mode
+⚙️  Running in WANDB offline mode
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 2493 examples [00:00, 9807.07 examples/s]Generating train split: 2493 examples [00:00, 9785.64 examples/s]
+[dataset] already has problem/solution; skip field normalization
+[dataset] prompt length already filtered offline; keep 2493 examples
+[dataset] already has problem/solution; skip field normalization
+[dataset] prompt length already filtered offline; keep 2493 examples
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b student_thinking=True teacher_thinking=True rollout_backend=vllm use_peft=False fixed_teacher=True lora_r=None lora_alpha=None lr=1e-06 jsd_token_clip=0.05 top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.1 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=0.0 global_batch=64 (micro=8 gas=4 world=2) prompt=4096 response=1024
+`torch_dtype` is deprecated! Use `dtype` instead!
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b student_thinking=True teacher_thinking=True rollout_backend=vllm use_peft=False fixed_teacher=True lora_r=None lora_alpha=None lr=1e-06 jsd_token_clip=0.05 top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.1 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=0.0 global_batch=64 (micro=8 gas=4 world=2) prompt=4096 response=1024
+`torch_dtype` is deprecated! Use `dtype` instead!
+NCCL version 2.21.5+cuda12.4
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:10<00:10, 10.43s/it]Loading checkpoint shards:  50%|█████     | 1/2 [00:10<00:10, 10.89s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:10<00:00,  4.57s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:10<00:00,  5.45s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:12<00:00,  5.42s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:12<00:00,  6.24s/it]
+Detected kernel version 4.18.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:07<00:07,  7.35s/it]Loading checkpoint shards:  50%|█████     | 1/2 [00:06<00:06,  6.28s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:07<00:00,  3.30s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:07<00:00,  3.91s/it]
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher is an independent frozen copy of the initial checkpoint
+Student updates all parameters; teacher receives no gradients
+================================================================================
+
+Loading checkpoint shards: 100%|██████████| 2/2 [00:07<00:00,  3.31s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:07<00:00,  3.76s/it]
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher is an independent frozen copy of the initial checkpoint
+Student updates all parameters; teacher receives no gradients
+================================================================================
+
+`torch_dtype` is deprecated! Use `dtype` instead!
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:06<00:00,  3.43s/it]
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:06<00:00,  3.43s/it]
+
+Capturing CUDA graph shapes:   0%|          | 0/7 [00:00<?, ?it/s]Capturing CUDA graph shapes:   0%|          | 0/7 [00:00<?, ?it/s]Capturing CUDA graph shapes:  14%|█▍        | 1/7 [00:00<00:03,  1.54it/s]Capturing CUDA graph shapes:  14%|█▍        | 1/7 [00:00<00:03,  1.52it/s]Capturing CUDA graph shapes:  29%|██▊       | 2/7 [00:01<00:02,  1.78it/s]Capturing CUDA graph shapes:  29%|██▊       | 2/7 [00:01<00:02,  1.75it/s]Capturing CUDA graph shapes:  43%|████▎     | 3/7 [00:01<00:02,  1.71it/s]Capturing CUDA graph shapes:  43%|████▎     | 3/7 [00:01<00:02,  1.69it/s]Capturing CUDA graph shapes:  57%|█████▋    | 4/7 [00:02<00:01,  1.77it/s]Capturing CUDA graph shapes:  57%|█████▋    | 4/7 [00:02<00:01,  1.77it/s]Capturing CUDA graph shapes:  71%|███████▏  | 5/7 [00:02<00:01,  1.84it/s]Capturing CUDA graph shapes:  71%|███████▏  | 5/7 [00:02<00:01,  1.83it/s]Capturing CUDA graph shapes:  86%|████████▌ | 6/7 [00:03<00:00,  1.87it/s]Capturing CUDA graph shapes:  86%|████████▌ | 6/7 [00:03<00:00,  1.86it/s]Capturing CUDA graph shapes: 100%|██████████| 7/7 [00:03<00:00,  1.86it/s]Capturing CUDA graph shapes: 100%|██████████| 7/7 [00:03<00:00,  1.81it/s]
+Capturing CUDA graph shapes: 100%|██████████| 7/7 [00:03<00:00,  1.85it/s]Capturing CUDA graph shapes: 100%|██████████| 7/7 [00:03<00:00,  1.80it/s]
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None, 'pad_token_id': 151643}.
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None, 'pad_token_id': 151643}.
+wandb: Tracking run with wandb version 0.26.1
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/wandb/wandb/offline-run-20260815_220451-8nsztdev
+wandb: Detected [openai] in use.
+wandb: Use W&B Weave for improved LLM call tracing. Weave is installed but not imported. Add `import weave` to the top of your script.
+wandb: For more information, check out the docs at: https://weave-docs.wandb.ai
+  0%|          | 0/100 [00:00<?, ?it/s]vLLM generation done - elapsed time: 11.90s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2753.6 tok/s
+Could not estimate the number of tokens of the input, floating-point operations will not be computed
+Could not estimate the number of tokens of the input, floating-point operations will not be computed
+  1%|          | 1/100 [00:25<41:43, 25.29s/it]                                               {'loss': -0.0096, 'grad_norm': 0.3825494018199435, 'learning_rate': 0.0, 'on_policy_loss': -0.0096, 'rollout/tokens_per_second': 2753.5610688057523, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26166977301760147, 'opsd/teacher_entropy': 0.25724858226840136, 'opsd/student_sampled_logp': -0.22808857449122916, 'opsd/teacher_sampled_logp': -0.34463979505012027, 'opsd/forward_kl_teacher_student': 0.14915648322555927, 'opsd/reverse_kl_student_teacher': 0.11843099993639547, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0092315673828125, 'system/gpu_allocated_gib': 42.443947315216064, 'system/gpu_reserved_gib': 69.54541015625, 'system/gpu_peak_allocated_gib': 72.89688563346863, 'epoch': 0.03}
+  1%|          | 1/100 [00:25<41:43, 25.29s/it]vLLM generation done - elapsed time: 11.99s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2732.3 tok/s
+  2%|▏         | 2/100 [00:50<41:36, 25.48s/it]                                               {'loss': -0.0099, 'grad_norm': 0.3785242332907278, 'learning_rate': 1e-07, 'on_policy_loss': -0.0099, 'rollout/tokens_per_second': 2732.3126777947627, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2838737657025663, 'opsd/teacher_entropy': 0.279761606610915, 'opsd/student_sampled_logp': -0.24361487461497788, 'opsd/teacher_sampled_logp': -0.3702036088685212, 'opsd/forward_kl_teacher_student': 0.16779189077078188, 'opsd/reverse_kl_student_teacher': 0.1274829100429612, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.010162353515625, 'system/gpu_allocated_gib': 47.25193691253662, 'system/gpu_reserved_gib': 74.5048828125, 'system/gpu_peak_allocated_gib': 79.93669843673706, 'epoch': 0.05}
+  2%|▏         | 2/100 [00:51<41:36, 25.48s/it]vLLM generation done - elapsed time: 12.00s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2731.3 tok/s
+  3%|▎         | 3/100 [01:15<40:48, 25.24s/it]                                               {'loss': -0.0095, 'grad_norm': 0.40340588814357436, 'learning_rate': 2e-07, 'on_policy_loss': -0.0095, 'rollout/tokens_per_second': 2731.3371328965213, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2881109921844207, 'opsd/teacher_entropy': 0.282934176628314, 'opsd/student_sampled_logp': -0.24887608493911856, 'opsd/teacher_sampled_logp': -0.3913519069687098, 'opsd/forward_kl_teacher_student': 0.1849893586864635, 'opsd/reverse_kl_student_teacher': 0.14263282556326418, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0101470947265625, 'system/gpu_allocated_gib': 47.2520112991333, 'system/gpu_reserved_gib': 74.74462890625, 'system/gpu_peak_allocated_gib': 79.95426321029663, 'epoch': 0.08}
+  3%|▎         | 3/100 [01:16<40:48, 25.24s/it]vLLM generation done - elapsed time: 11.99s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2733.2 tok/s
+  4%|▍         | 4/100 [01:40<39:51, 24.92s/it]                                               {'loss': -0.0096, 'grad_norm': 0.4086852337336255, 'learning_rate': 3e-07, 'on_policy_loss': -0.0096, 'rollout/tokens_per_second': 2733.237498371013, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2710394301647315, 'opsd/teacher_entropy': 0.26714599141075734, 'opsd/student_sampled_logp': -0.2332003913543183, 'opsd/teacher_sampled_logp': -0.3676456896400429, 'opsd/forward_kl_teacher_student': 0.17571748835238368, 'opsd/reverse_kl_student_teacher': 0.13856713962805367, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0096282958984375, 'system/gpu_allocated_gib': 47.25305986404419, 'system/gpu_reserved_gib': 75.943359375, 'system/gpu_peak_allocated_gib': 81.85150635242462, 'epoch': 0.1}
+  4%|▍         | 4/100 [01:40<39:51, 24.92s/it]vLLM generation done - elapsed time: 12.00s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2731.1 tok/s
+  5%|▌         | 5/100 [02:06<39:58, 25.25s/it]                                               {'loss': -0.01, 'grad_norm': 0.38953715635340985, 'learning_rate': 4e-07, 'on_policy_loss': -0.01, 'rollout/tokens_per_second': 2731.120409585336, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.27746582370068784, 'opsd/teacher_entropy': 0.271446593108331, 'opsd/student_sampled_logp': -0.23769439941861306, 'opsd/teacher_sampled_logp': -0.3745742403586584, 'opsd/forward_kl_teacher_student': 0.1735721935670129, 'opsd/reverse_kl_student_teacher': 0.1404296673941796, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.00958251953125, 'system/gpu_allocated_gib': 47.252665996551514, 'system/gpu_reserved_gib': 75.09423828125, 'system/gpu_peak_allocated_gib': 81.86907291412354, 'epoch': 0.13}
+  5%|▌         | 5/100 [02:06<39:58, 25.25s/it]vLLM generation done - elapsed time: 12.00s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2730.4 tok/s
+
+================================================================================
+Saved 192 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_5.json
+================================================================================
+
+  6%|▌         | 6/100 [02:31<39:31, 25.23s/it]                                               {'loss': -0.0097, 'grad_norm': 0.397093786312596, 'learning_rate': 5e-07, 'on_policy_loss': -0.0097, 'rollout/tokens_per_second': 2730.3774177950286, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2838102151594866, 'opsd/teacher_entropy': 0.27969017198126295, 'opsd/student_sampled_logp': -0.2463122415936886, 'opsd/teacher_sampled_logp': -0.3743788999959756, 'opsd/forward_kl_teacher_student': 0.16174798837909657, 'opsd/reverse_kl_student_teacher': 0.129135274485903, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0095672607421875, 'system/gpu_allocated_gib': 47.251646518707275, 'system/gpu_reserved_gib': 74.47216796875, 'system/gpu_peak_allocated_gib': 81.86907291412354, 'epoch': 0.15}
+  6%|▌         | 6/100 [02:31<39:31, 25.23s/it]vLLM generation done - elapsed time: 12.04s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2721.6 tok/s
+  7%|▋         | 7/100 [02:55<38:49, 25.04s/it]                                               {'loss': -0.01, 'grad_norm': 0.3924590634068639, 'learning_rate': 6e-07, 'on_policy_loss': -0.01, 'rollout/tokens_per_second': 2721.6071963770983, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.29064473606401986, 'opsd/teacher_entropy': 0.2844874427603492, 'opsd/student_sampled_logp': -0.2512727227985575, 'opsd/teacher_sampled_logp': -0.38531654616791966, 'opsd/forward_kl_teacher_student': 0.1777905577457362, 'opsd/reverse_kl_student_teacher': 0.13722359125291486, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.010009765625, 'system/gpu_allocated_gib': 47.25319004058838, 'system/gpu_reserved_gib': 74.7861328125, 'system/gpu_peak_allocated_gib': 81.92910552024841, 'epoch': 0.18}
+  7%|▋         | 7/100 [02:56<38:49, 25.04s/it]vLLM generation done - elapsed time: 11.86s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2763.6 tok/s
+  8%|▊         | 8/100 [03:22<39:13, 25.59s/it]                                               {'loss': -0.0101, 'grad_norm': 0.4115080723552906, 'learning_rate': 7e-07, 'on_policy_loss': -0.0101, 'rollout/tokens_per_second': 2763.6347670394393, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.283228670254377, 'opsd/teacher_entropy': 0.2784768209231884, 'opsd/student_sampled_logp': -0.2431837822191832, 'opsd/teacher_sampled_logp': -0.3760230033794889, 'opsd/forward_kl_teacher_student': 0.16901465979299732, 'opsd/reverse_kl_student_teacher': 0.13486877877264308, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0098724365234375, 'system/gpu_allocated_gib': 47.252458572387695, 'system/gpu_reserved_gib': 74.97119140625, 'system/gpu_peak_allocated_gib': 81.9466700553894, 'epoch': 0.21}
+  8%|▊         | 8/100 [03:23<39:13, 25.59s/it]vLLM generation done - elapsed time: 11.87s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2761.3 tok/s
+  9%|▉         | 9/100 [03:47<38:24, 25.32s/it]                                               {'loss': -0.0099, 'grad_norm': 0.36554768743464083, 'learning_rate': 8e-07, 'on_policy_loss': -0.0099, 'rollout/tokens_per_second': 2761.3315303104855, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2743855460727858, 'opsd/teacher_entropy': 0.2699314839407612, 'opsd/student_sampled_logp': -0.2402959523052715, 'opsd/teacher_sampled_logp': -0.36163151352321443, 'opsd/forward_kl_teacher_student': 0.1540209995076644, 'opsd/reverse_kl_student_teacher': 0.12219695389435675, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0098724365234375, 'system/gpu_allocated_gib': 47.25248146057129, 'system/gpu_reserved_gib': 75.486328125, 'system/gpu_peak_allocated_gib': 81.9466700553894, 'epoch': 0.23}
+  9%|▉         | 9/100 [03:48<38:24, 25.32s/it]vLLM generation done - elapsed time: 12.00s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2731.1 tok/s
+
+================================================================================
+STUDENT GENERATION SAMPLE (Step 9):
+================================================================================
+
+Prompt:
+<|im_start|>user
+Problem: Sei $n \geq 3$ und sei $P$ ein konvexes $n$-Eck. Beweise, dass sich $P$ mit Hilfe von $n-3$ sich nicht schneidenden Diagonalen in Dreiecke zerlegen lässt, sodass der Umkreis von jedem dieser Dreiecke ganz $P$ enthält. Wann existiert genau eine solche Zerlegung?
+
+Please reason step by step, and put your final answer within \boxed{}.<|im_end|>
+<|im_start|>assistant
+
+
+Completion:
+<think>
+Okay, so I need to prove that any convex n-gon (where n is at least 3) can be divided into triangles using n-3 non-crossing diagonals, such that each triangle's circumcircle contains the entire polygon. Also, determine when there's exactly one such partition. Hmm, let me think.
+
+First, I remember that for convex polygons, triangulations usually involve dividing the polygon into triangles with non-crossing diagonals. The number of triangles in a triangulation of an n-gon is n-2, right? Because each triangle adds a region, and starting with one polygon, each triangle adds a region, so n-2 triangles. But the problem here is talking about dividing the polygon into triangles using n-3 diagonals. Wait, n-2 triangles would need n-3 diagonals, since each diagonal can add a triangle. Let me check that. For example, with a quadrilateral (n=4), triangulation requires 1 diagonal, which is n-3 = 1. Yep, that works. For a pentagon (n=5), triangulation needs 2 diagonals, which is 5-3=2. So yes, the number of diagonals needed is n-3. So that part seems okay.
+
+Now, the main part is that each triangle's circumcircle contains the entire polygon. Wait, that seems a bit strange. Because if you have a triangle inside a convex polygon, the circumcircle of the triangle would contain the polygon? Wait, no. Wait, the circumcircle of a triangle is the circle passing through all three vertices. If the polygon is convex, then the circumcircle of each triangle would have to contain the entire polygon? But that seems impossible unless the polygon is a triangle itself. Wait, maybe I misread the problem.
+
+Wait, the problem says "der Umkreis von jedem dieser Dreiecke ganz P enthält." So the circumcircle of each triangle contains the entire polygon. Wait, that's not possible. Because the triangle is inside the polygon, and if the circumcircle of the triangle contains the entire polygon, then the polygon must lie entirely within the circumcircle. But for a convex polygon, if you have a triangle whose circumcircle contains the whole polygon, then the polygon must be inscribed in that circle. But for a convex polygon, if you have a triangle inside it, then the circumcircle of the triangle can't contain the entire polygon unless the polygon is the triangle itself. Wait, that doesn't make sense.
+
+Wait, maybe there's a translation issue. Maybe it's supposed to say that the circumcircle of each triangle contains the polygon's interior? But no, the original says "ganz P enthält" which is "contains P completely." So the circumcircle of each triangle contains the entire polygon P. But that would mean that the polygon is entirely inside the circle. But if you have a triangle inside the polygon, then the polygon is convex, so it's possible that the circumcircle of the triangle contains the entire polygon? But for example, take a convex polygon with more than three sides. If you have a triangle inside it, then the circumcircle of that triangle might not contain the rest of the polygon. Wait, unless the polygon is a triangle itself. Hmm, maybe the problem is mistranslated or misunderstood.
+
+Wait, perhaps the problem says that the circumcircle of each triangle contains the entire polygon? But that seems impossible unless the polygon is a triangle. Alternatively, maybe it's that the circumcircle of each triangle contains the polygon's center? No, that's not what it says.
+
+Wait, maybe the problem is that the circumcircle of each triangle is tangent to the polygon? Or maybe that each triangle's circumcircle contains the polygon's vertices? Wait, but the problem says "ganz P enthält," which is "contains P completely." So the entire polygon lies inside the circumcircle of each triangle. That would mean that each triangle's circumcircle contains the entire polygon. But for a convex polygon, if you have a triangle inside it, then the circumcircle of the triangle can only contain the polygon if the triangle is such that all the polygon's vertices lie on the circumcircle. But for a convex polygon with n ≥ 4, how can that be?
+
+Wait, maybe the problem is actually that each triangle's circumcircle contains the entire polygon's interior? But that would require that the entire polygon is inside each triangle's circumcircle. Which is impossible unless the polygon is a triangle. Therefore, I must be misunderstanding the problem.
+
+Wait, let me check the original problem again:
+
+"Sei n ≥ 3 und sei P ein konvexes n-Eck. Beweise, dass sich P mit Hilfe von n-3 sich nicht schneidenden Diagonalen in Dreiecke zerlegen lässt, sodass der Umkreis von jedem dieser Dreiecke ganz P enthält. Wann existiert genau eine solche Zerlegung?"
+
+Trans
+================================================================================
+
+ 10%|█         | 10/100 [04:13<38:07, 25.42s/it]                                                {'loss': -0.01, 'grad_norm': 0.4009709089256865, 'learning_rate': 9e-07, 'on_policy_loss': -0.01, 'rollout/tokens_per_second': 2731.0801407232348, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2760384594963744, 'opsd/teacher_entropy': 0.269799712600763, 'opsd/student_sampled_logp': -0.2386724572614164, 'opsd/teacher_sampled_logp': -0.3560943692774511, 'opsd/forward_kl_teacher_student': 0.15454739332130193, 'opsd/reverse_kl_student_teacher': 0.12150301537707528, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0102386474609375, 'system/gpu_allocated_gib': 47.2534613609314, 'system/gpu_reserved_gib': 74.6904296875, 'system/gpu_peak_allocated_gib': 83.38266158103943, 'epoch': 0.26}
+ 10%|█         | 10/100 [04:13<38:07, 25.42s/it]vLLM generation done - elapsed time: 11.92s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2749.7 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_10.json
+================================================================================
+
+ 11%|█         | 11/100 [04:38<37:39, 25.39s/it]                                                {'loss': -0.0107, 'grad_norm': 0.380150120624994, 'learning_rate': 1e-06, 'on_policy_loss': -0.0107, 'rollout/tokens_per_second': 2749.7106714154756, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2659575337106298, 'opsd/teacher_entropy': 0.26099667299951557, 'opsd/student_sampled_logp': -0.23223429926008976, 'opsd/teacher_sampled_logp': -0.3668752245389005, 'opsd/forward_kl_teacher_student': 0.17663266613374817, 'opsd/reverse_kl_student_teacher': 0.13720776360929773, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.009857177734375, 'system/gpu_allocated_gib': 47.25344753265381, 'system/gpu_reserved_gib': 74.9052734375, 'system/gpu_peak_allocated_gib': 83.4002251625061, 'epoch': 0.28}
+ 11%|█         | 11/100 [04:39<37:39, 25.39s/it]vLLM generation done - elapsed time: 12.05s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2718.3 tok/s
+ 12%|█▏        | 12/100 [05:03<37:18, 25.44s/it]                                                {'loss': -0.01, 'grad_norm': 0.4131732166952391, 'learning_rate': 9.996954135095478e-07, 'on_policy_loss': -0.01, 'rollout/tokens_per_second': 2718.347065309972, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2870491911617046, 'opsd/teacher_entropy': 0.2802728247701589, 'opsd/student_sampled_logp': -0.2509116706291962, 'opsd/teacher_sampled_logp': -0.36701663661947637, 'opsd/forward_kl_teacher_student': 0.14813442492214685, 'opsd/reverse_kl_student_teacher': 0.11589626806321097, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01019287109375, 'system/gpu_allocated_gib': 47.25359296798706, 'system/gpu_reserved_gib': 74.7294921875, 'system/gpu_peak_allocated_gib': 83.4002251625061, 'epoch': 0.31}
+ 12%|█▏        | 12/100 [05:04<37:18, 25.44s/it]vLLM generation done - elapsed time: 11.90s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2753.6 tok/s
+ 13%|█▎        | 13/100 [05:27<36:03, 24.87s/it]                                                {'loss': -0.0103, 'grad_norm': 0.4058886764474655, 'learning_rate': 9.98782025129912e-07, 'on_policy_loss': -0.0103, 'rollout/tokens_per_second': 2753.5873837294685, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.28617076883841236, 'opsd/teacher_entropy': 0.27930242892160684, 'opsd/student_sampled_logp': -0.25114924590552856, 'opsd/teacher_sampled_logp': -0.38196974157509456, 'opsd/forward_kl_teacher_student': 0.17168909566946905, 'opsd/reverse_kl_student_teacher': 0.13309155357535757, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0108184814453125, 'system/gpu_allocated_gib': 47.251996994018555, 'system/gpu_reserved_gib': 74.96923828125, 'system/gpu_peak_allocated_gib': 83.4002251625061, 'epoch': 0.33}
+ 13%|█▎        | 13/100 [05:28<36:03, 24.87s/it]vLLM generation done - elapsed time: 11.87s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2760.5 tok/s
+ 14%|█▍        | 14/100 [05:52<35:38, 24.86s/it]                                                {'loss': -0.0103, 'grad_norm': 0.3889149973898207, 'learning_rate': 9.972609476841365e-07, 'on_policy_loss': -0.0103, 'rollout/tokens_per_second': 2760.5121293536345, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2725480620103567, 'opsd/teacher_entropy': 0.2634919533496671, 'opsd/student_sampled_logp': -0.23458487599500816, 'opsd/teacher_sampled_logp': -0.3722661132902756, 'opsd/forward_kl_teacher_student': 0.1779097591558841, 'opsd/reverse_kl_student_teacher': 0.14287254817293538, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01031494140625, 'system/gpu_allocated_gib': 47.253169536590576, 'system/gpu_reserved_gib': 74.57568359375, 'system/gpu_peak_allocated_gib': 83.4002251625061, 'epoch': 0.36}
+ 14%|█▍        | 14/100 [05:53<35:38, 24.86s/it]vLLM generation done - elapsed time: 11.99s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2733.4 tok/s
+ 15%|█▌        | 15/100 [06:18<35:49, 25.29s/it]                                                {'loss': -0.0112, 'grad_norm': 0.4413924806781593, 'learning_rate': 9.95134034370785e-07, 'on_policy_loss': -0.0112, 'rollout/tokens_per_second': 2733.3948671131193, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.30432227580990495, 'opsd/teacher_entropy': 0.2910691546828593, 'opsd/student_sampled_logp': -0.2665835642377529, 'opsd/teacher_sampled_logp': -0.40213052555410866, 'opsd/forward_kl_teacher_student': 0.1696693234632159, 'opsd/reverse_kl_student_teacher': 0.1380891162756811, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0108642578125, 'system/gpu_allocated_gib': 47.25356388092041, 'system/gpu_reserved_gib': 75.8486328125, 'system/gpu_peak_allocated_gib': 83.91543328762054, 'epoch': 0.38}
+ 15%|█▌        | 15/100 [06:19<35:49, 25.29s/it]vLLM generation done - elapsed time: 12.14s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2698.9 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_15.json
+================================================================================
+
+ 16%|█▌        | 16/100 [06:43<35:17, 25.21s/it]                                                {'loss': -0.0105, 'grad_norm': 0.4310702578562494, 'learning_rate': 9.92403876506104e-07, 'on_policy_loss': -0.0105, 'rollout/tokens_per_second': 2698.91494254914, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.28545878711170414, 'opsd/teacher_entropy': 0.27388173634524193, 'opsd/student_sampled_logp': -0.2472482965468521, 'opsd/teacher_sampled_logp': -0.3754530004647506, 'opsd/forward_kl_teacher_student': 0.16383203990090187, 'opsd/reverse_kl_student_teacher': 0.12963295696066682, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01055908203125, 'system/gpu_allocated_gib': 47.25246858596802, 'system/gpu_reserved_gib': 74.75048828125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.41}
+ 16%|█▌        | 16/100 [06:44<35:17, 25.21s/it]vLLM generation done - elapsed time: 12.00s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2729.9 tok/s
+ 17%|█▋        | 17/100 [07:07<34:19, 24.81s/it]                                                {'loss': -0.0109, 'grad_norm': 0.46021272650973294, 'learning_rate': 9.890738003669027e-07, 'on_policy_loss': -0.0109, 'rollout/tokens_per_second': 2729.915408565123, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2815272489094779, 'opsd/teacher_entropy': 0.2682859805324963, 'opsd/student_sampled_logp': -0.24634797661468555, 'opsd/teacher_sampled_logp': -0.3735085140133595, 'opsd/forward_kl_teacher_student': 0.15403425686507477, 'opsd/reverse_kl_student_teacher': 0.12921537706089212, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0109100341796875, 'system/gpu_allocated_gib': 47.252538204193115, 'system/gpu_reserved_gib': 75.6240234375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.44}
+ 17%|█▋        | 17/100 [07:08<34:19, 24.81s/it]vLLM generation done - elapsed time: 11.90s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2753.5 tok/s
+ 18%|█▊        | 18/100 [07:32<34:01, 24.90s/it]                                                {'loss': -0.0111, 'grad_norm': 0.4366193681359151, 'learning_rate': 9.851478631379982e-07, 'on_policy_loss': -0.0111, 'rollout/tokens_per_second': 2753.516439403665, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.29275899181310683, 'opsd/teacher_entropy': 0.2784546883312323, 'opsd/student_sampled_logp': -0.2543500067216024, 'opsd/teacher_sampled_logp': -0.3905810443866965, 'opsd/forward_kl_teacher_student': 0.169869702066477, 'opsd/reverse_kl_student_teacher': 0.14315580596394759, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0110015869140625, 'system/gpu_allocated_gib': 47.25347328186035, 'system/gpu_reserved_gib': 75.5849609375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.46}
+ 18%|█▊        | 18/100 [07:33<34:01, 24.90s/it]vLLM generation done - elapsed time: 11.92s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2749.5 tok/s
+ 19%|█▉        | 19/100 [07:58<33:52, 25.09s/it]                                                {'loss': -0.0112, 'grad_norm': 0.43380388881904713, 'learning_rate': 9.806308479691594e-07, 'on_policy_loss': -0.0112, 'rollout/tokens_per_second': 2749.526940767889, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.27815370004513407, 'opsd/teacher_entropy': 0.2668941600945463, 'opsd/student_sampled_logp': -0.23756993352645492, 'opsd/teacher_sampled_logp': -0.36829696315426047, 'opsd/forward_kl_teacher_student': 0.16701430067136436, 'opsd/reverse_kl_student_teacher': 0.137036397845342, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0117645263671875, 'system/gpu_allocated_gib': 47.25357723236084, 'system/gpu_reserved_gib': 74.94970703125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.49}
+ 19%|█▉        | 19/100 [07:58<33:52, 25.09s/it]vLLM generation done - elapsed time: 11.94s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2744.9 tok/s
+ 20%|██        | 20/100 [08:22<33:04, 24.80s/it]                                                {'loss': -0.0119, 'grad_norm': 0.43157395618769356, 'learning_rate': 9.755282581475767e-07, 'on_policy_loss': -0.0119, 'rollout/tokens_per_second': 2744.937967943937, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2826868720192538, 'opsd/teacher_entropy': 0.26747751174959, 'opsd/student_sampled_logp': -0.24602546145540977, 'opsd/teacher_sampled_logp': -0.37751105878649877, 'opsd/forward_kl_teacher_student': 0.1660157751999103, 'opsd/reverse_kl_student_teacher': 0.13542289508653743, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0126800537109375, 'system/gpu_allocated_gib': 47.25229740142822, 'system/gpu_reserved_gib': 75.15625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.51}
+ 20%|██        | 20/100 [08:23<33:04, 24.80s/it]vLLM generation done - elapsed time: 11.92s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2749.2 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_20.json
+================================================================================
+
+ 21%|██        | 21/100 [08:46<32:22, 24.59s/it]                                                {'loss': -0.0112, 'grad_norm': 0.4615474535088279, 'learning_rate': 9.698463103929541e-07, 'on_policy_loss': -0.0112, 'rollout/tokens_per_second': 2749.1891384918977, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2883322098474044, 'opsd/teacher_entropy': 0.27445860457539806, 'opsd/student_sampled_logp': -0.24844900231182332, 'opsd/teacher_sampled_logp': -0.38346235901833, 'opsd/forward_kl_teacher_student': 0.1686339028328998, 'opsd/reverse_kl_student_teacher': 0.13593839289569992, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.011474609375, 'system/gpu_allocated_gib': 47.251792430877686, 'system/gpu_reserved_gib': 75.103515625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.54}
+ 21%|██        | 21/100 [08:47<32:22, 24.59s/it]vLLM generation done - elapsed time: 12.05s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2718.9 tok/s
+ 22%|██▏       | 22/100 [09:11<32:07, 24.72s/it]                                                {'loss': -0.0121, 'grad_norm': 0.45482918824389235, 'learning_rate': 9.635919272833937e-07, 'on_policy_loss': -0.0121, 'rollout/tokens_per_second': 2718.9114465520233, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.28288739947867114, 'opsd/teacher_entropy': 0.2673516300084616, 'opsd/student_sampled_logp': -0.24478410010915916, 'opsd/teacher_sampled_logp': -0.38343472971237846, 'opsd/forward_kl_teacher_student': 0.1705092829357171, 'opsd/reverse_kl_student_teacher': 0.14272308332287992, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.012542724609375, 'system/gpu_allocated_gib': 47.25210952758789, 'system/gpu_reserved_gib': 75.46728515625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.56}
+ 22%|██▏       | 22/100 [09:12<32:07, 24.72s/it]vLLM generation done - elapsed time: 11.96s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2740.8 tok/s
+ 23%|██▎       | 23/100 [09:37<32:07, 25.03s/it]                                                {'loss': -0.0124, 'grad_norm': 0.44197359516568047, 'learning_rate': 9.567727288213004e-07, 'on_policy_loss': -0.0124, 'rollout/tokens_per_second': 2740.7512445994935, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.3011388073511636, 'opsd/teacher_entropy': 0.2782700126771133, 'opsd/student_sampled_logp': -0.26077059445588396, 'opsd/teacher_sampled_logp': -0.411250043968469, 'opsd/forward_kl_teacher_student': 0.18023326803289613, 'opsd/reverse_kl_student_teacher': 0.15539573143408295, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0125274658203125, 'system/gpu_allocated_gib': 47.253233909606934, 'system/gpu_reserved_gib': 75.07470703125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.59}
+ 23%|██▎       | 23/100 [09:37<32:07, 25.03s/it]vLLM generation done - elapsed time: 11.92s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2749.7 tok/s
+ 24%|██▍       | 24/100 [10:00<31:01, 24.49s/it]                                                {'loss': -0.0124, 'grad_norm': 0.40755794496053616, 'learning_rate': 9.493970231495834e-07, 'on_policy_loss': -0.0124, 'rollout/tokens_per_second': 2749.74780559191, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2690194483627803, 'opsd/teacher_entropy': 0.2537245380725203, 'opsd/student_sampled_logp': -0.23364234270911474, 'opsd/teacher_sampled_logp': -0.3735456391502402, 'opsd/forward_kl_teacher_student': 0.17401989705239634, 'opsd/reverse_kl_student_teacher': 0.14441203440365147, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0127105712890625, 'system/gpu_allocated_gib': 47.25218963623047, 'system/gpu_reserved_gib': 75.02001953125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.62}
+ 24%|██▍       | 24/100 [10:01<31:01, 24.49s/it]vLLM generation done - elapsed time: 11.99s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2733.2 tok/s
+ 25%|██▌       | 25/100 [10:25<30:54, 24.73s/it]                                                {'loss': -0.0135, 'grad_norm': 0.43614363595523536, 'learning_rate': 9.414737964294634e-07, 'on_policy_loss': -0.0135, 'rollout/tokens_per_second': 2733.242662169987, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.29623054130916465, 'opsd/teacher_entropy': 0.2740318099439366, 'opsd/student_sampled_logp': -0.2568462477440159, 'opsd/teacher_sampled_logp': -0.4063880326501538, 'opsd/forward_kl_teacher_student': 0.18531903424904278, 'opsd/reverse_kl_student_teacher': 0.15585431821929235, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0132904052734375, 'system/gpu_allocated_gib': 47.2533278465271, 'system/gpu_reserved_gib': 74.84375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.64}
+ 25%|██▌       | 25/100 [10:26<30:54, 24.73s/it]wandb: WARNING URL not available in offline run
+vLLM generation done - elapsed time: 12.31s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2662.8 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_25.json
+================================================================================
+
+ 26%|██▌       | 26/100 [11:06<36:20, 29.46s/it]                                                {'loss': -0.0133, 'grad_norm': 0.4026739896750678, 'learning_rate': 9.330127018922193e-07, 'on_policy_loss': -0.0133, 'rollout/tokens_per_second': 2662.8456324387907, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2875290546118152, 'opsd/teacher_entropy': 0.26600420236305977, 'opsd/student_sampled_logp': -0.2482611365804837, 'opsd/teacher_sampled_logp': -0.4063725290897279, 'opsd/forward_kl_teacher_student': 0.18557416086547462, 'opsd/reverse_kl_student_teacher': 0.16237144256702063, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01361083984375, 'system/gpu_allocated_gib': 47.252471923828125, 'system/gpu_reserved_gib': 75.3388671875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.67}
+ 26%|██▌       | 26/100 [11:06<36:20, 29.46s/it]vLLM generation done - elapsed time: 12.07s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2714.1 tok/s
+ 27%|██▋       | 27/100 [11:31<34:14, 28.15s/it]                                                {'loss': -0.0134, 'grad_norm': 0.39928538387945195, 'learning_rate': 9.240240480782129e-07, 'on_policy_loss': -0.0134, 'rollout/tokens_per_second': 2714.096016419616, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2805899286784099, 'opsd/teacher_entropy': 0.2613264896367524, 'opsd/student_sampled_logp': -0.24022931846236, 'opsd/teacher_sampled_logp': -0.39931654338826056, 'opsd/forward_kl_teacher_student': 0.19253542852798544, 'opsd/reverse_kl_student_teacher': 0.16274035727338837, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0135040283203125, 'system/gpu_allocated_gib': 47.25271701812744, 'system/gpu_reserved_gib': 75.09375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.69}
+ 27%|██▋       | 27/100 [11:31<34:14, 28.15s/it]vLLM generation done - elapsed time: 11.96s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2739.0 tok/s
+ 28%|██▊       | 28/100 [11:55<32:19, 26.94s/it]                                                {'loss': -0.0136, 'grad_norm': 0.3958184133730791, 'learning_rate': 9.145187862775208e-07, 'on_policy_loss': -0.0136, 'rollout/tokens_per_second': 2738.968959098576, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2982065130172976, 'opsd/teacher_entropy': 0.2744240498788503, 'opsd/student_sampled_logp': -0.2575550967822737, 'opsd/teacher_sampled_logp': -0.4075556303674233, 'opsd/forward_kl_teacher_student': 0.18231084025404398, 'opsd/reverse_kl_student_teacher': 0.15903386165693545, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0136566162109375, 'system/gpu_allocated_gib': 47.252402782440186, 'system/gpu_reserved_gib': 75.0068359375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.72}
+ 28%|██▊       | 28/100 [11:56<32:19, 26.94s/it]vLLM generation done - elapsed time: 11.99s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2733.6 tok/s
+ 29%|██▉       | 29/100 [12:20<31:23, 26.53s/it]                                                {'loss': -0.0144, 'grad_norm': 0.3816787303801306, 'learning_rate': 9.045084971874737e-07, 'on_policy_loss': -0.0144, 'rollout/tokens_per_second': 2733.6251636726774, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.3021956873933698, 'opsd/teacher_entropy': 0.2787939422742726, 'opsd/student_sampled_logp': -0.25857123421629413, 'opsd/teacher_sampled_logp': -0.4185026187632308, 'opsd/forward_kl_teacher_student': 0.1901765035043373, 'opsd/reverse_kl_student_teacher': 0.16350144562400648, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01458740234375, 'system/gpu_allocated_gib': 47.253544330596924, 'system/gpu_reserved_gib': 74.4443359375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.74}
+ 29%|██▉       | 29/100 [12:21<31:23, 26.53s/it]vLLM generation done - elapsed time: 11.90s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2753.0 tok/s
+ 30%|███       | 30/100 [12:45<30:06, 25.80s/it]                                                {'loss': -0.0141, 'grad_norm': 0.3500365435775009, 'learning_rate': 8.940053768033608e-07, 'on_policy_loss': -0.0141, 'rollout/tokens_per_second': 2753.0379641097184, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.28448313132886, 'opsd/teacher_entropy': 0.26436182881043646, 'opsd/student_sampled_logp': -0.24528432697373503, 'opsd/teacher_sampled_logp': -0.4100959388922907, 'opsd/forward_kl_teacher_student': 0.19978239800383135, 'opsd/reverse_kl_student_teacher': 0.17338746886177406, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0145111083984375, 'system/gpu_allocated_gib': 47.25234270095825, 'system/gpu_reserved_gib': 75.216796875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.77}
+ 30%|███       | 30/100 [12:45<30:06, 25.80s/it]vLLM generation done - elapsed time: 11.99s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2733.1 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_30.json
+================================================================================
+
+ 31%|███       | 31/100 [13:09<29:11, 25.39s/it]                                                {'loss': -0.0138, 'grad_norm': 0.3545691302019754, 'learning_rate': 8.83022221559489e-07, 'on_policy_loss': -0.0138, 'rollout/tokens_per_second': 2733.122867058173, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.27896830691549335, 'opsd/teacher_entropy': 0.25582741332754566, 'opsd/student_sampled_logp': -0.24197840641514026, 'opsd/teacher_sampled_logp': -0.40247040703203796, 'opsd/forward_kl_teacher_student': 0.18761366861585915, 'opsd/reverse_kl_student_teacher': 0.16654456611411012, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0131378173828125, 'system/gpu_allocated_gib': 47.2524471282959, 'system/gpu_reserved_gib': 75.3056640625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.79}
+ 31%|███       | 31/100 [13:10<29:11, 25.39s/it]vLLM generation done - elapsed time: 12.05s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2719.0 tok/s
+ 32%|███▏      | 32/100 [13:34<28:41, 25.32s/it]                                                {'loss': -0.0145, 'grad_norm': 0.33090900156585407, 'learning_rate': 8.71572412738697e-07, 'on_policy_loss': -0.0145, 'rollout/tokens_per_second': 2718.9907314431575, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.28092731379404406, 'opsd/teacher_entropy': 0.2587578186243743, 'opsd/student_sampled_logp': -0.24365266198932206, 'opsd/teacher_sampled_logp': -0.4100055566024967, 'opsd/forward_kl_teacher_student': 0.19666994015131958, 'opsd/reverse_kl_student_teacher': 0.17415202410827374, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.014739990234375, 'system/gpu_allocated_gib': 47.25324869155884, 'system/gpu_reserved_gib': 74.7197265625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.82}
+ 32%|███▏      | 32/100 [13:35<28:41, 25.32s/it]vLLM generation done - elapsed time: 12.16s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2694.4 tok/s
+ 33%|███▎      | 33/100 [14:00<28:34, 25.59s/it]                                                {'loss': -0.0154, 'grad_norm': 0.36450484263905386, 'learning_rate': 8.596699001693255e-07, 'on_policy_loss': -0.0154, 'rollout/tokens_per_second': 2694.445363136719, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2973854659371291, 'opsd/teacher_entropy': 0.27202002843344075, 'opsd/student_sampled_logp': -0.25766444010462997, 'opsd/teacher_sampled_logp': -0.4391180394805002, 'opsd/forward_kl_teacher_student': 0.21015633166927886, 'opsd/reverse_kl_student_teacher': 0.18670051518189695, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01556396484375, 'system/gpu_allocated_gib': 47.253633975982666, 'system/gpu_reserved_gib': 75.5869140625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.85}
+ 33%|███▎      | 33/100 [14:01<28:34, 25.59s/it]vLLM generation done - elapsed time: 12.09s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2711.2 tok/s
+ 34%|███▍      | 34/100 [14:25<27:39, 25.14s/it]                                                {'loss': -0.0145, 'grad_norm': 0.3300143216096348, 'learning_rate': 8.473291852294986e-07, 'on_policy_loss': -0.0145, 'rollout/tokens_per_second': 2711.165337566129, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.27842848894824535, 'opsd/teacher_entropy': 0.2571634133495363, 'opsd/student_sampled_logp': -0.23679522554706134, 'opsd/teacher_sampled_logp': -0.4004906489262548, 'opsd/forward_kl_teacher_student': 0.19502415815318122, 'opsd/reverse_kl_student_teacher': 0.16979881181991088, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0147247314453125, 'system/gpu_allocated_gib': 47.252063274383545, 'system/gpu_reserved_gib': 74.736328125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.87}
+ 34%|███▍      | 34/100 [14:25<27:39, 25.14s/it]vLLM generation done - elapsed time: 12.13s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2700.7 tok/s
+ 35%|███▌      | 35/100 [14:50<27:18, 25.21s/it]                                                {'loss': -0.0155, 'grad_norm': 0.3296003204589473, 'learning_rate': 8.34565303179429e-07, 'on_policy_loss': -0.0155, 'rollout/tokens_per_second': 2700.7321797283353, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2673743315684072, 'opsd/teacher_entropy': 0.2479720089776563, 'opsd/student_sampled_logp': -0.23327803273583783, 'opsd/teacher_sampled_logp': -0.41438038992880344, 'opsd/forward_kl_teacher_student': 0.2115060002437603, 'opsd/reverse_kl_student_teacher': 0.1884910566655681, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0151519775390625, 'system/gpu_allocated_gib': 47.253432750701904, 'system/gpu_reserved_gib': 75.48095703125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.9}
+ 35%|███▌      | 35/100 [14:51<27:18, 25.21s/it]vLLM generation done - elapsed time: 12.35s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2653.6 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_35.json
+================================================================================
+
+ 36%|███▌      | 36/100 [15:14<26:37, 24.95s/it]                                                {'loss': -0.015, 'grad_norm': 0.3087028605399148, 'learning_rate': 8.213938048432696e-07, 'on_policy_loss': -0.015, 'rollout/tokens_per_second': 2653.6038009997465, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2623631491535545, 'opsd/teacher_entropy': 0.24551459390946342, 'opsd/student_sampled_logp': -0.2274061861485968, 'opsd/teacher_sampled_logp': -0.4093485995083248, 'opsd/forward_kl_teacher_student': 0.2166373185802155, 'opsd/reverse_kl_student_teacher': 0.1900463418039493, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0151519775390625, 'system/gpu_allocated_gib': 47.25257921218872, 'system/gpu_reserved_gib': 74.52880859375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.92}
+ 36%|███▌      | 36/100 [15:15<26:37, 24.95s/it]vLLM generation done - elapsed time: 12.08s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2713.4 tok/s
+ 37%|███▋      | 37/100 [15:40<26:19, 25.07s/it]                                                {'loss': -0.0154, 'grad_norm': 0.33223378395154907, 'learning_rate': 8.07830737662829e-07, 'on_policy_loss': -0.0154, 'rollout/tokens_per_second': 2713.3631144575916, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2845268488370071, 'opsd/teacher_entropy': 0.26250216508457763, 'opsd/student_sampled_logp': -0.24677780474448555, 'opsd/teacher_sampled_logp': -0.4369223757307308, 'opsd/forward_kl_teacher_student': 0.2208133169075202, 'opsd/reverse_kl_student_teacher': 0.19353067075140312, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0145721435546875, 'system/gpu_allocated_gib': 47.25322389602661, 'system/gpu_reserved_gib': 74.93017578125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.95}
+ 37%|███▋      | 37/100 [15:40<26:19, 25.07s/it]vLLM generation done - elapsed time: 12.04s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2721.9 tok/s
+ 38%|███▊      | 38/100 [16:03<25:16, 24.46s/it]                                                {'loss': -0.0151, 'grad_norm': 0.31320370847929135, 'learning_rate': 7.938926261462365e-07, 'on_policy_loss': -0.0151, 'rollout/tokens_per_second': 2721.8581503438827, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26099791843965603, 'opsd/teacher_entropy': 0.24252174506554408, 'opsd/student_sampled_logp': -0.22627157517183882, 'opsd/teacher_sampled_logp': -0.41051196245391774, 'opsd/forward_kl_teacher_student': 0.21537530222099965, 'opsd/reverse_kl_student_teacher': 0.18834522128890518, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01495361328125, 'system/gpu_allocated_gib': 47.25137281417847, 'system/gpu_reserved_gib': 74.78759765625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 0.97}
+ 38%|███▊      | 38/100 [16:03<25:16, 24.46s/it]vLLM generation done - elapsed time: 12.03s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2723.1 tok/s
+ 39%|███▉      | 39/100 [16:29<25:18, 24.90s/it]                                                {'loss': -0.0155, 'grad_norm': 0.318506971505635, 'learning_rate': 7.795964517353733e-07, 'on_policy_loss': -0.0155, 'rollout/tokens_per_second': 2723.0619279797734, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.28442816927086345, 'opsd/teacher_entropy': 0.26471976736167957, 'opsd/student_sampled_logp': -0.24720271497138724, 'opsd/teacher_sampled_logp': -0.44981907728253895, 'opsd/forward_kl_teacher_student': 0.2313941017814709, 'opsd/reverse_kl_student_teacher': 0.206407210125366, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.015533447265625, 'system/gpu_allocated_gib': 47.25326633453369, 'system/gpu_reserved_gib': 75.1484375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.0}
+ 39%|███▉      | 39/100 [16:29<25:18, 24.90s/it]vLLM generation done - elapsed time: 12.13s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2701.7 tok/s
+ 40%|████      | 40/100 [16:54<24:55, 24.92s/it]                                                {'loss': -0.0169, 'grad_norm': 0.31610940074873295, 'learning_rate': 7.649596321166024e-07, 'on_policy_loss': -0.0169, 'rollout/tokens_per_second': 2701.677377635728, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2990562041551325, 'opsd/teacher_entropy': 0.27957548604058435, 'opsd/student_sampled_logp': -0.25755081122960233, 'opsd/teacher_sampled_logp': -0.4552090666715238, 'opsd/forward_kl_teacher_student': 0.23015698017789987, 'opsd/reverse_kl_student_teacher': 0.20296525629161585, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0169677734375, 'system/gpu_allocated_gib': 47.2519736289978, 'system/gpu_reserved_gib': 75.45361328125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.03}
+ 40%|████      | 40/100 [16:54<24:55, 24.92s/it]vLLM generation done - elapsed time: 12.04s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2721.5 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_40.json
+================================================================================
+
+ 41%|████      | 41/100 [17:18<24:30, 24.92s/it]                                                {'loss': -0.0162, 'grad_norm': 0.26569600319116865, 'learning_rate': 7.5e-07, 'on_policy_loss': -0.0162, 'rollout/tokens_per_second': 2721.5292677711727, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2546920711877737, 'opsd/teacher_entropy': 0.2404336996833082, 'opsd/student_sampled_logp': -0.21887887991346627, 'opsd/teacher_sampled_logp': -0.43494548322252125, 'opsd/forward_kl_teacher_student': 0.24450288488927382, 'opsd/reverse_kl_student_teacher': 0.2162868069635305, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.016387939453125, 'system/gpu_allocated_gib': 47.25330924987793, 'system/gpu_reserved_gib': 74.82470703125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.05}
+ 41%|████      | 41/100 [17:19<24:30, 24.92s/it]vLLM generation done - elapsed time: 12.09s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2709.9 tok/s
+ 42%|████▏     | 42/100 [17:43<23:55, 24.75s/it]                                                {'loss': -0.0166, 'grad_norm': 0.31090255681145956, 'learning_rate': 7.347357813929454e-07, 'on_policy_loss': -0.0166, 'rollout/tokens_per_second': 2709.8517242390985, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.27497028078264735, 'opsd/teacher_entropy': 0.257811288523755, 'opsd/student_sampled_logp': -0.2399109267513843, 'opsd/teacher_sampled_logp': -0.45258141195564056, 'opsd/forward_kl_teacher_student': 0.24996166521758878, 'opsd/reverse_kl_student_teacher': 0.2170449961417391, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.017486572265625, 'system/gpu_allocated_gib': 47.25263023376465, 'system/gpu_reserved_gib': 75.00830078125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.08}
+ 42%|████▏     | 42/100 [17:43<23:55, 24.75s/it]vLLM generation done - elapsed time: 12.08s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2713.4 tok/s
+ 43%|████▎     | 43/100 [18:08<23:38, 24.88s/it]                                                {'loss': -0.0167, 'grad_norm': 0.2842198301276165, 'learning_rate': 7.191855733945386e-07, 'on_policy_loss': -0.0167, 'rollout/tokens_per_second': 2713.3802027793326, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2660212931991998, 'opsd/teacher_entropy': 0.2531826205087192, 'opsd/student_sampled_logp': -0.22803066131334782, 'opsd/teacher_sampled_logp': -0.4619402348375839, 'opsd/forward_kl_teacher_student': 0.2668699558747424, 'opsd/reverse_kl_student_teacher': 0.23750259858242845, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0156707763671875, 'system/gpu_allocated_gib': 47.2534294128418, 'system/gpu_reserved_gib': 75.44580078125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.1}
+ 43%|████▎     | 43/100 [18:09<23:38, 24.88s/it]vLLM generation done - elapsed time: 12.11s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2705.8 tok/s
+ 44%|████▍     | 44/100 [18:34<23:26, 25.12s/it]                                                {'loss': -0.0176, 'grad_norm': 0.29952701482433053, 'learning_rate': 7.033683215379002e-07, 'on_policy_loss': -0.0176, 'rollout/tokens_per_second': 2705.7865562687894, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.27138623526083333, 'opsd/teacher_entropy': 0.25636420574251334, 'opsd/student_sampled_logp': -0.2355627598136315, 'opsd/teacher_sampled_logp': -0.46008960845053215, 'opsd/forward_kl_teacher_student': 0.26138273754357355, 'opsd/reverse_kl_student_teacher': 0.23148443089210075, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0179443359375, 'system/gpu_allocated_gib': 47.253177642822266, 'system/gpu_reserved_gib': 75.15673828125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.13}
+ 44%|████▍     | 44/100 [18:34<23:26, 25.12s/it]vLLM generation done - elapsed time: 12.21s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2684.1 tok/s
+ 45%|████▌     | 45/100 [19:00<23:19, 25.45s/it]                                                {'loss': -0.0171, 'grad_norm': 0.27098134421648395, 'learning_rate': 6.87303296707956e-07, 'on_policy_loss': -0.0171, 'rollout/tokens_per_second': 2684.0537572566573, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26601755327331383, 'opsd/teacher_entropy': 0.25194214600520104, 'opsd/student_sampled_logp': -0.23051296334176172, 'opsd/teacher_sampled_logp': -0.4589871871317942, 'opsd/forward_kl_teacher_student': 0.26152202696360344, 'opsd/reverse_kl_student_teacher': 0.23287339563051332, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0177001953125, 'system/gpu_allocated_gib': 47.25256538391113, 'system/gpu_reserved_gib': 75.1376953125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.15}
+ 45%|████▌     | 45/100 [19:01<23:19, 25.45s/it]vLLM generation done - elapsed time: 12.11s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2706.5 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_45.json
+================================================================================
+
+ 46%|████▌     | 46/100 [19:25<22:54, 25.46s/it]                                                {'loss': -0.0173, 'grad_norm': 0.26270145670916, 'learning_rate': 6.710100716628344e-07, 'on_policy_loss': -0.0173, 'rollout/tokens_per_second': 2706.5349842298433, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26122469549087657, 'opsd/teacher_entropy': 0.24733387831160547, 'opsd/student_sampled_logp': -0.2262129497532938, 'opsd/teacher_sampled_logp': -0.4629012624096937, 'opsd/forward_kl_teacher_student': 0.2758197889672694, 'opsd/reverse_kl_student_teacher': 0.24238967541889403, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0177764892578125, 'system/gpu_allocated_gib': 47.253159523010254, 'system/gpu_reserved_gib': 74.8896484375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.18}
+ 46%|████▌     | 46/100 [19:26<22:54, 25.46s/it]vLLM generation done - elapsed time: 12.10s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2709.1 tok/s
+ 47%|████▋     | 47/100 [19:50<22:16, 25.22s/it]                                                {'loss': -0.0169, 'grad_norm': 0.27904320319934794, 'learning_rate': 6.545084971874736e-07, 'on_policy_loss': -0.0169, 'rollout/tokens_per_second': 2709.1167335435675, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26788881005837006, 'opsd/teacher_entropy': 0.2553951408027393, 'opsd/student_sampled_logp': -0.2332995915520675, 'opsd/teacher_sampled_logp': -0.4654622388768683, 'opsd/forward_kl_teacher_student': 0.27141523812065155, 'opsd/reverse_kl_student_teacher': 0.23476649099811733, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.017059326171875, 'system/gpu_allocated_gib': 47.25273942947388, 'system/gpu_reserved_gib': 74.7900390625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.21}
+ 47%|████▋     | 47/100 [19:51<22:16, 25.22s/it]vLLM generation done - elapsed time: 12.10s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2708.6 tok/s
+ 48%|████▊     | 48/100 [20:15<21:48, 25.16s/it]                                                {'loss': -0.0177, 'grad_norm': 0.2872583641452156, 'learning_rate': 6.378186779084995e-07, 'on_policy_loss': -0.0177, 'rollout/tokens_per_second': 2708.563937238249, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2744201437954655, 'opsd/teacher_entropy': 0.2599633756061206, 'opsd/student_sampled_logp': -0.2345251349416953, 'opsd/teacher_sampled_logp': -0.4790498443204914, 'opsd/forward_kl_teacher_student': 0.281060024534143, 'opsd/reverse_kl_student_teacher': 0.24819675717930983, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019134521484375, 'system/gpu_allocated_gib': 47.25237464904785, 'system/gpu_reserved_gib': 75.1201171875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.23}
+ 48%|████▊     | 48/100 [20:16<21:48, 25.16s/it]vLLM generation done - elapsed time: 12.09s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2710.8 tok/s
+ 49%|████▉     | 49/100 [20:41<21:33, 25.35s/it]                                                {'loss': -0.018, 'grad_norm': 0.2792992003570073, 'learning_rate': 6.209609477998338e-07, 'on_policy_loss': -0.018, 'rollout/tokens_per_second': 2710.793960634846, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26007408743995164, 'opsd/teacher_entropy': 0.2493084775863201, 'opsd/student_sampled_logp': -0.22725023180203124, 'opsd/teacher_sampled_logp': -0.47357847531200564, 'opsd/forward_kl_teacher_student': 0.28971529222707093, 'opsd/reverse_kl_student_teacher': 0.24988754794776014, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.017181396484375, 'system/gpu_allocated_gib': 47.252201080322266, 'system/gpu_reserved_gib': 75.435546875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.26}
+ 49%|████▉     | 49/100 [20:42<21:33, 25.35s/it]vLLM generation done - elapsed time: 12.35s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2652.8 tok/s
+ 50%|█████     | 50/100 [21:06<21:02, 25.25s/it]                                                {'loss': -0.0173, 'grad_norm': 0.27324312443261034, 'learning_rate': 6.039558454088795e-07, 'on_policy_loss': -0.0173, 'rollout/tokens_per_second': 2652.806934348068, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.25558831935283544, 'opsd/teacher_entropy': 0.24890900108645297, 'opsd/student_sampled_logp': -0.22091414450950364, 'opsd/teacher_sampled_logp': -0.46637983918896897, 'opsd/forward_kl_teacher_student': 0.28993238404436206, 'opsd/reverse_kl_student_teacher': 0.2454008073120949, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.017333984375, 'system/gpu_allocated_gib': 47.25315713882446, 'system/gpu_reserved_gib': 74.91259765625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.28}
+ 50%|█████     | 50/100 [21:07<21:02, 25.25s/it]wandb: WARNING URL not available in offline run
+vLLM generation done - elapsed time: 12.05s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2719.3 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_50.json
+================================================================================
+
+ 51%|█████     | 51/100 [21:43<23:25, 28.68s/it]                                                {'loss': -0.0178, 'grad_norm': 0.2527506782509328, 'learning_rate': 5.868240888334652e-07, 'on_policy_loss': -0.0178, 'rollout/tokens_per_second': 2719.3167409824946, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.25168214233758146, 'opsd/teacher_entropy': 0.24467535348019137, 'opsd/student_sampled_logp': -0.22098859796251763, 'opsd/teacher_sampled_logp': -0.47554003739864054, 'opsd/forward_kl_teacher_student': 0.29671894554559164, 'opsd/reverse_kl_student_teacher': 0.2550288919667698, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.018157958984375, 'system/gpu_allocated_gib': 47.25269412994385, 'system/gpu_reserved_gib': 75.39990234375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.31}
+ 51%|█████     | 51/100 [21:43<23:25, 28.68s/it]vLLM generation done - elapsed time: 12.08s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2713.6 tok/s
+
+================================================================================
+STUDENT GENERATION SAMPLE (Step 51):
+================================================================================
+
+Prompt:
+<|im_start|>user
+Problem: Given an acute-angled triangle, describe all interior points whose orthogonal projections on the sides form a triangle similar to the original one.
+
+Please reason step by step, and put your final answer within \boxed{}.<|im_end|>
+<|im_start|>assistant
+
+
+Completion:
+<think>
+Okay, so I need to figure out all the interior points of an acute-angled triangle such that when you project them orthogonally onto the sides of the triangle, the resulting triangle is similar to the original one. Hmm, let me start by recalling some concepts.
+
+First, orthogonal projection. If we have a point inside the triangle and we project it orthogonally onto each of the three sides, then the three projections should form a triangle. The question is asking for all such interior points where this triangle is similar to the original triangle.
+
+Let me try to visualize this. Let's consider an acute-angled triangle, say triangle ABC, with points D, E, F on the sides BC, AC, and AB respectively, but actually, no—wait, the problem is about points inside the triangle, not necessarily on the sides. Wait, but if we are projecting the interior point onto the sides, then those projections would be points on the sides of the triangle, right?
+
+So, suppose we have a point P inside triangle ABC. Then, if we project P orthogonally onto each of the three sides of ABC, we get three points, let's call them P_a, P_b, P_c, where P_a is the projection of P onto BC, P_b is the projection of P onto AC, and P_c is the projection of P onto AB.
+
+Then, the triangle formed by these three projections, say triangle P_aP_bP_c, should be similar to triangle ABC.
+
+So, our task is to find all interior points P such that triangle P_aP_bP_c is similar to triangle ABC.
+
+First, let me recall that similarity of triangles requires that corresponding angles are equal and corresponding sides are proportional. So, for triangle P_aP_bP_c to be similar to triangle ABC, there must be a correspondence between the vertices of the two triangles such that the angles are preserved in some order, and the sides are in proportion.
+
+But since we are dealing with projections, maybe there is some relationship between the position of point P and the angles or lengths of the projections.
+
+Alternatively, maybe we can use coordinate geometry here. Let me try to approach this with coordinates.
+
+Let me set up coordinates for triangle ABC. Let me assume coordinates for simplicity. Let me suppose triangle ABC is any acute-angled triangle. Let me assign coordinates:
+
+Let me choose coordinates such that triangle ABC has coordinates A(0, 0), B(1, 0), and C(0, 1). Wait, but then ABC is a right-angled triangle at A, but the problem states that the triangle is acute-angled. Therefore, I need to choose coordinates for an acute-angled triangle. Let me adjust that.
+
+Let me take triangle ABC with coordinates A(0, 0), B(2, 0), C(0, 2). Wait, but then ABC is a right-angled triangle at A as well, since AB is horizontal and AC is vertical. So that's not acute-angled. So, maybe I need to take coordinates where all angles are less than 90 degrees.
+
+Let me take coordinates for an acute-angled triangle. For example, let me take A(0, 0), B(1, 0), and C(0, 1). Wait, but again, this is a right-angled triangle at A. So, to make it acute-angled, maybe I need points such that all angles are less than 90 degrees. For example, let me take A(0, 0), B(1, 1), and C(1, 0). Wait, but then triangle ABC has coordinates A(0, 0), B(1, 1), and C(1, 0). Let me check the angles here.
+
+Calculating the angles:
+
+First, compute the lengths of the sides.
+
+AB: from (0,0) to (1,1): length sqrt((1)^2 + (1)^2) = sqrt(2).
+
+AC: from (0,0) to (1, 0): length 1.
+
+BC: from (1,1) to (1, 0): length sqrt((0)^2 + (-1)^2) = 1.
+
+So, triangle ABC has sides of length sqrt(2), 1, 1. Let me check the angles using the Law of Cosines.
+
+For angle at A:
+
+Opposite side BC is length 1.
+
+Law of Cosines: BC² = AB² + AC² - 2*AB*AC*cos(angle at A)
+
+So, 1² = (sqrt(2))² + 1² - 2*sqrt(2)*1*cos(angle at A)
+
+Calculates to:
+
+1 = 2 + 1 - 2*sqrt(2)*cos(angle at A)
+
+Which is:
+
+1 = 3 - 2*sqrt(2)*cos(angle at A)
+
+Then, rearr
+================================================================================
+
+ 52%|█████▏    | 52/100 [22:08<22:06, 27.64s/it]                                                {'loss': -0.0184, 'grad_norm': 0.26101991520816864, 'learning_rate': 5.695865504800327e-07, 'on_policy_loss': -0.0184, 'rollout/tokens_per_second': 2713.636339121119, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.25903829948467133, 'opsd/teacher_entropy': 0.2511484334577922, 'opsd/student_sampled_logp': -0.22410930815653315, 'opsd/teacher_sampled_logp': -0.46948869606568866, 'opsd/forward_kl_teacher_student': 0.2888703611275348, 'opsd/reverse_kl_student_teacher': 0.24769891019865015, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.018768310546875, 'system/gpu_allocated_gib': 47.25386047363281, 'system/gpu_reserved_gib': 74.93017578125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.33}
+ 52%|█████▏    | 52/100 [22:08<22:06, 27.64s/it]vLLM generation done - elapsed time: 12.20s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2686.7 tok/s
+ 53%|█████▎    | 53/100 [22:32<20:48, 26.56s/it]                                                {'loss': -0.0173, 'grad_norm': 0.25487451042076814, 'learning_rate': 5.522642316338268e-07, 'on_policy_loss': -0.0173, 'rollout/tokens_per_second': 2686.6628336599583, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.24799072503490574, 'opsd/teacher_entropy': 0.24071779973178817, 'opsd/student_sampled_logp': -0.21459251709564436, 'opsd/teacher_sampled_logp': -0.46464917164407926, 'opsd/forward_kl_teacher_student': 0.2928792583262215, 'opsd/reverse_kl_student_teacher': 0.25275194555638375, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.018096923828125, 'system/gpu_allocated_gib': 47.25222444534302, 'system/gpu_reserved_gib': 74.962890625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.36}
+ 53%|█████▎    | 53/100 [22:32<20:48, 26.56s/it]vLLM generation done - elapsed time: 12.15s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2697.5 tok/s
+ 54%|█████▍    | 54/100 [22:57<20:05, 26.20s/it]                                                {'loss': -0.0182, 'grad_norm': 0.2530160622165115, 'learning_rate': 5.348782368720625e-07, 'on_policy_loss': -0.0182, 'rollout/tokens_per_second': 2697.5307331639747, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2507636861016741, 'opsd/teacher_entropy': 0.24371775459761622, 'opsd/student_sampled_logp': -0.2156279893007359, 'opsd/teacher_sampled_logp': -0.4577574138506562, 'opsd/forward_kl_teacher_student': 0.2887438224615864, 'opsd/reverse_kl_student_teacher': 0.24528552631068062, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0182342529296875, 'system/gpu_allocated_gib': 47.25328493118286, 'system/gpu_reserved_gib': 75.7294921875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.38}
+ 54%|█████▍    | 54/100 [22:58<20:05, 26.20s/it]vLLM generation done - elapsed time: 12.06s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2717.2 tok/s
+ 55%|█████▌    | 55/100 [23:22<19:25, 25.89s/it]                                                {'loss': -0.0176, 'grad_norm': 0.2375064750592737, 'learning_rate': 5.174497483512505e-07, 'on_policy_loss': -0.0176, 'rollout/tokens_per_second': 2717.1643728720464, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.24469060759633626, 'opsd/teacher_entropy': 0.2374215338448445, 'opsd/student_sampled_logp': -0.2099473455405902, 'opsd/teacher_sampled_logp': -0.46163369630381357, 'opsd/forward_kl_teacher_student': 0.29432093888283795, 'opsd/reverse_kl_student_teacher': 0.2521078616898465, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0181884765625, 'system/gpu_allocated_gib': 47.25302505493164, 'system/gpu_reserved_gib': 75.228515625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.41}
+ 55%|█████▌    | 55/100 [23:23<19:25, 25.89s/it]vLLM generation done - elapsed time: 12.20s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2685.2 tok/s
+
+================================================================================
+STUDENT GENERATION SAMPLE (Step 55):
+================================================================================
+
+Prompt:
+<|im_start|>user
+Problem: a) Qual dos números é maior: $2^{100}+3^{100}$ ou $4^{100}$ ?
+
+b) Sejam $x$ e $y$ números naturais tais que
+$$
+2^{x} \cdot 3^{y}=\left(24^{\frac{1}{2}+\frac{1}{3}+\frac{1}{4}+\cdots+\frac{1}{60}}\right) \cdot\left(24^{\frac{1}{3}+\frac{1}{4}+\frac{1}{5}+\cdots+\frac{1}{60}}\right)^{2} \cdot\left(24^{\frac{1}{4}+\frac{1}{5}+\frac{1}{6}+\cdots+\frac{1}{60}}\right)^{3} \cdot \ldots \cdot\left(2^{\frac{1}{60}}\right)^{59}
+$$
+Determinar o valor de $x+y$.
+
+Please reason step by step, and put your final answer within \boxed{}.<|im_end|>
+<|im_start|>assistant
+
+
+Completion:
+<think>
+Okay, so I have these two problems here. Let me try to tackle them one by one. Starting with part a):
+
+**a) Qual dos números é maior: $2^{100} + 3^{100}$ ou $4^{100}$ ?**
+
+Alright, so I need to compare $2^{100} + 3^{100}$ with $4^{100}$. Hmm, both numbers are exponentials with the same exponent, 100, but they have different bases. Let me see.
+
+First, maybe I can rewrite both expressions in terms of the same base to make it easier to compare. Let me recall that $4$ is $2^2$, so $4^{100}$ is the same as $(2^2)^{100}$. Let me compute that:
+
+$4^{100} = (2^2)^{100} = 2^{2 \times 100} = 2^{200}$.
+
+So, now I have to compare $2^{100} + 3^{100}$ with $2^{200}$. 
+
+Hmm, so now I need to figure out which of these two expressions is larger. Let me think about how these exponents compare.
+
+First, note that $2^{200}$ is an extremely large number, right? Because exponentials grow very quickly. However, $2^{100}$ is a much smaller number compared to $2^{200}$, but then there is also $3^{100}$ added to $2^{100}$ in the first expression.
+
+Wait, so let me think about the two expressions:
+
+Expression A: $2^{100} + 3^{100}$
+
+Expression B: $2^{200}$
+
+So, if I can figure out how big each of these is, I can compare them.
+
+Let me consider the size of each term.
+
+First, note that $3^{100}$ is much larger than $2^{100}$, because 3 is larger than 2. So, $3^{100}$ is going to be significantly bigger than $2^{100}$, even though both are raised to the same power.
+
+But then, when we add them together, we get $2^{100} + 3^{100}$. However, Expression B is $2^{200}$, which is $ (2^{100})^2 $.
+
+So, let me think of this as follows: Let me denote $a = 2^{100}$, then Expression A becomes $a + 3^{100}$, and Expression B is $a^2$.
+
+But how does $a + 3^{100}$ compare to $a^2$?
+
+Alternatively, maybe I can compare $3^{100}$ with $2^{200} - 2^{100}$, since Expression A is $2^{100} + 3^{100}$, which is equal to $2^{100} + 3^{100}$. Therefore, if I can compare $3^{100}$ with $2^{200} - 2^{100}$, then I can see which one is larger.
+
+But this seems complicated. Maybe another approach.
+
+Let me consider taking logarithms to compare the two numbers. Since logarithms can help compare exponents.
+
+But since we are dealing with two numbers, which are $2^{100} + 3^{100}$ and $2^{200}$, taking logarithms might be useful.
+
+However, taking the logarithm of a sum is not straightforward, because the logarithm of a sum is not the same as the sum of the logarithms. However, for large exponents, maybe we can approximate or compare them.
+
+Alternatively, perhaps we can compare the two expressions by considering the dominant term.
+
+Let me note that $2^{200}$ is much larger than $3^{100}$, since $2^{200} = (2^{100})^2$, and $3^{100}$ is just a single term. Wait, but how do these compare?
+
+Wait, let me compare $2^{200}$ and $3^{100}$. Let me take the logarithm of both expressions to compare them.
+
+Let me compute $\log(2^{200})$ and $\log(3^{100})$.
+
+$\log(2^{200}) = 200 \log 2$
+
+$\log(3^{100}) = 100 \log 3$
+
+So, if I compute the
+================================================================================
+
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_55.json
+================================================================================
+
+ 56%|█████▌    | 56/100 [23:49<19:08, 26.11s/it]                                                {'loss': -0.0179, 'grad_norm': 0.24053287632601406, 'learning_rate': 5e-07, 'on_policy_loss': -0.0179, 'rollout/tokens_per_second': 2685.226576841663, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.24526959767945944, 'opsd/teacher_entropy': 0.23946073680402863, 'opsd/student_sampled_logp': -0.21109718241164394, 'opsd/teacher_sampled_logp': -0.46658373570299383, 'opsd/forward_kl_teacher_student': 0.2976797088376517, 'opsd/reverse_kl_student_teacher': 0.25608096896880417, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01751708984375, 'system/gpu_allocated_gib': 47.2540717124939, 'system/gpu_reserved_gib': 75.51025390625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.44}
+ 56%|█████▌    | 56/100 [23:50<19:08, 26.11s/it]vLLM generation done - elapsed time: 12.13s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2701.3 tok/s
+ 57%|█████▋    | 57/100 [24:14<18:28, 25.77s/it]                                                {'loss': -0.0187, 'grad_norm': 0.2562328231093312, 'learning_rate': 4.825502516487496e-07, 'on_policy_loss': -0.0187, 'rollout/tokens_per_second': 2701.319691827078, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2730231303474583, 'opsd/teacher_entropy': 0.26612888049059913, 'opsd/student_sampled_logp': -0.23763032640835308, 'opsd/teacher_sampled_logp': -0.51370807383236, 'opsd/forward_kl_teacher_student': 0.33340980603618975, 'opsd/reverse_kl_student_teacher': 0.28028422628932803, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.018218994140625, 'system/gpu_allocated_gib': 47.25308895111084, 'system/gpu_reserved_gib': 75.43994140625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.46}
+ 57%|█████▋    | 57/100 [24:15<18:28, 25.77s/it]vLLM generation done - elapsed time: 12.41s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2641.3 tok/s
+ 58%|█████▊    | 58/100 [24:40<18:09, 25.93s/it]                                                {'loss': -0.0179, 'grad_norm': 0.23731683680669916, 'learning_rate': 4.6512176312793735e-07, 'on_policy_loss': -0.0179, 'rollout/tokens_per_second': 2641.279571943409, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2459772098179159, 'opsd/teacher_entropy': 0.24292721103481416, 'opsd/student_sampled_logp': -0.21488089808211322, 'opsd/teacher_sampled_logp': -0.4583766379056534, 'opsd/forward_kl_teacher_student': 0.2936350601292954, 'opsd/reverse_kl_student_teacher': 0.24858262861004027, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01824951171875, 'system/gpu_allocated_gib': 47.2521595954895, 'system/gpu_reserved_gib': 75.583984375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.49}
+ 58%|█████▊    | 58/100 [24:41<18:09, 25.93s/it]vLLM generation done - elapsed time: 12.08s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2712.9 tok/s
+ 59%|█████▉    | 59/100 [25:04<17:11, 25.17s/it]                                                {'loss': -0.0187, 'grad_norm': 0.2541186677160666, 'learning_rate': 4.477357683661733e-07, 'on_policy_loss': -0.0187, 'rollout/tokens_per_second': 2712.8946890043453, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.27025656702461753, 'opsd/teacher_entropy': 0.262449805044296, 'opsd/student_sampled_logp': -0.23346368832176959, 'opsd/teacher_sampled_logp': -0.504176381001968, 'opsd/forward_kl_teacher_student': 0.3334801534952653, 'opsd/reverse_kl_student_teacher': 0.27715371971241193, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.017913818359375, 'system/gpu_allocated_gib': 47.25196886062622, 'system/gpu_reserved_gib': 74.78369140625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.51}
+ 59%|█████▉    | 59/100 [25:04<17:11, 25.17s/it]vLLM generation done - elapsed time: 12.03s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2724.8 tok/s
+ 60%|██████    | 60/100 [25:28<16:38, 24.95s/it]                                                {'loss': -0.0195, 'grad_norm': 0.26666201875681983, 'learning_rate': 4.304134495199674e-07, 'on_policy_loss': -0.0195, 'rollout/tokens_per_second': 2724.776567155459, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26462442302620715, 'opsd/teacher_entropy': 0.25653592150954996, 'opsd/student_sampled_logp': -0.23045115794786294, 'opsd/teacher_sampled_logp': -0.4967423860815172, 'opsd/forward_kl_teacher_student': 0.31450476418963913, 'opsd/reverse_kl_student_teacher': 0.2687657314916896, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0196533203125, 'system/gpu_allocated_gib': 47.25295162200928, 'system/gpu_reserved_gib': 74.72998046875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.54}
+ 60%|██████    | 60/100 [25:29<16:38, 24.95s/it]vLLM generation done - elapsed time: 12.09s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2710.2 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_60.json
+================================================================================
+
+ 61%|██████    | 61/100 [25:54<16:25, 25.26s/it]                                                {'loss': -0.0186, 'grad_norm': 0.25807093634310796, 'learning_rate': 4.131759111665348e-07, 'on_policy_loss': -0.0186, 'rollout/tokens_per_second': 2710.162505925568, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2516215459726301, 'opsd/teacher_entropy': 0.24713432439461752, 'opsd/student_sampled_logp': -0.21739260537573796, 'opsd/teacher_sampled_logp': -0.4831935449192085, 'opsd/forward_kl_teacher_student': 0.3162112564374012, 'opsd/reverse_kl_student_teacher': 0.26427762745944744, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0186767578125, 'system/gpu_allocated_gib': 47.251176834106445, 'system/gpu_reserved_gib': 75.00830078125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.56}
+ 61%|██████    | 61/100 [25:55<16:25, 25.26s/it]vLLM generation done - elapsed time: 12.13s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2700.5 tok/s
+ 62%|██████▏   | 62/100 [26:19<15:54, 25.12s/it]                                                {'loss': -0.0184, 'grad_norm': 0.24636720760167774, 'learning_rate': 3.960441545911204e-07, 'on_policy_loss': -0.0184, 'rollout/tokens_per_second': 2700.541351686256, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.24684510895380365, 'opsd/teacher_entropy': 0.24456153727157492, 'opsd/student_sampled_logp': -0.21421410067552193, 'opsd/teacher_sampled_logp': -0.48689545978181986, 'opsd/forward_kl_teacher_student': 0.3322144762459661, 'opsd/reverse_kl_student_teacher': 0.2768845363948509, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.018280029296875, 'system/gpu_allocated_gib': 47.251821994781494, 'system/gpu_reserved_gib': 74.5947265625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.59}
+ 62%|██████▏   | 62/100 [26:20<15:54, 25.12s/it]vLLM generation done - elapsed time: 12.14s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2699.3 tok/s
+ 63%|██████▎   | 63/100 [26:45<15:37, 25.33s/it]                                                {'loss': -0.0183, 'grad_norm': 0.2582114895992803, 'learning_rate': 3.790390522001662e-07, 'on_policy_loss': -0.0183, 'rollout/tokens_per_second': 2699.295953914277, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2561818904781109, 'opsd/teacher_entropy': 0.25194555518783546, 'opsd/student_sampled_logp': -0.22040143778132443, 'opsd/teacher_sampled_logp': -0.4813177304498578, 'opsd/forward_kl_teacher_student': 0.31923201944092905, 'opsd/reverse_kl_student_teacher': 0.2643524530771747, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01849365234375, 'system/gpu_allocated_gib': 47.25331449508667, 'system/gpu_reserved_gib': 74.7158203125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.62}
+ 63%|██████▎   | 63/100 [26:45<15:37, 25.33s/it]vLLM generation done - elapsed time: 12.05s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2720.2 tok/s
+ 64%|██████▍   | 64/100 [27:10<15:11, 25.32s/it]                                                {'loss': -0.0192, 'grad_norm': 0.2455526577385971, 'learning_rate': 3.621813220915004e-07, 'on_policy_loss': -0.0192, 'rollout/tokens_per_second': 2720.248827710094, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26639301947129657, 'opsd/teacher_entropy': 0.2582037800071184, 'opsd/student_sampled_logp': -0.22933959465924142, 'opsd/teacher_sampled_logp': -0.5111185358385307, 'opsd/forward_kl_teacher_student': 0.32963720966074195, 'opsd/reverse_kl_student_teacher': 0.2790768339956863, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0191650390625, 'system/gpu_allocated_gib': 47.25256681442261, 'system/gpu_reserved_gib': 74.962890625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.64}
+ 64%|██████▍   | 64/100 [27:11<15:11, 25.32s/it]vLLM generation done - elapsed time: 12.18s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2689.3 tok/s
+ 65%|██████▌   | 65/100 [27:36<14:55, 25.59s/it]                                                {'loss': -0.0193, 'grad_norm': 0.24186311181799386, 'learning_rate': 3.454915028125263e-07, 'on_policy_loss': -0.0193, 'rollout/tokens_per_second': 2689.2506243936105, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2563112669956963, 'opsd/teacher_entropy': 0.2534433004277362, 'opsd/student_sampled_logp': -0.2216762945096369, 'opsd/teacher_sampled_logp': -0.4953006574692106, 'opsd/forward_kl_teacher_student': 0.32703156262541094, 'opsd/reverse_kl_student_teacher': 0.2735070710903619, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019561767578125, 'system/gpu_allocated_gib': 47.253732681274414, 'system/gpu_reserved_gib': 75.337890625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.67}
+ 65%|██████▌   | 65/100 [27:37<14:55, 25.59s/it]vLLM generation done - elapsed time: 12.06s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2716.4 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_65.json
+================================================================================
+
+ 66%|██████▌   | 66/100 [28:01<14:23, 25.40s/it]                                                {'loss': -0.0187, 'grad_norm': 0.23745233498016655, 'learning_rate': 3.2898992833716563e-07, 'on_policy_loss': -0.0187, 'rollout/tokens_per_second': 2716.3580861569967, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.24772581945846905, 'opsd/teacher_entropy': 0.2438521903946787, 'opsd/student_sampled_logp': -0.21402372934726493, 'opsd/teacher_sampled_logp': -0.4799244669493986, 'opsd/forward_kl_teacher_student': 0.32474648724893795, 'opsd/reverse_kl_student_teacher': 0.2683837699851069, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.018707275390625, 'system/gpu_allocated_gib': 47.25271654129028, 'system/gpu_reserved_gib': 74.91845703125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.69}
+ 66%|██████▌   | 66/100 [28:02<14:23, 25.40s/it]vLLM generation done - elapsed time: 12.18s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2691.2 tok/s
+ 67%|██████▋   | 67/100 [28:27<14:00, 25.48s/it]                                                {'loss': -0.0186, 'grad_norm': 0.24956423549148934, 'learning_rate': 3.1269670329204393e-07, 'on_policy_loss': -0.0186, 'rollout/tokens_per_second': 2691.1976132435657, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.25034909137026845, 'opsd/teacher_entropy': 0.24293289664387835, 'opsd/student_sampled_logp': -0.21888373090890217, 'opsd/teacher_sampled_logp': -0.4835667335012662, 'opsd/forward_kl_teacher_student': 0.31831760708513424, 'opsd/reverse_kl_student_teacher': 0.2674180725667319, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01837158203125, 'system/gpu_allocated_gib': 47.2536187171936, 'system/gpu_reserved_gib': 75.48095703125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.72}
+ 67%|██████▋   | 67/100 [28:27<14:00, 25.48s/it]vLLM generation done - elapsed time: 12.10s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2707.1 tok/s
+ 68%|██████▊   | 68/100 [28:51<13:23, 25.12s/it]                                                {'loss': -0.0194, 'grad_norm': 0.2457759863802809, 'learning_rate': 2.9663167846209996e-07, 'on_policy_loss': -0.0194, 'rollout/tokens_per_second': 2707.0849263955456, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2609364593164166, 'opsd/teacher_entropy': 0.25601639005676624, 'opsd/student_sampled_logp': -0.22427020208221046, 'opsd/teacher_sampled_logp': -0.49266513975201737, 'opsd/forward_kl_teacher_student': 0.3328382212468198, 'opsd/reverse_kl_student_teacher': 0.2756127014447498, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01922607421875, 'system/gpu_allocated_gib': 47.252721309661865, 'system/gpu_reserved_gib': 75.51220703125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.74}
+ 68%|██████▊   | 68/100 [28:52<13:23, 25.12s/it]vLLM generation done - elapsed time: 12.14s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2699.2 tok/s
+ 69%|██████▉   | 69/100 [29:17<13:06, 25.37s/it]                                                {'loss': -0.0194, 'grad_norm': 0.24315278868138693, 'learning_rate': 2.808144266054612e-07, 'on_policy_loss': -0.0194, 'rollout/tokens_per_second': 2699.1643263911546, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.245197091571342, 'opsd/teacher_entropy': 0.24243234984422996, 'opsd/student_sampled_logp': -0.2105934044711151, 'opsd/teacher_sampled_logp': -0.47129520642445366, 'opsd/forward_kl_teacher_student': 0.3187386338274406, 'opsd/reverse_kl_student_teacher': 0.2630920200998681, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019134521484375, 'system/gpu_allocated_gib': 47.25306463241577, 'system/gpu_reserved_gib': 75.42236328125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.77}
+ 69%|██████▉   | 69/100 [29:18<13:06, 25.37s/it]vLLM generation done - elapsed time: 12.07s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2715.7 tok/s
+ 70%|███████   | 70/100 [29:43<12:49, 25.64s/it]                                                {'loss': -0.0191, 'grad_norm': 0.23380918158875058, 'learning_rate': 2.6526421860705473e-07, 'on_policy_loss': -0.0191, 'rollout/tokens_per_second': 2715.656693566771, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.25130933440980824, 'opsd/teacher_entropy': 0.24709417217210483, 'opsd/student_sampled_logp': -0.21727488666573583, 'opsd/teacher_sampled_logp': -0.4692976993710321, 'opsd/forward_kl_teacher_student': 0.3068259781643936, 'opsd/reverse_kl_student_teacher': 0.2543149438176392, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019073486328125, 'system/gpu_allocated_gib': 47.25342845916748, 'system/gpu_reserved_gib': 74.67138671875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.79}
+ 70%|███████   | 70/100 [29:44<12:49, 25.64s/it]vLLM generation done - elapsed time: 12.08s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2712.7 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_70.json
+================================================================================
+
+ 71%|███████   | 71/100 [30:09<12:22, 25.60s/it]                                                {'loss': -0.0198, 'grad_norm': 0.24507453291863743, 'learning_rate': 2.500000000000001e-07, 'on_policy_loss': -0.0198, 'rollout/tokens_per_second': 2712.6844696624967, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26450199318203604, 'opsd/teacher_entropy': 0.2594363200592141, 'opsd/student_sampled_logp': -0.2298256833339417, 'opsd/teacher_sampled_logp': -0.5139255246377175, 'opsd/forward_kl_teacher_student': 0.349228775804433, 'opsd/reverse_kl_student_teacher': 0.28784686670139115, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019439697265625, 'system/gpu_allocated_gib': 47.253353118896484, 'system/gpu_reserved_gib': 75.4296875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.82}
+ 71%|███████   | 71/100 [30:09<12:22, 25.60s/it]vLLM generation done - elapsed time: 12.08s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2711.9 tok/s
+ 72%|███████▏  | 72/100 [30:34<11:51, 25.40s/it]                                                {'loss': -0.0194, 'grad_norm': 0.24254416272042895, 'learning_rate': 2.350403678833976e-07, 'on_policy_loss': -0.0194, 'rollout/tokens_per_second': 2711.8646257809446, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2549878409518923, 'opsd/teacher_entropy': 0.2501818059807225, 'opsd/student_sampled_logp': -0.2201150057215701, 'opsd/teacher_sampled_logp': -0.5036824727684062, 'opsd/forward_kl_teacher_student': 0.3424981120790349, 'opsd/reverse_kl_student_teacher': 0.2824995412099805, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0205078125, 'system/gpu_allocated_gib': 47.25332975387573, 'system/gpu_reserved_gib': 74.74072265625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.85}
+ 72%|███████▏  | 72/100 [30:34<11:51, 25.40s/it]vLLM generation done - elapsed time: 12.08s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2713.6 tok/s
+ 73%|███████▎  | 73/100 [30:58<11:15, 25.04s/it]                                                {'loss': -0.0201, 'grad_norm': 0.25277337800906374, 'learning_rate': 2.2040354826462664e-07, 'on_policy_loss': -0.0201, 'rollout/tokens_per_second': 2713.5761178211183, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2625635578696524, 'opsd/teacher_entropy': 0.2538267020966114, 'opsd/student_sampled_logp': -0.22588123025410564, 'opsd/teacher_sampled_logp': -0.5014480927057482, 'opsd/forward_kl_teacher_student': 0.33639606580044334, 'opsd/reverse_kl_student_teacher': 0.28165529414439844, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019866943359375, 'system/gpu_allocated_gib': 47.252853870391846, 'system/gpu_reserved_gib': 75.212890625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.87}
+ 73%|███████▎  | 73/100 [30:59<11:15, 25.04s/it]vLLM generation done - elapsed time: 12.10s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2708.6 tok/s
+ 74%|███████▍  | 74/100 [31:22<10:43, 24.76s/it]                                                {'loss': -0.0192, 'grad_norm': 0.22330180772237287, 'learning_rate': 2.0610737385376348e-07, 'on_policy_loss': -0.0192, 'rollout/tokens_per_second': 2708.553421666665, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2522940498987012, 'opsd/teacher_entropy': 0.24751253559575392, 'opsd/student_sampled_logp': -0.21982237782644864, 'opsd/teacher_sampled_logp': -0.4801818210037734, 'opsd/forward_kl_teacher_student': 0.3166433628482881, 'opsd/reverse_kl_student_teacher': 0.2632635965524629, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019287109375, 'system/gpu_allocated_gib': 47.252108573913574, 'system/gpu_reserved_gib': 74.4482421875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.9}
+ 74%|███████▍  | 74/100 [31:23<10:43, 24.76s/it]vLLM generation done - elapsed time: 12.23s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2679.9 tok/s
+ 75%|███████▌  | 75/100 [31:45<10:08, 24.34s/it]                                                {'loss': -0.0196, 'grad_norm': 0.2471976713952898, 'learning_rate': 1.9216926233717084e-07, 'on_policy_loss': -0.0196, 'rollout/tokens_per_second': 2679.9425998098054, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2469286626699686, 'opsd/teacher_entropy': 0.2438669535053756, 'opsd/student_sampled_logp': -0.21186652415015012, 'opsd/teacher_sampled_logp': -0.4869252460734238, 'opsd/forward_kl_teacher_student': 0.3313682580815087, 'opsd/reverse_kl_student_teacher': 0.2779014251316838, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.020172119140625, 'system/gpu_allocated_gib': 47.25196313858032, 'system/gpu_reserved_gib': 74.72216796875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.92}
+ 75%|███████▌  | 75/100 [31:46<10:08, 24.34s/it]wandb: WARNING URL not available in offline run
+vLLM generation done - elapsed time: 12.02s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2725.7 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_75.json
+================================================================================
+
+ 76%|███████▌  | 76/100 [32:23<11:19, 28.31s/it]                                                {'loss': -0.0203, 'grad_norm': 0.24435286162822295, 'learning_rate': 1.7860619515673032e-07, 'on_policy_loss': -0.0203, 'rollout/tokens_per_second': 2725.658345445755, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26454980870527106, 'opsd/teacher_entropy': 0.2568323623537443, 'opsd/student_sampled_logp': -0.22765771918443775, 'opsd/teacher_sampled_logp': -0.5177602070995636, 'opsd/forward_kl_teacher_student': 0.35274694014182517, 'opsd/reverse_kl_student_teacher': 0.29303952871705785, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.020233154296875, 'system/gpu_allocated_gib': 47.253511905670166, 'system/gpu_reserved_gib': 74.2744140625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.95}
+ 76%|███████▌  | 76/100 [32:24<11:19, 28.31s/it]vLLM generation done - elapsed time: 12.08s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2712.3 tok/s
+ 77%|███████▋  | 77/100 [32:48<10:28, 27.32s/it]                                                {'loss': -0.0199, 'grad_norm': 0.2358185433370305, 'learning_rate': 1.6543469682057104e-07, 'on_policy_loss': -0.0199, 'rollout/tokens_per_second': 2712.2701770046046, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26674717410632354, 'opsd/teacher_entropy': 0.25867209497766935, 'opsd/student_sampled_logp': -0.22965366652573718, 'opsd/teacher_sampled_logp': -0.499665938570082, 'opsd/forward_kl_teacher_student': 0.3361231104147851, 'opsd/reverse_kl_student_teacher': 0.27434447842476317, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.020355224609375, 'system/gpu_allocated_gib': 47.251965045928955, 'system/gpu_reserved_gib': 75.52197265625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 1.97}
+ 77%|███████▋  | 77/100 [32:49<10:28, 27.32s/it]vLLM generation done - elapsed time: 12.14s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2700.2 tok/s
+ 78%|███████▊  | 78/100 [33:14<09:54, 27.01s/it]                                                {'loss': -0.0205, 'grad_norm': 0.2500134407594005, 'learning_rate': 1.5267081477050131e-07, 'on_policy_loss': -0.0205, 'rollout/tokens_per_second': 2700.184497090148, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2783010819280877, 'opsd/teacher_entropy': 0.26880288959733245, 'opsd/student_sampled_logp': -0.2407579651093253, 'opsd/teacher_sampled_logp': -0.5218851265235696, 'opsd/forward_kl_teacher_student': 0.33897980562676644, 'opsd/reverse_kl_student_teacher': 0.2850374477370367, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019866943359375, 'system/gpu_allocated_gib': 47.25205898284912, 'system/gpu_reserved_gib': 74.7822265625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.0}
+ 78%|███████▊  | 78/100 [33:15<09:54, 27.01s/it]vLLM generation done - elapsed time: 12.04s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2720.7 tok/s
+ 79%|███████▉  | 79/100 [33:39<09:13, 26.37s/it]                                                {'loss': -0.0197, 'grad_norm': 0.23980683058695088, 'learning_rate': 1.4033009983067452e-07, 'on_policy_loss': -0.0197, 'rollout/tokens_per_second': 2720.658129362261, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.25383434015686035, 'opsd/teacher_entropy': 0.2508494492560831, 'opsd/student_sampled_logp': -0.22131330230393823, 'opsd/teacher_sampled_logp': -0.5039605301352141, 'opsd/forward_kl_teacher_student': 0.3421975642144277, 'opsd/reverse_kl_student_teacher': 0.2859678978342157, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019927978515625, 'system/gpu_allocated_gib': 47.25333070755005, 'system/gpu_reserved_gib': 74.7802734375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.03}
+ 79%|███████▉  | 79/100 [33:40<09:13, 26.37s/it]vLLM generation done - elapsed time: 11.98s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2734.6 tok/s
+ 80%|████████  | 80/100 [34:05<08:43, 26.15s/it]                                                {'loss': -0.0205, 'grad_norm': 0.2401112478082594, 'learning_rate': 1.284275872613028e-07, 'on_policy_loss': -0.0205, 'rollout/tokens_per_second': 2734.5863475294145, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26958192224193006, 'opsd/teacher_entropy': 0.263461504803874, 'opsd/student_sampled_logp': -0.23275096026848097, 'opsd/teacher_sampled_logp': -0.5040964624094408, 'opsd/forward_kl_teacher_student': 0.3231100981066096, 'opsd/reverse_kl_student_teacher': 0.2705304785385585, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.020843505859375, 'system/gpu_allocated_gib': 47.25339365005493, 'system/gpu_reserved_gib': 76.01953125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.05}
+ 80%|████████  | 80/100 [34:05<08:43, 26.15s/it]vLLM generation done - elapsed time: 11.91s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2751.3 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_80.json
+================================================================================
+
+ 81%|████████  | 81/100 [34:29<08:03, 25.46s/it]                                                {'loss': -0.0203, 'grad_norm': 0.24026369037737796, 'learning_rate': 1.1697777844051104e-07, 'on_policy_loss': -0.0203, 'rollout/tokens_per_second': 2751.255088969869, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26360214672759497, 'opsd/teacher_entropy': 0.25832551049549246, 'opsd/student_sampled_logp': -0.22662414646690351, 'opsd/teacher_sampled_logp': -0.4967381784924648, 'opsd/forward_kl_teacher_student': 0.33715013169522545, 'opsd/reverse_kl_student_teacher': 0.27446100471409174, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01873779296875, 'system/gpu_allocated_gib': 47.25175094604492, 'system/gpu_reserved_gib': 75.11962890625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.08}
+ 81%|████████  | 81/100 [34:29<08:03, 25.46s/it]vLLM generation done - elapsed time: 11.94s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2745.4 tok/s
+ 82%|████████▏ | 82/100 [34:54<07:38, 25.45s/it]                                                {'loss': -0.0193, 'grad_norm': 0.2211613917843939, 'learning_rate': 1.0599462319663904e-07, 'on_policy_loss': -0.0193, 'rollout/tokens_per_second': 2745.4453849268984, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2427817453189663, 'opsd/teacher_entropy': 0.24095570235721903, 'opsd/student_sampled_logp': -0.21117646027445144, 'opsd/teacher_sampled_logp': -0.47081689014414857, 'opsd/forward_kl_teacher_student': 0.3194484603533685, 'opsd/reverse_kl_student_teacher': 0.2581005698526067, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.017852783203125, 'system/gpu_allocated_gib': 47.2531304359436, 'system/gpu_reserved_gib': 75.09375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.1}
+ 82%|████████▏ | 82/100 [34:55<07:38, 25.45s/it]vLLM generation done - elapsed time: 12.33s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2658.3 tok/s
+ 83%|████████▎ | 83/100 [35:21<07:18, 25.80s/it]                                                {'loss': -0.0201, 'grad_norm': 0.23242579392275992, 'learning_rate': 9.549150281252632e-08, 'on_policy_loss': -0.0201, 'rollout/tokens_per_second': 2658.25208212313, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26137398690899877, 'opsd/teacher_entropy': 0.254464403987955, 'opsd/student_sampled_logp': -0.22357048600433796, 'opsd/teacher_sampled_logp': -0.4919882942178924, 'opsd/forward_kl_teacher_student': 0.3349130155754466, 'opsd/reverse_kl_student_teacher': 0.2727562679129074, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.020172119140625, 'system/gpu_allocated_gib': 47.2533016204834, 'system/gpu_reserved_gib': 75.49267578125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.13}
+ 83%|████████▎ | 83/100 [35:21<07:18, 25.80s/it]vLLM generation done - elapsed time: 11.94s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2745.3 tok/s
+ 84%|████████▍ | 84/100 [35:45<06:46, 25.39s/it]                                                {'loss': -0.0195, 'grad_norm': 0.21041886922354303, 'learning_rate': 8.548121372247919e-08, 'on_policy_loss': -0.0195, 'rollout/tokens_per_second': 2745.264855897965, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.22515234796501526, 'opsd/teacher_entropy': 0.22650228662948008, 'opsd/student_sampled_logp': -0.19461601144762172, 'opsd/teacher_sampled_logp': -0.46515467554192935, 'opsd/forward_kl_teacher_student': 0.33919036813059283, 'opsd/reverse_kl_student_teacher': 0.27398135531692763, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01806640625, 'system/gpu_allocated_gib': 47.25173234939575, 'system/gpu_reserved_gib': 75.912109375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.15}
+ 84%|████████▍ | 84/100 [35:46<06:46, 25.39s/it]vLLM generation done - elapsed time: 11.94s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2745.1 tok/s
+ 85%|████████▌ | 85/100 [36:09<06:16, 25.09s/it]                                                {'loss': -0.0205, 'grad_norm': 0.2577371746160153, 'learning_rate': 7.597595192178702e-08, 'on_policy_loss': -0.0205, 'rollout/tokens_per_second': 2745.0921910200846, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.27236861899387516, 'opsd/teacher_entropy': 0.2652006988942925, 'opsd/student_sampled_logp': -0.23424902096205902, 'opsd/teacher_sampled_logp': -0.5257419215426102, 'opsd/forward_kl_teacher_student': 0.3518001015864868, 'opsd/reverse_kl_student_teacher': 0.2935808743209275, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0203857421875, 'system/gpu_allocated_gib': 47.25140857696533, 'system/gpu_reserved_gib': 75.44921875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.18}
+ 85%|████████▌ | 85/100 [36:10<06:16, 25.09s/it]vLLM generation done - elapsed time: 11.99s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2732.3 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_85.json
+================================================================================
+
+ 86%|████████▌ | 86/100 [36:35<05:53, 25.22s/it]                                                {'loss': -0.0206, 'grad_norm': 0.22898577723116764, 'learning_rate': 6.698729810778064e-08, 'on_policy_loss': -0.0206, 'rollout/tokens_per_second': 2732.345541123644, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26371263521007043, 'opsd/teacher_entropy': 0.2568949406138602, 'opsd/student_sampled_logp': -0.23097134975314249, 'opsd/teacher_sampled_logp': -0.5151729880341304, 'opsd/forward_kl_teacher_student': 0.336611152267115, 'opsd/reverse_kl_student_teacher': 0.2841326495027059, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.021514892578125, 'system/gpu_allocated_gib': 47.253549575805664, 'system/gpu_reserved_gib': 75.52001953125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.21}
+ 86%|████████▌ | 86/100 [36:36<05:53, 25.22s/it]vLLM generation done - elapsed time: 12.01s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2727.3 tok/s
+ 87%|████████▋ | 87/100 [36:59<05:22, 24.83s/it]                                                {'loss': -0.0203, 'grad_norm': 0.236662098441026, 'learning_rate': 5.8526203570536504e-08, 'on_policy_loss': -0.0203, 'rollout/tokens_per_second': 2727.288202045176, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2551651245609754, 'opsd/teacher_entropy': 0.24994736339020063, 'opsd/student_sampled_logp': -0.21908489209067647, 'opsd/teacher_sampled_logp': -0.5031862015382877, 'opsd/forward_kl_teacher_student': 0.34506704892274254, 'opsd/reverse_kl_student_teacher': 0.286467587740608, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.020294189453125, 'system/gpu_allocated_gib': 47.25188446044922, 'system/gpu_reserved_gib': 75.66015625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.23}
+ 87%|████████▋ | 87/100 [37:00<05:22, 24.83s/it]vLLM generation done - elapsed time: 11.93s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2747.0 tok/s
+
+================================================================================
+STUDENT GENERATION SAMPLE (Step 87):
+================================================================================
+
+Prompt:
+<|im_start|>user
+Problem: Suppose quadratic polynomials $P$, $Q$, $R$ with integer coefficients satisfy the following properties:
+* $P(1) = P(2) = Q(3) = 0$.
+* $P(x)^2 + Q(x)^2 = R(x)^2$ holds for any real number $x$.
+* There exists no integer greater than or equal to $2$, which divides all of the numbers appearing as a coefficient of any of $P$, $Q$, $R$.
+* The coefficients of the quadratic terms of $P$ and $Q$ are not $0$, and the coefficient of the quadratic term of $R$ is positive.
+Find all possible forms of $R(x)$ satisfying the conditions above.
+
+Please reason step by step, and put your final answer within \boxed{}.<|im_end|>
+<|im_start|>assistant
+
+
+Completion:
+<think>
+Okay, so I need to find all possible forms of the quadratic polynomial R(x) that satisfies these conditions. Let me try to break down the problem step by step.
+
+First, let me recall the given information:
+
+1. We have three quadratic polynomials P, Q, R with integer coefficients.
+2. P(1) = P(2) = Q(3) = 0.
+3. For any real number x, P(x)^2 + Q(x)^2 = R(x)^2.
+4. There is no integer greater than or equal to 2 that divides all of the coefficients of P, Q, and R.
+5. The coefficients of the quadratic terms of P and Q are not zero, and the coefficient of the quadratic term of R is positive.
+
+Alright, let me start by analyzing the first condition: P(1) = P(2) = Q(3) = 0.
+
+Since P is a quadratic polynomial with integer coefficients and it has roots at x = 1 and x = 2, then P(x) must be of the form:
+
+P(x) = a(x - 1)(x - 2), where a is an integer (since the coefficients must be integers).
+
+Similarly, Q(3) = 0, so Q(x) is a quadratic polynomial with integer coefficients that has a root at x = 3. Let me denote Q(x) as:
+
+Q(x) = b(x - 3)(x - k), where b is an integer and k is some integer (since the coefficients must be integers).
+
+Wait, but since Q is a quadratic polynomial, and it has one root at x = 3, but it could have another root as well. However, since Q is quadratic, it can have at most two roots, but since we have only one given root at x = 3, the other root could be something else, say, m, making Q(x) = b(x - 3)(x - m), where b is an integer and m is an integer (maybe different from 1 and 2? Not sure yet).
+
+But let me check if there are any other constraints. The next condition is that for any real number x, P(x)^2 + Q(x)^2 = R(x)^2.
+
+So, if I have expressions for P(x) and Q(x), then their squares add up to R(x)^2.
+
+But since both P and Q are quadratics, their squares will be quartic polynomials, and R(x)^2 will also be a quartic polynomial. However, since they are equal for all real numbers x, their difference must be zero for all x. Therefore, they must be identical polynomials.
+
+But let me think: if we have P(x)^2 + Q(x)^2 = R(x)^2, then R(x)^2 - P(x)^2 - Q(x)^2 = 0 for all real x.
+
+This resembles the identity for the difference of squares:
+
+R(x)^2 - P(x)^2 = (R(x) - P(x))(R(x) + P(x)) = Q(x)^2.
+
+But since this holds for all real x, then both sides are polynomials that are equal for all x. However, since Q(x)^2 is a polynomial that is a square of a quadratic, it is a quartic polynomial, and so is R(x)^2 - P(x)^2. Therefore, this equation must hold for all real numbers x, so that must mean that both sides are equal polynomials.
+
+However, this seems a bit abstract. Maybe another approach is better.
+
+Alternatively, since P(x) and Q(x) are quadratics, their squares are quartic polynomials, so R(x) must be a quadratic polynomial such that when you square it, it is equal to P(x)^2 + Q(x)^2. But since R(x) is a quadratic polynomial, squaring it would result in a quartic polynomial, which would match the degree of P(x)^2 + Q(x)^2.
+
+Therefore, the quartic polynomial P(x)^2 + Q(x)^2 must be a perfect square of a quadratic polynomial, which is R(x). Therefore, this implies that P(x)^2 + Q(x)^2 is a perfect square of a quadratic polynomial, which is R(x).
+
+This is similar to Pythagorean theorem, where two squares add up to another square. In this case, the polynomials are quadratics, and their squares add up to another quadratic squared.
+
+Now, perhaps we can think of R(x) as a square root of P(x)^2 + Q(x)^2, which is a function that is defined for all real numbers x, and since it's a polynomial, we can analyze its structure.
+
+Let me consider that P(x) and Q(x) are quadratics with integer coefficients, and their squares add up to another square of a quadratic with integer coefficients.
+
+Moreover, there are constraints on the coefficients of P, Q,
+================================================================================
+
+ 88%|████████▊ | 88/100 [37:24<04:59, 24.99s/it]                                                {'loss': -0.0205, 'grad_norm': 0.23902950392570868, 'learning_rate': 5.060297685041659e-08, 'on_policy_loss': -0.0205, 'rollout/tokens_per_second': 2746.96815815142, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2599631660222936, 'opsd/teacher_entropy': 0.25431337462175674, 'opsd/student_sampled_logp': -0.22364969202188184, 'opsd/teacher_sampled_logp': -0.49530742631363545, 'opsd/forward_kl_teacher_student': 0.33982453906256815, 'opsd/reverse_kl_student_teacher': 0.2763881951399473, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.020782470703125, 'system/gpu_allocated_gib': 47.25333642959595, 'system/gpu_reserved_gib': 75.15673828125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.26}
+ 88%|████████▊ | 88/100 [37:25<04:59, 24.99s/it]vLLM generation done - elapsed time: 12.00s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2730.9 tok/s
+ 89%|████████▉ | 89/100 [37:50<04:36, 25.15s/it]                                                {'loss': -0.0206, 'grad_norm': 0.2461438675766376, 'learning_rate': 4.322727117869951e-08, 'on_policy_loss': -0.0206, 'rollout/tokens_per_second': 2730.8624814886984, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26066719256425797, 'opsd/teacher_entropy': 0.2544809558221347, 'opsd/student_sampled_logp': -0.22579052911100275, 'opsd/teacher_sampled_logp': -0.4964481841184024, 'opsd/forward_kl_teacher_student': 0.32720252466908534, 'opsd/reverse_kl_student_teacher': 0.2732538165549635, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.02142333984375, 'system/gpu_allocated_gib': 47.25287675857544, 'system/gpu_reserved_gib': 75.03759765625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.28}
+ 89%|████████▉ | 89/100 [37:51<04:36, 25.15s/it]vLLM generation done - elapsed time: 12.06s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2717.4 tok/s
+ 90%|█████████ | 90/100 [38:15<04:11, 25.14s/it]                                                {'loss': -0.0198, 'grad_norm': 0.23369045479504613, 'learning_rate': 3.6408072716606345e-08, 'on_policy_loss': -0.0198, 'rollout/tokens_per_second': 2717.37867193433, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.25789547506136146, 'opsd/teacher_entropy': 0.25300270496306493, 'opsd/student_sampled_logp': -0.22547511707995604, 'opsd/teacher_sampled_logp': -0.4924629290841248, 'opsd/forward_kl_teacher_student': 0.32764635886271926, 'opsd/reverse_kl_student_teacher': 0.2709672245528071, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0196533203125, 'system/gpu_allocated_gib': 47.25321340560913, 'system/gpu_reserved_gib': 74.91455078125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.31}
+ 90%|█████████ | 90/100 [38:16<04:11, 25.14s/it]vLLM generation done - elapsed time: 12.01s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2727.8 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_90.json
+================================================================================
+
+ 91%|█████████ | 91/100 [38:41<03:48, 25.38s/it]                                                {'loss': -0.0191, 'grad_norm': 0.2288503025454965, 'learning_rate': 3.015368960704584e-08, 'on_policy_loss': -0.0191, 'rollout/tokens_per_second': 2727.818620274555, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2377279113215041, 'opsd/teacher_entropy': 0.23496070160576504, 'opsd/student_sampled_logp': -0.20537743554933435, 'opsd/teacher_sampled_logp': -0.4709319288401533, 'opsd/forward_kl_teacher_student': 0.3303268127935792, 'opsd/reverse_kl_student_teacher': 0.2676656563402696, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.0183868408203125, 'system/gpu_allocated_gib': 47.25372934341431, 'system/gpu_reserved_gib': 75.16259765625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.33}
+ 91%|█████████ | 91/100 [38:42<03:48, 25.38s/it]vLLM generation done - elapsed time: 12.02s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2726.2 tok/s
+ 92%|█████████▏| 92/100 [39:04<03:18, 24.80s/it]                                                {'loss': -0.0205, 'grad_norm': 0.2307451539536852, 'learning_rate': 2.4471741852423233e-08, 'on_policy_loss': -0.0205, 'rollout/tokens_per_second': 2726.2181421558635, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26235241996219416, 'opsd/teacher_entropy': 0.2554215308684964, 'opsd/student_sampled_logp': -0.22557375254565867, 'opsd/teacher_sampled_logp': -0.5160088291991567, 'opsd/forward_kl_teacher_student': 0.3587294762060169, 'opsd/reverse_kl_student_teacher': 0.29037102388330455, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01983642578125, 'system/gpu_allocated_gib': 47.25213956832886, 'system/gpu_reserved_gib': 74.94384765625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.36}
+ 92%|█████████▏| 92/100 [39:05<03:18, 24.80s/it]vLLM generation done - elapsed time: 11.91s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2752.2 tok/s
+ 93%|█████████▎| 93/100 [39:28<02:50, 24.33s/it]                                                {'loss': -0.0196, 'grad_norm': 0.24859939756360286, 'learning_rate': 1.936915203084055e-08, 'on_policy_loss': -0.0196, 'rollout/tokens_per_second': 2752.2289333633926, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.25428143690993626, 'opsd/teacher_entropy': 0.24829186419827887, 'opsd/student_sampled_logp': -0.2196302745609045, 'opsd/teacher_sampled_logp': -0.49195707290739366, 'opsd/forward_kl_teacher_student': 0.32594343908160484, 'opsd/reverse_kl_student_teacher': 0.271507266946323, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019744873046875, 'system/gpu_allocated_gib': 47.25188446044922, 'system/gpu_reserved_gib': 75.02197265625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.38}
+ 93%|█████████▎| 93/100 [39:28<02:50, 24.33s/it]vLLM generation done - elapsed time: 12.12s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2703.7 tok/s
+ 94%|█████████▍| 94/100 [39:54<02:29, 24.88s/it]                                                {'loss': -0.0209, 'grad_norm': 0.2422841602179763, 'learning_rate': 1.4852136862001763e-08, 'on_policy_loss': -0.0209, 'rollout/tokens_per_second': 2703.7011789419025, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.26982035612259414, 'opsd/teacher_entropy': 0.26370349671285853, 'opsd/student_sampled_logp': -0.2353760404986377, 'opsd/teacher_sampled_logp': -0.5083307249923548, 'opsd/forward_kl_teacher_student': 0.33813513698011344, 'opsd/reverse_kl_student_teacher': 0.2753881199518349, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.021697998046875, 'system/gpu_allocated_gib': 47.25236797332764, 'system/gpu_reserved_gib': 75.1396484375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.41}
+ 94%|█████████▍| 94/100 [39:54<02:29, 24.88s/it]vLLM generation done - elapsed time: 12.30s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2664.8 tok/s
+ 95%|█████████▌| 95/100 [40:21<02:07, 25.46s/it]                                                {'loss': -0.0195, 'grad_norm': 0.2374157122863955, 'learning_rate': 1.0926199633097154e-08, 'on_policy_loss': -0.0195, 'rollout/tokens_per_second': 2664.7707331027405, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.251250391448942, 'opsd/teacher_entropy': 0.246336533268007, 'opsd/student_sampled_logp': -0.21810452670123864, 'opsd/teacher_sampled_logp': -0.4762714135155682, 'opsd/forward_kl_teacher_student': 0.32072301876784964, 'opsd/reverse_kl_student_teacher': 0.26353068644176664, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019622802734375, 'system/gpu_allocated_gib': 47.25259733200073, 'system/gpu_reserved_gib': 74.8955078125, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.44}
+ 95%|█████████▌| 95/100 [40:21<02:07, 25.46s/it]vLLM generation done - elapsed time: 12.03s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2723.1 tok/s
+
+================================================================================
+Saved 160 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_1e_6_mn_hard_1p7b/3236666/generations/generations_step_95.json
+================================================================================
+
+ 96%|█████████▌| 96/100 [40:46<01:41, 25.49s/it]                                                {'loss': -0.0214, 'grad_norm': 0.2678670007245878, 'learning_rate': 7.59612349389599e-09, 'on_policy_loss': -0.0214, 'rollout/tokens_per_second': 2723.075469925786, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2823587328045122, 'opsd/teacher_entropy': 0.27397043972818513, 'opsd/student_sampled_logp': -0.24309271895922885, 'opsd/teacher_sampled_logp': -0.5313280182760198, 'opsd/forward_kl_teacher_student': 0.3491774792789932, 'opsd/reverse_kl_student_teacher': 0.2870380198664051, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.02227783203125, 'system/gpu_allocated_gib': 47.25227499008179, 'system/gpu_reserved_gib': 75.91015625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.46}
+ 96%|█████████▌| 96/100 [40:47<01:41, 25.49s/it]vLLM generation done - elapsed time: 11.96s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2739.0 tok/s
+ 97%|█████████▋| 97/100 [41:11<01:16, 25.38s/it]                                                {'loss': -0.0196, 'grad_norm': 0.22893307445991273, 'learning_rate': 4.865965629214819e-09, 'on_policy_loss': -0.0196, 'rollout/tokens_per_second': 2739.0390465903247, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.25105071582516236, 'opsd/teacher_entropy': 0.24857878352445742, 'opsd/student_sampled_logp': -0.21673594834603727, 'opsd/teacher_sampled_logp': -0.47492471892720334, 'opsd/forward_kl_teacher_student': 0.3259828357539937, 'opsd/reverse_kl_student_teacher': 0.261958469509332, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.020294189453125, 'system/gpu_allocated_gib': 47.25258827209473, 'system/gpu_reserved_gib': 75.6259765625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.49}
+ 97%|█████████▋| 97/100 [41:12<01:16, 25.38s/it]vLLM generation done - elapsed time: 11.94s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2744.3 tok/s
+ 98%|█████████▊| 98/100 [41:35<00:49, 24.83s/it]                                                {'loss': -0.02, 'grad_norm': 0.22735316547724976, 'learning_rate': 2.739052315863355e-09, 'on_policy_loss': -0.02, 'rollout/tokens_per_second': 2744.26480871496, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2542112451248661, 'opsd/teacher_entropy': 0.24833765742743874, 'opsd/student_sampled_logp': -0.2212097782428557, 'opsd/teacher_sampled_logp': -0.4903318949684814, 'opsd/forward_kl_teacher_student': 0.3286850678683766, 'opsd/reverse_kl_student_teacher': 0.2741252865603326, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.01959228515625, 'system/gpu_allocated_gib': 47.25191879272461, 'system/gpu_reserved_gib': 74.79541015625, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.51}
+ 98%|█████████▊| 98/100 [41:35<00:49, 24.83s/it]vLLM generation done - elapsed time: 11.98s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2734.7 tok/s
+
+================================================================================
+STUDENT GENERATION SAMPLE (Step 98):
+================================================================================
+
+Prompt:
+<|im_start|>user
+Problem: Одредити највећи природан број $n$ за који постоје различити скупови $S_{1}, S_{2}, \ldots, S_{n}$ такви да је:
+
+$1^{\circ}\left|S_{i} \cup S_{j}\right| \leqslant 2004$ за свака два цела броја $1 \leqslant i, j \leqslant n$, и
+
+$2^{\circ} S_{i} \cup S_{j} \cup S_{k}=\{1,2, \ldots, 2008\}$ за свака три цела броја $1 \leqslant i<j<k \leqslant n$.
+
+Please reason step by step, and put your final answer within \boxed{}.<|im_end|>
+<|im_start|>assistant
+
+
+Completion:
+<think>
+Okay, so I need to find the largest natural number n such that there exist distinct sets S₁, S₂, ..., Sₙ satisfying two conditions:
+
+1. For any two distinct indices i and j, the union of S_i and S_j has at most 2004 elements.
+2. For any three distinct indices i, j, k, the union of S_i, S_j, and S_k covers all elements from 1 to 2008.
+
+Hmm, let me try to understand what these conditions mean and how they constrain the number of sets.
+
+First, let me recall that the union of two sets S_i and S_j, denoted as |S_i ∪ S_j|, is the number of elements in either set, minus the size of their intersection. So, if I have two sets, their union can have at most 2004 elements. That suggests that each pair of sets cannot have too many elements in their union.
+
+But then, the second condition says that any three sets together cover all elements from 1 to 2008. That is, for any three sets, their union is the entire set {1, 2, ..., 2008}. This seems like a requirement that every trio of sets combined must cover all the elements, but each pair of sets may not necessarily cover all elements.
+
+So, how can I relate these two conditions?
+
+Let me consider what happens when we have multiple sets. Each set S_i is a subset of the universal set U = {1, 2, ..., 2008}. The conditions are about the unions of pairs and triples of these sets.
+
+First, let me think about the second condition. If any three sets have a union equal to the entire universal set, then this tells me that for any three sets, there is no element in U that is missing from all three sets. In other words, for any element x in U, there is at least one set among S_i, S_j, S_k that contains x. Therefore, for each element x in U, there is no trio of sets that fail to contain x.
+
+But since the union of any three sets is the entire set, that implies that for each element x in U, there are no three sets that don't contain x. Therefore, for each element x, the number of sets that do not contain x is at most 2. Because if there were three sets that do not contain x, then those three sets would have their union missing x, which contradicts the second condition.
+
+Therefore, for each element x in U, the number of sets that do not contain x is at most 2. In other words, for each element x, there are at most two sets that are disjoint from x (i.e., S_i does not contain x).
+
+Therefore, for each element x in U, there are at most two sets that don't contain x. Therefore, the complement of each set S_i (which is U \ S_i) contains at least 2008 - |S_i| elements, and for each element x in U, the number of sets that do not contain x is at most two.
+
+Wait, but if we consider the complement sets, let me think.
+
+Let me denote for each element x in U, let’s define a characteristic vector for each set S_i, where each entry is 1 if the element is in S_i, and 0 otherwise. However, maybe it's more straightforward to think in terms of the complements.
+
+Let me consider that for each element x in U, the number of sets that do not contain x is at most 2. Therefore, for each element x, the number of sets that contain x is at least n - 2.
+
+Therefore, for each element x in U, the number of sets containing x is at least n - 2.
+
+Moreover, since each set S_i is a subset of U, then each set S_i has some number of elements, and the number of elements in S_i can vary.
+
+Now, going back to the first condition: for any two sets S_i and S_j, their union has size at most 2004.
+
+So, |S_i ∪ S_j| ≤ 2004 for all i ≠ j.
+
+Let me think about how this condition relates to the number of elements in each set.
+
+If we consider two sets S_i and S_j, then |S_i ∪ S_j| = |S_i| + |S_j| - |S_i ∩ S_j|.
+
+Since this is ≤ 2004, we have:
+
+|S_i| + |S_j| - |S_i ∩ S_j| ≤ 2004.
+
+But since |S_i ∩ S_j| ≥ |S_i| - |S_i ∪ S_j|? Wait, no. Let me think again.
+
+Actually, since |S
+================================================================================
+
+ 99%|█████████▉| 99/100 [41:59<00:24, 24.51s/it]                                                {'loss': -0.02, 'grad_norm': 0.23530054431495404, 'learning_rate': 1.217974870087901e-09, 'on_policy_loss': -0.02, 'rollout/tokens_per_second': 2734.7268940729577, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.2489307751427487, 'opsd/teacher_entropy': 0.243478627369566, 'opsd/student_sampled_logp': -0.2141296908040318, 'opsd/teacher_sampled_logp': -0.48452917720104843, 'opsd/forward_kl_teacher_student': 0.34026281211488996, 'opsd/reverse_kl_student_teacher': 0.278488184343225, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.020111083984375, 'system/gpu_allocated_gib': 47.25184774398804, 'system/gpu_reserved_gib': 74.96484375, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.54}
+ 99%|█████████▉| 99/100 [41:59<00:24, 24.51s/it]vLLM generation done - elapsed time: 12.04s, prompts: 32, total tokens: 32768, avg length: 1024.0, speed: 2721.7 tok/s
+100%|██████████| 100/100 [42:23<00:00, 24.56s/it]                                                 {'loss': -0.0203, 'grad_norm': 0.23175214533556782, 'learning_rate': 3.0458649045211894e-10, 'on_policy_loss': -0.0203, 'rollout/tokens_per_second': 2721.665079848329, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 32768.0, 'opsd/student_entropy': 0.263087790506485, 'opsd/teacher_entropy': 0.2565042425004238, 'opsd/student_sampled_logp': -0.2286218119331614, 'opsd/teacher_sampled_logp': -0.4997310813090089, 'opsd/forward_kl_teacher_student': 0.32292798813937085, 'opsd/reverse_kl_student_teacher': 0.27144687441964416, 'opsd/valid_response_tokens': 16384.0, 'opsd/loss': -0.019989013671875, 'system/gpu_allocated_gib': 47.25251865386963, 'system/gpu_reserved_gib': 74.4560546875, 'system/gpu_peak_allocated_gib': 83.9329981803894, 'epoch': 2.56}
+100%|██████████| 100/100 [42:24<00:00, 24.56s/it]wandb: WARNING URL not available in offline run
+                                                 {'train_runtime': 2561.7072, 'train_samples_per_second': 2.498, 'train_steps_per_second': 0.039, 'train_loss': -0.01631610870361328, 'epoch': 2.56}
+100%|██████████| 100/100 [42:36<00:00, 24.56s/it]100%|██████████| 100/100 [42:36<00:00, 25.57s/it]
+[1;34mwandb[0m: 
+[1;34mwandb[0m: You can sync this run to the cloud by running:
+[1;34mwandb[0m: [1mwandb sync /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/wandb/wandb/offline-run-20260815_220451-8nsztdev[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/wandb/offline-run-20260815_220451-8nsztdev/logs[0m
+E0815 22:47:42.245000 3583731 site-packages/torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: -6) local_rank: 0 (pid: 3584020) of binary: /gpfs/share/home/2501210611/miniconda3/envs/anchor/bin/python
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/accelerate_cli.py", line 50, in main
+    args.func(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/launch.py", line 1183, in launch_command
+    deepspeed_launcher(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/launch.py", line 868, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/run.py", line 909, in run
+    elastic_launch(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-08-15_22:47:42
+  host      : gpua800n16.hpc.pku.edu.cn
+  rank      : 1 (local_rank: 1)
+  exitcode  : -6 (pid: 3584021)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 3584021
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-08-15_22:47:42
+  host      : gpua800n16.hpc.pku.edu.cn
+  rank      : 0 (local_rank: 0)
+  exitcode  : -6 (pid: 3584020)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 3584020
+============================================================

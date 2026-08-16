@@ -11,12 +11,12 @@
 #SBATCH --exclude=gpua800n13
 set -euo pipefail
 
-# Qwen3-1.7B OPSD on hard OpenThoughts (base n=8, num_correct<=3 / acc<=37.5%):
+# Qwen3-1.7B OPSD on hard MathNet (gold CoT length decile 8-9, long):
 # - Student AND teacher both think
 # - Teacher privilege = full solution
 # Same steps/batch as opsd_student_think_teacher_think_clip005_1e_6_openthoughts.sh:
 #   micro=8, gas=4, 2 GPU → global_batch=64; max_steps=100 → 6400 samples.
-# Prompt cap 2048 (official tip + chat template + problem + solution).
+# Prompt cap 4096 (official tip + chat template + problem + solution).
 
 MODE=${MODE:-opsd}
 TEACHER_PRIVILEGE_FIELD=${TEACHER_PRIVILEGE_FIELD:-solution}
@@ -25,7 +25,7 @@ TEACHER_THINKING=${TEACHER_THINKING:-1}
 
 LEARNING_RATE=${LEARNING_RATE:-1e-6}
 JSD_TOKEN_CLIP=${JSD_TOKEN_CLIP:-0.05}
-MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-2048}
+MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-4096}
 MAX_COMPLETION_LENGTH=${MAX_COMPLETION_LENGTH:-1024}
 PER_DEVICE_BATCH_SIZE=${PER_DEVICE_BATCH_SIZE:-8}
 GRADIENT_ACCUMULATION_STEPS=${GRADIENT_ACCUMULATION_STEPS:-4}
@@ -34,11 +34,11 @@ MAX_STEPS=${MAX_STEPS:-100}
 SAVE_STEPS=${SAVE_STEPS:-25}
 VLLM_GPU_MEMORY_UTILIZATION=${VLLM_GPU_MEMORY_UTILIZATION:-0.4}
 
-RUN_NAME=${RUN_NAME:-st_tt_clip005_1e_6_ot_hard_1p7b}
+RUN_NAME=${RUN_NAME:-st_tt_clip005_1e_6_mn_hard_1p7b}
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../.." && pwd)}}
 MODEL_PATH=${MODEL_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b}
-DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/openthoughts/preprocessed/openthoughts.qwen3_1.7b.hard.opsd.solution.sthink_tthink.maxprompt2048.parquet}
+DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/mathnet_text/preprocessed/mathnet_text.cotlen_hard.opsd.solution.sthink_tthink.qwen3_1.7b.maxprompt4096.parquet}
 : "${DATASET_PATH:?Set DATASET_PATH to the hard st_tt preprocessed parquet}"
 MODEL_TAG=${MODEL_TAG:-qwen3_1.7b}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
@@ -59,7 +59,7 @@ export HF_HOME=${HF_HOME:-${BASE_DIR}/.cache/huggingface}
 export HF_DATASETS_CACHE=${HF_DATASETS_CACHE:-/tmp/${USER}/hf_datasets_${SLURM_JOB_ID:-$$}}
 export WANDB_MODE=offline
 export WANDB_PROJECT=${WANDB_PROJECT:-OPSD}
-export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-qwen3_1p7b_fullparam_100step_ot_hard_sttt}
+export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-qwen3_1p7b_fullparam_100step_mn_cotlen_hard_sttt}
 export WANDB_DIR=${WANDB_DIR:-${BASE_DIR}/wandb}
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export VLLM_USE_V1=0
@@ -75,9 +75,9 @@ mkdir -p "${OUTPUT_DIR}" "${WANDB_DIR}" "${HF_HOME}" "${HF_DATASETS_CACHE}" "${B
 if [[ ! -f "${DATASET_PATH}" ]]; then
   echo "[error] missing preprocessed dataset: ${DATASET_PATH}" >&2
   echo "[error] run: PYTHONPATH=src:vendor/verl python scripts/data/preprocess_opsd_openthoughts.py \\" >&2
-  echo "  --input data/openthoughts/preprocessed/openthoughts.qwen3_1.7b.nothink.n8.acc_0_375.parquet \\" >&2
+  echo "  --input data/mathnet_text/preprocessed/mathnet_text.cotlen_hard.parquet \\" >&2
   echo "  --privilege-mode opsd --teacher-privilege-field solution \\" >&2
-  echo "  --student-thinking --teacher-thinking --max-prompt-length 2048 \\" >&2
+  echo "  --student-thinking --teacher-thinking --max-prompt-length 4096 \\" >&2
   echo "  --model-path ${MODEL_PATH} --output ${DATASET_PATH}" >&2
   exit 1
 fi
@@ -101,7 +101,7 @@ if [[ "${JSD_TOKEN_CLIP}" == "none" || "${JSD_TOKEN_CLIP}" == "None" || "${JSD_T
 fi
 
 echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_PRIVILEGE_FIELD}"
-echo "[launch] band=hard (acc<=0.375) student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING}"
+echo "[launch] band=hard (MathNet gold CoT decile 8-9, long) student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING}"
 echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP}"
 echo "[launch] micro=${PER_DEVICE_BATCH_SIZE} gas=${GRADIENT_ACCUMULATION_STEPS} gpus=${NUM_GPUS} → global_batch=${GLOBAL_BATCH}"
 echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS} → total_samples=${TOTAL_SAMPLES}"

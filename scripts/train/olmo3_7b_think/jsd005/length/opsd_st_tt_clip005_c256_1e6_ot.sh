@@ -8,7 +8,6 @@
 #SBATCH --gres=gpu:4
 #SBATCH --mem=400G
 #SBATCH --time=12:00:00
-#SBATCH --exclude=gpua800n03,gpua800n10,gpua800n13,gpua800n21
 set -euo pipefail
 
 # Olmo-3-7B-Think st_tt + jsd_token_clip=0.05: max_completion=256.
