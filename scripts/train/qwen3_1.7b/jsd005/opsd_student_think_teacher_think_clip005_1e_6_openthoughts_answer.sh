@@ -24,6 +24,8 @@ TEACHER_THINKING=${TEACHER_THINKING:-1}
 
 LEARNING_RATE=${LEARNING_RATE:-1e-6}
 JSD_TOKEN_CLIP=${JSD_TOKEN_CLIP:-0.05}
+MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-1024}
+MAX_COMPLETION_LENGTH=${MAX_COMPLETION_LENGTH:-1024}
 PER_DEVICE_BATCH_SIZE=${PER_DEVICE_BATCH_SIZE:-8}
 GRADIENT_ACCUMULATION_STEPS=${GRADIENT_ACCUMULATION_STEPS:-4}
 MAX_STEPS=${MAX_STEPS:-100}
@@ -87,6 +89,7 @@ echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_P
 echo "[launch] student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING}"
 echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP}"
 echo "[launch] micro=${PER_DEVICE_BATCH_SIZE} gas=${GRADIENT_ACCUMULATION_STEPS} gpus=${NUM_GPUS} → global_batch=${GLOBAL_BATCH}"
+echo "[launch] prompt=${MAX_PROMPT_LENGTH} completion=${MAX_COMPLETION_LENGTH}"
 echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS}"
 echo "[launch] model=${MODEL_PATH} dataset=${DATASET_PATH} output=${OUTPUT_DIR}"
 echo "[launch] master_port=${MASTER_PORT} vLLM util=${VLLM_GPU_MEMORY_UTILIZATION}"
@@ -104,8 +107,8 @@ accelerate launch \
   --teacher-privilege-field "${TEACHER_PRIVILEGE_FIELD}" \
   --max-steps "${MAX_STEPS}" \
   --save-steps "${SAVE_STEPS}" \
-  --max-prompt-length 1024 \
-  --max-completion-length 1024 \
+  --max-prompt-length "${MAX_PROMPT_LENGTH}" \
+  --max-completion-length "${MAX_COMPLETION_LENGTH}" \
   --per-device-batch-size "${PER_DEVICE_BATCH_SIZE}" \
   --gradient-accumulation-steps "${GRADIENT_ACCUMULATION_STEPS}" \
   --learning-rate "${LEARNING_RATE}" \

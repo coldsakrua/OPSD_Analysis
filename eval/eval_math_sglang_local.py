@@ -232,6 +232,8 @@ def main() -> None:
     is_olmo = is_olmo_model_path(model_path)
     is_olmo_think = is_olmo_think_model_path(model_path)
     is_olmo_instruct = is_olmo_instruct_model_path(model_path)
+    # Xiaomi MiMo recommends an empty system prompt (avoid default "helpful assistant").
+    is_mimo = "mimo" in Path(model_path).name.lower()
     # Olmo-Instruct has no think mode; Olmo-Think uses chat_template.jinja that
     # already opens with <think> (no HF enable_thinking switch).
     enable_thinking = bool(args.enable_thinking) and not is_gemma3 and not is_olmo_instruct
@@ -242,6 +244,15 @@ def main() -> None:
             "[eval] Olmo-3-Think: using model chat_template.jinja "
             "(generation prompt ends with <think>); "
             f"official sampling temp=0.6 top_p=0.95 max_tokens=32768",
+            flush=True,
+        )
+    if is_mimo:
+        # Official MiMo-7B-RL eval (ModelScope/HF/paper): temp=0.6, top_p=0.95,
+        # max_tokens=32768 for math; empty system prompt.
+        # https://www.modelscope.cn/models/XiaomiMiMo/MiMo-7B-RL
+        print(
+            "[eval] MiMo: empty system prompt; official sampling "
+            f"temp={args.temperature} top_p={args.top_p} max_tokens={args.max_new_tokens}",
             flush=True,
         )
 
@@ -288,13 +299,80 @@ def main() -> None:
     for ex in examples:
         eval_type = str(ex.get("eval_type", "boxed_math"))
         user_suffix = _math_user_suffix(eval_type, is_gemma3)
-        messages = [{"role": "user", "content": ex["problem"] + user_suffix}]
+        messages: List[Dict[str, str]] = []
+        if is_mimo:
+            messages.append({"role": "system", "content": ""})
+        messages.append({"role": "user", "content": ex["problem"] + user_suffix})
         # Olmo templates ignore enable_thinking; pass False to avoid unused jinja vars.
         all_prompts.append(
             _apply_chat_prompt(
                 tokenizer, messages, False if is_olmo else enable_thinking
             )
         )
+
+    # SGLang rejects when (prompt_len + max_new_tokens) >= context_length
+    # (see tokenizer_manager._validate_one_request). Official math evals ask for
+    # max_tokens=32768 with the same model context; clamp to remaining budget - 1.
+    prompt_lens = [len(tokenizer.encode(p, add_special_tokens=False)) for p in all_prompts]
+    max_prompt_tokens = max(prompt_lens) if prompt_lens else 0
+    context_length = int(args.context_length)
+    requested_max_new = max_new_tokens
+    # Must satisfy: max_new + max_prompt < context_length
+    max_allowed_new = max(1, context_length - max_prompt_tokens - 1)
+    if max_new_tokens > max_allowed_new:
+        max_new_tokens = max_allowed_new
+        print(
+            f"[eval] clamp max_new_tokens {requested_max_new} -> {max_new_tokens} "
+            f"(max_prompt={max_prompt_tokens} + gen must be < context_length={context_length})",
+            flush=True,
+        )
+    else:
+        print(
+            f"[eval] context ok: max_prompt={max_prompt_tokens} + "
+            f"max_new_tokens={max_new_tokens} < context_length={context_length}",
+            flush=True,
+        )
+    # #region agent log
+    try:
+        import time as _agent_time
+
+        with open(
+            "/gpfs/share/home/2501210611/opsd_analysis/.cursor/debug-71bbf7.log",
+            "a",
+            encoding="utf-8",
+        ) as _agent_f:
+            _agent_f.write(
+                json.dumps(
+                    {
+                        "sessionId": "71bbf7",
+                        "runId": "post-fix",
+                        "hypothesisId": "A",
+                        "location": "eval_math_sglang_local.py:clamp",
+                        "message": "context clamp decision",
+                        "data": {
+                            "requested_max_new": requested_max_new,
+                            "max_prompt_tokens": max_prompt_tokens,
+                            "context_length": context_length,
+                            "max_allowed_new": max_allowed_new,
+                            "final_max_new_tokens": max_new_tokens,
+                            "sum_prompt_plus_new": max_prompt_tokens + max_new_tokens,
+                            "sglang_would_reject": (
+                                max_prompt_tokens + max_new_tokens
+                            )
+                            >= context_length,
+                            "is_mimo": is_mimo,
+                            "temperature": temperature,
+                            "top_p": top_p,
+                        },
+                        "timestamp": int(_agent_time.time() * 1000),
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+    except Exception:
+        pass
+    # #endregion
 
     from sglang import Engine
 
@@ -307,7 +385,7 @@ def main() -> None:
         "sampling_backend": args.sampling_backend,
         "mem_fraction_static": args.mem_fraction_static,
         "tp_size": args.tp_size,
-        "context_length": args.context_length,
+        "context_length": context_length,
         "log_level": "warning",  # suppress Prefill/Decode batch info spam
     }
     if args.disable_hybrid_swa_memory:
@@ -464,6 +542,54 @@ def main() -> None:
             end = min(start + gbs, len(work_examples))
             chunk_ex = work_examples[start:end]
             chunk_prompts = work_prompts[start:end]
+            # #region agent log
+            try:
+                import time as _agent_time
+
+                _chunk_lens = [
+                    len(tokenizer.encode(p, add_special_tokens=False))
+                    for p in chunk_prompts
+                ]
+                with open(
+                    "/gpfs/share/home/2501210611/opsd_analysis/.cursor/debug-71bbf7.log",
+                    "a",
+                    encoding="utf-8",
+                ) as _agent_f:
+                    _agent_f.write(
+                        json.dumps(
+                            {
+                                "sessionId": "71bbf7",
+                                "runId": "post-fix",
+                                "hypothesisId": "A",
+                                "location": "eval_math_sglang_local.py:generate",
+                                "message": "pre-generate batch token budget",
+                                "data": {
+                                    "batch_start": start,
+                                    "batch_end": end,
+                                    "chunk_prompt_lens": _chunk_lens,
+                                    "max_new_tokens": sampling_params.get(
+                                        "max_new_tokens"
+                                    ),
+                                    "worst_sum": (
+                                        max(_chunk_lens) if _chunk_lens else 0
+                                    )
+                                    + int(sampling_params.get("max_new_tokens") or 0),
+                                    "context_length": context_length,
+                                    "would_reject": any(
+                                        (pl + int(sampling_params.get("max_new_tokens") or 0))
+                                        >= context_length
+                                        for pl in _chunk_lens
+                                    ),
+                                },
+                                "timestamp": int(_agent_time.time() * 1000),
+                            },
+                            ensure_ascii=False,
+                        )
+                        + "\n"
+                    )
+            except Exception:
+                pass
+            # #endregion
             raw = llm.generate(chunk_prompts, sampling_params=sampling_params)
             grouped = _normalize_generate_outputs(raw, len(chunk_ex), gen_n)
 
