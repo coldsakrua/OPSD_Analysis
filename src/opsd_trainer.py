@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
 import os
 import random
+from cuda_env import ensure_nvidia_cudart_on_ld_path
 from collections import defaultdict, deque
 from collections.abc import Callable
 from contextlib import contextmanager, nullcontext
@@ -188,6 +190,7 @@ class OPSDTrainer(SFTTrainer):
         reason_first: bool = False,
         top_k_loss: int | None = None,
         jsd_token_clip: float | None = None,
+        high_entropy_ratio: float | None = None,
         use_ema_teacher: bool = False,
         ema_decay: float = 0.999,
         teacher_update_steps: int | None = None,
@@ -219,6 +222,40 @@ class OPSDTrainer(SFTTrainer):
                 teacher_thinking=teacher_thinking,
             )
 
+        # TRL SFTTrainer loads str models via AutoConfig.from_pretrained(model_id) WITHOUT
+        # trust_remote_code, then getattr(transformers, architecture). That breaks custom-code
+        # models (e.g. MiMoForCausalLM). Preload via AutoModel so auto_map + trust_remote_code apply.
+        _preloaded_student = False
+        if isinstance(model, str):
+            model = AutoModelForCausalLM.from_pretrained(model, **args.model_init_kwargs)
+            _preloaded_student = True
+
+        # #region agent log
+        try:
+            import json as _agent_json, time as _agent_time
+            _mk = dict(args.model_init_kwargs or {})
+            _agent_payload = {
+                "sessionId": "dfa2d2",
+                "runId": "post-fix",
+                "hypothesisId": "A,B,C,D",
+                "location": "opsd_trainer.py:before_super_init",
+                "message": "pre-super after optional AutoModel preload",
+                "data": {
+                    "preloaded_student": _preloaded_student,
+                    "model_is_str": isinstance(model, str),
+                    "model_type": type(model).__name__,
+                    "trust_remote_code_in_kwargs": bool(_mk.get("trust_remote_code")),
+                    "model_init_kwargs_keys": sorted(_mk.keys()),
+                    "architecture": getattr(getattr(model, "config", None), "architectures", None),
+                },
+                "timestamp": int(_agent_time.time() * 1000),
+            }
+            with open("/gpfs/share/home/2501210611/opsd_analysis/.cursor/debug-dfa2d2.log", "a") as _af:
+                _af.write(_agent_json.dumps(_agent_payload) + "\n")
+        except Exception:
+            pass
+        # #endregion
+
         super().__init__(
             model,
             args=args,
@@ -247,6 +284,11 @@ class OPSDTrainer(SFTTrainer):
         self.reason_first = reason_first
         self.top_k_loss = top_k_loss
         self.jsd_token_clip = jsd_token_clip
+        if high_entropy_ratio is not None and high_entropy_ratio >= 1.0:
+            high_entropy_ratio = None
+        if high_entropy_ratio is not None and high_entropy_ratio <= 0:
+            raise ValueError("high_entropy_ratio must be in (0, 1) or None/>=1 to disable")
+        self.high_entropy_ratio = high_entropy_ratio
         self.use_ema_teacher = use_ema_teacher
         self.ema_decay = ema_decay
         self.teacher_update_steps = teacher_update_steps if teacher_update_steps and teacher_update_steps > 0 else None
@@ -489,6 +531,34 @@ class OPSDTrainer(SFTTrainer):
                     self._signature_columns.append(column)
 
     @staticmethod
+    def _compute_token_entropy(logits, temperature=1.0):
+        """Per-position Shannon entropy over the vocabulary distribution."""
+        log_probs = F.log_softmax(logits / temperature, dim=-1)
+        probs = log_probs.exp()
+        return -(probs * log_probs).sum(dim=-1)
+
+    @staticmethod
+    def _high_entropy_mask(entropy, valid_mask, ratio):
+        """Select top-ρ high-entropy positions independently within each sequence."""
+        if ratio >= 1.0:
+            return valid_mask
+        if ratio <= 0:
+            raise ValueError("high_entropy_ratio must be in (0, 1]")
+
+        high_ent_mask = torch.zeros_like(valid_mask, dtype=torch.bool)
+        batch_size = entropy.shape[0]
+        for i in range(batch_size):
+            valid_idx = valid_mask[i].nonzero(as_tuple=False).squeeze(-1)
+            if valid_idx.numel() == 0:
+                continue
+            n_valid = int(valid_idx.numel())
+            k = max(1, math.ceil(ratio * n_valid))
+            seq_entropy = entropy[i, valid_idx]
+            _, top_local = torch.topk(seq_entropy, k=k, largest=True)
+            high_ent_mask[i, valid_idx[top_local]] = True
+        return high_ent_mask
+
+    @staticmethod
     def generalized_jsd_loss(
         student_logits,
         teacher_logits,
@@ -499,6 +569,7 @@ class OPSDTrainer(SFTTrainer):
         logits_are_probs=False,
         top_k=None,
         token_clip=None,
+        loss_mask=None,
     ):
         """
         Compute the generalized Jensen-Shannon Divergence loss for knowledge distillation using F.kl_div. See Eq. (1)
@@ -524,6 +595,9 @@ class OPSDTrainer(SFTTrainer):
                 and focuses distillation on the teacher's most probable tokens. (default: None = full vocabulary)
             token_clip:
                 if set, clips per-token divergence values to this maximum before reduction. Prevents style tokens from dominating the gradient signal over math tokens.
+            loss_mask:
+                Optional bool tensor [batch, seq] selecting which response positions contribute to loss.
+                When None, uses labels != -100.
 
         Returns:
             loss: Scalar tensor with the generalized JSD loss
@@ -575,12 +649,14 @@ class OPSDTrainer(SFTTrainer):
 
         # Masking
         if labels is not None:
-            mask = labels != -100
+            mask = loss_mask if loss_mask is not None else (labels != -100)
             jsd = jsd[mask]
+        else:
+            mask = None
 
         # Apply reduction
         if reduction == "batchmean":
-            return jsd.sum() / mask.sum() if labels is not None else jsd.sum() / jsd.size(0)
+            return jsd.sum() / mask.sum() if mask is not None else jsd.sum() / jsd.size(0)
         elif reduction == "sum":
             return jsd.sum()
         elif reduction == "mean":
@@ -851,6 +927,19 @@ class OPSDTrainer(SFTTrainer):
 
         # Extract only what we need and convert to log-probs immediately
         student_logits = outputs_student.logits[:, student_prompt_len - 1 : -1, :]
+        valid_mask = shifted_labels != -100
+        loss_mask = None
+
+        if self.high_entropy_ratio is not None:
+            with torch.no_grad():
+                entropy = self._compute_token_entropy(student_logits, self.temperature)
+                loss_mask = self._high_entropy_mask(entropy, valid_mask, self.high_entropy_ratio)
+                selected = loss_mask.sum().double()
+                valid_count = valid_mask.sum().double()
+                self._metrics["train"]["opsd/high_entropy_ratio"].append(
+                    (selected / valid_count.clamp(min=1)).item()
+                )
+                self._metrics["train"]["opsd/high_entropy_loss_tokens"].append(selected.item())
 
         if self.use_thinking_machines_loss:
             # For reverse KL, we only need log-probs of sampled tokens
@@ -925,15 +1014,19 @@ class OPSDTrainer(SFTTrainer):
 
             # Apply masking before computing loss
             if shifted_labels is not None:
-                mask = shifted_labels != -100
+                mask = loss_mask if loss_mask is not None else valid_mask
                 advantage = advantage[mask]
                 student_log_probs_sampled_masked = student_log_probs_sampled[mask]
             else:
                 student_log_probs_sampled_masked = student_log_probs_sampled
+                mask = None
 
             # Policy gradient loss: -advantage * log π_student
             # Negative because we minimize loss (gradient descent), but want to maximize reward
-            loss = -(advantage * student_log_probs_sampled_masked).mean()
+            if mask is not None:
+                loss = -(advantage * student_log_probs_sampled_masked).sum() / mask.sum().clamp(min=1)
+            else:
+                loss = -(advantage * student_log_probs_sampled_masked).mean()
 
             del (
                 student_log_probs_sampled,
@@ -946,7 +1039,7 @@ class OPSDTrainer(SFTTrainer):
                 student_logits_for_loss,
                 teacher_logits_for_loss,
                 sampled_token_ids,
-                shifted_labels != -100,
+                valid_mask,
             )
             # Temperature is applied inside generalized_jsd_loss
             loss = self.generalized_jsd_loss(
@@ -957,6 +1050,7 @@ class OPSDTrainer(SFTTrainer):
                 temperature=self.temperature,  # Let the function handle temperature
                 top_k=self.top_k_loss,
                 token_clip=self.jsd_token_clip,
+                loss_mask=loss_mask,
             )
             del student_logits_for_loss, teacher_logits_for_loss
 
@@ -1081,7 +1175,7 @@ class OPSDTrainer(SFTTrainer):
 
         # Ensure pip nvidia cudart (with cudaGetDriverEntryPointByVersion) stays ahead of
         # any node /usr/local/cuda/lib64 that SGLang/JIT may inject into LD_LIBRARY_PATH.
-        self._ensure_nvidia_cudart_on_ld_path()
+        ensure_nvidia_cudart_on_ld_path()
 
         self.vllm_mode = "colocate"
         self.vllm_tensor_parallel_size = 1
@@ -1095,6 +1189,10 @@ class OPSDTrainer(SFTTrainer):
         self.sglang_mem_fraction_static = float(getattr(args, "sglang_mem_fraction_static", 0.4))
         ctx_len = getattr(args, "sglang_context_length", None)
         self.sglang_context_length = int(ctx_len) if ctx_len else int(args.max_length)
+        self.sglang_reasoning_parser = getattr(args, "sglang_reasoning_parser", None) or None
+        self.sglang_disable_piecewise_cuda_graph = bool(
+            getattr(args, "sglang_disable_piecewise_cuda_graph", False)
+        )
 
         # Isolate each rank onto its local GPU for the Engine process group.
         local_rank = int(self.accelerator.local_process_index)
@@ -1116,6 +1214,8 @@ class OPSDTrainer(SFTTrainer):
                 f"sampling={self.sglang_sampling_backend} "
                 f"mem_fraction_static={self.sglang_mem_fraction_static} "
                 f"context_length={self.sglang_context_length} "
+                f"reasoning_parser={self.sglang_reasoning_parser or 'none'} "
+                f"disable_piecewise_cuda_graph={self.sglang_disable_piecewise_cuda_graph} "
                 f"disable_hybrid_swa_memory={disable_hybrid_swa} "
                 f"world={self.accelerator.num_processes}",
                 flush=True,
@@ -1138,6 +1238,10 @@ class OPSDTrainer(SFTTrainer):
             "log_level": "warning",
             "enable_memory_saver": self.vllm_enable_sleep_mode,
         }
+        if self.sglang_reasoning_parser:
+            engine_kwargs["reasoning_parser"] = self.sglang_reasoning_parser
+        if self.sglang_disable_piecewise_cuda_graph:
+            engine_kwargs["disable_piecewise_cuda_graph"] = True
         # Critical: SGLang scheduler subprocesses inherit accelerate's RANK/WORLD_SIZE/
         # MASTER_* and then try to join the *training* TCPStore (hangs ~10min then dies).
         # Isolate env so each Engine boots as a standalone TP=1 process group.
@@ -1155,29 +1259,6 @@ class OPSDTrainer(SFTTrainer):
         if self.accelerator.is_main_process:
             print("[sglang] Engine init done", flush=True)
         self.add_callback(GOLDVLLMSyncCallback(self))
-
-    @staticmethod
-    def _ensure_nvidia_cudart_on_ld_path() -> None:
-        """Prepend pip nvidia/*/lib so Engine spawn children resolve a modern libcudart."""
-        conda_prefix = os.environ.get("CONDA_PREFIX") or ""
-        nvidia_root = os.path.join(conda_prefix, "lib", "python3.12", "site-packages", "nvidia")
-        if not os.path.isdir(nvidia_root):
-            return
-        extra: list[str] = []
-        try:
-            for name in sorted(os.listdir(nvidia_root)):
-                lib_dir = os.path.join(nvidia_root, name, "lib")
-                if os.path.isdir(lib_dir):
-                    extra.append(lib_dir)
-        except OSError:
-            return
-        if not extra:
-            return
-        current = [p for p in (os.environ.get("LD_LIBRARY_PATH") or "").split(":") if p]
-        # Keep nvidia dirs first; drop duplicates that appear later.
-        extra_set = set(extra)
-        rest = [p for p in current if p not in extra_set]
-        os.environ["LD_LIBRARY_PATH"] = ":".join(extra + rest)
 
     @staticmethod
     @contextmanager
@@ -1215,7 +1296,7 @@ class OPSDTrainer(SFTTrainer):
         # Leave MASTER_PORT unset so SGLang picks its own nccl_port.
         try:
             # Re-assert cudart path inside the isolated env (children inherit this).
-            OPSDTrainer._ensure_nvidia_cudart_on_ld_path()
+            ensure_nvidia_cudart_on_ld_path()
             yield
         finally:
             for k in ("RANK", "LOCAL_RANK", "WORLD_SIZE", "LOCAL_WORLD_SIZE", "MASTER_ADDR", "MASTER_PORT"):

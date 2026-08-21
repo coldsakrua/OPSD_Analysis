@@ -139,6 +139,26 @@ def _apply_chat_prompt(tokenizer: Any, messages: List[Dict[str, str]], enable_th
         return tokenizer.apply_chat_template(messages, **kwargs)
 
 
+def _stop_token_ids(tokenizer: Any) -> List[int]:
+    """EOS / chat-end ids aligned with training (Qwen: <|im_end|>, <|endoftext|>)."""
+    ids: List[int] = []
+    for tok in ("<|im_end|>", "<|endoftext|>"):
+        try:
+            tid = tokenizer.convert_tokens_to_ids(tok)
+            if isinstance(tid, int) and tid >= 0 and tid not in ids:
+                ids.append(tid)
+        except Exception:
+            pass
+    eos = getattr(tokenizer, "eos_token_id", None)
+    if isinstance(eos, int) and eos not in ids:
+        ids.append(eos)
+    elif isinstance(eos, list):
+        for x in eos:
+            if isinstance(x, int) and x not in ids:
+                ids.append(x)
+    return ids
+
+
 def extract_boxed_answer(text: str) -> Optional[str]:
     idx = text.rfind("\\boxed")
     if idx < 0:
@@ -1849,6 +1869,8 @@ def main() -> None:
     print(f"[eval] tokenizer_source={tokenizer_src}")
     tokenizer = load_eval_tokenizer(tokenizer_src)
     maybe_install_olmo_chat_template(tokenizer, model_path=vllm_model_path)
+    stop_ids = _stop_token_ids(tokenizer)
+    print(f"[eval] stop_token_ids={stop_ids}", flush=True)
 
     all_prompts: List[str] = []
     for ex in examples:
@@ -1952,6 +1974,8 @@ def main() -> None:
         sp_kw["top_k"] = top_k
     if presence_penalty != 0.0:
         sp_kw["presence_penalty"] = presence_penalty
+    if stop_ids:
+        sp_kw["stop_token_ids"] = stop_ids
 
     from vllm import SamplingParams
 
@@ -2183,6 +2207,7 @@ def main() -> None:
             "format_rate_pct": 100.0 * formatted_total / total_solutions if total_solutions else 0.0,
             "avg_output_tokens_mean": total_output_tokens / total_solutions if total_solutions else 0.0,
             "math_verify": _HAS_MATH_VERIFY,
+            "stop_token_ids": stop_ids,
             "generate_batch_size": gbs if args.generate_batch_size > 0 else n_prompts_total,
             "generate_batch_size_requested": args.generate_batch_size,
             "streaming_write": True,
@@ -2263,6 +2288,7 @@ def main() -> None:
             "format_rate_pct": 100.0 * formatted_total / total_solutions if total_solutions else 0.0,
             "avg_output_tokens_mean": total_output_tokens / total_solutions if total_solutions else 0.0,
             "math_verify": _HAS_MATH_VERIFY,
+            "stop_token_ids": stop_ids,
             "generate_batch_size": gbs if args.generate_batch_size > 0 else n_prompts_total,
             "generate_batch_size_requested": args.generate_batch_size,
             "streaming_write": True,

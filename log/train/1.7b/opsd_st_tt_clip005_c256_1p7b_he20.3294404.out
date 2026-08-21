@@ -1,0 +1,131 @@
+[launch] run=st_tt_clip005_c256_1p7b_he20_3294404 mode=opsd privilege_field=solution
+[launch] student_thinking=1 teacher_thinking=1
+[launch] lr=1e-6 jsd_token_clip=0.05 high_entropy_ratio=0.2 (he20)
+[launch] variant=c256+he20 max_completion=256 high_entropy_ratio=0.2
+[launch] micro=8 gas=4 gpus=2 → global_batch=64
+[launch] max_steps=100 save_steps=25 → total_samples=6400
+[launch] prompt=1024 completion=256 max_seq=1280
+[launch] model=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b dataset=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/openthoughts/preprocessed/openthoughts.opsd.solution.sthink_tthink.maxprompt1024.parquet output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/st_tt_clip005_c256_1p7b_he20/3294404
+[launch] master_port=34404 vLLM util=0.4
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+W0820 00:47:17.499000 1383224 site-packages/torch/distributed/run.py:792] 
+W0820 00:47:17.499000 1383224 site-packages/torch/distributed/run.py:792] *****************************************
+W0820 00:47:17.499000 1383224 site-packages/torch/distributed/run.py:792] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0820 00:47:17.499000 1383224 site-packages/torch/distributed/run.py:792] *****************************************
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+⚙️  Running in WANDB offline mode
+⚙️  Running in WANDB offline mode
+usage: train_opsd.py [-h] [--model-path MODEL_PATH]
+                     [--teacher-model-path TEACHER_MODEL_PATH]
+                     [--dataset-path DATASET_PATH] [--output-dir OUTPUT_DIR]
+                     [--run-name RUN_NAME] --privilege-mode
+                     {correct,correct_simple,pi,instruction,opsd,same,encourage,irrelevant,same_trans,encourage_trans,irrelevant_trans,sample_irrelevant_trans,irrelevant_other_sol}
+                     [--teacher-privilege-field {solution,answer,none}]
+                     [--enable-thinking]
+                     [--student-thinking | --no-student-thinking]
+                     [--teacher-thinking | --no-teacher-thinking]
+                     [--max-steps MAX_STEPS] [--save-steps SAVE_STEPS]
+                     [--max-prompt-length MAX_PROMPT_LENGTH]
+                     [--max-completion-length MAX_COMPLETION_LENGTH]
+                     [--per-device-batch-size PER_DEVICE_BATCH_SIZE]
+                     [--gradient-accumulation-steps GRADIENT_ACCUMULATION_STEPS]
+                     [--learning-rate LEARNING_RATE]
+                     [--jsd-token-clip JSD_TOKEN_CLIP]
+                     [--top-k-loss TOP_K_LOSS]
+                     [--high-entropy-ratio HIGH_ENTROPY_RATIO]
+                     [--use-thinking-machines-loss | --no-use-thinking-machines-loss]
+                     [--teacher-update-steps TEACHER_UPDATE_STEPS]
+                     [--temperature TEMPERATURE] [--top-p TOP_P]
+                     [--top-k TOP_K] [--min-p MIN_P]
+                     [--presence-penalty PRESENCE_PENALTY]
+                     [--repetition-penalty REPETITION_PENALTY]
+                     [--rollout-backend {vllm,sglang}]
+                     [--vllm-gpu-memory-utilization VLLM_GPU_MEMORY_UTILIZATION]
+                     [--sglang-mem-fraction-static SGLANG_MEM_FRACTION_STATIC]
+                     [--sglang-attention-backend SGLANG_ATTENTION_BACKEND]
+                     [--sglang-sampling-backend {pytorch,flashinfer}]
+                     [--sglang-reasoning-parser SGLANG_REASONING_PARSER]
+                     [--sglang-disable-piecewise-cuda-graph | --no-sglang-disable-piecewise-cuda-graph]
+                     [--deepspeed DEEPSPEED] [--use-peft | --no-use-peft]
+                     [--fixed-teacher | --no-fixed-teacher] [--lora-r LORA_R]
+                     [--lora-alpha LORA_ALPHA] [--lora-dropout LORA_DROPOUT]
+                     [--lora-target-modules LORA_TARGET_MODULES] [--seed SEED]
+usage: train_opsd.py [-h] [--model-path MODEL_PATH]
+                     [--teacher-model-path TEACHER_MODEL_PATH]
+                     [--dataset-path DATASET_PATH] [--output-dir OUTPUT_DIR]
+                     [--run-name RUN_NAME] --privilege-mode
+                     {correct,correct_simple,pi,instruction,opsd,same,encourage,irrelevant,same_trans,encourage_trans,irrelevant_trans,sample_irrelevant_trans,irrelevant_other_sol}
+                     [--teacher-privilege-field {solution,answer,none}]
+                     [--enable-thinking]
+                     [--student-thinking | --no-student-thinking]
+                     [--teacher-thinking | --no-teacher-thinking]
+                     [--max-steps MAX_STEPS] [--save-steps SAVE_STEPS]
+                     [--max-prompt-length MAX_PROMPT_LENGTH]
+                     [--max-completion-length MAX_COMPLETION_LENGTH]
+                     [--per-device-batch-size PER_DEVICE_BATCH_SIZE]
+                     [--gradient-accumulation-steps GRADIENT_ACCUMULATION_STEPS]
+                     [--learning-rate LEARNING_RATE]
+                     [--jsd-token-clip JSD_TOKEN_CLIP]
+                     [--top-k-loss TOP_K_LOSS]
+                     [--high-entropy-ratio HIGH_ENTROPY_RATIO]
+                     [--use-thinking-machines-loss | --no-use-thinking-machines-loss]
+                     [--teacher-update-steps TEACHER_UPDATE_STEPS]
+                     [--temperature TEMPERATURE] [--top-p TOP_P]
+                     [--top-k TOP_K] [--min-p MIN_P]
+                     [--presence-penalty PRESENCE_PENALTY]
+                     [--repetition-penalty REPETITION_PENALTY]
+                     [--rollout-backend {vllm,sglang}]
+                     [--vllm-gpu-memory-utilization VLLM_GPU_MEMORY_UTILIZATION]
+                     [--sglang-mem-fraction-static SGLANG_MEM_FRACTION_STATIC]
+                     [--sglang-attention-backend SGLANG_ATTENTION_BACKEND]
+                     [--sglang-sampling-backend {pytorch,flashinfer}]
+                     [--sglang-reasoning-parser SGLANG_REASONING_PARSER]
+                     [--sglang-disable-piecewise-cuda-graph | --no-sglang-disable-piecewise-cuda-graph]
+                     [--deepspeed DEEPSPEED] [--use-peft | --no-use-peft]
+                     [--fixed-teacher | --no-fixed-teacher] [--lora-r LORA_R]
+                     [--lora-alpha LORA_ALPHA] [--lora-dropout LORA_DROPOUT]
+                     [--lora-target-modules LORA_TARGET_MODULES] [--seed SEED]
+train_opsd.py: error: unrecognized arguments:  
+train_opsd.py: error: unrecognized arguments:  
+E0820 00:47:51.174000 1383224 site-packages/torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: 2) local_rank: 0 (pid: 1383505) of binary: /gpfs/share/home/2501210611/miniconda3/envs/anchor/bin/python
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/accelerate_cli.py", line 50, in main
+    args.func(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/launch.py", line 1183, in launch_command
+    deepspeed_launcher(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/launch.py", line 868, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/run.py", line 909, in run
+    elastic_launch(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-08-20_00:47:51
+  host      : gpua800n09.hpc.pku.edu.cn
+  rank      : 1 (local_rank: 1)
+  exitcode  : 2 (pid: 1383506)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-08-20_00:47:51
+  host      : gpua800n09.hpc.pku.edu.cn
+  rank      : 0 (local_rank: 0)
+  exitcode  : 2 (pid: 1383505)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

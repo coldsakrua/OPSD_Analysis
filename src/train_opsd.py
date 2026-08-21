@@ -17,6 +17,11 @@ if _LOCAL_WANDB.is_dir() and not (_LOCAL_WANDB / "__init__.py").exists():
         if p not in ("", ".") and str(Path(p or ".").resolve()) != _repo
     ]
 
+from cuda_env import ensure_nvidia_cudart_on_ld_path
+
+# SGLang scheduler subprocesses re-import this module (spawn); fix libcudart before torch.
+ensure_nvidia_cudart_on_ld_path()
+
 import torch
 from transformers import AutoTokenizer, TrainerCallback, set_seed
 
@@ -159,6 +164,16 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--high-entropy-ratio",
+        type=float,
+        default=None,
+        help=(
+            "If set to a value in (0, 1), only the top-ρ fraction of highest-entropy "
+            "response tokens per sequence contribute to loss (student entropy). "
+            "Default None = all valid response tokens (existing behavior)."
+        ),
+    )
+    parser.add_argument(
         "--use-thinking-machines-loss",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -210,6 +225,17 @@ def parse_args() -> argparse.Namespace:
         default=os.environ.get("SGLANG_SAMPLING_BACKEND", "pytorch"),
         help="SGLang token sampling backend. pytorch avoids flashinfer JIT on incomplete CUDA/CCCL nodes.",
     )
+    parser.add_argument(
+        "--sglang-reasoning-parser",
+        default=os.environ.get("SGLANG_REASONING_PARSER", ""),
+        help="SGLang reasoning parser (e.g. deepseek-r1 for Falcon-H1R). Empty disables.",
+    )
+    parser.add_argument(
+        "--sglang-disable-piecewise-cuda-graph",
+        action=argparse.BooleanOptionalAction,
+        default=os.environ.get("SGLANG_DISABLE_PIECEWISE_CUDA_GRAPH", "0") in {"1", "true", "True", "yes"},
+        help="Disable SGLang piecewise CUDA graph (required for Falcon-H1 Mamba layers).",
+    )
     parser.add_argument("--deepspeed", default="configs/deepspeed_zero3.json")
     parser.add_argument(
         "--use-peft",
@@ -252,6 +278,10 @@ def parse_args() -> argparse.Namespace:
     # <=0 disables clip (trainer expects None).
     if args.jsd_token_clip is not None and args.jsd_token_clip <= 0:
         args.jsd_token_clip = None
+    if args.high_entropy_ratio is not None and args.high_entropy_ratio >= 1.0:
+        args.high_entropy_ratio = None
+    if args.high_entropy_ratio is not None and args.high_entropy_ratio <= 0:
+        parser.error("--high-entropy-ratio must be in (0, 1) when set")
     if args.top_k_loss is not None and args.top_k_loss <= 0:
         parser.error("--top-k-loss must be a positive integer when set")
     if args.use_thinking_machines_loss and args.top_k_loss is not None:
@@ -393,6 +423,8 @@ def main() -> None:
         sglang_sampling_backend=args.sglang_sampling_backend,
         sglang_context_length=max_length,
         sglang_enable_memory_saver=True,
+        sglang_reasoning_parser=args.sglang_reasoning_parser or None,
+        sglang_disable_piecewise_cuda_graph=bool(args.sglang_disable_piecewise_cuda_graph),
         steps_per_generation=args.gradient_accumulation_steps,
         log_completions=False,
         wandb_project=os.environ.get("WANDB_PROJECT", "OPSD"),
@@ -435,6 +467,7 @@ def main() -> None:
         f"lora_r={args.lora_r if args.use_peft else None} "
         f"lora_alpha={args.lora_alpha if args.use_peft else None} "
         f"lr={args.learning_rate} jsd_token_clip={args.jsd_token_clip} "
+        f"high_entropy_ratio={args.high_entropy_ratio} "
         f"top_k_loss={args.top_k_loss} use_thinking_machines_loss={args.use_thinking_machines_loss} "
         f"teacher_update_steps={args.teacher_update_steps} "
         f"temp={args.temperature} top_p={args.top_p} top_k={args.top_k} "
@@ -456,6 +489,7 @@ def main() -> None:
         use_thinking_machines_loss=args.use_thinking_machines_loss,
         top_k_loss=args.top_k_loss,
         jsd_token_clip=args.jsd_token_clip,
+        high_entropy_ratio=args.high_entropy_ratio,
         teacher_update_steps=args.teacher_update_steps,
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,

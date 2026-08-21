@@ -44,6 +44,8 @@ class OPSDConfig(SFTConfig):
     sglang_sampling_backend: str = "pytorch"
     sglang_context_length: int | None = None
     sglang_enable_memory_saver: bool = True
+    sglang_reasoning_parser: str | None = None
+    sglang_disable_piecewise_cuda_graph: bool = False
 
     log_completions: bool = False
     log_completions_steps: int = 25

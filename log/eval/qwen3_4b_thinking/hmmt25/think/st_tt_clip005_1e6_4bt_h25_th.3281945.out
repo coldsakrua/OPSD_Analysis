@@ -51,4 +51,59 @@ INFO 08-18 15:54:19 [llm_engine.py:437] init engine (profile, create kv cache, w
 [eval] wrote partial json: 8/30 metrics=hmmt25_4b_thinking_think.metrics.json results=hmmt25_4b_thinking_think.results.json
 prompt_batches:  25%|██▌       | 2/8 [3:41:58<11:45:45, 7057.66s/it]WARNING 08-18 21:13:42 [scheduler.py:1768] Sequence group 11_parallel_sample_0 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=101
 [eval] wrote partial json: 12/30 metrics=hmmt25_4b_thinking_think.metrics.json results=hmmt25_4b_thinking_think.results.json
-prompt_batches:  38%|███▊      | 3/8 [5:50:21<10:12:40, 7352.13s/it]
+prompt_batches:  38%|███▊      | 3/8 [5:50:21<10:12:40, 7352.13s/it][eval] wrote partial json: 16/30 metrics=hmmt25_4b_thinking_think.metrics.json results=hmmt25_4b_thinking_think.results.json
+prompt_batches:  50%|█████     | 4/8 [8:26:40<9:03:29, 8152.32s/it] WARNING 08-19 00:47:49 [scheduler.py:1768] Sequence group 18_parallel_sample_2 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=151
+[eval] wrote partial json: 20/30 metrics=hmmt25_4b_thinking_think.metrics.json results=hmmt25_4b_thinking_think.results.json
+prompt_batches:  62%|██████▎   | 5/8 [10:38:38<6:43:23, 8067.99s/it][eval] wrote partial json: 24/30 metrics=hmmt25_4b_thinking_think.metrics.json results=hmmt25_4b_thinking_think.results.json
+prompt_batches:  75%|███████▌  | 6/8 [12:19:13<4:05:53, 7376.58s/it]WARNING 08-19 04:28:23 [scheduler.py:1768] Sequence group 27_parallel_sample_4 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=201
+[eval] wrote partial json: 28/30 metrics=hmmt25_4b_thinking_think.metrics.json results=hmmt25_4b_thinking_think.results.json
+prompt_batches:  88%|████████▊ | 7/8 [14:52:30<2:12:51, 7972.00s/it]WARNING 08-19 08:24:12 [scheduler.py:1768] Sequence group 29_parallel_sample_7 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=251
+[eval] wrote partial json: 30/30 metrics=hmmt25_4b_thinking_think.metrics.json results=hmmt25_4b_thinking_think.results.json
+prompt_batches: 100%|██████████| 8/8 [16:48:59<00:00, 7659.00s/it]  prompt_batches: 100%|██████████| 8/8 [16:48:59<00:00, 7567.47s/it]
+[eval] wrote partial json: 30/30 metrics=hmmt25_4b_thinking_think.metrics.json results=hmmt25_4b_thinking_think.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_clip005_1e6_4bt_ckpt100/hmmt25_4b_thinking_think.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_clip005_1e6_4bt_ckpt100/hmmt25_4b_thinking_think.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 46.67% (14/30)
+  Pass@4: 56.67% (17/30)
+  Pass@8: 66.67% (20/30)
+  Avg1(one-shot hit rate): 46.67%
+  Avg16(overall correctness): 46.25%
+  Avg output tokens: 46991.7
+[hmmt25] n=30
+  Pass@1: 46.67% (14/30)
+  Pass@4: 56.67% (17/30)
+  Pass@8: 66.67% (20/30)
+  Avg1(one-shot hit rate): 46.67%
+  Avg16(overall correctness): 46.25%
+  Avg output tokens: 46991.7
+[BY_CATEGORY]
+[__uncategorized__] n=30
+  Pass@1: 46.67% (14/30)
+  Pass@4: 56.67% (17/30)
+  Pass@8: 66.67% (20/30)
+  Avg1(one-shot hit rate): 46.67%
+  Avg16(overall correctness): 46.25%
+  Avg output tokens: 46991.7
+Avg correct / sample: 46.25%
+Majority vote: 50.00%
+Boxed format rate: 98.75%
+Avg output tokens: 46991.7
+[TOKEN_BUDGET]
+[hmmt25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @8k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @16k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @32k: Pass@8=26.67% (8/30)  Avg16=14.17%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[hmmt25] n=30  P@16=0.00%  Avg16=46.25%  L=46991.7  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[hmmt25] n=30  P@16=0.00%  Avg16=46.25%  L=46991.7  pass/log2(16L)=0.0000  avg/log2(16L)=2.3694
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_clip005_1e6_4bt_ckpt100/hmmt25_4b_thinking_think.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_clip005_1e6_4bt_ckpt100/hmmt25_4b_thinking_think.results.json
+============================================================
+[rank0]:[W819 08:45:10.900465070 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())

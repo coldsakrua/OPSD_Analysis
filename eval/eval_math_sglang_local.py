@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import struct
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -97,6 +98,62 @@ def _normalize_generate_outputs(raw: Any, n_prompts: int, gen_n: int) -> List[Li
     )
 
 
+def _validate_safetensors_checkpoint(model_path: str) -> None:
+    """Fail fast if any *.safetensors shard is shorter than its header-declared span."""
+    root = Path(model_path)
+    shards = sorted(root.glob("*.safetensors"))
+    if not shards:
+        return
+    bad: List[str] = []
+    details: List[Dict[str, Any]] = []
+    for p in shards:
+        size = p.stat().st_size
+        rec: Dict[str, Any] = {"name": p.name, "size": size, "ok": False}
+        try:
+            with p.open("rb") as f:
+                hdr = f.read(8)
+                if len(hdr) < 8:
+                    rec["error"] = "file shorter than 8-byte header"
+                    bad.append(p.name)
+                    details.append(rec)
+                    continue
+                header_len = struct.unpack("<Q", hdr)[0]
+                raw = f.read(header_len)
+            rec["header_len"] = header_len
+            if len(raw) < header_len:
+                rec["error"] = f"truncated header json have={len(raw)} need={header_len}"
+                bad.append(p.name)
+                details.append(rec)
+                continue
+            meta = json.loads(raw)
+            ends = [
+                int(v["data_offsets"][1])
+                for v in meta.values()
+                if isinstance(v, dict) and "data_offsets" in v
+            ]
+            max_end = max(ends) if ends else 0
+            declared = 8 + header_len + max_end
+            rec["declared"] = declared
+            rec["delta"] = size - declared
+            rec["ok"] = size >= declared
+            if not rec["ok"]:
+                rec["error"] = f"truncated payload size={size} declared={declared} missing={declared - size}"
+                bad.append(p.name)
+        except Exception as e:
+            rec["error"] = f"{type(e).__name__}: {e}"
+            bad.append(p.name)
+        details.append(rec)
+    print(f"[eval] safetensors preflight: {len(shards)} shards, bad={len(bad)}", flush=True)
+    if bad:
+        for rec in details:
+            print(f"[eval]   {rec}", flush=True)
+        raise SystemExit(
+            "error: truncated safetensors shard(s): "
+            + ", ".join(bad)
+            + " — re-download those files (header payload shorter than declared offsets)"
+        )
+
+
 def _completion_tokens(sample: Dict[str, Any], text: str, tokenizer: Any) -> int:
     meta = sample.get("meta_info") or {}
     for key in ("completion_tokens", "completion_tokens_count", "output_tokens"):
@@ -172,6 +229,15 @@ def main() -> None:
         help="SGLang reasoning parser name (e.g. qwen3). Empty disables.",
     )
     parser.add_argument(
+        "--disable-piecewise-cuda-graph",
+        action="store_true",
+        default=False,
+        help=(
+            "Pass disable_piecewise_cuda_graph to SGLang Engine. "
+            "Required for Falcon-H1: piecewise CUDA graph warmup hits Dynamo KeyError."
+        ),
+    )
+    parser.add_argument(
         "--disable-hybrid-swa-memory",
         action="store_true",
         default=True,
@@ -228,6 +294,7 @@ def main() -> None:
         raise RuntimeError("No examples loaded")
 
     model_path = str(Path(args.model_path).expanduser().resolve())
+    _validate_safetensors_checkpoint(model_path)
     is_gemma3 = _is_gemma3_model(model_path)
     is_olmo = is_olmo_model_path(model_path)
     is_olmo_think = is_olmo_think_model_path(model_path)
@@ -395,6 +462,8 @@ def main() -> None:
         engine_kwargs["enable_multimodal"] = False
     if args.reasoning_parser:
         engine_kwargs["reasoning_parser"] = args.reasoning_parser
+    if args.disable_piecewise_cuda_graph:
+        engine_kwargs["disable_piecewise_cuda_graph"] = True
     llm = Engine(**engine_kwargs)
 
     out_path = Path(args.output_json)
