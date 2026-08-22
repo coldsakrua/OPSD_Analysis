@@ -191,6 +191,7 @@ class OPSDTrainer(SFTTrainer):
         top_k_loss: int | None = None,
         jsd_token_clip: float | None = None,
         high_entropy_ratio: float | None = None,
+        low_entropy_ratio: float | None = None,
         use_ema_teacher: bool = False,
         ema_decay: float = 0.999,
         teacher_update_steps: int | None = None,
@@ -288,7 +289,14 @@ class OPSDTrainer(SFTTrainer):
             high_entropy_ratio = None
         if high_entropy_ratio is not None and high_entropy_ratio <= 0:
             raise ValueError("high_entropy_ratio must be in (0, 1) or None/>=1 to disable")
+        if low_entropy_ratio is not None and low_entropy_ratio >= 1.0:
+            low_entropy_ratio = None
+        if low_entropy_ratio is not None and low_entropy_ratio <= 0:
+            raise ValueError("low_entropy_ratio must be in (0, 1) or None/>=1 to disable")
+        if high_entropy_ratio is not None and low_entropy_ratio is not None:
+            raise ValueError("high_entropy_ratio and low_entropy_ratio are mutually exclusive")
         self.high_entropy_ratio = high_entropy_ratio
+        self.low_entropy_ratio = low_entropy_ratio
         self.use_ema_teacher = use_ema_teacher
         self.ema_decay = ema_decay
         self.teacher_update_steps = teacher_update_steps if teacher_update_steps and teacher_update_steps > 0 else None
@@ -538,14 +546,14 @@ class OPSDTrainer(SFTTrainer):
         return -(probs * log_probs).sum(dim=-1)
 
     @staticmethod
-    def _high_entropy_mask(entropy, valid_mask, ratio):
-        """Select top-ρ high-entropy positions independently within each sequence."""
+    def _entropy_topk_mask(entropy, valid_mask, ratio, largest):
+        """Select top/bottom-ρ entropy positions independently within each sequence."""
         if ratio >= 1.0:
             return valid_mask
         if ratio <= 0:
-            raise ValueError("high_entropy_ratio must be in (0, 1]")
+            raise ValueError("entropy ratio must be in (0, 1]")
 
-        high_ent_mask = torch.zeros_like(valid_mask, dtype=torch.bool)
+        selected_mask = torch.zeros_like(valid_mask, dtype=torch.bool)
         batch_size = entropy.shape[0]
         for i in range(batch_size):
             valid_idx = valid_mask[i].nonzero(as_tuple=False).squeeze(-1)
@@ -554,9 +562,21 @@ class OPSDTrainer(SFTTrainer):
             n_valid = int(valid_idx.numel())
             k = max(1, math.ceil(ratio * n_valid))
             seq_entropy = entropy[i, valid_idx]
-            _, top_local = torch.topk(seq_entropy, k=k, largest=True)
-            high_ent_mask[i, valid_idx[top_local]] = True
-        return high_ent_mask
+            _, local_idx = torch.topk(seq_entropy, k=k, largest=largest)
+            selected_mask[i, valid_idx[local_idx]] = True
+        return selected_mask
+
+    @staticmethod
+    def _high_entropy_mask(entropy, valid_mask, ratio):
+        """Select top-ρ high-entropy positions independently within each sequence."""
+        return OPSDTrainer._entropy_topk_mask(entropy, valid_mask, ratio, largest=True)
+
+    @staticmethod
+    def _low_entropy_mask(entropy, valid_mask, ratio):
+        """Select bottom-ρ low-entropy positions independently within each sequence.
+        ratio=0.2 → le20 (bottom-20%); ratio=0.8 → le80 (bottom-80%).
+        """
+        return OPSDTrainer._entropy_topk_mask(entropy, valid_mask, ratio, largest=False)
 
     @staticmethod
     def generalized_jsd_loss(
@@ -930,16 +950,21 @@ class OPSDTrainer(SFTTrainer):
         valid_mask = shifted_labels != -100
         loss_mask = None
 
-        if self.high_entropy_ratio is not None:
+        if self.high_entropy_ratio is not None or self.low_entropy_ratio is not None:
             with torch.no_grad():
                 entropy = self._compute_token_entropy(student_logits, self.temperature)
-                loss_mask = self._high_entropy_mask(entropy, valid_mask, self.high_entropy_ratio)
+                if self.high_entropy_ratio is not None:
+                    loss_mask = self._high_entropy_mask(entropy, valid_mask, self.high_entropy_ratio)
+                    metric_prefix = "high_entropy"
+                else:
+                    loss_mask = self._low_entropy_mask(entropy, valid_mask, self.low_entropy_ratio)
+                    metric_prefix = "low_entropy"
                 selected = loss_mask.sum().double()
                 valid_count = valid_mask.sum().double()
-                self._metrics["train"]["opsd/high_entropy_ratio"].append(
+                self._metrics["train"][f"opsd/{metric_prefix}_ratio"].append(
                     (selected / valid_count.clamp(min=1)).item()
                 )
-                self._metrics["train"]["opsd/high_entropy_loss_tokens"].append(selected.item())
+                self._metrics["train"][f"opsd/{metric_prefix}_loss_tokens"].append(selected.item())
 
         if self.use_thinking_machines_loss:
             # For reverse KL, we only need log-probs of sampled tokens

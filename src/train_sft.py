@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 from pathlib import Path
@@ -31,6 +32,48 @@ from sft_dataset import DEFAULT_CHAT_TEMPLATE_PATH, load_sft_dataset, load_sft_t
 
 
 DEFAULT_MODEL = "/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b-base"
+
+
+def resolve_resume_checkpoint(output_dir: Path, resume: str | None) -> str | None:
+    """Resolve checkpoint path for Trainer.resume_from_checkpoint."""
+    if not resume:
+        return None
+
+    resume = resume.strip()
+    if resume in {"true", "True", "1", "latest"}:
+        checkpoints = sorted(
+            output_dir.glob("checkpoint-*"),
+            key=lambda p: int(p.name.rsplit("-", 1)[-1])
+            if p.name.rsplit("-", 1)[-1].isdigit()
+            else -1,
+        )
+        if not checkpoints:
+            raise FileNotFoundError(f"No checkpoint-* directories found under {output_dir}")
+        return str(checkpoints[-1].resolve())
+
+    checkpoint = Path(resume).expanduser()
+    if not checkpoint.is_absolute():
+        candidate = output_dir / checkpoint
+        checkpoint = candidate if candidate.is_dir() else checkpoint.resolve()
+    else:
+        checkpoint = checkpoint.resolve()
+    if not checkpoint.is_dir():
+        raise FileNotFoundError(f"Resume checkpoint not found: {checkpoint}")
+    if not (checkpoint / "trainer_state.json").exists():
+        raise FileNotFoundError(
+            f"Resume checkpoint missing trainer_state.json: {checkpoint}"
+        )
+    return str(checkpoint)
+
+
+def log_resume_checkpoint(checkpoint: str) -> None:
+    state_path = Path(checkpoint) / "trainer_state.json"
+    with state_path.open(encoding="utf-8") as f:
+        state = json.load(f)
+    print(
+        f"[sft] resume checkpoint={checkpoint} "
+        f"global_step={state.get('global_step')} epoch={state.get('epoch')}"
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -86,6 +129,14 @@ def parse_args() -> argparse.Namespace:
         help="Trainer report_to (default: wandb). Use 'none' to disable.",
     )
     parser.add_argument("--num-proc", type=int, default=None, help="Dataset map workers")
+    parser.add_argument(
+        "--resume-from-checkpoint",
+        default=os.environ.get("RESUME_FROM_CHECKPOINT"),
+        help=(
+            "Resume training from a checkpoint directory. "
+            "Use 'latest' to pick the newest checkpoint-* under output-dir."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -95,6 +146,9 @@ def main() -> None:
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    resume_from_checkpoint = resolve_resume_checkpoint(
+        output_dir, args.resume_from_checkpoint
+    )
 
     print(f"[sft] model={args.model_path}")
     print(f"[sft] chat_template={args.chat_template_path}")
@@ -108,6 +162,10 @@ def main() -> None:
         f"[sft] micro={args.per_device_batch_size} gas={args.gradient_accumulation_steps} "
         f"lr={args.learning_rate} packing={args.packing}"
     )
+    if resume_from_checkpoint:
+        log_resume_checkpoint(resume_from_checkpoint)
+    else:
+        print("[sft] resume=disabled (fresh run)")
 
     tokenizer = load_sft_tokenizer(
         args.model_path,
@@ -177,7 +235,7 @@ def main() -> None:
         processing_class=tokenizer,
     )
 
-    trainer.train()
+    trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
     final_dir = output_dir / "final"
     trainer.save_model(str(final_dir))

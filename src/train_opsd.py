@@ -170,7 +170,20 @@ def parse_args() -> argparse.Namespace:
         help=(
             "If set to a value in (0, 1), only the top-ρ fraction of highest-entropy "
             "response tokens per sequence contribute to loss (student entropy). "
-            "Default None = all valid response tokens (existing behavior)."
+            "Default None = all valid response tokens (existing behavior). "
+            "Mutually exclusive with --low-entropy-ratio."
+        ),
+    )
+    parser.add_argument(
+        "--low-entropy-ratio",
+        type=float,
+        default=None,
+        help=(
+            "If set to a value in (0, 1), only the bottom-ρ fraction of lowest-entropy "
+            "response tokens per sequence contribute to loss (student entropy). "
+            "E.g. 0.2 = le20 (bottom-20% only), 0.8 = le80 (bottom-80%). "
+            "Default None = all valid response tokens (existing behavior). "
+            "Mutually exclusive with --high-entropy-ratio."
         ),
     )
     parser.add_argument(
@@ -282,6 +295,12 @@ def parse_args() -> argparse.Namespace:
         args.high_entropy_ratio = None
     if args.high_entropy_ratio is not None and args.high_entropy_ratio <= 0:
         parser.error("--high-entropy-ratio must be in (0, 1) when set")
+    if args.low_entropy_ratio is not None and args.low_entropy_ratio >= 1.0:
+        args.low_entropy_ratio = None
+    if args.low_entropy_ratio is not None and args.low_entropy_ratio <= 0:
+        parser.error("--low-entropy-ratio must be in (0, 1) when set")
+    if args.high_entropy_ratio is not None and args.low_entropy_ratio is not None:
+        parser.error("--high-entropy-ratio and --low-entropy-ratio are mutually exclusive")
     if args.top_k_loss is not None and args.top_k_loss <= 0:
         parser.error("--top-k-loss must be a positive integer when set")
     if args.use_thinking_machines_loss and args.top_k_loss is not None:
@@ -468,6 +487,7 @@ def main() -> None:
         f"lora_alpha={args.lora_alpha if args.use_peft else None} "
         f"lr={args.learning_rate} jsd_token_clip={args.jsd_token_clip} "
         f"high_entropy_ratio={args.high_entropy_ratio} "
+        f"low_entropy_ratio={args.low_entropy_ratio} "
         f"top_k_loss={args.top_k_loss} use_thinking_machines_loss={args.use_thinking_machines_loss} "
         f"teacher_update_steps={args.teacher_update_steps} "
         f"temp={args.temperature} top_p={args.top_p} top_k={args.top_k} "
@@ -490,6 +510,7 @@ def main() -> None:
         top_k_loss=args.top_k_loss,
         jsd_token_clip=args.jsd_token_clip,
         high_entropy_ratio=args.high_entropy_ratio,
+        low_entropy_ratio=args.low_entropy_ratio,
         teacher_update_steps=args.teacher_update_steps,
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,

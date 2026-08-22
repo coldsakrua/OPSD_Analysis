@@ -15,6 +15,9 @@ set -euo pipefail
 #   ZeRO-2 no CPU offload (1.7B 不需 ZeRO-3；省通信、ckpt 更快)
 #   max_steps=15000, save_steps=500
 #   dataset: offline-tokenized le12k.all.tok
+# Resume (same output dir, inherit model/optim/data position):
+#   RESUME_FROM_CHECKPOINT=latest OUTPUT_DIR=.../3299217 sbatch scripts/sft/qwen3_1.7b_base/sft_think_4gpu_12k.sh
+#   or use scripts/sft/qwen3_1.7b_base/sft_think_4gpu_12k_resume.sh
 
 NUM_GPUS=${NUM_GPUS:-4}
 LEARNING_RATE=${LEARNING_RATE:-1e-5}
@@ -26,6 +29,7 @@ MAX_STEPS=${MAX_STEPS:-15000}
 SAVE_STEPS=${SAVE_STEPS:-500}
 # Keep every checkpoint (do not set save_total_limit).
 RUN_NAME=${RUN_NAME:-sft_think_4gpu_12k}
+RESUME_FROM_CHECKPOINT=${RESUME_FROM_CHECKPOINT:-}
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
 MODEL_PATH=${MODEL_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b-base}
@@ -74,6 +78,14 @@ echo "[launch] lr=${LEARNING_RATE} max_length=${MAX_LENGTH} max_steps=${MAX_STEP
 echo "[launch] model=${MODEL_PATH}"
 echo "[launch] dataset=${DATASET_PATH}"
 echo "[launch] output=${OUTPUT_DIR} master_port=${MASTER_PORT}"
+if [[ -n "${RESUME_FROM_CHECKPOINT}" ]]; then
+  echo "[launch] resume_from_checkpoint=${RESUME_FROM_CHECKPOINT}"
+fi
+
+RESUME_ARGS=()
+if [[ -n "${RESUME_FROM_CHECKPOINT}" ]]; then
+  RESUME_ARGS+=(--resume-from-checkpoint "${RESUME_FROM_CHECKPOINT}")
+fi
 
 accelerate launch \
   --config_file "${BASE_DIR}/configs/accelerate_zero2_no_offload.yaml" \
@@ -92,4 +104,5 @@ accelerate launch \
   --per-device-batch-size "${PER_DEVICE_BATCH_SIZE}" \
   --gradient-accumulation-steps "${GRADIENT_ACCUMULATION_STEPS}" \
   --learning-rate "${LEARNING_RATE}" \
-  --deepspeed "${BASE_DIR}/configs/deepspeed_zero2_no_offload.json"
+  --deepspeed "${BASE_DIR}/configs/deepspeed_zero2_no_offload.json" \
+  "${RESUME_ARGS[@]}"
