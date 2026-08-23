@@ -25,13 +25,14 @@ from cuda_env import ensure_nvidia_cudart_on_ld_path
 ensure_nvidia_cudart_on_ld_path()
 
 import torch
-from transformers import AutoModelForCausalLM, set_seed
+from transformers import AutoModelForCausalLM, TrainerCallback, set_seed
 from trl import SFTConfig, SFTTrainer
 
 from sft_dataset import DEFAULT_CHAT_TEMPLATE_PATH, load_sft_dataset, load_sft_tokenizer
 
 
 DEFAULT_MODEL = "/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b-base"
+WANDB_META_NAME = "wandb_run.json"
 
 
 def resolve_resume_checkpoint(output_dir: Path, resume: str | None) -> str | None:
@@ -74,6 +75,107 @@ def log_resume_checkpoint(checkpoint: str) -> None:
         f"[sft] resume checkpoint={checkpoint} "
         f"global_step={state.get('global_step')} epoch={state.get('epoch')}"
     )
+
+
+def wandb_meta_path(output_dir: Path) -> Path:
+    return output_dir / WANDB_META_NAME
+
+
+def load_wandb_meta(output_dir: Path) -> dict[str, str] | None:
+    path = wandb_meta_path(output_dir)
+    if not path.is_file():
+        return None
+    with path.open(encoding="utf-8") as f:
+        data = json.load(f)
+    if not isinstance(data, dict):
+        return None
+    return {str(k): str(v) for k, v in data.items() if v is not None}
+
+
+def save_wandb_meta(
+    output_dir: Path,
+    *,
+    run_id: str,
+    run_name: str | None = None,
+    project: str | None = None,
+    group: str | None = None,
+) -> None:
+    path = wandb_meta_path(output_dir)
+    payload = {
+        "id": run_id,
+        "name": run_name,
+        "project": project or os.environ.get("WANDB_PROJECT"),
+        "group": group or os.environ.get("WANDB_RUN_GROUP"),
+    }
+    payload = {k: v for k, v in payload.items() if v}
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"[sft] saved wandb meta -> {path} id={run_id}")
+
+
+def setup_wandb_resume(
+    output_dir: Path,
+    *,
+    resume_training: bool,
+    run_name: str,
+    wandb_run_id: str | None,
+) -> str:
+    """Attach to the previous wandb curve when resuming training.
+
+    Sets WANDB_RUN_ID / WANDB_RESUME so wandb.init continues the same offline/online run.
+    Returns the run_name to pass into SFTConfig (prefer the original name).
+    """
+    meta = load_wandb_meta(output_dir) or {}
+    run_id = (wandb_run_id or os.environ.get("WANDB_RUN_ID") or meta.get("id") or "").strip()
+    if not resume_training:
+        if run_id:
+            # Allow pinning id for a fresh job (rare); still create a new curve unless resume env set.
+            os.environ.setdefault("WANDB_RUN_ID", run_id)
+        return run_name
+
+    if not run_id:
+        print(
+            "[sft] warn: resume training but no WANDB_RUN_ID / wandb_run.json; "
+            "wandb will start a new run"
+        )
+        return run_name
+
+    os.environ["WANDB_RUN_ID"] = run_id
+    os.environ.setdefault("WANDB_RESUME", "allow")
+    if meta.get("name"):
+        run_name = meta["name"]
+    if meta.get("project"):
+        os.environ.setdefault("WANDB_PROJECT", meta["project"])
+    if meta.get("group"):
+        os.environ.setdefault("WANDB_RUN_GROUP", meta["group"])
+    print(
+        f"[sft] wandb resume id={run_id} name={run_name} "
+        f"resume={os.environ.get('WANDB_RESUME')} project={os.environ.get('WANDB_PROJECT')}"
+    )
+    return run_name
+
+
+class PersistWandbRunCallback(TrainerCallback):
+    """Persist wandb run id under output_dir so later resume can attach the same curve."""
+
+    def __init__(self, output_dir: Path):
+        self.output_dir = Path(output_dir)
+
+    def on_train_begin(self, args, state, control, **kwargs):  # noqa: ANN001
+        try:
+            import wandb
+
+            run = wandb.run
+            if run is None or not getattr(run, "id", None):
+                return
+            save_wandb_meta(
+                self.output_dir,
+                run_id=str(run.id),
+                run_name=getattr(run, "name", None) or args.run_name,
+                project=getattr(run, "project", None),
+                group=os.environ.get("WANDB_RUN_GROUP"),
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"[sft] warn: failed to persist wandb meta: {exc}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -137,6 +239,14 @@ def parse_args() -> argparse.Namespace:
             "Use 'latest' to pick the newest checkpoint-* under output-dir."
         ),
     )
+    parser.add_argument(
+        "--wandb-run-id",
+        default=os.environ.get("WANDB_RUN_ID"),
+        help=(
+            "Reuse this wandb run id when resuming so loss curves continue. "
+            "If omitted, load from output-dir/wandb_run.json."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -148,6 +258,12 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     resume_from_checkpoint = resolve_resume_checkpoint(
         output_dir, args.resume_from_checkpoint
+    )
+    run_name = setup_wandb_resume(
+        output_dir,
+        resume_training=resume_from_checkpoint is not None,
+        run_name=args.run_name,
+        wandb_run_id=args.wandb_run_id,
     )
 
     print(f"[sft] model={args.model_path}")
@@ -162,6 +278,7 @@ def main() -> None:
         f"[sft] micro={args.per_device_batch_size} gas={args.gradient_accumulation_steps} "
         f"lr={args.learning_rate} packing={args.packing}"
     )
+    print(f"[sft] run_name={run_name}")
     if resume_from_checkpoint:
         log_resume_checkpoint(resume_from_checkpoint)
     else:
@@ -196,7 +313,7 @@ def main() -> None:
     # Pretokenized datasets already truncated; still set max_length for collator safety.
     sft_args = SFTConfig(
         output_dir=str(output_dir),
-        run_name=args.run_name,
+        run_name=run_name,
         max_steps=args.max_steps,
         per_device_train_batch_size=args.per_device_batch_size,
         gradient_accumulation_steps=args.gradient_accumulation_steps,
@@ -233,6 +350,7 @@ def main() -> None:
         args=sft_args,
         train_dataset=train_dataset,
         processing_class=tokenizer,
+        callbacks=[PersistWandbRunCallback(output_dir)],
     )
 
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)

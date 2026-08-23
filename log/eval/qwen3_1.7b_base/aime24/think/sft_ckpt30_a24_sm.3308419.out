@@ -44,4 +44,53 @@ INFO 08-22 21:33:55 [model_runner.py:1450] Capturing cudagraphs for decoding. Th
 INFO 08-22 21:34:07 [model_runner.py:1592] Graph capturing finished in 13 secs, took 0.33 GiB
 INFO 08-22 21:34:07 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 16.94 seconds
 [eval] generating 8 prompts x n=4 (pass-at-k=[1, 2, 4], generate_batch_size=4) ...
-prompt_batches:   0%|          | 0/2 [00:00<?, ?it/s]
+prompt_batches:   0%|          | 0/2 [00:00<?, ?it/s][eval] wrote partial json: 4/8 metrics=aime24_qwen3_1.7b_base_think.metrics.json results=aime24_qwen3_1.7b_base_think.results.json
+prompt_batches:  50%|█████     | 1/2 [11:09<11:09, 669.06s/it][eval] wrote partial json: 8/8 metrics=aime24_qwen3_1.7b_base_think.metrics.json results=aime24_qwen3_1.7b_base_think.results.json
+prompt_batches: 100%|██████████| 2/2 [22:55<00:00, 691.08s/it]prompt_batches: 100%|██████████| 2/2 [22:55<00:00, 687.77s/it]
+[eval] wrote partial json: 8/8 metrics=aime24_qwen3_1.7b_base_think.metrics.json results=aime24_qwen3_1.7b_base_think.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ckpt3000_stopfix_smoke/aime24_qwen3_1.7b_base_think.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ckpt3000_stopfix_smoke/aime24_qwen3_1.7b_base_think.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 12.50% (1/8)
+  Pass@2: 25.00% (2/8)
+  Pass@4: 25.00% (2/8)
+  Avg1(one-shot hit rate): 12.50%
+  Avg16(overall correctness): 18.75%
+  Avg output tokens: 23432.1
+[aime24] n=8
+  Pass@1: 12.50% (1/8)
+  Pass@2: 25.00% (2/8)
+  Pass@4: 25.00% (2/8)
+  Avg1(one-shot hit rate): 12.50%
+  Avg16(overall correctness): 18.75%
+  Avg output tokens: 23432.1
+[BY_CATEGORY]
+[__uncategorized__] n=8
+  Pass@1: 12.50% (1/8)
+  Pass@2: 25.00% (2/8)
+  Pass@4: 25.00% (2/8)
+  Avg1(one-shot hit rate): 12.50%
+  Avg16(overall correctness): 18.75%
+  Avg output tokens: 23432.1
+Avg correct / sample: 18.75%
+Majority vote: 25.00%
+Boxed format rate: 50.00%
+Avg output tokens: 23432.1
+[TOKEN_BUDGET]
+[aime24] n=8
+  @1k: Pass@4=0.00% (0/8)  Avg16=0.00%
+  @2k: Pass@4=0.00% (0/8)  Avg16=0.00%
+  @4k: Pass@4=0.00% (0/8)  Avg16=0.00%
+  @8k: Pass@4=25.00% (2/8)  Avg16=9.38%
+  @16k: Pass@4=25.00% (2/8)  Avg16=15.62%
+  @32k: Pass@4=25.00% (2/8)  Avg16=18.75%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime24] n=8  P@16=0.00%  Avg16=18.75%  L=23432.1  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime24] n=8  P@16=0.00%  Avg16=18.75%  L=23432.1  pass/log2(16L)=0.0000  avg/log2(16L)=1.0126
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ckpt3000_stopfix_smoke/aime24_qwen3_1.7b_base_think.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ckpt3000_stopfix_smoke/aime24_qwen3_1.7b_base_think.results.json
+============================================================
+[rank0]:[W822 21:57:10.696161187 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())

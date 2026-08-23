@@ -39,7 +39,14 @@ MODEL_TAG=${MODEL_TAG:-qwen3_1.7b_base}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
 OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/${JOB_TAG}}
-RUN_NAME_WITH_JOB=${RUN_NAME}_${JOB_TAG}
+# When resuming into an existing OUTPUT_DIR, keep the original run_name (basename=old job id)
+# so wandb attaches to the same curve instead of creating sft_..._<new_jobid>.
+if [[ -n "${RESUME_FROM_CHECKPOINT}" ]]; then
+  JOB_TAG=$(basename "${OUTPUT_DIR}")
+fi
+RUN_NAME_WITH_JOB=${RUN_NAME_WITH_JOB:-${RUN_NAME}_${JOB_TAG}}
+WANDB_RUN_ID=${WANDB_RUN_ID:-}
+WANDB_RESUME=${WANDB_RESUME:-}
 
 cd "${BASE_DIR}"
 set +u
@@ -54,6 +61,15 @@ export WANDB_MODE=offline
 export WANDB_PROJECT=${WANDB_PROJECT:-SFT_OpenMath}
 export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-qwen3_1p7b_base_sft_fullparam_12k}
 export WANDB_DIR=${WANDB_DIR:-${BASE_DIR}/wandb}
+if [[ -n "${WANDB_RUN_ID}" ]]; then
+  export WANDB_RUN_ID
+fi
+if [[ -n "${WANDB_RESUME}" ]]; then
+  export WANDB_RESUME
+elif [[ -n "${RESUME_FROM_CHECKPOINT}" ]]; then
+  # Default: allow attaching to the previous offline/online run id.
+  export WANDB_RESUME=allow
+fi
 export NCCL_DEBUG=${NCCL_DEBUG:-WARN}
 unset PYTORCH_CUDA_ALLOC_CONF
 
@@ -81,10 +97,18 @@ echo "[launch] output=${OUTPUT_DIR} master_port=${MASTER_PORT}"
 if [[ -n "${RESUME_FROM_CHECKPOINT}" ]]; then
   echo "[launch] resume_from_checkpoint=${RESUME_FROM_CHECKPOINT}"
 fi
+if [[ -n "${WANDB_RUN_ID:-}" ]]; then
+  echo "[launch] wandb_run_id=${WANDB_RUN_ID} wandb_resume=${WANDB_RESUME:-}"
+elif [[ -f "${OUTPUT_DIR}/wandb_run.json" ]]; then
+  echo "[launch] wandb meta=${OUTPUT_DIR}/wandb_run.json"
+fi
 
 RESUME_ARGS=()
 if [[ -n "${RESUME_FROM_CHECKPOINT}" ]]; then
   RESUME_ARGS+=(--resume-from-checkpoint "${RESUME_FROM_CHECKPOINT}")
+fi
+if [[ -n "${WANDB_RUN_ID:-}" ]]; then
+  RESUME_ARGS+=(--wandb-run-id "${WANDB_RUN_ID}")
 fi
 
 accelerate launch \
