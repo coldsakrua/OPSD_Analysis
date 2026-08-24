@@ -9,7 +9,6 @@
 #SBATCH --mem=400G
 #SBATCH --time=03:00:00
 # Exclude n13/n21: known bad/old CUDA runtime that breaks torch+cu126 (same as qwen3.5 scripts).
-#SBATCH --exclude=gpua800n03,gpua800n10,gpua800n13,gpua800n21
 set -euo pipefail
 
 # Olmo-3-7B-Think OPSD on hard OpenThoughts (gold CoT length decile 7-9, long).
