@@ -277,7 +277,13 @@ class OPSDTrainer(SFTTrainer):
 
         self.lmbda = args.lmbda
         self.beta = args.beta
-        self.temperature = args.temperature
+        self.student_temperature = (
+            args.student_temperature if args.student_temperature is not None else args.temperature
+        )
+        self.teacher_temperature = (
+            args.teacher_temperature if args.teacher_temperature is not None else args.temperature
+        )
+        self.temperature = self.student_temperature
         self.top_p = args.top_p
         self.seq_kd = args.seq_kd
         self.use_thinking_machines_loss = use_thinking_machines_loss
@@ -388,7 +394,7 @@ class OPSDTrainer(SFTTrainer):
 
         self.generation_config = GenerationConfig(
             max_new_tokens=args.max_completion_length,
-            temperature=args.temperature,
+            temperature=self.student_temperature,
             top_p=args.top_p,
             do_sample=True,
             top_k=args.top_k,
@@ -405,7 +411,7 @@ class OPSDTrainer(SFTTrainer):
         max_reasoning_length = getattr(args, "max_reasoning_length", 4096)
         self.reasoning_generation_config = GenerationConfig(
             max_new_tokens=max_reasoning_length,
-            temperature=args.temperature,
+            temperature=self.teacher_temperature,
             top_p=args.top_p,
             do_sample=True,
             top_k=args.top_k,
@@ -585,6 +591,8 @@ class OPSDTrainer(SFTTrainer):
         labels=None,
         beta=0.5,
         temperature=1.0,
+        student_temperature=None,
+        teacher_temperature=None,
         reduction="batchmean",
         logits_are_probs=False,
         top_k=None,
@@ -606,7 +614,11 @@ class OPSDTrainer(SFTTrainer):
             beta:
                 Interpolation coefficient between 0 and 1 (default: 0.5)
             temperature:
-                Softmax temperature (default: 1.0)
+                Default softmax temperature when student/teacher temps are unset (default: 1.0)
+            student_temperature:
+                Student softmax temperature for JSD (defaults to temperature)
+            teacher_temperature:
+                Teacher softmax temperature for JSD (defaults to temperature)
             reduction:
                 Specifies the reduction to apply to the output (default: 'batchmean')
             top_k:
@@ -623,13 +635,16 @@ class OPSDTrainer(SFTTrainer):
             loss: Scalar tensor with the generalized JSD loss
         """
 
+        student_temp = temperature if student_temperature is None else student_temperature
+        teacher_temp = temperature if teacher_temperature is None else teacher_temperature
+
         if logits_are_probs:
             student_log_probs = torch.log(student_logits.clamp_min(1e-8))
             teacher_log_probs = torch.log(teacher_logits.clamp_min(1e-8))
         else:
             # Apply temperature scaling to logits before computing probabilities
-            student_logits = student_logits / temperature
-            teacher_logits = teacher_logits / temperature
+            student_logits = student_logits / student_temp
+            teacher_logits = teacher_logits / teacher_temp
 
             if top_k is not None and top_k > 0:
                 # Restrict to top-k tokens of the teacher distribution and renormalize.
@@ -900,8 +915,8 @@ class OPSDTrainer(SFTTrainer):
             # Chunking bounds temporary softmax memory while preserving exact metrics.
             for start in range(0, valid.numel(), 128):
                 idx = valid[start : start + 128]
-                s_logp = F.log_softmax(flat_s.index_select(0, idx).float() / self.temperature, dim=-1)
-                t_logp = F.log_softmax(flat_t.index_select(0, idx).float() / self.temperature, dim=-1)
+                s_logp = F.log_softmax(flat_s.index_select(0, idx).float() / self.student_temperature, dim=-1)
+                t_logp = F.log_softmax(flat_t.index_select(0, idx).float() / self.teacher_temperature, dim=-1)
                 s_prob = s_logp.exp()
                 t_prob = t_logp.exp()
                 ids = flat_ids.index_select(0, idx).unsqueeze(-1)
@@ -952,7 +967,7 @@ class OPSDTrainer(SFTTrainer):
 
         if self.high_entropy_ratio is not None or self.low_entropy_ratio is not None:
             with torch.no_grad():
-                entropy = self._compute_token_entropy(student_logits, self.temperature)
+                entropy = self._compute_token_entropy(student_logits, self.student_temperature)
                 if self.high_entropy_ratio is not None:
                     loss_mask = self._high_entropy_mask(entropy, valid_mask, self.high_entropy_ratio)
                     metric_prefix = "high_entropy"
@@ -968,7 +983,7 @@ class OPSDTrainer(SFTTrainer):
 
         if self.use_thinking_machines_loss:
             # For reverse KL, we only need log-probs of sampled tokens
-            student_log_probs = F.log_softmax(student_logits / self.temperature, dim=-1)
+            student_log_probs = F.log_softmax(student_logits / self.student_temperature, dim=-1)
             student_log_probs_sampled = torch.gather(
                 student_log_probs, dim=-1, index=sampled_token_ids.unsqueeze(-1)
             ).squeeze(-1)
@@ -1013,7 +1028,7 @@ class OPSDTrainer(SFTTrainer):
             teacher_logits = outputs_teacher.logits[:, teacher_prompt_len - 1 : -1, :]
 
             if self.use_thinking_machines_loss:
-                teacher_log_probs = F.log_softmax(teacher_logits / self.temperature, dim=-1)
+                teacher_log_probs = F.log_softmax(teacher_logits / self.teacher_temperature, dim=-1)
                 teacher_log_probs_sampled = torch.gather(
                     teacher_log_probs, dim=-1, index=sampled_token_ids.unsqueeze(-1)
                 ).squeeze(-1)
@@ -1072,7 +1087,8 @@ class OPSDTrainer(SFTTrainer):
                 teacher_logits=teacher_logits_for_loss,
                 labels=shifted_labels,
                 beta=self.beta,
-                temperature=self.temperature,  # Let the function handle temperature
+                student_temperature=self.student_temperature,
+                teacher_temperature=self.teacher_temperature,
                 top_k=self.top_k_loss,
                 token_clip=self.jsd_token_clip,
                 loss_mask=loss_mask,

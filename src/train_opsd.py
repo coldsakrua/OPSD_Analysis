@@ -209,7 +209,19 @@ def parse_args() -> argparse.Namespace:
         "--temperature",
         type=float,
         default=1.1,
-        help="Shared softmax / rollout temperature (OPSD historical default 1.1).",
+        help="Default rollout / JSD temperature when student/teacher temps are unset (1.1).",
+    )
+    parser.add_argument(
+        "--student-temperature",
+        type=float,
+        default=None,
+        help="Student rollout + JSD softmax temperature (defaults to --temperature).",
+    )
+    parser.add_argument(
+        "--teacher-temperature",
+        type=float,
+        default=None,
+        help="Teacher JSD softmax temperature (defaults to --temperature).",
     )
     parser.add_argument("--top-p", type=float, default=0.95)
     parser.add_argument("--top-k", type=int, default=20)
@@ -423,6 +435,8 @@ def main() -> None:
         max_length=max_length,
         max_completion_length=args.max_completion_length,
         temperature=args.temperature,
+        student_temperature=args.student_temperature,
+        teacher_temperature=args.teacher_temperature,
         top_p=args.top_p,
         top_k=args.top_k,
         min_p=args.min_p,
@@ -490,7 +504,10 @@ def main() -> None:
         f"low_entropy_ratio={args.low_entropy_ratio} "
         f"top_k_loss={args.top_k_loss} use_thinking_machines_loss={args.use_thinking_machines_loss} "
         f"teacher_update_steps={args.teacher_update_steps} "
-        f"temp={args.temperature} top_p={args.top_p} top_k={args.top_k} "
+        f"temp={args.temperature} "
+        f"temp_s={args.student_temperature if args.student_temperature is not None else args.temperature} "
+        f"temp_t={args.teacher_temperature if args.teacher_temperature is not None else args.temperature} "
+        f"top_p={args.top_p} top_k={args.top_k} "
         f"min_p={args.min_p} presence_penalty={args.presence_penalty} "
         f"global_batch={global_batch} "
         f"(micro={args.per_device_batch_size} gas={args.gradient_accumulation_steps} world={world}) "

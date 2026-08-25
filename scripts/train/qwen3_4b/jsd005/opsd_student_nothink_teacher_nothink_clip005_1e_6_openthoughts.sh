@@ -8,7 +8,6 @@
 #SBATCH --gres=gpu:2
 #SBATCH --mem=220G
 #SBATCH --time=72:00:00
-#SBATCH --exclude=gpua800n13
 set -euo pipefail
 
 # Qwen3-4B OPSD: student nothink + teacher nothink, privilege=opsd/solution.

@@ -10,6 +10,8 @@ class OPSDConfig(SFTConfig):
     """GOLD-compatible arguments implemented against server TRL 0.22.1."""
 
     temperature: float = 1.1
+    student_temperature: float | None = None
+    teacher_temperature: float | None = None
     top_p: float = 0.95
     top_k: int = 20
     min_p: float = 0.0
