@@ -13,6 +13,10 @@ set -euo pipefail
 # Qwen3-4B OPSD: student nothink + teacher nothink, privilege=opsd/solution.
 # jsd_token_clip=0.05 (official README / run_opsd_1b.sh). lr=1e-6.
 # Batch: micro=4, gas=4, 2 GPU → global_batch=32.
+#
+# Env-overridable for longer student rollouts while keeping samples/update fixed:
+#   MAX_COMPLETION_LENGTH / PER_DEVICE_BATCH_SIZE / GRADIENT_ACCUMULATION_STEPS
+#   TARGET_GLOBAL_BATCH (default 32) is asserted: micro * gas * num_gpus == target.
 
 MODE=${MODE:-opsd}
 TEACHER_PRIVILEGE_FIELD=${TEACHER_PRIVILEGE_FIELD:-solution}
@@ -21,8 +25,11 @@ TEACHER_THINKING=${TEACHER_THINKING:-0}
 
 LEARNING_RATE=${LEARNING_RATE:-1e-6}
 JSD_TOKEN_CLIP=${JSD_TOKEN_CLIP:-0.05}
+MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-1024}
+MAX_COMPLETION_LENGTH=${MAX_COMPLETION_LENGTH:-1024}
 PER_DEVICE_BATCH_SIZE=${PER_DEVICE_BATCH_SIZE:-4}
 GRADIENT_ACCUMULATION_STEPS=${GRADIENT_ACCUMULATION_STEPS:-4}
+TARGET_GLOBAL_BATCH=${TARGET_GLOBAL_BATCH:-32}
 MAX_STEPS=${MAX_STEPS:-100}
 SAVE_STEPS=${SAVE_STEPS:-25}
 VLLM_GPU_MEMORY_UTILIZATION=${VLLM_GPU_MEMORY_UTILIZATION:-0.4}
@@ -75,6 +82,14 @@ MASTER_PORT=${MASTER_PORT:-$((20000 + (${SLURM_JOB_ID:-$$} % 20000)))}
 
 NUM_GPUS=2
 GLOBAL_BATCH=$((PER_DEVICE_BATCH_SIZE * GRADIENT_ACCUMULATION_STEPS * NUM_GPUS))
+TOTAL_SAMPLES=$((GLOBAL_BATCH * MAX_STEPS))
+MAX_SEQ_LEN=$((MAX_PROMPT_LENGTH + MAX_COMPLETION_LENGTH))
+
+if [[ "${GLOBAL_BATCH}" -ne "${TARGET_GLOBAL_BATCH}" ]]; then
+  echo "[error] global_batch=${GLOBAL_BATCH} != TARGET_GLOBAL_BATCH=${TARGET_GLOBAL_BATCH}" >&2
+  echo "[error] keep samples/update fixed: micro * gas * gpus must equal ${TARGET_GLOBAL_BATCH}" >&2
+  exit 1
+fi
 
 if [[ "${JSD_TOKEN_CLIP}" == "none" || "${JSD_TOKEN_CLIP}" == "None" || "${JSD_TOKEN_CLIP}" == "NONE" ]]; then
   JSD_TOKEN_CLIP=0
@@ -84,7 +99,8 @@ echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_P
 echo "[launch] student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING}"
 echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP}"
 echo "[launch] micro=${PER_DEVICE_BATCH_SIZE} gas=${GRADIENT_ACCUMULATION_STEPS} gpus=${NUM_GPUS} → global_batch=${GLOBAL_BATCH}"
-echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS}"
+echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS} → total_samples=${TOTAL_SAMPLES}"
+echo "[launch] prompt=${MAX_PROMPT_LENGTH} completion=${MAX_COMPLETION_LENGTH} max_seq=${MAX_SEQ_LEN}"
 echo "[launch] model=${MODEL_PATH} dataset=${DATASET_PATH} output=${OUTPUT_DIR}"
 echo "[launch] master_port=${MASTER_PORT} vLLM util=${VLLM_GPU_MEMORY_UTILIZATION}"
 
@@ -101,8 +117,8 @@ accelerate launch \
   --teacher-privilege-field "${TEACHER_PRIVILEGE_FIELD}" \
   --max-steps "${MAX_STEPS}" \
   --save-steps "${SAVE_STEPS}" \
-  --max-prompt-length 1024 \
-  --max-completion-length 1024 \
+  --max-prompt-length "${MAX_PROMPT_LENGTH}" \
+  --max-completion-length "${MAX_COMPLETION_LENGTH}" \
   --per-device-batch-size "${PER_DEVICE_BATCH_SIZE}" \
   --gradient-accumulation-steps "${GRADIENT_ACCUMULATION_STEPS}" \
   --learning-rate "${LEARNING_RATE}" \
