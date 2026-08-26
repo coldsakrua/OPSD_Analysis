@@ -15,18 +15,19 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from data_collator import SelfDistillationDataCollator  # noqa: E402
 
-from .model_registry import COMBO_THINK, privilege_for_prefix
+from .model_registry import combo_think, privilege_for_prefix
 
 
 def make_collator(
     tokenizer: Any,
     *,
+    model_key: str,
     combo: str,
     max_prompt_length: int,
     privilege_mode: str = "opsd",
     teacher_privilege_field: str = "solution",
 ) -> SelfDistillationDataCollator:
-    student_thinking, teacher_thinking = COMBO_THINK[combo]
+    student_thinking, teacher_thinking = combo_think(model_key, combo)
     return SelfDistillationDataCollator(
         tokenizer=tokenizer,
         max_length=max_prompt_length + 1024,
@@ -42,6 +43,7 @@ def load_prompt_samples(
     dataset_path: str | Path,
     tokenizer: Any,
     *,
+    model_key: str,
     combo: str,
     num_prompts: int,
     max_prompt_length: int,
@@ -52,6 +54,7 @@ def load_prompt_samples(
     privilege_mode, privilege_field = privilege_for_prefix(teacher_prefix)
     collator = make_collator(
         tokenizer,
+        model_key=model_key,
         combo=combo,
         max_prompt_length=max_prompt_length,
         privilege_mode=privilege_mode,
@@ -99,6 +102,7 @@ def load_multi_prefix_samples(
     dataset_paths: dict[str, str | Path],
     tokenizer: Any,
     *,
+    model_key: str,
     combo: str,
     num_prompts: int,
     max_prompt_length: int,
@@ -108,6 +112,7 @@ def load_multi_prefix_samples(
     collators = {
         name: make_collator(
             tokenizer,
+            model_key=model_key,
             combo=combo,
             max_prompt_length=max_prompt_length,
             privilege_mode=privilege_for_prefix(name)[0],

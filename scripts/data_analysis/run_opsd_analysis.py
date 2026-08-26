@@ -8,7 +8,8 @@ Pipeline
 1. Sample prompts from preprocessed OpenThoughts parquet (matching training collator).
 2. Generate student rollouts (vLLM or SGLang).
 3. Score each completion token with student + teacher (same weights, different prompts).
-4. Aggregate JSD KL, top-k KL (k=1,16), log-ratio, loss-dominant tokens.
+4. Aggregate KL/JSD, top-k KL, log-ratio, argmax preference, SNR, loss-dominant tokens.
+   Persist per-token arrays to token_metrics*.jsonl when enabled.
 
 Tasks
 -----
@@ -24,7 +25,7 @@ import argparse
 import sys
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import torch
 from tqdm import tqdm
@@ -35,9 +36,10 @@ ROOT = SCRIPT_DIR.parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from common.aggregation import MetricsAggregator, merge_summaries  # noqa: E402
+from common.aggregation import MetricsAggregator  # noqa: E402
 from common.generation import run_generation  # noqa: E402
 from common.io import load_jsonl, save_jsonl, write_json  # noqa: E402
+from common.metrics import DEFAULT_JSD_BETA, DEFAULT_JSD_TOKEN_CLIP, DEFAULT_TOPK_HIT_KS  # noqa: E402
 from common.model_registry import (  # noqa: E402
     DEFAULT_MAX_PROMPT,
     LENGTH_WINDOWS,
@@ -46,14 +48,18 @@ from common.model_registry import (  # noqa: E402
     entropy_ratio,
     get_model_config,
     model_launch_overrides,
+    task_default_gen_batch_hint,
     task_default_max_completion,
+    task_default_score_batch,
     teacher_prefix_dataset,
 )
 from common.prompts import load_multi_prefix_samples, load_prompt_samples  # noqa: E402
 from common.scoring import (  # noqa: E402
     apply_entropy_bucket,
     apply_length_window,
-    score_rollout_pair,
+    rollout_metrics_summary,
+    score_rollout_batch,
+    token_metrics_record,
 )
 
 
@@ -78,7 +84,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--temperature", type=float, default=1.1)
     p.add_argument("--top-p", type=float, default=0.95)
     p.add_argument("--top-k", type=int, default=20)
-    p.add_argument("--score-batch-size", type=int, default=2)
+    p.add_argument(
+        "--score-batch-size",
+        type=int,
+        default=0,
+        help="HF score microbatch (0 = auto from task+model; short tasks 2–8, length_windows 1–2)",
+    )
     p.add_argument("--gpu-memory-utilization", type=float, default=0.90)
     p.add_argument("--backend", choices=("vllm", "sglang"), default="")
     p.add_argument("--attention-backend", default="triton")
@@ -90,10 +101,40 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="SGLang: disable piecewise CUDA graph (required for Falcon-H1R Mamba)",
     )
-    p.add_argument("--gen-batch-hint", type=int, default=64)
+    p.add_argument(
+        "--gen-batch-hint",
+        type=int,
+        default=0,
+        help="SGLang prompt chunk (0 = auto from task+model; vLLM ignores)",
+    )
     p.add_argument("--entropy-bucket", choices=("he20", "le20", "he80", "le80"), default="")
     p.add_argument("--teacher-prefixes", nargs="+", default=list(TEACHER_PREFIXES))
     p.add_argument("--top-token-k", type=int, default=50)
+    p.add_argument(
+        "--jsd-beta",
+        type=float,
+        default=DEFAULT_JSD_BETA,
+        help="Mixture beta for generalized_jsd_loss (train_opsd hardcodes 0.0 = forward KL)",
+    )
+    p.add_argument(
+        "--jsd-token-clip",
+        type=float,
+        default=DEFAULT_JSD_TOKEN_CLIP,
+        help="Per-token JSD clip threshold (train jsd005 uses 0.05)",
+    )
+    p.add_argument(
+        "--topk-hit-ks",
+        type=int,
+        nargs="+",
+        default=list(DEFAULT_TOPK_HIT_KS),
+        help="Top-k hit diagnostics for sampled token (student/teacher)",
+    )
+    p.add_argument(
+        "--save-token-metrics",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Write per-token arrays (incl. SNR, argmax) to token_metrics*.jsonl",
+    )
     p.add_argument("--skip-generate", action="store_true")
     p.add_argument("--skip-score", action="store_true")
     p.add_argument("--max-rollouts", type=int, default=0, help="0 = all")
@@ -116,6 +157,20 @@ def load_models(model_path: str) -> tuple[Any, AutoModelForCausalLM]:
     return tokenizer, model
 
 
+def _make_aggregator(args: argparse.Namespace) -> MetricsAggregator:
+    return MetricsAggregator(topk_names=("k1", "k16"), topk_hit_ks=tuple(args.topk_hit_ks))
+
+
+def _score_batch_kwargs(args: argparse.Namespace) -> dict[str, Any]:
+    return {
+        "temperature": args.temperature,
+        "topk_ks": (1, 16),
+        "topk_hit_ks": tuple(args.topk_hit_ks),
+        "jsd_beta": args.jsd_beta,
+        "jsd_token_clip": args.jsd_token_clip,
+    }
+
+
 def score_rollouts(
     model: AutoModelForCausalLM,
     tokenizer: Any,
@@ -123,31 +178,64 @@ def score_rollouts(
     args: argparse.Namespace,
     *,
     teacher_key: str = "teacher_prompt",
-    filter_fn=None,
+    filter_fn: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
     window_label: str | None = None,
+    token_metrics_out: list[dict[str, Any]] | None = None,
+    rollout_metrics_out: list[dict[str, Any]] | None = None,
+    metrics_tag: str = "",
 ) -> MetricsAggregator:
-    agg = MetricsAggregator(topk_names=("k1", "k16"))
+    agg = _make_aggregator(args)
     bs = max(1, args.score_batch_size)
+    score_kw = _score_batch_kwargs(args)
     for start in tqdm(range(0, len(rollouts), bs), desc=f"score/{teacher_key}"):
         batch = rollouts[start : start + bs]
-        for r in batch:
-            metrics = score_rollout_pair(
-                model,
-                model,
-                tokenizer,
-                student_prompt=r["student_prompt"],
-                teacher_prompt=r[teacher_key],
-                completion_ids=r["completion_token_ids"],
-                temperature=args.temperature,
-                topk_ks=(1, 16),
-            )
+        metrics_list = score_rollout_batch(
+            model,
+            model,
+            tokenizer,
+            student_prompts=[r["student_prompt"] for r in batch],
+            teacher_prompts=[r[teacher_key] for r in batch],
+            completion_ids_list=[r["completion_token_ids"] for r in batch],
+            **score_kw,
+        )
+        for r, metrics in zip(batch, metrics_list):
             if filter_fn is not None:
                 metrics = filter_fn(metrics)
             agg.update(metrics, window_label=window_label)
+            if rollout_metrics_out is not None:
+                rollout_rec = rollout_metrics_summary(metrics)
+                rollout_rec.update(
+                    {
+                        "row_id": r.get("row_id"),
+                        "rollout_idx": r.get("rollout_idx"),
+                        "teacher_key": teacher_key,
+                    }
+                )
+                if metrics_tag:
+                    rollout_rec["tag"] = metrics_tag
+                if window_label:
+                    rollout_rec["window"] = window_label
+                rollout_metrics_out.append(rollout_rec)
+            if token_metrics_out is not None and args.save_token_metrics:
+                meta = {
+                    "row_id": r.get("row_id"),
+                    "rollout_idx": r.get("rollout_idx"),
+                    "teacher_key": teacher_key,
+                }
+                if metrics_tag:
+                    meta["tag"] = metrics_tag
+                if window_label:
+                    meta["window"] = window_label
+                token_metrics_out.append(token_metrics_record(metrics, meta=meta))
     return agg
 
 
-def run_combinations(args: argparse.Namespace, model_cfg, out_dir: Path) -> dict[str, Any]:
+def run_combinations(
+    args: argparse.Namespace,
+    model_cfg,
+    out_dir: Path,
+    overrides: dict[str, Any],
+) -> dict[str, Any]:
     ds = args.dataset_path or str(dataset_path(args.model_key, args.combo))
     rollouts_path = out_dir / "rollouts.jsonl"
     model_path = args.model_path or model_cfg.model_path
@@ -159,7 +247,7 @@ def run_combinations(args: argparse.Namespace, model_cfg, out_dir: Path) -> dict
         if tokenizer.pad_token_id is None:
             tokenizer.pad_token = tokenizer.eos_token
         samples = load_prompt_samples(
-            ds, tokenizer, combo=args.combo, num_prompts=args.num_prompts,
+            ds, tokenizer, model_key=args.model_key, combo=args.combo, num_prompts=args.num_prompts,
             max_prompt_length=args.max_prompt_length, seed=args.seed,
         )
         save_jsonl(out_dir / "samples.jsonl", samples)
@@ -183,7 +271,22 @@ def run_combinations(args: argparse.Namespace, model_cfg, out_dir: Path) -> dict
     if args.entropy_bucket:
         filter_fn = lambda m: apply_entropy_bucket(m, args.entropy_bucket)
 
-    agg = score_rollouts(model, tokenizer, rollouts, args, filter_fn=filter_fn)
+    token_rows: list[dict[str, Any]] = []
+    rollout_rows: list[dict[str, Any]] = []
+    agg = score_rollouts(
+        model,
+        tokenizer,
+        rollouts,
+        args,
+        filter_fn=filter_fn,
+        token_metrics_out=token_rows if args.save_token_metrics else None,
+        rollout_metrics_out=rollout_rows,
+        metrics_tag=args.entropy_bucket or "all",
+    )
+    save_jsonl(out_dir / "rollout_metrics.jsonl", rollout_rows)
+    if args.save_token_metrics:
+        save_jsonl(out_dir / "token_metrics.jsonl", token_rows)
+
     summary = {
         "config": _config_dict(args, model_cfg, ds),
         "metrics": agg.summary(tokenizer, args.top_token_k),
@@ -192,7 +295,12 @@ def run_combinations(args: argparse.Namespace, model_cfg, out_dir: Path) -> dict
     return summary
 
 
-def run_teacher_prefix(args: argparse.Namespace, model_cfg, out_dir: Path) -> dict[str, Any]:
+def run_teacher_prefix(
+    args: argparse.Namespace,
+    model_cfg,
+    out_dir: Path,
+    overrides: dict[str, Any],
+) -> dict[str, Any]:
     ds_map = {
         name: str(teacher_prefix_dataset(args.model_key, args.combo, name))
         for name in args.teacher_prefixes
@@ -207,7 +315,7 @@ def run_teacher_prefix(args: argparse.Namespace, model_cfg, out_dir: Path) -> di
         if tokenizer.pad_token_id is None:
             tokenizer.pad_token = tokenizer.eos_token
         samples = load_multi_prefix_samples(
-            ds_map, tokenizer, combo=args.combo, num_prompts=args.num_prompts,
+            ds_map, tokenizer, model_key=args.model_key, combo=args.combo, num_prompts=args.num_prompts,
             max_prompt_length=args.max_prompt_length, seed=args.seed,
         )
         save_jsonl(out_dir / "samples.jsonl", samples)
@@ -229,21 +337,45 @@ def run_teacher_prefix(args: argparse.Namespace, model_cfg, out_dir: Path) -> di
     summaries: dict[str, Any] = {}
     for prefix in args.teacher_prefixes:
         key = f"teacher_prompt_{prefix}"
-        agg = score_rollouts(model, tokenizer, rollouts, args, teacher_key=key)
+        token_rows: list[dict[str, Any]] = []
+        rollout_rows: list[dict[str, Any]] = []
+        agg = score_rollouts(
+            model,
+            tokenizer,
+            rollouts,
+            args,
+            teacher_key=key,
+            token_metrics_out=token_rows if args.save_token_metrics else None,
+            rollout_metrics_out=rollout_rows,
+            metrics_tag=prefix,
+        )
         summaries[prefix] = agg.summary(tokenizer, args.top_token_k)
+        save_jsonl(out_dir / f"rollout_metrics_{prefix}.jsonl", rollout_rows)
+        if args.save_token_metrics:
+            save_jsonl(out_dir / f"token_metrics_{prefix}.jsonl", token_rows)
 
     out = {"config": _config_dict(args, model_cfg, ds_map), "teacher_prefixes": summaries}
     write_json(out_dir / "summary.json", out)
     return out
 
 
-def run_entropy(args: argparse.Namespace, model_cfg, out_dir: Path) -> dict[str, Any]:
+def run_entropy(
+    args: argparse.Namespace,
+    model_cfg,
+    out_dir: Path,
+    overrides: dict[str, Any],
+) -> dict[str, Any]:
     if not args.entropy_bucket:
         raise ValueError("--entropy-bucket required for task=entropy")
-    return run_combinations(args, model_cfg, out_dir)
+    return run_combinations(args, model_cfg, out_dir, overrides)
 
 
-def run_length_windows(args: argparse.Namespace, model_cfg, out_dir: Path) -> dict[str, Any]:
+def run_length_windows(
+    args: argparse.Namespace,
+    model_cfg,
+    out_dir: Path,
+    overrides: dict[str, Any],
+) -> dict[str, Any]:
     ds = args.dataset_path or str(dataset_path(args.model_key, args.combo))
     rollouts_path = out_dir / "rollouts.jsonl"
     model_path = args.model_path or model_cfg.model_path
@@ -255,7 +387,7 @@ def run_length_windows(args: argparse.Namespace, model_cfg, out_dir: Path) -> di
         if tokenizer.pad_token_id is None:
             tokenizer.pad_token = tokenizer.eos_token
         samples = load_prompt_samples(
-            ds, tokenizer, combo=args.combo, num_prompts=args.num_prompts,
+            ds, tokenizer, model_key=args.model_key, combo=args.combo, num_prompts=args.num_prompts,
             max_prompt_length=args.max_prompt_length, seed=args.seed,
         )
         save_jsonl(out_dir / "samples.jsonl", samples)
@@ -274,24 +406,73 @@ def run_length_windows(args: argparse.Namespace, model_cfg, out_dir: Path) -> di
         return {"status": "generate_only"}
 
     tokenizer, model = load_models(model_path)
-    window_summaries: dict[str, Any] = {}
-    for start, end in LENGTH_WINDOWS:
-        label = f"{start}_{end}"
-        agg = MetricsAggregator(topk_names=("k1", "k16"))
-        for r in tqdm(rollouts, desc=f"window {label}"):
-            metrics = score_rollout_pair(
-                model, model, tokenizer,
-                student_prompt=r["student_prompt"],
-                teacher_prompt=r["teacher_prompt"],
-                completion_ids=r["completion_token_ids"],
-                temperature=args.temperature,
-                topk_ks=(1, 16),
-            )
-            metrics = apply_length_window(metrics, start, end)
-            agg.update(metrics, window_label=label)
-        window_summaries[label] = agg.summary(tokenizer, args.top_token_k)
+    window_summaries: dict[str, MetricsAggregator] = {}
+    token_rows_full: list[dict[str, Any]] = []
+    rollout_rows_full: list[dict[str, Any]] = []
+    per_window_rows: dict[str, list[dict[str, Any]]] = {f"{s}_{e}": [] for s, e in LENGTH_WINDOWS}
 
-    out = {"config": _config_dict(args, model_cfg, ds), "length_windows": window_summaries}
+    bs = max(1, args.score_batch_size)
+    score_kw = _score_batch_kwargs(args)
+    for start in tqdm(range(0, len(rollouts), bs), desc="score/length_windows"):
+        batch = rollouts[start : start + bs]
+        metrics_list = score_rollout_batch(
+            model,
+            model,
+            tokenizer,
+            student_prompts=[r["student_prompt"] for r in batch],
+            teacher_prompts=[r["teacher_prompt"] for r in batch],
+            completion_ids_list=[r["completion_token_ids"] for r in batch],
+            **score_kw,
+        )
+        for r, metrics in zip(batch, metrics_list):
+            rollout_rec = rollout_metrics_summary(metrics)
+            rollout_rec.update(
+                {
+                    "row_id": r.get("row_id"),
+                    "rollout_idx": r.get("rollout_idx"),
+                    "tag": "full",
+                }
+            )
+            rollout_rows_full.append(rollout_rec)
+            if args.save_token_metrics:
+                token_rows_full.append(
+                    token_metrics_record(
+                        metrics,
+                        meta={
+                            "row_id": r.get("row_id"),
+                            "rollout_idx": r.get("rollout_idx"),
+                            "tag": "full",
+                        },
+                    )
+                )
+            for win_start, win_end in LENGTH_WINDOWS:
+                label = f"{win_start}_{win_end}"
+                windowed = apply_length_window(metrics, win_start, win_end)
+                if label not in window_summaries:
+                    window_summaries[label] = _make_aggregator(args)
+                window_summaries[label].update(windowed, window_label=label)
+                if args.save_token_metrics and windowed.get("n_tokens", 0) > 0:
+                    per_window_rows[label].append(
+                        token_metrics_record(
+                            windowed,
+                            meta={
+                                "row_id": r.get("row_id"),
+                                "rollout_idx": r.get("rollout_idx"),
+                                "window": label,
+                            },
+                        )
+                    )
+
+    summarized = {
+        label: agg.summary(tokenizer, args.top_token_k) for label, agg in window_summaries.items()
+    }
+    if args.save_token_metrics:
+        save_jsonl(out_dir / "token_metrics.jsonl", token_rows_full)
+        for label, rows in per_window_rows.items():
+            save_jsonl(out_dir / f"token_metrics_{label}.jsonl", rows)
+    save_jsonl(out_dir / "rollout_metrics.jsonl", rollout_rows_full)
+
+    out = {"config": _config_dict(args, model_cfg, ds), "length_windows": summarized}
     write_json(out_dir / "summary.json", out)
     return out
 
@@ -309,14 +490,30 @@ def _config_dict(args: argparse.Namespace, model_cfg, dataset) -> dict[str, Any]
         "max_prompt_length": args.max_prompt_length,
         "max_completion_length": args.max_completion_length,
         "temperature": args.temperature,
+        "score_batch_size": args.score_batch_size,
+        "gen_batch_hint": args.gen_batch_hint,
+        "jsd_beta": args.jsd_beta,
+        "jsd_token_clip": args.jsd_token_clip,
+        "topk_hit_ks": args.topk_hit_ks,
         "entropy_bucket": args.entropy_bucket,
         "entropy_kind": kind,
         "entropy_ratio": ratio,
         "teacher_prefixes": args.teacher_prefixes,
+        "save_token_metrics": args.save_token_metrics,
         "metrics": {
-            "jsd_kl": "generalized JSD beta=0.5 full vocab",
+            "jsd_kl": f"generalized_jsd_loss beta={args.jsd_beta} full vocab",
+            "jsd_kl_clipped": f"min(jsd_kl, {args.jsd_token_clip}) — aligns with train jsd_token_clip",
+            "frac_jsd_clipped": f"fraction of tokens with jsd_kl > {args.jsd_token_clip}",
             "topk_kl_k16": "teacher top-16 renormalized KL",
             "log_ratio_k1": "log pi_S(x) - log pi_T(x) for sampled token",
+            "advantage": "log pi_T(x) - log pi_S(x); encourage/discourage counts",
+            "topk_hit": f"sampled token in student/teacher TopK for K={args.topk_hit_ks}",
+            "rank_within_topk_max": f"rank of sampled token in Top-{max(args.topk_hit_ks)} (capped if miss)",
+            "entropy_gap": "H(pi_S) - H(pi_T) per token",
+            "confidence_gap": "max log pi - log pi(x) for student and teacher",
+            "snr": "|advantage| / (student_entropy + 1e-8)",
+            "top1_agree": "student_argmax == teacher_argmax",
+            "rollout_metrics.jsonl": "per-rollout means, frac_encourage, first/last-128 advantage, clip rate",
         },
     }
 
@@ -348,6 +545,10 @@ def main() -> None:
     overrides = model_launch_overrides(args.model_key)
     if args.max_completion_length is None:
         args.max_completion_length = task_default_max_completion(args.task)
+    if args.score_batch_size <= 0:
+        args.score_batch_size = task_default_score_batch(args.task, args.model_key)
+    if args.gen_batch_hint <= 0:
+        args.gen_batch_hint = task_default_gen_batch_hint(args.task, args.model_key)
     if not args.backend:
         args.backend = overrides.get("backend", model_cfg.backend)
     if not args.reasoning_parser and model_cfg.reasoning_parser:
@@ -359,22 +560,48 @@ def main() -> None:
 
     t0 = time.time()
     print(f"[cfg] task={args.task} model={args.model_key} combo={args.combo}", flush=True)
-    print(f"[cfg] max_completion={args.max_completion_length} backend={args.backend}", flush=True)
+    print(f"[cfg] max_completion={args.max_completion_length} backend={args.backend} jsd_beta={args.jsd_beta}", flush=True)
+    print(
+        f"[cfg] score_batch={args.score_batch_size} gen_batch_hint={args.gen_batch_hint}",
+        flush=True,
+    )
     print(f"[cfg] output={out_dir}", flush=True)
 
     if args.task in ("combinations", "entropy"):
-        result = run_combinations(args, model_cfg, out_dir)
+        result = run_combinations(args, model_cfg, out_dir, overrides)
     elif args.task == "teacher_prefix":
-        result = run_teacher_prefix(args, model_cfg, out_dir)
+        result = run_teacher_prefix(args, model_cfg, out_dir, overrides)
     elif args.task == "length_windows":
-        result = run_length_windows(args, model_cfg, out_dir)
+        result = run_length_windows(args, model_cfg, out_dir, overrides)
     else:
         raise ValueError(args.task)
 
     print(f"[done] {time.time() - t0:.1f}s", flush=True)
     if isinstance(result, dict) and "metrics" in result:
         m = result["metrics"]
-        print(f"  mean_jsd_kl={m.get('mean_jsd_kl', 0):.4f} n_tokens={m.get('n_tokens', 0)}", flush=True)
+        print(
+            f"  mean_jsd_kl={m.get('mean_jsd_kl', 0):.4f} "
+            f"top1_agree={m.get('top1_agree_rate', 0):.3f} "
+            f"mean_snr={m.get('mean_snr', 0):.4f} "
+            f"n_tokens={m.get('n_tokens', 0)}",
+            flush=True,
+        )
+    elif isinstance(result, dict) and "teacher_prefixes" in result:
+        for name, m in result["teacher_prefixes"].items():
+            print(
+                f"  [{name}] mean_jsd_kl={m.get('mean_jsd_kl', 0):.4f} "
+                f"top1_agree={m.get('top1_agree_rate', 0):.3f} "
+                f"mean_snr={m.get('mean_snr', 0):.4f}",
+                flush=True,
+            )
+    elif isinstance(result, dict) and "length_windows" in result:
+        for name, m in result["length_windows"].items():
+            print(
+                f"  [{name}] mean_jsd_kl={m.get('mean_jsd_kl', 0):.4f} "
+                f"top1_agree={m.get('top1_agree_rate', 0):.3f} "
+                f"mean_snr={m.get('mean_snr', 0):.4f} n={m.get('n_tokens', 0)}",
+                flush=True,
+            )
 
 
 if __name__ == "__main__":

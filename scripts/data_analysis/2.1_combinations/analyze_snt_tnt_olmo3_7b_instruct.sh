@@ -13,7 +13,7 @@ set -euo pipefail
 
 # 2.1 student/teacher combo snt_tnt on olmo3_7b_instruct
 # Rollout length: 1024 (override MAX_COMPLETION).
-# Metrics: JSD KL, top-k KL (k=1,16), log-ratio, loss-dominant tokens.
+# Metrics: KL/JSD (beta=0.0), top-k KL (k=1,16), log-ratio, argmax preference, SNR, loss-dominant tokens.
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis}}
 export TASK=combinations

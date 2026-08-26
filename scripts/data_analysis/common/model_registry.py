@@ -42,6 +42,12 @@ COMBO_DATASET_TAG = {
     "snt_tt": "snothink_tthink",
 }
 
+# Train scripts named st_tt but chat templates ignore enable_thinking (falcon/mimo).
+MODEL_COMBO_THINK_OVERRIDE: dict[str, dict[str, tuple[bool, bool]]] = {
+    "falcon_h1r_7b": {"st_tt": (False, False)},
+    "mimo_7b_rl": {"st_tt": (False, False)},
+}
+
 
 @dataclass(frozen=True)
 class ModelConfig:
@@ -89,7 +95,6 @@ MODELS: dict[str, ModelConfig] = {
         "qwen3_5",
         "sglang",
         ".qwen35_4b",
-        reasoning_parser="qwen3",
     ),
     "qwen3_06b": ModelConfig(
         "qwen3_06b",
@@ -182,22 +187,30 @@ def get_model_config(model_key: str) -> ModelConfig:
     return MODELS[model_key]
 
 
-def _suffix_for_combo(model: ModelConfig, combo: str) -> str:
-    """Return dataset filename suffix for opsd/solution parquet."""
-    if model.dataset_suffix:
-        return model.dataset_suffix
-    tag = COMBO_DATASET_TAG[combo]
-    if tag == "nothink":
-        return ".nothink"
-    return ""
+def combo_think(model_key: str, combo: str) -> tuple[bool, bool]:
+    """Student/teacher thinking flags; match train THINK_ARGS per model."""
+    overrides = MODEL_COMBO_THINK_OVERRIDE.get(model_key, {})
+    if combo in overrides:
+        return overrides[combo]
+    return COMBO_THINK[combo]
+
+
+def _dataset_tag_part(model: ModelConfig, combo: str) -> str:
+    """Middle segment of opsd/solution parquet filename (before .maxprompt1024)."""
+    suffix = model.dataset_suffix
+    if suffix.startswith(".nothink."):
+        # e.g. .nothink.instruct → nothink.instruct (combo tag omitted; train uses snt_tnt parquet)
+        return "nothink" + suffix[len(".nothink") :]
+    if suffix:
+        return f"{COMBO_DATASET_TAG[combo]}{suffix}"
+    return COMBO_DATASET_TAG[combo]
 
 
 def dataset_path(model_key: str, combo: str, base_dir: Path | None = None) -> Path:
     model = get_model_config(model_key)
-    tag = COMBO_DATASET_TAG[combo]
-    suffix = _suffix_for_combo(model, combo)
+    tag_part = _dataset_tag_part(model, combo)
     root = base_dir or DATA_ROOT
-    name = f"openthoughts.opsd.solution.{tag}{suffix}.maxprompt1024.parquet"
+    name = f"openthoughts.opsd.solution.{tag_part}.maxprompt1024.parquet"
     return Path(root) / name
 
 
@@ -209,14 +222,14 @@ def teacher_prefix_dataset(
 ) -> Path:
     """Dataset parquet for teacher-prefix variants (2.2)."""
     model = get_model_config(model_key)
-    tag = COMBO_DATASET_TAG[combo]
+    tag_part = _dataset_tag_part(model, combo)
     root = base_dir or DATA_ROOT
     if prefix == "sol":
         return dataset_path(model_key, combo, base_dir=root)
     if prefix == "answer":
-        return Path(root) / f"openthoughts.correct.answer.{tag}.maxprompt1024.parquet"
+        return Path(root) / f"openthoughts.correct.answer.{tag_part}.maxprompt1024.parquet"
     if prefix == "irrelevant_other_sol":
-        return Path(root) / f"openthoughts.irrelevant_other_sol.{tag}.maxprompt1024.parquet"
+        return Path(root) / f"openthoughts.irrelevant_other_sol.{tag_part}.maxprompt1024.parquet"
     raise ValueError(f"unknown teacher prefix {prefix!r}")
 
 
@@ -249,6 +262,49 @@ def task_default_max_completion(task: str) -> int:
     if task == "length_windows":
         return LENGTH_WINDOWS_MAX_COMPLETION
     return DEFAULT_MAX_COMPLETION
+
+
+MODEL_SIZE_TIER: dict[str, str] = {
+    "qwen3_06b": "small",
+    "deepseek_r1_1.5b": "small",
+    "qwen3_1.7b": "small",
+    "qwen3_4b": "medium",
+    "qwen3_4b_instruct": "medium",
+    "qwen3_4b_thinking": "medium",
+    "qwen3.5_4b": "medium",
+    "olmo3_7b_instruct": "large",
+    "olmo3_7b_think": "large",
+    "falcon_h1r_7b": "large",
+    "mimo_7b_rl": "large",
+}
+
+# HF score microbatch: short tasks (max_completion=1024) vs 2.5 length_windows (6144).
+# Peak VRAM scales ~B * L * vocab during forward + metric temps on GPU.
+_SCORE_BATCH_SHORT = {"small": 8, "medium": 4, "large": 2}
+_SCORE_BATCH_LONG = {"small": 2, "medium": 1, "large": 1}
+_GEN_BATCH_SHORT = {"small": 64, "medium": 64, "large": 32}
+_GEN_BATCH_LONG = {"small": 32, "medium": 16, "large": 8}
+
+
+def model_size_tier(model_key: str) -> str:
+    tier = MODEL_SIZE_TIER.get(model_key)
+    if tier is None:
+        raise KeyError(f"unknown model tier for {model_key!r}; extend MODEL_SIZE_TIER")
+    return tier
+
+
+def task_default_score_batch(task: str, model_key: str) -> int:
+    """HF scoring microbatch size tuned for A800 80GB."""
+    tier = model_size_tier(model_key)
+    table = _SCORE_BATCH_LONG if task == "length_windows" else _SCORE_BATCH_SHORT
+    return table[tier]
+
+
+def task_default_gen_batch_hint(task: str, model_key: str) -> int:
+    """SGLang prompt chunk size (vLLM ignores this; uses continuous batching)."""
+    tier = model_size_tier(model_key)
+    table = _GEN_BATCH_LONG if task == "length_windows" else _GEN_BATCH_SHORT
+    return table[tier]
 
 
 def model_launch_overrides(model_key: str) -> dict[str, Any]:

@@ -22,7 +22,7 @@ set -euo pipefail
 
 # {description}
 # Rollout length: 1024 (override MAX_COMPLETION).
-# Metrics: JSD KL, top-k KL (k=1,16), log-ratio, loss-dominant tokens.
+# Metrics: KL/JSD (beta=0.0), top-k KL (k=1,16), log-ratio, argmax preference, SNR, loss-dominant tokens.
 
 BASE_DIR=${{BASE_DIR:-${{SLURM_SUBMIT_DIR:-/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis}}}}
 export TASK={task}
@@ -47,7 +47,7 @@ set -euo pipefail
 # {description}
 # Rollout length: 6144 (match length training; override MAX_COMPLETION).
 # Length windows: 0-128, 128-256, 256-512, 512-1024, 1024-2048, 2048-4096, 4096-6144.
-# Metrics: JSD KL, top-k KL (k=1,16), log-ratio, loss-dominant tokens.
+# Metrics: KL/JSD (beta=0.0), top-k KL (k=1,16), log-ratio, argmax preference, SNR, loss-dominant tokens.
 
 BASE_DIR=${{BASE_DIR:-${{SLURM_SUBMIT_DIR:-/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis}}}}
 export TASK={task}

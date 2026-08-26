@@ -17,7 +17,8 @@ ANALYSIS_DIR="${BASE_DIR}/scripts/data_analysis"
 #   NUM_PROMPTS      default 2048
 #   N_ROLLOUTS       default 2
 #   MAX_COMPLETION   default 1024 (6144 for length_windows)
-#   SCORE_BATCH      default 2
+#   SCORE_BATCH      default auto from task+model (short 2–8, length_windows 1–2)
+#   GEN_BATCH_HINT   default auto from task+model (SGLang only)
 #   JOB_TAG          default SLURM_JOB_ID
 
 : "${TASK:?Set TASK}"
@@ -28,14 +29,23 @@ ANALYSIS_DIR="${BASE_DIR}/scripts/data_analysis"
 eval "$(python - <<'PY'
 import os, sys
 sys.path.insert(0, os.environ["BASE_DIR"] + "/scripts/data_analysis")
-from common.model_registry import get_model_config, model_launch_overrides, task_default_max_completion
+from common.model_registry import (
+    get_model_config,
+    model_launch_overrides,
+    task_default_gen_batch_hint,
+    task_default_max_completion,
+    task_default_score_batch,
+)
 m = get_model_config(os.environ["MODEL_KEY"])
 ov = model_launch_overrides(os.environ["MODEL_KEY"])
 task = os.environ["TASK"]
+model_key = os.environ["MODEL_KEY"]
 print(f'export MODEL_PATH_DEFAULT="{m.model_path}"')
 print(f'export CONDA_ENV_DEFAULT="{m.conda_env}"')
 print(f'export BACKEND_DEFAULT="{ov.get("backend", m.backend)}"')
 print(f'export MAX_COMPLETION_DEFAULT="{task_default_max_completion(task)}"')
+print(f'export SCORE_BATCH_DEFAULT="{task_default_score_batch(task, model_key)}"')
+print(f'export GEN_BATCH_HINT_DEFAULT="{task_default_gen_batch_hint(task, model_key)}"')
 print(f'export MEM_FRACTION_STATIC_DEFAULT="{ov.get("mem_fraction_static", 0.80)}"')
 if m.reasoning_parser:
     print(f'export REASONING_PARSER_DEFAULT="{m.reasoning_parser}"')
@@ -51,7 +61,8 @@ NUM_PROMPTS=${NUM_PROMPTS:-2048}
 N_ROLLOUTS=${N_ROLLOUTS:-2}
 MAX_PROMPT=${MAX_PROMPT:-1024}
 MAX_COMPLETION=${MAX_COMPLETION:-${MAX_COMPLETION_DEFAULT}}
-SCORE_BATCH=${SCORE_BATCH:-2}
+SCORE_BATCH=${SCORE_BATCH:-${SCORE_BATCH_DEFAULT}}
+GEN_BATCH_HINT=${GEN_BATCH_HINT:-${GEN_BATCH_HINT_DEFAULT}}
 MEM_FRACTION_STATIC=${MEM_FRACTION_STATIC:-${MEM_FRACTION_STATIC_DEFAULT:-0.80}}
 JOB_TAG=${JOB_TAG:-${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}}
 
@@ -141,6 +152,7 @@ EXTRA_ARGS+=(--temperature 1.1)
 EXTRA_ARGS+=(--top-p 0.95)
 EXTRA_ARGS+=(--top-k 20)
 EXTRA_ARGS+=(--score-batch-size "${SCORE_BATCH}")
+EXTRA_ARGS+=(--gen-batch-hint "${GEN_BATCH_HINT}")
 EXTRA_ARGS+=(--backend "${BACKEND}")
 EXTRA_ARGS+=(--gpu-memory-utilization 0.90)
 EXTRA_ARGS+=(--seed 42)
@@ -164,6 +176,7 @@ echo "[analysis] task=${TASK} model=${MODEL_KEY} combo=${COMBO}"
 echo "[analysis] model_path=${MODEL_PATH} backend=${BACKEND} conda=${CONDA_ENV}"
 echo "[analysis] output=${OUTPUT_DIR}"
 echo "[analysis] prompts=${NUM_PROMPTS} rollouts=${N_ROLLOUTS} max_completion=${MAX_COMPLETION}"
+echo "[analysis] score_batch=${SCORE_BATCH} gen_batch_hint=${GEN_BATCH_HINT}"
 
 _run_phase() {
   local flag=$1
