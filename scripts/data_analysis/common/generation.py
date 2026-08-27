@@ -89,11 +89,11 @@ def run_generation_sglang(
     top_p: float,
     top_k: int,
     seed: int,
-    gen_batch_hint: int,
-    attention_backend: str,
-    sampling_backend: str,
-    mem_fraction_static: float,
-    reasoning_parser: str,
+    gen_batch_hint: int = 64,
+    attention_backend: str = "triton",
+    sampling_backend: str = "pytorch",
+    mem_fraction_static: float = 0.80,
+    reasoning_parser: str = "",
     disable_piecewise_cuda_graph: bool = False,
 ) -> list[dict[str, Any]]:
     from sglang import Engine
@@ -184,6 +184,29 @@ def run_generation(
     backend: str,
     **kwargs: Any,
 ) -> list[dict[str, Any]]:
+    common = (
+        "n_rollouts",
+        "max_prompt_length",
+        "max_completion_length",
+        "temperature",
+        "top_p",
+        "top_k",
+        "seed",
+    )
+    base = {k: kwargs[k] for k in common if k in kwargs}
     if backend == "sglang":
-        return run_generation_sglang(model_path, samples, **kwargs)
-    return run_generation_vllm(model_path, samples, **kwargs)
+        sglang_defaults: dict[str, Any] = {
+            "gen_batch_hint": 64,
+            "attention_backend": "triton",
+            "sampling_backend": "pytorch",
+            "mem_fraction_static": 0.80,
+            "reasoning_parser": "",
+            "disable_piecewise_cuda_graph": False,
+        }
+        for k, default in sglang_defaults.items():
+            val = kwargs.get(k, default)
+            base[k] = default if val is None else val
+        return run_generation_sglang(model_path, samples, **base)
+    if "gpu_memory_utilization" in kwargs:
+        base["gpu_memory_utilization"] = kwargs["gpu_memory_utilization"]
+    return run_generation_vllm(model_path, samples, **base)

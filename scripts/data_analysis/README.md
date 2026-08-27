@@ -7,8 +7,8 @@ Analysis code for sections **2.1–2.5**: on-policy student rollouts scored agai
 ```
 scripts/data_analysis/
 ├── run_opsd_analysis.py      # Main Python entrypoint
-├── _common_launch.sh         # Shared env + two-phase gen/score launcher
-├── generate_shell_scripts.py # Regenerate section shell wrappers
+├── generate_shell_scripts.py # Regenerate self-contained SLURM scripts (2.1–2.5)
+├── _common_launch.sh         # Legacy launcher (prefer generated scripts)
 ├── common/                   # Shared Python modules
 ├── 2.1_combinations/         # Four st/tt combos per model
 ├── 2.2_teacher_prefix/       # sol / answer / irrelevant_other_sol
@@ -24,7 +24,7 @@ Outputs: `scripts/data_analysis/outputs/<task>/<model>/<combo>_<jobid>/`
 ```bash
 cd OPSD_Analysis
 
-# Single job (Slurm)
+# Single job (Slurm) — log: log/data_analysis/21/<job-name>.<jobid>.out
 sbatch scripts/data_analysis/2.1_combinations/analyze_st_tt_qwen3_1.7b.sh
 
 # Local smoke (reduce prompts)

@@ -15,7 +15,7 @@ Tasks
 -----
 - combinations (2.1, 2.4): single teacher prefix (opsd/solution).
 - teacher_prefix (2.2): sol + answer + irrelevant_other_sol on same rollouts.
-- entropy (2.3): filter positions by student entropy bucket then score.
+- entropy (2.3): score once, aggregate he20/le20/he80/le80 buckets from student entropy.
 - length_windows (2.5): bucket metrics by completion position.
 """
 
@@ -42,6 +42,7 @@ from common.io import load_jsonl, save_jsonl, write_json  # noqa: E402
 from common.metrics import DEFAULT_JSD_BETA, DEFAULT_JSD_TOKEN_CLIP, DEFAULT_TOPK_HIT_KS  # noqa: E402
 from common.model_registry import (  # noqa: E402
     DEFAULT_MAX_PROMPT,
+    ENTROPY_BUCKETS,
     LENGTH_WINDOWS,
     TEACHER_PREFIXES,
     dataset_path,
@@ -365,9 +366,117 @@ def run_entropy(
     out_dir: Path,
     overrides: dict[str, Any],
 ) -> dict[str, Any]:
-    if not args.entropy_bucket:
-        raise ValueError("--entropy-bucket required for task=entropy")
-    return run_combinations(args, model_cfg, out_dir, overrides)
+    ds = args.dataset_path or str(dataset_path(args.model_key, args.combo))
+    rollouts_path = out_dir / "rollouts.jsonl"
+    model_path = args.model_path or model_cfg.model_path
+
+    if args.skip_generate and rollouts_path.is_file():
+        rollouts = load_jsonl(rollouts_path)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+        if tokenizer.pad_token_id is None:
+            tokenizer.pad_token = tokenizer.eos_token
+        samples = load_prompt_samples(
+            ds, tokenizer, model_key=args.model_key, combo=args.combo, num_prompts=args.num_prompts,
+            max_prompt_length=args.max_prompt_length, seed=args.seed,
+        )
+        save_jsonl(out_dir / "samples.jsonl", samples)
+        backend = args.backend or model_cfg.backend
+        rollouts = run_generation(
+            model_path,
+            samples,
+            backend=backend,
+            **_generation_kwargs(args, overrides),
+        )
+        save_jsonl(rollouts_path, rollouts)
+
+    if args.max_rollouts > 0:
+        rollouts = rollouts[: args.max_rollouts]
+    if args.skip_score:
+        return {"status": "generate_only", "n_rollouts": len(rollouts)}
+
+    tokenizer, model = load_models(model_path)
+    bucket_summaries: dict[str, MetricsAggregator] = {}
+    token_rows_full: list[dict[str, Any]] = []
+    rollout_rows_full: list[dict[str, Any]] = []
+    per_bucket_rows: dict[str, list[dict[str, Any]]] = {b: [] for b in ENTROPY_BUCKETS}
+    per_bucket_token_rows: dict[str, list[dict[str, Any]]] = {b: [] for b in ENTROPY_BUCKETS}
+
+    bs = max(1, args.score_batch_size)
+    score_kw = _score_batch_kwargs(args)
+    for start in tqdm(range(0, len(rollouts), bs), desc="score/entropy"):
+        batch = rollouts[start : start + bs]
+        metrics_list = score_rollout_batch(
+            model,
+            model,
+            tokenizer,
+            student_prompts=[r["student_prompt"] for r in batch],
+            teacher_prompts=[r["teacher_prompt"] for r in batch],
+            completion_ids_list=[r["completion_token_ids"] for r in batch],
+            **score_kw,
+        )
+        for r, metrics in zip(batch, metrics_list):
+            rollout_rec = rollout_metrics_summary(metrics)
+            rollout_rec.update(
+                {
+                    "row_id": r.get("row_id"),
+                    "rollout_idx": r.get("rollout_idx"),
+                    "tag": "full",
+                }
+            )
+            rollout_rows_full.append(rollout_rec)
+            if args.save_token_metrics:
+                token_rows_full.append(
+                    token_metrics_record(
+                        metrics,
+                        meta={
+                            "row_id": r.get("row_id"),
+                            "rollout_idx": r.get("rollout_idx"),
+                            "tag": "full",
+                        },
+                    )
+                )
+            for bucket in ENTROPY_BUCKETS:
+                bucketed = apply_entropy_bucket(metrics, bucket)
+                if bucket not in bucket_summaries:
+                    bucket_summaries[bucket] = _make_aggregator(args)
+                bucket_summaries[bucket].update(bucketed, window_label=bucket)
+                if bucketed.get("n_tokens", 0) > 0:
+                    bucket_rec = rollout_metrics_summary(bucketed)
+                    bucket_rec.update(
+                        {
+                            "row_id": r.get("row_id"),
+                            "rollout_idx": r.get("rollout_idx"),
+                            "tag": bucket,
+                        }
+                    )
+                    per_bucket_rows[bucket].append(bucket_rec)
+                    if args.save_token_metrics:
+                        per_bucket_token_rows[bucket].append(
+                            token_metrics_record(
+                                bucketed,
+                                meta={
+                                    "row_id": r.get("row_id"),
+                                    "rollout_idx": r.get("rollout_idx"),
+                                    "tag": bucket,
+                                },
+                            )
+                        )
+
+    summarized = {
+        bucket: agg.summary(tokenizer, args.top_token_k) for bucket, agg in bucket_summaries.items()
+    }
+    save_jsonl(out_dir / "rollout_metrics.jsonl", rollout_rows_full)
+    for bucket, rows in per_bucket_rows.items():
+        save_jsonl(out_dir / f"rollout_metrics_{bucket}.jsonl", rows)
+    if args.save_token_metrics:
+        save_jsonl(out_dir / "token_metrics.jsonl", token_rows_full)
+        for bucket, rows in per_bucket_token_rows.items():
+            save_jsonl(out_dir / f"token_metrics_{bucket}.jsonl", rows)
+
+    out = {"config": _config_dict(args, model_cfg, ds), "entropy_buckets": summarized}
+    write_json(out_dir / "summary.json", out)
+    return out
 
 
 def run_length_windows(
@@ -567,8 +676,10 @@ def main() -> None:
     )
     print(f"[cfg] output={out_dir}", flush=True)
 
-    if args.task in ("combinations", "entropy"):
+    if args.task == "combinations":
         result = run_combinations(args, model_cfg, out_dir, overrides)
+    elif args.task == "entropy":
+        result = run_entropy(args, model_cfg, out_dir, overrides)
     elif args.task == "teacher_prefix":
         result = run_teacher_prefix(args, model_cfg, out_dir, overrides)
     elif args.task == "length_windows":
@@ -596,6 +707,14 @@ def main() -> None:
             )
     elif isinstance(result, dict) and "length_windows" in result:
         for name, m in result["length_windows"].items():
+            print(
+                f"  [{name}] mean_jsd_kl={m.get('mean_jsd_kl', 0):.4f} "
+                f"top1_agree={m.get('top1_agree_rate', 0):.3f} "
+                f"mean_snr={m.get('mean_snr', 0):.4f} n={m.get('n_tokens', 0)}",
+                flush=True,
+            )
+    elif isinstance(result, dict) and "entropy_buckets" in result:
+        for name, m in result["entropy_buckets"].items():
             print(
                 f"  [{name}] mean_jsd_kl={m.get('mean_jsd_kl', 0):.4f} "
                 f"top1_agree={m.get('top1_agree_rate', 0):.3f} "

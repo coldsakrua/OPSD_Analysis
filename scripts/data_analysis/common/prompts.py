@@ -17,6 +17,44 @@ from data_collator import SelfDistillationDataCollator  # noqa: E402
 
 from .model_registry import combo_think, privilege_for_prefix
 
+DISTRACTOR_COLUMNS = (
+    "distractor_problems",
+    "distractor_solutions",
+    "distractor_indices",
+    "distractor_problem",
+    "distractor_solution",
+    "distractor_index",
+)
+
+
+def _distractor_lookup(dataset_path: str | Path) -> dict[str, dict[str, Any]]:
+    """Map problem text → distractor columns for irrelevant_other_sol prompts."""
+    cols = ["problem", *DISTRACTOR_COLUMNS]
+    df = pd.read_parquet(dataset_path, columns=cols)
+    lookup: dict[str, dict[str, Any]] = {}
+    for row in df.itertuples(index=False):
+        problem = str(getattr(row, "problem", "") or "").strip()
+        if not problem or problem in lookup:
+            continue
+        extras: dict[str, Any] = {}
+        for col in DISTRACTOR_COLUMNS:
+            val = getattr(row, col, None)
+            if val is None or (isinstance(val, float) and pd.isna(val)):
+                continue
+            extras[col] = val.tolist() if hasattr(val, "tolist") else val
+        if extras:
+            lookup[problem] = extras
+    return lookup
+
+
+def _merge_distractors(feature: dict[str, Any], lookup: dict[str, dict[str, Any]]) -> bool:
+    """Attach distractor fields; return False when lookup has no entry."""
+    extras = lookup.get(feature["problem"])
+    if not extras:
+        return False
+    feature.update(extras)
+    return True
+
 
 def make_collator(
     tokenizer: Any,
@@ -121,9 +159,12 @@ def load_multi_prefix_samples(
         for name in dataset_paths
     }
 
-    # Binding dataset: use sol path rows
+    # Binding dataset: use sol path rows; join distractors by problem text.
     bind_path = dataset_paths["sol"]
     df = pd.read_parquet(bind_path, columns=["problem", "solution", "answer"])
+    distractor_lookup: dict[str, dict[str, Any]] | None = None
+    if "irrelevant_other_sol" in dataset_paths:
+        distractor_lookup = _distractor_lookup(dataset_paths["irrelevant_other_sol"])
     rng = np.random.default_rng(seed)
     order = rng.permutation(len(df))
 
@@ -136,6 +177,8 @@ def load_multi_prefix_samples(
             "answer": str(row["answer"]).strip() if row["answer"] is not None else "",
         }
         if not feature["problem"]:
+            continue
+        if distractor_lookup is not None and not _merge_distractors(feature, distractor_lookup):
             continue
         if not all(c.fits(feature) for c in collators.values()):
             continue

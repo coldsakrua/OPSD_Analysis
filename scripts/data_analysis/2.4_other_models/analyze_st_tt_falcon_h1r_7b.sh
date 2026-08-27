@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --exclude=gpua800n13,gpua800n21
-#SBATCH --job-name=da24stttfalconh1r7b
-#SBATCH --output=log/data_analysis/2.4_other_models/falcon_h1r_7b/%x.%j.out
+#SBATCH --job-name=da24_st_tt_falcon7b
+#SBATCH --output=log/data_analysis/24/%x.%j.out
 #SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
@@ -11,13 +11,97 @@
 #SBATCH --time=48:00:00
 set -euo pipefail
 
-# 2.4 additional model falcon_h1r_7b st_tt
-# Rollout length: 1024 (override MAX_COMPLETION).
-# Metrics: JSD KL, top-k KL (k=1,16), log-ratio, loss-dominant tokens.
+# 2.4 falcon_h1r_7b st_tt
+# Rollout: temp=1.1 top_p=0.95 top_k=20 max_prompt=1024 max_completion=1024
 
-BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis}}
-export TASK=combinations
-export MODEL_KEY=falcon_h1r_7b
-export COMBO=st_tt
+BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
+JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
+OUTPUT_DIR=${OUTPUT_DIR:-${BASE_DIR}/scripts/data_analysis/outputs/combinations/falcon_h1r_7b/st_tt_${JOB_TAG}}
 
-source "${BASE_DIR}/scripts/data_analysis/_common_launch.sh"
+TASK="combinations"
+MODEL_KEY="falcon_h1r_7b"
+COMBO="st_tt"
+MODEL_PATH="/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b"
+CONDA_ENV="falcon"
+BACKEND="sglang"
+NUM_PROMPTS=${NUM_PROMPTS:-2048}
+N_ROLLOUTS=${N_ROLLOUTS:-2}
+MAX_PROMPT=${MAX_PROMPT:-1024}
+MAX_COMPLETION=${MAX_COMPLETION:-1024}
+SCORE_BATCH=${SCORE_BATCH:-2}
+GEN_BATCH_HINT=${GEN_BATCH_HINT:-32}
+
+mkdir -p "${OUTPUT_DIR}" "${BASE_DIR}/log/data_analysis/24"
+
+cd "${BASE_DIR}"
+set +u
+source activate "falcon"
+set -u
+_PY_VER=$(python -c 'import sys; print(f"python{sys.version_info.major}.{sys.version_info.minor}")')
+_NVIDIA_LIB_ROOT="${CONDA_PREFIX}/lib/${_PY_VER}/site-packages/nvidia"
+_NVIDIA_LD=""
+if [[ -d "${_NVIDIA_LIB_ROOT}/cuda_runtime/lib" ]]; then _NVIDIA_LD="${_NVIDIA_LIB_ROOT}/cuda_runtime/lib"; fi
+if [[ -d "${_NVIDIA_LIB_ROOT}" ]]; then
+  for _lib in "${_NVIDIA_LIB_ROOT}"/*/lib; do
+    [[ -d "${_lib}" && "${_lib}" != "${_NVIDIA_LIB_ROOT}/cuda_runtime/lib" ]] && _NVIDIA_LD="${_NVIDIA_LD:+${_NVIDIA_LD}:}${_lib}"
+  done
+fi
+export LD_LIBRARY_PATH="${_NVIDIA_LD:+${_NVIDIA_LD}:}${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+if [[ ! -e "${CONDA_PREFIX}/lib64/libcudart.so" && -f "${CONDA_PREFIX}/targets/x86_64-linux/lib/libcudart.so" ]]; then
+  mkdir -p "${CONDA_PREFIX}/lib64"
+  ln -sf "${CONDA_PREFIX}/targets/x86_64-linux/lib/libcudart.so" "${CONDA_PREFIX}/lib64/libcudart.so"
+fi
+if command -v module >/dev/null 2>&1; then module load gcc/11 2>/dev/null || module load gcc/9 2>/dev/null || true; fi
+if [[ -n "${_NVIDIA_LD}" ]]; then export LD_LIBRARY_PATH="${_NVIDIA_LD}:${LD_LIBRARY_PATH}"; fi
+unset PYTORCH_CUDA_ALLOC_CONF
+export SGLANG_MEM_FRACTION_STATIC="0.4"
+export SGLANG_ATTENTION_BACKEND=triton
+export SGLANG_SAMPLING_BACKEND=pytorch
+export SGLANG_REASONING_PARSER="deepseek-r1"
+export SGLANG_DISABLE_PIECEWISE_CUDA_GRAPH="1"
+python -c "import mamba_ssm, causal_conv1d" >/dev/null
+
+export PYTHONPATH="${BASE_DIR}/src:${BASE_DIR}/scripts/data_analysis:${PYTHONPATH:-}"
+export TOKENIZERS_PARALLELISM=false
+export TRANSFORMERS_NO_ADVISORY_WARNINGS=1
+export HF_HOME=${HF_HOME:-${BASE_DIR}/.cache/huggingface}
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
+export VLLM_USE_V1=0
+export VLLM_ATTENTION_BACKEND=XFORMERS
+export VLLM_LOGGING_LEVEL=ERROR
+export VLLM_CONFIGURE_LOGGING=0
+
+EXTRA_ARGS=(
+  --task "${TASK}"
+  --model-key "${MODEL_KEY}"
+  --combo "${COMBO}"
+  --model-path "${MODEL_PATH}"
+  --output-dir "${OUTPUT_DIR}"
+  --num-prompts "${NUM_PROMPTS}"
+  --n-rollouts "${N_ROLLOUTS}"
+  --max-prompt-length "${MAX_PROMPT}"
+  --max-completion-length "${MAX_COMPLETION}"
+  --temperature 1.1
+  --top-p 0.95
+  --top-k 20
+  --score-batch-size "${SCORE_BATCH}"
+  --gen-batch-hint "${GEN_BATCH_HINT}"
+  --backend "${BACKEND}"
+  --gpu-memory-utilization 0.90
+  --seed 42
+)
+EXTRA_ARGS+=(--attention-backend triton --sampling-backend pytorch --mem-fraction-static 0.4)
+EXTRA_ARGS+=(--disable-piecewise-cuda-graph)
+EXTRA_ARGS+=(--reasoning-parser "deepseek-r1")
+
+echo "[analysis] task=${TASK} model=${MODEL_KEY} combo=${COMBO} backend=${BACKEND}"
+echo "[analysis] output=${OUTPUT_DIR}"
+
+echo "[analysis] ===== phase 1: generate ====="
+python "${BASE_DIR}/scripts/data_analysis/run_opsd_analysis.py" "${EXTRA_ARGS[@]}" --skip-score
+
+echo "[analysis] ===== phase 2: score ====="
+python "${BASE_DIR}/scripts/data_analysis/run_opsd_analysis.py" "${EXTRA_ARGS[@]}" --skip-generate
+
+echo "[analysis] done -> ${OUTPUT_DIR}"
+ls -lah "${OUTPUT_DIR}"

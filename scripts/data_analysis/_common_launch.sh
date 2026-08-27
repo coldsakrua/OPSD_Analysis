@@ -4,6 +4,7 @@
 set -euo pipefail
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis}}
+export BASE_DIR
 ANALYSIS_DIR="${BASE_DIR}/scripts/data_analysis"
 
 # Required env (set by wrapper):

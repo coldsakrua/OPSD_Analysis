@@ -50,4 +50,54 @@ INFO 08-26 14:18:11 [llm_engine.py:437] init engine (profile, create kv cache, w
 prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s][eval] wrote partial json: 8/30 metrics=aime25_8b_nothink.metrics.json results=aime25_8b_nothink.results.json
 prompt_batches:  25%|██▌       | 1/4 [21:27<1:04:21, 1287.30s/it]WARNING 08-26 14:48:49 [scheduler.py:1768] Sequence group 15_parallel_sample_2 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=1
 [eval] wrote partial json: 16/30 metrics=aime25_8b_nothink.metrics.json results=aime25_8b_nothink.results.json
-prompt_batches:  50%|█████     | 2/4 [1:47:00<1:58:19, 3549.68s/it]
+prompt_batches:  50%|█████     | 2/4 [1:47:00<1:58:19, 3549.68s/it]WARNING 08-26 16:25:54 [scheduler.py:1768] Sequence group 23_parallel_sample_4 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=51
+[eval] wrote partial json: 24/30 metrics=aime25_8b_nothink.metrics.json results=aime25_8b_nothink.results.json
+prompt_batches:  75%|███████▌  | 3/4 [2:31:56<52:39, 3159.82s/it]  [eval] wrote partial json: 30/30 metrics=aime25_8b_nothink.metrics.json results=aime25_8b_nothink.results.json
+prompt_batches: 100%|██████████| 4/4 [3:28:43<00:00, 3257.47s/it]prompt_batches: 100%|██████████| 4/4 [3:28:43<00:00, 3130.93s/it]
+[eval] wrote partial json: 30/30 metrics=aime25_8b_nothink.metrics.json results=aime25_8b_nothink.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tnt_clip005_1e6_8b_c2048_ckpt100/aime25_8b_nothink.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tnt_clip005_1e6_8b_c2048_ckpt100/aime25_8b_nothink.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 23.33% (7/30)
+  Pass@4: 33.33% (10/30)
+  Pass@8: 33.33% (10/30)
+  Avg1(one-shot hit rate): 23.33%
+  Avg16(overall correctness): 21.67%
+  Avg output tokens: 14803.5
+[aime25] n=30
+  Pass@1: 23.33% (7/30)
+  Pass@4: 33.33% (10/30)
+  Pass@8: 33.33% (10/30)
+  Avg1(one-shot hit rate): 23.33%
+  Avg16(overall correctness): 21.67%
+  Avg output tokens: 14803.5
+[BY_CATEGORY]
+[__uncategorized__] n=30
+  Pass@1: 23.33% (7/30)
+  Pass@4: 33.33% (10/30)
+  Pass@8: 33.33% (10/30)
+  Avg1(one-shot hit rate): 23.33%
+  Avg16(overall correctness): 21.67%
+  Avg output tokens: 14803.5
+Avg correct / sample: 21.67%
+Majority vote: 26.67%
+Boxed format rate: 72.92%
+Avg output tokens: 14803.5
+[TOKEN_BUDGET]
+[aime25] n=30
+  @1k: Pass@8=6.67% (2/30)  Avg16=2.92%
+  @2k: Pass@8=23.33% (7/30)  Avg16=12.08%
+  @4k: Pass@8=33.33% (10/30)  Avg16=20.83%
+  @8k: Pass@8=33.33% (10/30)  Avg16=21.67%
+  @16k: Pass@8=33.33% (10/30)  Avg16=21.67%
+  @32k: Pass@8=33.33% (10/30)  Avg16=21.67%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime25] n=30  P@16=0.00%  Avg16=21.67%  L=14803.5  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime25] n=30  P@16=0.00%  Avg16=21.67%  L=14803.5  pass/log2(16L)=0.0000  avg/log2(16L)=1.2136
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tnt_clip005_1e6_8b_c2048_ckpt100/aime25_8b_nothink.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/snt_tnt_clip005_1e6_8b_c2048_ckpt100/aime25_8b_nothink.results.json
+============================================================
+[rank0]:[W826 17:47:28.524136833 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())

@@ -1,16 +1,200 @@
 #!/usr/bin/env python3
-"""Generate per-model/combo shell scripts for sections 2.1–2.5."""
+"""Generate self-contained per-model SLURM scripts for sections 2.1–2.5."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-from common.model_registry import ENTROPY_BUCKETS, SECTION_MODEL_COMBOS, TEACHER_PREFIXES
+from common.model_registry import (  # noqa: E402
+    SECTION_MODEL_COMBOS,
+    get_model_config,
+    model_launch_overrides,
+    task_default_gen_batch_hint,
+    task_default_max_completion,
+    task_default_score_batch,
+)
 
-SBATCH_HEADER = """#!/bin/bash
-{sbatch_extra}#SBATCH --job-name={job_name}
-#SBATCH --output={log_dir}/%x.%j.out
+MODEL_SHORT = {
+    "qwen3_1.7b": "1p7b",
+    "qwen3_4b": "4b",
+    "qwen3_4b_instruct": "4bi",
+    "qwen3_4b_thinking": "4bt",
+    "qwen3.5_4b": "q35",
+    "qwen3_06b": "0p6b",
+    "olmo3_7b_instruct": "olmo7bi",
+    "olmo3_7b_think": "olmo7bt",
+    "deepseek_r1_1.5b": "ds1p5b",
+    "falcon_h1r_7b": "falcon7b",
+    "mimo_7b_rl": "mimo7b",
+}
+
+SECTION_TAG = {
+    "2.1": "21",
+    "2.2": "22",
+    "2.3": "23",
+    "2.4": "24",
+    "2.5": "25",
+}
+
+SECTION_DIR = {
+    "2.1": "2.1_combinations",
+    "2.2": "2.2_teacher_prefix",
+    "2.3": "2.3_entropy",
+    "2.4": "2.4_other_models",
+    "2.5": "2.5_length_windows",
+}
+
+SBATCH_EXCLUDE = {
+    "olmo3_7b_instruct": "#SBATCH --exclude=gpua800n13,gpua800n21\n",
+    "olmo3_7b_think": "#SBATCH --exclude=gpua800n13,gpua800n21\n",
+    "qwen3.5_4b": "#SBATCH --exclude=gpua800n13,gpua800n21\n",
+    "falcon_h1r_7b": "#SBATCH --exclude=gpua800n13,gpua800n21\n",
+    "mimo_7b_rl": "#SBATCH --exclude=gpua800n13,gpua800n21\n",
+}
+
+
+def _job_name(section: str, combo: str, model: str, suffix: str = "") -> str:
+    tag = SECTION_TAG[section]
+    short = MODEL_SHORT.get(model, model.replace("_", "")[:8])
+    name = f"da{tag}_{combo}_{short}"
+    if suffix:
+        name = f"{name}_{suffix}"
+    return name.replace(".", "")[:32]
+
+
+def _conda_setup(conda_env: str, backend: str, model_key: str, mem_fraction: float, reasoning_parser: str, disable_cuda_graph: bool) -> str:
+    lines = [
+        'cd "${BASE_DIR}"',
+        "set +u",
+        f'source activate "{conda_env}"',
+        "set -u",
+    ]
+    if conda_env == "falcon":
+        lines.extend(
+            [
+                '_PY_VER=$(python -c \'import sys; print(f"python{sys.version_info.major}.{sys.version_info.minor}")\')',
+                '_NVIDIA_LIB_ROOT="${CONDA_PREFIX}/lib/${_PY_VER}/site-packages/nvidia"',
+                '_NVIDIA_LD=""',
+                'if [[ -d "${_NVIDIA_LIB_ROOT}/cuda_runtime/lib" ]]; then _NVIDIA_LD="${_NVIDIA_LIB_ROOT}/cuda_runtime/lib"; fi',
+                'if [[ -d "${_NVIDIA_LIB_ROOT}" ]]; then',
+                '  for _lib in "${_NVIDIA_LIB_ROOT}"/*/lib; do',
+                '    [[ -d "${_lib}" && "${_lib}" != "${_NVIDIA_LIB_ROOT}/cuda_runtime/lib" ]] && _NVIDIA_LD="${_NVIDIA_LD:+${_NVIDIA_LD}:}${_lib}"',
+                "  done",
+                "fi",
+                'export LD_LIBRARY_PATH="${_NVIDIA_LD:+${_NVIDIA_LD}:}${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"',
+                'if [[ ! -e "${CONDA_PREFIX}/lib64/libcudart.so" && -f "${CONDA_PREFIX}/targets/x86_64-linux/lib/libcudart.so" ]]; then',
+                '  mkdir -p "${CONDA_PREFIX}/lib64"',
+                '  ln -sf "${CONDA_PREFIX}/targets/x86_64-linux/lib/libcudart.so" "${CONDA_PREFIX}/lib64/libcudart.so"',
+                "fi",
+                "if command -v module >/dev/null 2>&1; then module load gcc/11 2>/dev/null || module load gcc/9 2>/dev/null || true; fi",
+                'if [[ -n "${_NVIDIA_LD}" ]]; then export LD_LIBRARY_PATH="${_NVIDIA_LD}:${LD_LIBRARY_PATH}"; fi',
+                "unset PYTORCH_CUDA_ALLOC_CONF",
+                f'export SGLANG_MEM_FRACTION_STATIC="{mem_fraction}"',
+                "export SGLANG_ATTENTION_BACKEND=triton",
+                "export SGLANG_SAMPLING_BACKEND=pytorch",
+                f'export SGLANG_REASONING_PARSER="{reasoning_parser or "deepseek-r1"}"',
+                f'export SGLANG_DISABLE_PIECEWISE_CUDA_GRAPH="{"1" if disable_cuda_graph else "0"}"',
+                'python -c "import mamba_ssm, causal_conv1d" >/dev/null',
+            ]
+        )
+    elif conda_env == "qwen3_5":
+        lines.extend(
+            [
+                'export LD_LIBRARY_PATH="${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"',
+                "if [[ -d /usr/local/cuda-12.8 ]]; then",
+                "  export CUDA_HOME=/usr/local/cuda-12.8",
+                '  export PATH="${CUDA_HOME}/bin:${PATH}"',
+                '  export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"',
+                "elif command -v module >/dev/null 2>&1; then",
+                "  module load cuda/12.8 2>/dev/null || true",
+                "fi",
+            ]
+        )
+    elif conda_env == "sglang":
+        lines.extend(
+            [
+                '_NVIDIA_LIB_ROOT="${CONDA_PREFIX}/lib/python3.12/site-packages/nvidia"',
+                '_NVIDIA_LD=""',
+                'if [[ -d "${_NVIDIA_LIB_ROOT}" ]]; then',
+                '  for _lib in "${_NVIDIA_LIB_ROOT}"/*/lib; do [[ -d "${_lib}" ]] && _NVIDIA_LD="${_NVIDIA_LD:+${_NVIDIA_LD}:}${_lib}"; done',
+                "fi",
+                'export LD_LIBRARY_PATH="${_NVIDIA_LD:+${_NVIDIA_LD}:}${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"',
+                "if [[ -d /usr/local/cuda-12.6 ]]; then",
+                "  export CUDA_HOME=/usr/local/cuda-12.6",
+                '  export PATH="${CUDA_HOME}/bin:${PATH}"',
+                '  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CUDA_HOME}/lib64"',
+                "elif [[ -d /usr/local/cuda-12.8 ]]; then",
+                "  export CUDA_HOME=/usr/local/cuda-12.8",
+                '  export PATH="${CUDA_HOME}/bin:${PATH}"',
+                '  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CUDA_HOME}/lib64"',
+                "fi",
+                'if [[ -n "${_NVIDIA_LD}" ]]; then export LD_LIBRARY_PATH="${_NVIDIA_LD}:${LD_LIBRARY_PATH}"; fi',
+                "if command -v module >/dev/null 2>&1; then module load gcc/11 2>/dev/null || module load gcc/9 2>/dev/null || true; fi",
+            ]
+        )
+    else:
+        lines.append('export LD_LIBRARY_PATH="${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"')
+
+    if backend == "sglang" and conda_env not in ("falcon",):
+        lines.extend(
+            [
+                f'export SGLANG_MEM_FRACTION_STATIC="{mem_fraction}"',
+                "export SGLANG_ATTENTION_BACKEND=triton",
+                "export SGLANG_SAMPLING_BACKEND=pytorch",
+            ]
+        )
+    return "\n".join(lines)
+
+
+def render_script(
+    *,
+    section: str,
+    task: str,
+    model_key: str,
+    combo: str,
+    description: str,
+    entropy_bucket: str = "",
+    max_completion: int | None = None,
+) -> str:
+    m = get_model_config(model_key)
+    ov = model_launch_overrides(model_key)
+    backend = ov.get("backend", m.backend)
+    mem_fraction = ov.get("mem_fraction_static", 0.80)
+    reasoning_parser = m.reasoning_parser or ""
+    disable_cuda_graph = bool(ov.get("disable_piecewise_cuda_graph"))
+    max_comp = max_completion if max_completion is not None else task_default_max_completion(task)
+    score_batch = task_default_score_batch(task, model_key)
+    gen_batch_hint = task_default_gen_batch_hint(task, model_key)
+
+    suffix = entropy_bucket
+    job_name = _job_name(section, combo, model_key, suffix)
+    log_section = section.replace(".", "")
+    exclude = SBATCH_EXCLUDE.get(model_key, "")
+
+    run_suffix = combo
+    if entropy_bucket:
+        run_suffix = f"{combo}_{entropy_bucket}"
+
+    extra_args = ""
+    if entropy_bucket:
+        extra_args += f'\nEXTRA_ARGS+=(--entropy-bucket "{entropy_bucket}")'
+    if backend == "sglang":
+        extra_args += f"\nEXTRA_ARGS+=(--attention-backend triton --sampling-backend pytorch --mem-fraction-static {mem_fraction})"
+        if disable_cuda_graph:
+            extra_args += "\nEXTRA_ARGS+=(--disable-piecewise-cuda-graph)"
+        if reasoning_parser:
+            extra_args += f'\nEXTRA_ARGS+=(--reasoning-parser "{reasoning_parser}")'
+
+    length_note = ""
+    if section == "2.3":
+        length_note = "# Entropy buckets: he20, le20, he80, le80 (single score pass).\n"
+    elif section == "2.5":
+        length_note = "# Length windows: 0-128 … 4096-6144.\n"
+
+    return f"""#!/bin/bash
+{exclude}#SBATCH --job-name={job_name}
+#SBATCH --output=log/data_analysis/{log_section}/%x.%j.out
 #SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
@@ -21,44 +205,71 @@ SBATCH_HEADER = """#!/bin/bash
 set -euo pipefail
 
 # {description}
-# Rollout length: 1024 (override MAX_COMPLETION).
-# Metrics: KL/JSD (beta=0.0), top-k KL (k=1,16), log-ratio, argmax preference, SNR, loss-dominant tokens.
+{length_note}# Rollout: temp=1.1 top_p=0.95 top_k=20 max_prompt=1024 max_completion={max_comp}
 
-BASE_DIR=${{BASE_DIR:-${{SLURM_SUBMIT_DIR:-/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis}}}}
-export TASK={task}
-export MODEL_KEY={model_key}
-export COMBO={combo}
-{extra_exports}
-source "${{BASE_DIR}}/scripts/data_analysis/_common_launch.sh"
+BASE_DIR=${{BASE_DIR:-${{SLURM_SUBMIT_DIR:-$(cd "$(dirname "${{BASH_SOURCE[0]}}")/../../.." && pwd)}}}}
+JOB_TAG=${{SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}}
+OUTPUT_DIR=${{OUTPUT_DIR:-${{BASE_DIR}}/scripts/data_analysis/outputs/{task}/{model_key}/{run_suffix}_${{JOB_TAG}}}}
+
+TASK="{task}"
+MODEL_KEY="{model_key}"
+COMBO="{combo}"
+MODEL_PATH="{m.model_path}"
+CONDA_ENV="{m.conda_env}"
+BACKEND="{backend}"
+NUM_PROMPTS=${{NUM_PROMPTS:-2048}}
+N_ROLLOUTS=${{N_ROLLOUTS:-2}}
+MAX_PROMPT=${{MAX_PROMPT:-1024}}
+MAX_COMPLETION=${{MAX_COMPLETION:-{max_comp}}}
+SCORE_BATCH=${{SCORE_BATCH:-{score_batch}}}
+GEN_BATCH_HINT=${{GEN_BATCH_HINT:-{gen_batch_hint}}}
+
+mkdir -p "${{OUTPUT_DIR}}" "${{BASE_DIR}}/log/data_analysis/{log_section}"
+
+{_conda_setup(m.conda_env, backend, model_key, mem_fraction, reasoning_parser, disable_cuda_graph)}
+
+export PYTHONPATH="${{BASE_DIR}}/src:${{BASE_DIR}}/scripts/data_analysis:${{PYTHONPATH:-}}"
+export TOKENIZERS_PARALLELISM=false
+export TRANSFORMERS_NO_ADVISORY_WARNINGS=1
+export HF_HOME=${{HF_HOME:-${{BASE_DIR}}/.cache/huggingface}}
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
+export VLLM_USE_V1=0
+export VLLM_ATTENTION_BACKEND=XFORMERS
+export VLLM_LOGGING_LEVEL=ERROR
+export VLLM_CONFIGURE_LOGGING=0
+
+EXTRA_ARGS=(
+  --task "${{TASK}}"
+  --model-key "${{MODEL_KEY}}"
+  --combo "${{COMBO}}"
+  --model-path "${{MODEL_PATH}}"
+  --output-dir "${{OUTPUT_DIR}}"
+  --num-prompts "${{NUM_PROMPTS}}"
+  --n-rollouts "${{N_ROLLOUTS}}"
+  --max-prompt-length "${{MAX_PROMPT}}"
+  --max-completion-length "${{MAX_COMPLETION}}"
+  --temperature 1.1
+  --top-p 0.95
+  --top-k 20
+  --score-batch-size "${{SCORE_BATCH}}"
+  --gen-batch-hint "${{GEN_BATCH_HINT}}"
+  --backend "${{BACKEND}}"
+  --gpu-memory-utilization 0.90
+  --seed 42
+){extra_args}
+
+echo "[analysis] task=${{TASK}} model=${{MODEL_KEY}} combo=${{COMBO}} backend=${{BACKEND}}"
+echo "[analysis] output=${{OUTPUT_DIR}}"
+
+echo "[analysis] ===== phase 1: generate ====="
+python "${{BASE_DIR}}/scripts/data_analysis/run_opsd_analysis.py" "${{EXTRA_ARGS[@]}}" --skip-score
+
+echo "[analysis] ===== phase 2: score ====="
+python "${{BASE_DIR}}/scripts/data_analysis/run_opsd_analysis.py" "${{EXTRA_ARGS[@]}}" --skip-generate
+
+echo "[analysis] done -> ${{OUTPUT_DIR}}"
+ls -lah "${{OUTPUT_DIR}}"
 """
-
-SBATCH_HEADER_25 = """#!/bin/bash
-{sbatch_extra}#SBATCH --job-name={job_name}
-#SBATCH --output={log_dir}/%x.%j.out
-#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=7
-#SBATCH --gres=gpu:1
-#SBATCH --mem=80G
-#SBATCH --time=48:00:00
-set -euo pipefail
-
-# {description}
-# Rollout length: 6144 (match length training; override MAX_COMPLETION).
-# Length windows: 0-128, 128-256, 256-512, 512-1024, 1024-2048, 2048-4096, 4096-6144.
-# Metrics: KL/JSD (beta=0.0), top-k KL (k=1,16), log-ratio, argmax preference, SNR, loss-dominant tokens.
-
-BASE_DIR=${{BASE_DIR:-${{SLURM_SUBMIT_DIR:-/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis}}}}
-export TASK={task}
-export MODEL_KEY={model_key}
-export COMBO={combo}
-export MAX_COMPLETION=6144
-{extra_exports}
-source "${{BASE_DIR}}/scripts/data_analysis/_common_launch.sh"
-"""
-
-SBATCH_SGLANG = "#SBATCH --exclude=gpua800n13,gpua800n21\n"
 
 
 def write_script(path: Path, content: str) -> None:
@@ -67,30 +278,17 @@ def write_script(path: Path, content: str) -> None:
     path.chmod(0o755)
 
 
-def job_name(section: str, model: str, combo: str, suffix: str = "") -> str:
-    base = f"da_{section}_{combo}_{model}"
-    if suffix:
-        base = f"{base}_{suffix}"
-    return base.replace(".", "").replace("_", "")[:32]
-
-
 def gen_21() -> list[Path]:
     created = []
     for model, combos in SECTION_MODEL_COMBOS["2.1"].items():
         for combo in combos:
-            name = f"analyze_{combo}_{model}.sh"
-            path = ROOT / "2.1_combinations" / name
-            log_dir = f"log/data_analysis/2.1_combinations/{model}"
-            sbatch_extra = SBATCH_SGLANG if model in ("olmo3_7b_instruct", "olmo3_7b_think", "qwen3.5_4b") else ""
-            content = SBATCH_HEADER.format(
-                job_name=job_name("21", model, combo),
-                log_dir=log_dir,
-                description=f"2.1 student/teacher combo {combo} on {model}",
+            path = ROOT / SECTION_DIR["2.1"] / f"analyze_{combo}_{model}.sh"
+            content = render_script(
+                section="2.1",
                 task="combinations",
                 model_key=model,
                 combo=combo,
-                extra_exports="",
-                sbatch_extra=sbatch_extra,
+                description=f"2.1 combo {combo} on {model}",
             )
             write_script(path, content)
             created.append(path)
@@ -101,19 +299,13 @@ def gen_22() -> list[Path]:
     created = []
     for model, combos in SECTION_MODEL_COMBOS["2.2"].items():
         for combo in combos:
-            name = f"analyze_{combo}_{model}.sh"
-            path = ROOT / "2.2_teacher_prefix" / name
-            log_dir = f"log/data_analysis/2.2_teacher_prefix/{model}"
-            sbatch_extra = SBATCH_SGLANG if model.startswith("olmo") else ""
-            content = SBATCH_HEADER.format(
-                job_name=job_name("22", model, combo),
-                log_dir=log_dir,
-                description=f"2.2 teacher prefix variants (sol/answer/irr) {combo} {model}",
+            path = ROOT / SECTION_DIR["2.2"] / f"analyze_{combo}_{model}.sh"
+            content = render_script(
+                section="2.2",
                 task="teacher_prefix",
                 model_key=model,
                 combo=combo,
-                extra_exports="",
-                sbatch_extra=sbatch_extra,
+                description=f"2.2 teacher prefix {combo} on {model}",
             )
             write_script(path, content)
             created.append(path)
@@ -124,23 +316,16 @@ def gen_23() -> list[Path]:
     created = []
     for model, combos in SECTION_MODEL_COMBOS["2.3"].items():
         combo = combos[0]
-        for bucket in ENTROPY_BUCKETS:
-            name = f"analyze_{combo}_{bucket}_{model}.sh"
-            path = ROOT / "2.3_entropy" / name
-            log_dir = f"log/data_analysis/2.3_entropy/{model}"
-            sbatch_extra = SBATCH_SGLANG if model.startswith("olmo") else ""
-            content = SBATCH_HEADER.format(
-                job_name=job_name("23", model, combo, bucket),
-                log_dir=log_dir,
-                description=f"2.3 entropy bucket {bucket} {combo} {model}",
-                task="entropy",
-                model_key=model,
-                combo=combo,
-                extra_exports=f'export ENTROPY_BUCKET="{bucket}"',
-                sbatch_extra=sbatch_extra,
-            )
-            write_script(path, content)
-            created.append(path)
+        path = ROOT / SECTION_DIR["2.3"] / f"analyze_{combo}_{model}.sh"
+        content = render_script(
+            section="2.3",
+            task="entropy",
+            model_key=model,
+            combo=combo,
+            description=f"2.3 entropy (he20/le20/he80/le80) {combo} on {model}",
+        )
+        write_script(path, content)
+        created.append(path)
     return created
 
 
@@ -148,19 +333,13 @@ def gen_24() -> list[Path]:
     created = []
     for model, combos in SECTION_MODEL_COMBOS["2.4"].items():
         combo = combos[0]
-        name = f"analyze_{combo}_{model}.sh"
-        path = ROOT / "2.4_other_models" / name
-        log_dir = f"log/data_analysis/2.4_other_models/{model}"
-        sbatch_extra = SBATCH_SGLANG if model in ("falcon_h1r_7b", "mimo_7b_rl") else ""
-        content = SBATCH_HEADER.format(
-            job_name=job_name("24", model, combo),
-            log_dir=log_dir,
-            description=f"2.4 additional model {model} {combo}",
+        path = ROOT / SECTION_DIR["2.4"] / f"analyze_{combo}_{model}.sh"
+        content = render_script(
+            section="2.4",
             task="combinations",
             model_key=model,
             combo=combo,
-            extra_exports="",
-            sbatch_extra=sbatch_extra,
+            description=f"2.4 {model} {combo}",
         )
         write_script(path, content)
         created.append(path)
@@ -171,19 +350,14 @@ def gen_25() -> list[Path]:
     created = []
     for model, combos in SECTION_MODEL_COMBOS["2.5"].items():
         combo = combos[0]
-        name = f"analyze_{combo}_{model}.sh"
-        path = ROOT / "2.5_length_windows" / name
-        log_dir = f"log/data_analysis/2.5_length_windows/{model}"
-        sbatch_extra = SBATCH_SGLANG if model.startswith("olmo") else ""
-        content = SBATCH_HEADER_25.format(
-            job_name=job_name("25", model, combo),
-            log_dir=log_dir,
-            description=f"2.5 length-window analysis {combo} {model}",
+        path = ROOT / SECTION_DIR["2.5"] / f"analyze_{combo}_{model}.sh"
+        content = render_script(
+            section="2.5",
             task="length_windows",
             model_key=model,
             combo=combo,
-            extra_exports="",
-            sbatch_extra=sbatch_extra,
+            description=f"2.5 length windows {combo} on {model}",
+            max_completion=6144,
         )
         write_script(path, content)
         created.append(path)
@@ -197,7 +371,7 @@ def main() -> None:
     all_paths.extend(gen_23())
     all_paths.extend(gen_24())
     all_paths.extend(gen_25())
-    print(f"generated {len(all_paths)} scripts")
+    print(f"generated {len(all_paths)} self-contained scripts")
 
 
 if __name__ == "__main__":
