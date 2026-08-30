@@ -64,7 +64,7 @@ python "${BASE_DIR}/eval/eval_math_vllm_local.py" \
   --num-samples 0 \
   --val-n 8 \
   --pass-at-k 1,4,8 \
-  --max-new-tokens 32768 \
+  --max-new-tokens 38912 \
   --temperature 0.6 \
   --top-p 0.95 \
   --top-k 20 \

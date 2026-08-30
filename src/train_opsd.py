@@ -34,6 +34,7 @@ from data_collator import SelfDistillationDataCollator
 from opsd_config import OPSDConfig
 from opsd_dataset import load_training_dataset, normalize_dataset, prompt_length_filter_applied
 from opsd_trainer import OPSDTrainer
+from sft_dataset import load_sft_tokenizer
 
 
 DEFAULT_MODEL = "/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b"
@@ -75,6 +76,14 @@ class _CopyProcessorAssetsCallback(TrainerCallback):
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Full-parameter OPSD on Qwen3-4B")
     parser.add_argument("--model-path", default=os.environ.get("MODEL_PATH", DEFAULT_MODEL))
+    parser.add_argument(
+        "--chat-template-path",
+        default=os.environ.get("CHAT_TEMPLATE_PATH"),
+        help=(
+            "Optional: load tokenizer vocab from --model-path but overlay chat_template "
+            "from this checkpoint (e.g. qwen3-1.7b instruct over qwen3-1.7b-base weights)."
+        ),
+    )
     parser.add_argument(
         "--teacher-model-path",
         default=os.environ.get("TEACHER_MODEL_PATH"),
@@ -350,13 +359,20 @@ def main() -> None:
     set_seed(args.seed)
     max_length = args.max_prompt_length + args.max_completion_length
 
-    tokenizer = AutoTokenizer.from_pretrained(
-        args.model_path,
-        trust_remote_code=True,
-        padding_side="right",
-    )
-    if tokenizer.pad_token_id is None:
-        tokenizer.pad_token = tokenizer.eos_token
+    if args.chat_template_path:
+        tokenizer = load_sft_tokenizer(
+            args.model_path,
+            chat_template_path=args.chat_template_path,
+        )
+        tokenizer.padding_side = "right"
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(
+            args.model_path,
+            trust_remote_code=True,
+            padding_side="right",
+        )
+        if tokenizer.pad_token_id is None:
+            tokenizer.pad_token = tokenizer.eos_token
     _maybe_install_olmo_chat_template(tokenizer)
 
     teacher_tokenizer = tokenizer

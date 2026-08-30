@@ -1,0 +1,159 @@
+[extend] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[extend] shard=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/scripts/eval/extend_38912/manifest/shards/shard_25.jsonl
+[extend] generate_batch_size=0 (0=auto: 0.6b/1.7b=12, 4b=8, 8b=4)
+[extend] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/anchor
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[extend] shard=shard_25.jsonl jobs=12 models=3 trunc=390
+[extend] loading model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_ot_4b_c256/3226380/checkpoint-100 max_model_len=40960 jobs=4 generate_batch_size=8
+INFO 08-30 01:22:09 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 08-30 01:22:21 [__init__.py:239] Automatically detected platform cuda.
+INFO 08-30 01:22:34 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 08-30 01:22:34 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 08-30 01:22:34 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 08-30 01:22:34 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 08-30 01:22:34 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO 08-30 01:22:41 [config.py:717] This model supports multiple tasks: {'reward', 'embed', 'classify', 'score', 'generate'}. Defaulting to 'generate'.
+WARNING 08-30 01:22:41 [arg_utils.py:1525] Chunked prefill is enabled by default for models with max_model_len > 32K. Chunked prefill might not work with some features or models. If you encounter any issues, please disable by launching with --enable-chunked-prefill=False.
+INFO 08-30 01:22:41 [config.py:2003] Chunked prefill is enabled with max_num_batched_tokens=2048.
+INFO 08-30 01:22:41 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_ot_4b_c256/3226380/checkpoint-100', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_ot_4b_c256/3226380/checkpoint-100', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=False, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_ot_4b_c256/3226380/checkpoint-100, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=True, use_async_output_proc=True, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[256,248,240,232,224,216,208,200,192,184,176,168,160,152,144,136,128,120,112,104,96,88,80,72,64,56,48,40,32,24,16,8,4,2,1],"max_capture_size":256}, use_cached_outputs=False, 
+INFO 08-30 01:22:42 [cuda.py:228] Using XFormers backend.
+INFO 08-30 01:23:08 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 08-30 01:23:08 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_ot_4b_c256/3226380/checkpoint-100...
+Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards:  50% Completed | 1/2 [00:03<00:03,  3.87s/it]
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:10<00:00,  5.42s/it]
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:10<00:00,  5.19s/it]
+
+INFO 08-30 01:23:19 [loader.py:458] Loading weights took 10.45 seconds
+INFO 08-30 01:23:19 [model_runner.py:1140] Model loading took 7.5552 GiB and 10.569677 seconds
+INFO 08-30 01:23:20 [worker.py:287] Memory profiling takes 0.50 seconds
+INFO 08-30 01:23:20 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+INFO 08-30 01:23:20 [worker.py:287] model weights take 7.56GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.40GiB; the rest of the memory reserved for KV Cache is 62.28GiB.
+INFO 08-30 01:23:20 [executor_base.py:112] # cuda blocks: 28345, # CPU blocks: 1820
+INFO 08-30 01:23:20 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 11.07x
+INFO 08-30 01:23:21 [model_runner.py:1450] Capturing cudagraphs for decoding. This may lead to unexpected consequences if the model is not static. To run the model in eager mode, set 'enforce_eager=True' or use '--enforce-eager' in the CLI. If out-of-memory error occurs during cudagraph capture, consider decreasing `gpu_memory_utilization` or switching to eager mode. You can also reduce the `max_num_seqs` as needed to decrease memory usage.
+Capturing CUDA graph shapes:   0%|          | 0/35 [00:00<?, ?it/s]Capturing CUDA graph shapes:   3%|▎         | 1/35 [00:00<00:14,  2.34it/s]Capturing CUDA graph shapes:   6%|▌         | 2/35 [00:00<00:13,  2.46it/s]Capturing CUDA graph shapes:   9%|▊         | 3/35 [00:01<00:12,  2.49it/s]Capturing CUDA graph shapes:  11%|█▏        | 4/35 [00:01<00:12,  2.50it/s]Capturing CUDA graph shapes:  14%|█▍        | 5/35 [00:02<00:11,  2.52it/s]Capturing CUDA graph shapes:  17%|█▋        | 6/35 [00:02<00:11,  2.52it/s]Capturing CUDA graph shapes:  20%|██        | 7/35 [00:02<00:11,  2.52it/s]Capturing CUDA graph shapes:  23%|██▎       | 8/35 [00:03<00:10,  2.52it/s]Capturing CUDA graph shapes:  26%|██▌       | 9/35 [00:03<00:10,  2.52it/s]Capturing CUDA graph shapes:  29%|██▊       | 10/35 [00:03<00:09,  2.53it/s]Capturing CUDA graph shapes:  31%|███▏      | 11/35 [00:04<00:09,  2.54it/s]Capturing CUDA graph shapes:  34%|███▍      | 12/35 [00:04<00:09,  2.55it/s]Capturing CUDA graph shapes:  37%|███▋      | 13/35 [00:05<00:08,  2.54it/s]Capturing CUDA graph shapes:  40%|████      | 14/35 [00:05<00:08,  2.50it/s]Capturing CUDA graph shapes:  43%|████▎     | 15/35 [00:05<00:07,  2.53it/s]Capturing CUDA graph shapes:  46%|████▌     | 16/35 [00:06<00:07,  2.55it/s]Capturing CUDA graph shapes:  49%|████▊     | 17/35 [00:06<00:06,  2.57it/s]Capturing CUDA graph shapes:  51%|█████▏    | 18/35 [00:07<00:06,  2.58it/s]Capturing CUDA graph shapes:  54%|█████▍    | 19/35 [00:07<00:06,  2.58it/s]Capturing CUDA graph shapes:  57%|█████▋    | 20/35 [00:07<00:05,  2.57it/s]Capturing CUDA graph shapes:  60%|██████    | 21/35 [00:08<00:05,  2.56it/s]Capturing CUDA graph shapes:  63%|██████▎   | 22/35 [00:08<00:05,  2.56it/s]Capturing CUDA graph shapes:  66%|██████▌   | 23/35 [00:09<00:04,  2.58it/s]Capturing CUDA graph shapes:  69%|██████▊   | 24/35 [00:09<00:04,  2.58it/s]Capturing CUDA graph shapes:  71%|███████▏  | 25/35 [00:09<00:03,  2.59it/s]Capturing CUDA graph shapes:  74%|███████▍  | 26/35 [00:10<00:03,  2.54it/s]Capturing CUDA graph shapes:  77%|███████▋  | 27/35 [00:10<00:03,  2.56it/s]Capturing CUDA graph shapes:  80%|████████  | 28/35 [00:10<00:02,  2.59it/s]Capturing CUDA graph shapes:  83%|████████▎ | 29/35 [00:11<00:02,  2.60it/s]Capturing CUDA graph shapes:  86%|████████▌ | 30/35 [00:11<00:01,  2.62it/s]Capturing CUDA graph shapes:  89%|████████▊ | 31/35 [00:12<00:01,  2.58it/s]Capturing CUDA graph shapes:  91%|█████████▏| 32/35 [00:12<00:01,  2.63it/s]Capturing CUDA graph shapes:  94%|█████████▍| 33/35 [00:12<00:00,  2.67it/s]Capturing CUDA graph shapes:  97%|█████████▋| 34/35 [00:13<00:00,  2.66it/s]Capturing CUDA graph shapes: 100%|██████████| 35/35 [00:13<00:00,  2.67it/s]Capturing CUDA graph shapes: 100%|██████████| 35/35 [00:13<00:00,  2.57it/s]
+INFO 08-30 01:23:35 [model_runner.py:1592] Graph capturing finished in 14 secs, took 0.43 GiB
+INFO 08-30 01:23:35 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 15.94 seconds
+extend:st_tt_clip005_4b_c256_ckpt100/aime24:   0%|          | 0/3 [00:00<?, ?it/s]extend:st_tt_clip005_4b_c256_ckpt100/aime24:  33%|███▎      | 1/3 [06:01<12:02, 361.20s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime24:  67%|██████▋   | 2/3 [11:39<05:47, 347.60s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime24: 100%|██████████| 3/3 [17:21<00:00, 345.09s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime24: 100%|██████████| 3/3 [17:21<00:00, 347.13s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/4b/aime24/think/st_tt_clip005_c256_4b_a24_th.3226428.out
+[TOKEN_BUDGET]
+[aime24] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=13.33% (4/30)  Avg16=5.00%
+  @8k: Pass@8=43.33% (13/30)  Avg16=28.75%
+  @16k: Pass@8=73.33% (22/30)  Avg16=57.92%
+  @32k: Pass@8=83.33% (25/30)  Avg16=72.50%
+  @38k: Pass@8=83.33% (25/30)  Avg16=72.92%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime24] n=30  P@16=0.00%  Avg16=72.92%  L=16484.5  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime24] n=30  P@16=0.00%  Avg16=72.92%  L=16484.5  pass/log2(16L)=0.0000  avg/log2(16L)=4.0489
+[extend] done st_tt_clip005_4b_c256_ckpt100/aime24: extended=24 Pass@8 83.33% -> 83.33% len 16025.0 -> 16484.5
+extend:st_tt_clip005_4b_c256_ckpt100/aime25:   0%|          | 0/5 [00:00<?, ?it/s]extend:st_tt_clip005_4b_c256_ckpt100/aime25:  20%|██        | 1/5 [05:55<23:41, 355.38s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime25:  40%|████      | 2/5 [11:43<17:33, 351.06s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime25:  60%|██████    | 3/5 [17:41<11:48, 354.45s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime25:  80%|████████  | 4/5 [24:08<06:07, 367.24s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime25: 100%|██████████| 5/5 [29:27<00:00, 349.60s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime25: 100%|██████████| 5/5 [29:27<00:00, 353.41s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/4b/aime25/think/st_tt_clip005_c256_4b_a25_th.3226429.out
+[TOKEN_BUDGET]
+[aime25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=10.00% (3/30)  Avg16=4.17%
+  @8k: Pass@8=26.67% (8/30)  Avg16=15.42%
+  @16k: Pass@8=60.00% (18/30)  Avg16=46.25%
+  @32k: Pass@8=83.33% (25/30)  Avg16=63.75%
+  @38k: Pass@8=83.33% (25/30)  Avg16=63.75%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime25] n=30  P@16=0.00%  Avg16=63.75%  L=19818.1  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime25] n=30  P@16=0.00%  Avg16=63.75%  L=19818.1  pass/log2(16L)=0.0000  avg/log2(16L)=3.4885
+[extend] done st_tt_clip005_4b_c256_ckpt100/aime25: extended=39 Pass@8 83.33% -> 83.33% len 19028.5 -> 19818.1
+extend:st_tt_clip005_4b_c256_ckpt100/aime26:   0%|          | 0/4 [00:00<?, ?it/s]extend:st_tt_clip005_4b_c256_ckpt100/aime26:  25%|██▌       | 1/4 [05:55<17:45, 355.08s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime26:  50%|█████     | 2/4 [10:53<10:42, 321.49s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime26:  75%|███████▌  | 3/4 [16:36<05:31, 331.73s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime26: 100%|██████████| 4/4 [19:32<00:00, 270.23s/it]extend:st_tt_clip005_4b_c256_ckpt100/aime26: 100%|██████████| 4/4 [19:32<00:00, 293.23s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/4b/aime26/think/st_tt_clip005_c256_4b_a26_th.3226430.out
+[TOKEN_BUDGET]
+[aime26] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=10.00% (3/30)  Avg16=4.17%
+  @8k: Pass@8=43.33% (13/30)  Avg16=25.00%
+  @16k: Pass@8=76.67% (23/30)  Avg16=51.67%
+  @32k: Pass@8=83.33% (25/30)  Avg16=63.33%
+  @38k: Pass@8=83.33% (25/30)  Avg16=63.33%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime26] n=30  P@16=0.00%  Avg16=63.33%  L=18075.3  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime26] n=30  P@16=0.00%  Avg16=63.33%  L=18075.3  pass/log2(16L)=0.0000  avg/log2(16L)=3.4910
+[extend] done st_tt_clip005_4b_c256_ckpt100/aime26: extended=27 Pass@8 83.33% -> 83.33% len 17586.0 -> 18075.3
+extend:st_tt_clip005_4b_c256_ckpt100/hmmt25:   0%|          | 0/6 [00:00<?, ?it/s]extend:st_tt_clip005_4b_c256_ckpt100/hmmt25:  17%|█▋        | 1/6 [06:13<31:07, 373.46s/it]extend:st_tt_clip005_4b_c256_ckpt100/hmmt25:  33%|███▎      | 2/6 [11:51<23:30, 352.51s/it]extend:st_tt_clip005_4b_c256_ckpt100/hmmt25:  50%|█████     | 3/6 [17:33<17:23, 347.71s/it]extend:st_tt_clip005_4b_c256_ckpt100/hmmt25:  67%|██████▋   | 4/6 [22:16<10:44, 322.10s/it]extend:st_tt_clip005_4b_c256_ckpt100/hmmt25:  83%|████████▎ | 5/6 [29:08<05:54, 354.59s/it]extend:st_tt_clip005_4b_c256_ckpt100/hmmt25: 100%|██████████| 6/6 [31:24<00:00, 280.39s/it]extend:st_tt_clip005_4b_c256_ckpt100/hmmt25: 100%|██████████| 6/6 [31:24<00:00, 314.12s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/4b/hmmt25/think/st_tt_clip005_c256_4b_h25_th.3226431.out
+[TOKEN_BUDGET]
+[hmmt25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=6.67% (2/30)  Avg16=2.50%
+  @8k: Pass@8=16.67% (5/30)  Avg16=10.00%
+  @16k: Pass@8=46.67% (14/30)  Avg16=31.25%
+  @32k: Pass@8=53.33% (16/30)  Avg16=43.75%
+  @38k: Pass@8=53.33% (16/30)  Avg16=43.75%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[hmmt25] n=30  P@16=0.00%  Avg16=43.75%  L=21950.8  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[hmmt25] n=30  P@16=0.00%  Avg16=43.75%  L=21950.8  pass/log2(16L)=0.0000  avg/log2(16L)=2.3749
+[extend] done st_tt_clip005_4b_c256_ckpt100/hmmt25: extended=42 Pass@8 53.33% -> 53.33% len 21145.9 -> 21950.8
+[extend] loading model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/s1.7b_t4bt/s1p7_t4bt_st_tt_clip005_1e_6_openthoughts/3354231/checkpoint-100 max_model_len=40960 jobs=4 generate_batch_size=8
+INFO 08-30 03:09:02 [config.py:717] This model supports multiple tasks: {'reward', 'embed', 'classify', 'score', 'generate'}. Defaulting to 'generate'.
+WARNING 08-30 03:09:02 [arg_utils.py:1525] Chunked prefill is enabled by default for models with max_model_len > 32K. Chunked prefill might not work with some features or models. If you encounter any issues, please disable by launching with --enable-chunked-prefill=False.
+INFO 08-30 03:09:02 [config.py:2003] Chunked prefill is enabled with max_num_batched_tokens=2048.
+INFO 08-30 03:09:02 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/s1.7b_t4bt/s1p7_t4bt_st_tt_clip005_1e_6_openthoughts/3354231/checkpoint-100', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/s1.7b_t4bt/s1p7_t4bt_st_tt_clip005_1e_6_openthoughts/3354231/checkpoint-100', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=False, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/s1.7b_t4bt/s1p7_t4bt_st_tt_clip005_1e_6_openthoughts/3354231/checkpoint-100, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=True, use_async_output_proc=True, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[256,248,240,232,224,216,208,200,192,184,176,168,160,152,144,136,128,120,112,104,96,88,80,72,64,56,48,40,32,24,16,8,4,2,1],"max_capture_size":256}, use_cached_outputs=False, 
+INFO 08-30 03:09:03 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/s1.7b_t4bt/s1p7_t4bt_st_tt_clip005_1e_6_openthoughts/3354231/checkpoint-100...
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:03<00:00,  3.99s/it]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:03<00:00,  3.99s/it]
+
+INFO 08-30 03:09:07 [loader.py:458] Loading weights took 4.03 seconds
+INFO 08-30 03:09:07 [model_runner.py:1140] Model loading took 3.2054 GiB and 4.078362 seconds
+INFO 08-30 03:09:08 [worker.py:287] Memory profiling takes 0.30 seconds
+INFO 08-30 03:09:08 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.90) = 71.33GiB
+INFO 08-30 03:09:08 [worker.py:287] model weights take 3.21GiB; non_torch_memory takes 0.00GiB; PyTorch activation peak memory takes 1.39GiB; the rest of the memory reserved for KV Cache is 66.73GiB.
+INFO 08-30 03:09:08 [executor_base.py:112] # cuda blocks: 39049, # CPU blocks: 2340
+INFO 08-30 03:09:08 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 15.25x
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval/extend_truncated_vllm.py", line 599, in <module>
+[rank0]:     main()
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval/extend_truncated_vllm.py", line 589, in main
+[rank0]:     run_shard(
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval/extend_truncated_vllm.py", line 549, in run_shard
+[rank0]:     llm = build_llm(
+[rank0]:   File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval/eval_math_vllm_local.py", line 828, in build_llm
+[rank0]:     return LLM(**cfg)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/utils.py", line 1161, in inner
+[rank0]:     return fn(*args, **kwargs)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/entrypoints/llm.py", line 247, in __init__
+[rank0]:     self.llm_engine = LLMEngine.from_engine_args(
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/engine/llm_engine.py", line 510, in from_engine_args
+[rank0]:     return engine_cls.from_vllm_config(
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/engine/llm_engine.py", line 486, in from_vllm_config
+[rank0]:     return cls(
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/engine/llm_engine.py", line 278, in __init__
+[rank0]:     self._initialize_kv_caches()
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/engine/llm_engine.py", line 435, in _initialize_kv_caches
+[rank0]:     self.model_executor.initialize_cache(num_gpu_blocks, num_cpu_blocks)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/executor_base.py", line 123, in initialize_cache
+[rank0]:     self.collective_rpc("initialize_cache",
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/uniproc_executor.py", line 56, in collective_rpc
+[rank0]:     answer = run_method(self.driver_worker, method, args, kwargs)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/utils.py", line 2456, in run_method
+[rank0]:     return func(*args, **kwargs)
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/worker/worker.py", line 327, in initialize_cache
+[rank0]:     self._init_cache_engine()
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/worker/worker.py", line 332, in _init_cache_engine
+[rank0]:     self.cache_engine = [
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/worker/worker.py", line 333, in <listcomp>
+[rank0]:     CacheEngine(self.cache_config, self.model_config,
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/worker/cache_engine.py", line 64, in __init__
+[rank0]:     self.gpu_cache = self._allocate_kv_cache(
+[rank0]:   File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/worker/cache_engine.py", line 95, in _allocate_kv_cache
+[rank0]:     layer_kv_cache = torch.zeros(
+[rank0]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.38 GiB. GPU 0 has a total capacity of 79.25 GiB of which 415.94 MiB is free. Including non-PyTorch memory, this process has 78.83 GiB memory in use. Of the allocated memory 77.89 GiB is allocated by PyTorch, with 46.00 MiB allocated in private pools (e.g., CUDA Graphs), and 85.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[rank0]:[W830 03:09:09.291427033 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())

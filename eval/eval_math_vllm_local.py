@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -958,7 +959,7 @@ def summarize_result_subset(
     return out
 
 
-DEFAULT_TOKEN_BUDGETS = [1024, 2048, 4096, 8192, 16384, 32768]
+DEFAULT_TOKEN_BUDGETS = [1024, 2048, 4096, 8192, 16384, 32768, 38912]
 DEFAULT_AP_LNE_K = 16
 AP_LNE_SCALE = 1e5
 AP_LNE_LOG_POWER = 4
@@ -1634,6 +1635,16 @@ def main() -> None:
         default=0,
         help="0 = auto (max_prompt + max_new_tokens + 128)",
     )
+    parser.add_argument(
+        "--allow-long-max-model-len",
+        action="store_true",
+        default=False,
+        help=(
+            "Allow --max-model-len above config max_position_embeddings "
+            "(sets VLLM_ALLOW_LONG_MAX_MODEL_LEN=1). Needed for qwen3-*-base "
+            "evals at 38912/40960 when config max_pos is 32768."
+        ),
+    )
     parser.add_argument("--enforce-eager", action="store_true", default=False)
     parser.add_argument(
         "--disable-custom-all-reduce",
@@ -1931,15 +1942,32 @@ def main() -> None:
         print(f"[eval] vLLM model={vllm_model_path}")
 
     cfg_max = max_seq_len_from_model_config(vllm_model_path)
+    allow_long = bool(getattr(args, "allow_long_max_model_len", False)) or (
+        os.environ.get("VLLM_ALLOW_LONG_MAX_MODEL_LEN", "0").strip().lower()
+        in ("1", "true", "yes", "y", "on")
+    )
+    if allow_long:
+        os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1"
     if cfg_max is not None and max_model_len > cfg_max:
-        print(f"[eval] capping max_model_len {max_model_len} -> {cfg_max} (base model max_position_embeddings)")
-        max_model_len = cfg_max
-        if args.fill_context:
-            max_new_tokens = max(1, max_model_len - max_prompt_tokens)
+        if allow_long:
             print(
-                f"[eval] fill-context (after max_model_len cap): max_new_tokens={max_new_tokens}",
+                f"[eval] allowing max_model_len={max_model_len} > config "
+                f"max_position_embeddings={cfg_max} (VLLM_ALLOW_LONG_MAX_MODEL_LEN=1)",
                 flush=True,
             )
+        else:
+            print(
+                f"[eval] capping max_model_len {max_model_len} -> {cfg_max} "
+                f"(base model max_position_embeddings; pass --allow-long-max-model-len to override)",
+                flush=True,
+            )
+            max_model_len = cfg_max
+            if args.fill_context:
+                max_new_tokens = max(1, max_model_len - max_prompt_tokens)
+                print(
+                    f"[eval] fill-context (after max_model_len cap): max_new_tokens={max_new_tokens}",
+                    flush=True,
+                )
 
     llm = build_llm(
         vllm_model_path,

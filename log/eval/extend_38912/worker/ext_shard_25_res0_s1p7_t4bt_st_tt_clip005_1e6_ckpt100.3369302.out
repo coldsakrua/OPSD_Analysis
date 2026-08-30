@@ -1,0 +1,104 @@
+[extend] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[extend] shard=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/scripts/eval/extend_38912/manifest/shards/shard_25_res0_s1p7_t4bt_st_tt_clip005_1e6_ckpt100.jsonl
+[extend] generate_batch_size=4 (0=auto: 0.6b/1.7b=12, 4b=8, 8b=4)
+[extend] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/anchor
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[extend] shard=shard_25_res0_s1p7_t4bt_st_tt_clip005_1e6_ckpt100.jsonl jobs=4 models=1 trunc=131
+[extend] loading model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/s1.7b_t4bt/s1p7_t4bt_st_tt_clip005_1e_6_openthoughts/3354231/checkpoint-100 max_model_len=40960 jobs=4 generate_batch_size=4
+INFO 08-30 08:24:24 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 08-30 08:24:36 [__init__.py:239] Automatically detected platform cuda.
+INFO 08-30 08:24:54 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 08-30 08:24:54 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 08-30 08:24:54 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 08-30 08:24:54 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 08-30 08:24:54 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO 08-30 08:25:02 [config.py:717] This model supports multiple tasks: {'generate', 'score', 'reward', 'classify', 'embed'}. Defaulting to 'generate'.
+WARNING 08-30 08:25:02 [arg_utils.py:1525] Chunked prefill is enabled by default for models with max_model_len > 32K. Chunked prefill might not work with some features or models. If you encounter any issues, please disable by launching with --enable-chunked-prefill=False.
+INFO 08-30 08:25:02 [config.py:2003] Chunked prefill is enabled with max_num_batched_tokens=2048.
+INFO 08-30 08:25:02 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/s1.7b_t4bt/s1p7_t4bt_st_tt_clip005_1e_6_openthoughts/3354231/checkpoint-100', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/s1.7b_t4bt/s1p7_t4bt_st_tt_clip005_1e_6_openthoughts/3354231/checkpoint-100', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=False, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/s1.7b_t4bt/s1p7_t4bt_st_tt_clip005_1e_6_openthoughts/3354231/checkpoint-100, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=True, use_async_output_proc=True, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[256,248,240,232,224,216,208,200,192,184,176,168,160,152,144,136,128,120,112,104,96,88,80,72,64,56,48,40,32,24,16,8,4,2,1],"max_capture_size":256}, use_cached_outputs=False, 
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/uniproc_executor.py:29: UserWarning: Failed to get the IP address, using 0.0.0.0 by default.The value can be set by the environment variable VLLM_HOST_IP or HOST_IP.
+  get_ip(), get_open_port())
+INFO 08-30 08:25:03 [cuda.py:228] Using XFormers backend.
+INFO 08-30 08:25:04 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 08-30 08:25:04 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/s1.7b_t4bt/s1p7_t4bt_st_tt_clip005_1e_6_openthoughts/3354231/checkpoint-100...
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:04<00:00,  4.89s/it]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:04<00:00,  4.89s/it]
+
+INFO 08-30 08:25:09 [loader.py:458] Loading weights took 4.98 seconds
+INFO 08-30 08:25:10 [model_runner.py:1140] Model loading took 3.2152 GiB and 5.419697 seconds
+INFO 08-30 08:25:11 [worker.py:287] Memory profiling takes 0.75 seconds
+INFO 08-30 08:25:11 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.85) = 67.36GiB
+INFO 08-30 08:25:11 [worker.py:287] model weights take 3.22GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.39GiB; the rest of the memory reserved for KV Cache is 62.66GiB.
+INFO 08-30 08:25:11 [executor_base.py:112] # cuda blocks: 36666, # CPU blocks: 2340
+INFO 08-30 08:25:11 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 14.32x
+INFO 08-30 08:25:13 [model_runner.py:1450] Capturing cudagraphs for decoding. This may lead to unexpected consequences if the model is not static. To run the model in eager mode, set 'enforce_eager=True' or use '--enforce-eager' in the CLI. If out-of-memory error occurs during cudagraph capture, consider decreasing `gpu_memory_utilization` or switching to eager mode. You can also reduce the `max_num_seqs` as needed to decrease memory usage.
+Capturing CUDA graph shapes:   0%|          | 0/35 [00:00<?, ?it/s]Capturing CUDA graph shapes:   3%|▎         | 1/35 [00:00<00:17,  1.92it/s]Capturing CUDA graph shapes:   6%|▌         | 2/35 [00:00<00:15,  2.12it/s]Capturing CUDA graph shapes:   9%|▊         | 3/35 [00:01<00:14,  2.16it/s]Capturing CUDA graph shapes:  11%|█▏        | 4/35 [00:01<00:13,  2.24it/s]Capturing CUDA graph shapes:  14%|█▍        | 5/35 [00:02<00:13,  2.29it/s]Capturing CUDA graph shapes:  17%|█▋        | 6/35 [00:02<00:12,  2.33it/s]Capturing CUDA graph shapes:  20%|██        | 7/35 [00:03<00:11,  2.36it/s]Capturing CUDA graph shapes:  23%|██▎       | 8/35 [00:03<00:11,  2.38it/s]Capturing CUDA graph shapes:  26%|██▌       | 9/35 [00:03<00:11,  2.35it/s]Capturing CUDA graph shapes:  29%|██▊       | 10/35 [00:04<00:10,  2.34it/s]Capturing CUDA graph shapes:  31%|███▏      | 11/35 [00:04<00:10,  2.34it/s]Capturing CUDA graph shapes:  34%|███▍      | 12/35 [00:05<00:09,  2.33it/s]Capturing CUDA graph shapes:  37%|███▋      | 13/35 [00:05<00:09,  2.33it/s]Capturing CUDA graph shapes:  40%|████      | 14/35 [00:06<00:09,  2.32it/s]Capturing CUDA graph shapes:  43%|████▎     | 15/35 [00:06<00:08,  2.31it/s]Capturing CUDA graph shapes:  46%|████▌     | 16/35 [00:06<00:08,  2.31it/s]Capturing CUDA graph shapes:  49%|████▊     | 17/35 [00:07<00:07,  2.30it/s]Capturing CUDA graph shapes:  51%|█████▏    | 18/35 [00:07<00:07,  2.30it/s]Capturing CUDA graph shapes:  54%|█████▍    | 19/35 [00:08<00:06,  2.29it/s]Capturing CUDA graph shapes:  57%|█████▋    | 20/35 [00:08<00:06,  2.29it/s]Capturing CUDA graph shapes:  60%|██████    | 21/35 [00:09<00:06,  2.29it/s]Capturing CUDA graph shapes:  63%|██████▎   | 22/35 [00:09<00:05,  2.29it/s]Capturing CUDA graph shapes:  66%|██████▌   | 23/35 [00:10<00:05,  2.27it/s]Capturing CUDA graph shapes:  69%|██████▊   | 24/35 [00:10<00:04,  2.30it/s]Capturing CUDA graph shapes:  71%|███████▏  | 25/35 [00:10<00:04,  2.31it/s]Capturing CUDA graph shapes:  74%|███████▍  | 26/35 [00:11<00:03,  2.30it/s]Capturing CUDA graph shapes:  77%|███████▋  | 27/35 [00:11<00:03,  2.31it/s]Capturing CUDA graph shapes:  80%|████████  | 28/35 [00:12<00:03,  2.29it/s]Capturing CUDA graph shapes:  83%|████████▎ | 29/35 [00:12<00:02,  2.21it/s]Capturing CUDA graph shapes:  86%|████████▌ | 30/35 [00:13<00:02,  2.24it/s]Capturing CUDA graph shapes:  89%|████████▊ | 31/35 [00:13<00:01,  2.23it/s]Capturing CUDA graph shapes:  91%|█████████▏| 32/35 [00:14<00:01,  2.15it/s]Capturing CUDA graph shapes:  94%|█████████▍| 33/35 [00:14<00:00,  2.20it/s]Capturing CUDA graph shapes:  97%|█████████▋| 34/35 [00:14<00:00,  2.21it/s]Capturing CUDA graph shapes: 100%|██████████| 35/35 [00:15<00:00,  2.21it/s]Capturing CUDA graph shapes: 100%|██████████| 35/35 [00:15<00:00,  2.27it/s]
+INFO 08-30 08:25:29 [model_runner.py:1592] Graph capturing finished in 15 secs, took 0.33 GiB
+INFO 08-30 08:25:29 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 18.98 seconds
+extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24:   0%|          | 0/9 [00:00<?, ?it/s]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24:  11%|█         | 1/9 [02:05<16:45, 125.66s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24:  22%|██▏       | 2/9 [04:20<15:16, 131.00s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24:  33%|███▎      | 3/9 [06:34<13:14, 132.35s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24:  44%|████▍     | 4/9 [08:41<10:52, 130.43s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24:  56%|█████▌    | 5/9 [10:52<08:42, 130.68s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24:  67%|██████▋   | 6/9 [13:07<06:36, 132.03s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24:  78%|███████▊  | 7/9 [15:16<04:22, 131.02s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24:  89%|████████▉ | 8/9 [17:31<02:12, 132.26s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24: 100%|██████████| 9/9 [19:36<00:00, 129.96s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24: 100%|██████████| 9/9 [19:36<00:00, 130.71s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/1.7b/aime24/think/s1p7_t4bt_st_tt_a24_th.3354296.out
+[TOKEN_BUDGET]
+[aime24] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=10.00% (3/30)  Avg16=2.50%
+  @8k: Pass@8=33.33% (10/30)  Avg16=19.17%
+  @16k: Pass@8=60.00% (18/30)  Avg16=37.08%
+  @32k: Pass@8=70.00% (21/30)  Avg16=44.17%
+  @38k: Pass@8=70.00% (21/30)  Avg16=44.58%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime24] n=30  P@16=0.00%  Avg16=44.58%  L=18649.1  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime24] n=30  P@16=0.00%  Avg16=44.58%  L=18649.1  pass/log2(16L)=0.0000  avg/log2(16L)=2.4514
+[extend] done s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime24: extended=35 Pass@8 70.00% -> 70.00% len 17871.9 -> 18649.1
+extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25:   0%|          | 0/10 [00:00<?, ?it/s]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25:  10%|█         | 1/10 [02:15<20:21, 135.71s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25:  20%|██        | 2/10 [04:23<17:28, 131.07s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25:  30%|███       | 3/10 [06:37<15:27, 132.44s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25:  40%|████      | 4/10 [08:47<13:08, 131.46s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25:  50%|█████     | 5/10 [10:56<10:52, 130.54s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25:  60%|██████    | 6/10 [13:01<08:34, 128.68s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25:  70%|███████   | 7/10 [15:11<06:27, 129.16s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25:  80%|████████  | 8/10 [17:18<04:16, 128.26s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25:  90%|█████████ | 9/10 [19:25<02:07, 127.92s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25: 100%|██████████| 10/10 [21:11<00:00, 121.29s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25: 100%|██████████| 10/10 [21:11<00:00, 127.16s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/1.7b/aime25/think/s1p7_t4bt_st_tt_a25_th.3354297.out
+[TOKEN_BUDGET]
+[aime25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=13.33% (4/30)  Avg16=5.83%
+  @8k: Pass@8=23.33% (7/30)  Avg16=16.67%
+  @16k: Pass@8=46.67% (14/30)  Avg16=25.83%
+  @32k: Pass@8=56.67% (17/30)  Avg16=30.83%
+  @38k: Pass@8=60.00% (18/30)  Avg16=31.67%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime25] n=30  P@16=0.00%  Avg16=31.67%  L=19530.5  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime25] n=30  P@16=0.00%  Avg16=31.67%  L=19530.5  pass/log2(16L)=0.0000  avg/log2(16L)=1.7348
+[extend] done s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime25: extended=37 Pass@8 56.67% -> 60.00% len 18833.9 -> 19530.5
+extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:   0%|          | 0/11 [00:00<?, ?it/s]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:   9%|▉         | 1/11 [02:16<22:40, 136.04s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:  18%|█▊        | 2/11 [04:27<19:58, 133.18s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:  27%|██▋       | 3/11 [06:36<17:29, 131.22s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:  36%|███▋      | 4/11 [08:52<15:31, 133.14s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:  45%|████▌     | 5/11 [11:00<13:08, 131.38s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:  55%|█████▍    | 6/11 [13:15<11:02, 132.59s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:  64%|██████▎   | 7/11 [15:24<08:45, 131.47s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:  73%|███████▎  | 8/11 [17:40<06:38, 132.90s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:  82%|████████▏ | 9/11 [19:53<04:26, 133.06s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26:  91%|█████████ | 10/11 [21:59<02:10, 130.67s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26: 100%|██████████| 11/11 [24:15<00:00, 132.42s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26: 100%|██████████| 11/11 [24:15<00:00, 132.33s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/1.7b/aime26/think/s1p7_t4bt_st_tt_a26_th.3354298.out
+[TOKEN_BUDGET]
+[aime26] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=10.00% (3/30)  Avg16=4.58%
+  @8k: Pass@8=33.33% (10/30)  Avg16=17.08%
+  @16k: Pass@8=53.33% (16/30)  Avg16=31.25%
+  @32k: Pass@8=60.00% (18/30)  Avg16=35.00%
+  @38k: Pass@8=60.00% (18/30)  Avg16=35.00%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime26] n=30  P@16=0.00%  Avg16=35.00%  L=19488.9  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime26] n=30  P@16=0.00%  Avg16=35.00%  L=19488.9  pass/log2(16L)=0.0000  avg/log2(16L)=1.9178
+[extend] done s1p7_t4bt_st_tt_clip005_1e6_ckpt100/aime26: extended=44 Pass@8 60.00% -> 60.00% len 18541.2 -> 19488.9
+extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/hmmt25:   0%|          | 0/4 [00:00<?, ?it/s]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/hmmt25:  25%|██▌       | 1/4 [02:06<06:18, 126.30s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/hmmt25:  50%|█████     | 2/4 [04:15<04:16, 128.09s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/hmmt25:  75%|███████▌  | 3/4 [06:26<02:09, 129.19s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/hmmt25: 100%|██████████| 4/4 [08:25<00:00, 125.43s/it]extend:s1p7_t4bt_st_tt_clip005_1e6_ckpt100/hmmt25: 100%|██████████| 4/4 [08:25<00:00, 126.46s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/1.7b/hmmt25/think/s1p7_t4bt_st_tt_h25_th.3354299.out
+[TOKEN_BUDGET]
+[hmmt25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=6.67% (2/30)  Avg16=2.50%
+  @8k: Pass@8=10.00% (3/30)  Avg16=7.08%
+  @16k: Pass@8=30.00% (9/30)  Avg16=17.08%
+  @32k: Pass@8=33.33% (10/30)  Avg16=18.75%
+  @38k: Pass@8=33.33% (10/30)  Avg16=18.75%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[hmmt25] n=30  P@16=0.00%  Avg16=18.75%  L=19067.6  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[hmmt25] n=30  P@16=0.00%  Avg16=18.75%  L=19067.6  pass/log2(16L)=0.0000  avg/log2(16L)=1.0292
+[extend] done s1p7_t4bt_st_tt_clip005_1e6_ckpt100/hmmt25: extended=15 Pass@8 33.33% -> 33.33% len 18803.6 -> 19067.6

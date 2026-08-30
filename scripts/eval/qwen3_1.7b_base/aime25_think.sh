@@ -44,6 +44,8 @@ export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export VLLM_USE_V1=0
 export VLLM_ATTENTION_BACKEND=XFORMERS
 export TOKENIZERS_PARALLELISM=false
+# qwen3-*-base config max_pos=32768; allow 40k for 38912 think evals
+export VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
 mkdir -p "$(dirname "${OUTPUT_JSON}")" "log/eval/qwen3_1.7b_base/aime25/think"
 
 THINK_ARGS=(--no-thinking)
@@ -66,7 +68,7 @@ python "${BASE_DIR}/eval/eval_math_vllm_local.py" \
   --num-samples 0 \
   --val-n 8 \
   --pass-at-k 1,4,8 \
-  --max-new-tokens 32768 \
+  --max-new-tokens 38912 \
   --temperature 0.6 \
   --top-p 0.95 \
   --top-k 20 \
@@ -76,6 +78,7 @@ python "${BASE_DIR}/eval/eval_math_vllm_local.py" \
   --tensor-parallel-size 1 \
   --gpu-memory-utilization 0.9 \
   --max-model-len 40960 \
+  --allow-long-max-model-len \
   --generate-batch-size 8 \
   --disable-custom-all-reduce \
   --force-base-tokenizer \
