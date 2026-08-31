@@ -22,6 +22,9 @@ class MetricsAggregator:
 
         self.n_tokens = 0
         self.n_rollouts = 0
+        self.sum_forward_kl = 0.0
+        self.sum_reverse_kl = 0.0
+        self.sum_jsd_sym = 0.0
         self.sum_jsd = 0.0
         self.sum_jsd_clipped = 0.0
         self.n_jsd_clipped = 0
@@ -82,6 +85,9 @@ class MetricsAggregator:
         jsd = metrics["jsd_kl"]
         jsd_clip = metrics.get("jsd_kl_clipped", jsd)
         would_clip = metrics.get("jsd_would_clip", [])
+        forward_kl = metrics.get("forward_kl") or jsd
+        reverse_kl = metrics.get("reverse_kl") or []
+        jsd_sym = metrics.get("jsd_sym") or []
         lr = metrics["log_ratio_k1"]
         adv = metrics.get("advantage") or [-x for x in lr]
         snr = metrics.get("snr") or []
@@ -93,6 +99,11 @@ class MetricsAggregator:
         t_arg = metrics.get("teacher_argmax_ids") or []
         token_ids = metrics.get("token_ids") or []
 
+        self.sum_forward_kl += float(sum(forward_kl))
+        if reverse_kl:
+            self.sum_reverse_kl += float(sum(reverse_kl))
+        if jsd_sym:
+            self.sum_jsd_sym += float(sum(jsd_sym))
         self.sum_jsd += float(sum(jsd))
         self.sum_jsd_clipped += float(sum(jsd_clip))
         if would_clip:
@@ -272,6 +283,9 @@ class MetricsAggregator:
         out: dict[str, Any] = {
             "n_rollouts": self.n_rollouts,
             "n_tokens": self.n_tokens,
+            "mean_forward_kl": self.sum_forward_kl / n,
+            "mean_reverse_kl": self.sum_reverse_kl / n,
+            "mean_jsd_sym": self.sum_jsd_sym / n,
             "mean_jsd_kl": self.sum_jsd / n,
             "mean_jsd_kl_clipped": self.sum_jsd_clipped / n,
             "frac_jsd_clipped": self.n_jsd_clipped / n,

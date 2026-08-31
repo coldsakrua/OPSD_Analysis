@@ -35,7 +35,10 @@ NUM_PROMPTS=32 N_ROLLOUTS=1 bash scripts/data_analysis/2.1_combinations/analyze_
 
 | Metric | Description |
 |--------|-------------|
-| `jsd_kl` | `generalized_jsd_loss` full vocab, T=1.1; **β=0.0** (matches `train_opsd.py`; forward KL). Note: folder `jsd005` / `0.05` is **`jsd_token_clip`**, not β |
+| `forward_kl` | KL(π_T ‖ π_S), `generalized_jsd_loss` β=0 |
+| `reverse_kl` | KL(π_S ‖ π_T), `generalized_jsd_loss` β=1 |
+| `jsd_sym` | Symmetric JSD, `generalized_jsd_loss` β=0.5 |
+| `jsd_kl` | Train-aligned divergence via `--jsd-beta` (default **β=0.0** = forward KL). Note: folder `jsd005` / `0.05` is **`jsd_token_clip`**, not β |
 | `topk_kl_k16` | Teacher top-16, renormalized, D_KL(p_T ‖ p_S) |
 | `log_ratio_k1` | log π_S(x) − log π_T(x) for sampled token x |
 | `advantage` | log π_T(x) − log π_S(x) (= −log_ratio_k1) |

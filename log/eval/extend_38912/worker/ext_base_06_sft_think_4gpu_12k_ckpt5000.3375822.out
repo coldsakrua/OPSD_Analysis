@@ -1,0 +1,107 @@
+[extend] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[extend] shard=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/scripts/eval/extend_38912/manifest_base/shards/shard_06.jsonl
+[extend] generate_batch_size=8 (0=auto: 0.6b/1.7b=12, 4b=8, 8b=4)
+[extend] allow_long_max_model_len=1
+[extend] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/anchor
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[extend] VLLM_ALLOW_LONG_MAX_MODEL_LEN=1 (pos-capped base -> 40k)
+[extend] shard=shard_06.jsonl jobs=4 models=1 trunc=466
+[extend] loading model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k/3299217/checkpoint-5000 max_model_len=40960 jobs=4 generate_batch_size=8
+INFO 08-30 21:40:19 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 08-30 21:40:31 [__init__.py:239] Automatically detected platform cuda.
+INFO 08-30 21:40:47 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 08-30 21:40:47 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 08-30 21:40:47 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 08-30 21:40:47 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 08-30 21:40:47 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+WARNING 08-30 21:40:47 [config.py:3102] User-specified max_model_len (40960) is greater than the derived max_model_len (max_position_embeddings=32768 or model_max_length=None in model's config.json). This may lead to incorrect model outputs or CUDA errors. Make sure the value is correct and within the model context size.
+INFO 08-30 21:40:55 [config.py:717] This model supports multiple tasks: {'classify', 'generate', 'reward', 'embed', 'score'}. Defaulting to 'generate'.
+WARNING 08-30 21:40:55 [arg_utils.py:1525] Chunked prefill is enabled by default for models with max_model_len > 32K. Chunked prefill might not work with some features or models. If you encounter any issues, please disable by launching with --enable-chunked-prefill=False.
+INFO 08-30 21:40:55 [config.py:2003] Chunked prefill is enabled with max_num_batched_tokens=2048.
+INFO 08-30 21:40:55 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k/3299217/checkpoint-5000', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k/3299217/checkpoint-5000', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=False, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k/3299217/checkpoint-5000, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=True, use_async_output_proc=True, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[256,248,240,232,224,216,208,200,192,184,176,168,160,152,144,136,128,120,112,104,96,88,80,72,64,56,48,40,32,24,16,8,4,2,1],"max_capture_size":256}, use_cached_outputs=False, 
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/uniproc_executor.py:29: UserWarning: Failed to get the IP address, using 0.0.0.0 by default.The value can be set by the environment variable VLLM_HOST_IP or HOST_IP.
+  get_ip(), get_open_port())
+INFO 08-30 21:40:56 [cuda.py:228] Using XFormers backend.
+INFO 08-30 21:40:58 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 08-30 21:40:58 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k/3299217/checkpoint-5000...
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:04<00:00,  4.98s/it]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:04<00:00,  4.98s/it]
+
+INFO 08-30 21:41:03 [loader.py:458] Loading weights took 5.13 seconds
+INFO 08-30 21:41:03 [model_runner.py:1140] Model loading took 3.2132 GiB and 5.243302 seconds
+INFO 08-30 21:41:04 [worker.py:287] Memory profiling takes 0.47 seconds
+INFO 08-30 21:41:04 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.85) = 67.36GiB
+INFO 08-30 21:41:04 [worker.py:287] model weights take 3.21GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.39GiB; the rest of the memory reserved for KV Cache is 62.66GiB.
+INFO 08-30 21:41:04 [executor_base.py:112] # cuda blocks: 36667, # CPU blocks: 2340
+INFO 08-30 21:41:04 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 14.32x
+INFO 08-30 21:41:07 [model_runner.py:1450] Capturing cudagraphs for decoding. This may lead to unexpected consequences if the model is not static. To run the model in eager mode, set 'enforce_eager=True' or use '--enforce-eager' in the CLI. If out-of-memory error occurs during cudagraph capture, consider decreasing `gpu_memory_utilization` or switching to eager mode. You can also reduce the `max_num_seqs` as needed to decrease memory usage.
+Capturing CUDA graph shapes:   0%|          | 0/35 [00:00<?, ?it/s]Capturing CUDA graph shapes:   3%|▎         | 1/35 [00:00<00:17,  1.98it/s]Capturing CUDA graph shapes:   6%|▌         | 2/35 [00:00<00:14,  2.28it/s]Capturing CUDA graph shapes:   9%|▊         | 3/35 [00:01<00:13,  2.43it/s]Capturing CUDA graph shapes:  11%|█▏        | 4/35 [00:01<00:12,  2.50it/s]Capturing CUDA graph shapes:  14%|█▍        | 5/35 [00:02<00:11,  2.54it/s]Capturing CUDA graph shapes:  17%|█▋        | 6/35 [00:02<00:11,  2.57it/s]Capturing CUDA graph shapes:  20%|██        | 7/35 [00:02<00:10,  2.58it/s]Capturing CUDA graph shapes:  23%|██▎       | 8/35 [00:03<00:10,  2.59it/s]Capturing CUDA graph shapes:  26%|██▌       | 9/35 [00:03<00:10,  2.52it/s]Capturing CUDA graph shapes:  29%|██▊       | 10/35 [00:03<00:09,  2.54it/s]Capturing CUDA graph shapes:  31%|███▏      | 11/35 [00:04<00:09,  2.57it/s]Capturing CUDA graph shapes:  34%|███▍      | 12/35 [00:04<00:08,  2.59it/s]Capturing CUDA graph shapes:  37%|███▋      | 13/35 [00:05<00:08,  2.57it/s]Capturing CUDA graph shapes:  40%|████      | 14/35 [00:05<00:08,  2.55it/s]Capturing CUDA graph shapes:  43%|████▎     | 15/35 [00:05<00:07,  2.57it/s]Capturing CUDA graph shapes:  46%|████▌     | 16/35 [00:06<00:07,  2.59it/s]Capturing CUDA graph shapes:  49%|████▊     | 17/35 [00:06<00:06,  2.61it/s]Capturing CUDA graph shapes:  51%|█████▏    | 18/35 [00:07<00:06,  2.55it/s]Capturing CUDA graph shapes:  54%|█████▍    | 19/35 [00:07<00:06,  2.58it/s]Capturing CUDA graph shapes:  57%|█████▋    | 20/35 [00:07<00:05,  2.60it/s]Capturing CUDA graph shapes:  60%|██████    | 21/35 [00:08<00:05,  2.62it/s]Capturing CUDA graph shapes:  63%|██████▎   | 22/35 [00:08<00:04,  2.63it/s]Capturing CUDA graph shapes:  66%|██████▌   | 23/35 [00:09<00:04,  2.58it/s]Capturing CUDA graph shapes:  69%|██████▊   | 24/35 [00:09<00:04,  2.58it/s]Capturing CUDA graph shapes:  71%|███████▏  | 25/35 [00:09<00:03,  2.59it/s]Capturing CUDA graph shapes:  74%|███████▍  | 26/35 [00:10<00:03,  2.61it/s]Capturing CUDA graph shapes:  77%|███████▋  | 27/35 [00:10<00:03,  2.62it/s]Capturing CUDA graph shapes:  80%|████████  | 28/35 [00:10<00:02,  2.63it/s]Capturing CUDA graph shapes:  83%|████████▎ | 29/35 [00:11<00:02,  2.42it/s]Capturing CUDA graph shapes:  86%|████████▌ | 30/35 [00:11<00:02,  2.48it/s]Capturing CUDA graph shapes:  89%|████████▊ | 31/35 [00:12<00:01,  2.44it/s]Capturing CUDA graph shapes:  91%|█████████▏| 32/35 [00:12<00:01,  2.46it/s]Capturing CUDA graph shapes:  94%|█████████▍| 33/35 [00:12<00:00,  2.51it/s]Capturing CUDA graph shapes:  97%|█████████▋| 34/35 [00:13<00:00,  2.54it/s]Capturing CUDA graph shapes: 100%|██████████| 35/35 [00:13<00:00,  2.53it/s]Capturing CUDA graph shapes: 100%|██████████| 35/35 [00:13<00:00,  2.54it/s]
+INFO 08-30 21:41:20 [model_runner.py:1592] Graph capturing finished in 14 secs, took 0.33 GiB
+INFO 08-30 21:41:20 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 17.14 seconds
+extend:sft_think_4gpu_12k_ckpt5000/aime24:   0%|          | 0/17 [00:00<?, ?it/s]extend:sft_think_4gpu_12k_ckpt5000/aime24:   6%|▌         | 1/17 [03:23<54:14, 203.38s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  12%|█▏        | 2/17 [06:30<48:28, 193.91s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  18%|█▊        | 3/17 [09:49<45:49, 196.38s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  24%|██▎       | 4/17 [13:32<44:45, 206.54s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  29%|██▉       | 5/17 [16:56<41:09, 205.82s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  35%|███▌      | 6/17 [20:03<36:33, 199.41s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  41%|████      | 7/17 [23:11<32:38, 195.81s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  47%|████▋     | 8/17 [26:02<28:09, 187.74s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  53%|█████▎    | 9/17 [29:30<25:53, 194.18s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  59%|█████▉    | 10/17 [32:40<22:29, 192.76s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  65%|██████▍   | 11/17 [36:27<20:20, 203.42s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  71%|███████   | 12/17 [39:38<16:37, 199.45s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  76%|███████▋  | 13/17 [43:23<13:48, 207.19s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  82%|████████▏ | 14/17 [46:49<10:20, 206.97s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  88%|████████▊ | 15/17 [50:22<06:57, 208.62s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24:  94%|█████████▍| 16/17 [53:37<03:24, 204.74s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24: 100%|██████████| 17/17 [53:41<00:00, 144.37s/it]extend:sft_think_4gpu_12k_ckpt5000/aime24: 100%|██████████| 17/17 [53:41<00:00, 189.53s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/qwen3_1.7b_base/aime24/think/sft_think_4gpu_12k_a24.3352479.out
+[TOKEN_BUDGET]
+[aime24] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=6.67% (2/30)  Avg16=0.83%
+  @4k: Pass@8=13.33% (4/30)  Avg16=2.50%
+  @8k: Pass@8=16.67% (5/30)  Avg16=6.25%
+  @16k: Pass@8=23.33% (7/30)  Avg16=8.33%
+  @32k: Pass@8=26.67% (8/30)  Avg16=8.75%
+  @38k: Pass@8=26.67% (8/30)  Avg16=8.75%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime24] n=30  P@16=0.00%  Avg16=8.75%  L=24373.0  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime24] n=30  P@16=0.00%  Avg16=8.75%  L=24373.0  pass/log2(16L)=0.0000  avg/log2(16L)=0.4711
+[extend] done sft_think_4gpu_12k_ckpt5000/aime24: extended=129 Pass@8 26.67% -> 26.67% len 22675.5 -> 24373.0
+extend:sft_think_4gpu_12k_ckpt5000/aime25:   0%|          | 0/14 [00:00<?, ?it/s]extend:sft_think_4gpu_12k_ckpt5000/aime25:   7%|▋         | 1/14 [03:45<48:53, 225.62s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  14%|█▍        | 2/14 [06:06<35:07, 175.65s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  21%|██▏       | 3/14 [09:52<36:27, 198.83s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  29%|██▊       | 4/14 [13:20<33:42, 202.23s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  36%|███▌      | 5/14 [16:31<29:43, 198.19s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  43%|████▎     | 6/14 [20:16<27:38, 207.27s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  50%|█████     | 7/14 [23:45<24:16, 208.13s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  57%|█████▋    | 8/14 [27:22<21:04, 210.76s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  64%|██████▍   | 9/14 [31:16<18:09, 217.96s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  71%|███████▏  | 10/14 [34:28<13:59, 209.98s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  79%|███████▊  | 11/14 [37:55<10:27, 209.21s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  86%|████████▌ | 12/14 [41:26<06:59, 209.83s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25:  93%|█████████▎| 13/14 [44:55<03:29, 209.36s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25: 100%|██████████| 14/14 [46:49<00:00, 180.50s/it]extend:sft_think_4gpu_12k_ckpt5000/aime25: 100%|██████████| 14/14 [46:49<00:00, 200.65s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/qwen3_1.7b_base/aime25/think/sft_think_4gpu_12k_a25.3352480.out
+[TOKEN_BUDGET]
+[aime25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=13.33% (4/30)  Avg16=3.33%
+  @4k: Pass@8=16.67% (5/30)  Avg16=6.25%
+  @8k: Pass@8=16.67% (5/30)  Avg16=7.92%
+  @16k: Pass@8=23.33% (7/30)  Avg16=9.58%
+  @32k: Pass@8=23.33% (7/30)  Avg16=9.58%
+  @38k: Pass@8=23.33% (7/30)  Avg16=9.58%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime25] n=30  P@16=0.00%  Avg16=9.58%  L=23443.6  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime25] n=30  P@16=0.00%  Avg16=9.58%  L=23443.6  pass/log2(16L)=0.0000  avg/log2(16L)=0.5175
+[extend] done sft_think_4gpu_12k_ckpt5000/aime25: extended=106 Pass@8 23.33% -> 23.33% len 22102.6 -> 23443.6
+extend:sft_think_4gpu_12k_ckpt5000/aime26:   0%|          | 0/16 [00:00<?, ?it/s]extend:sft_think_4gpu_12k_ckpt5000/aime26:   6%|▋         | 1/16 [03:10<47:32, 190.14s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  12%|█▎        | 2/16 [06:54<49:03, 210.23s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  19%|█▉        | 3/16 [09:35<40:41, 187.80s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  25%|██▌       | 4/16 [13:04<39:12, 196.07s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  31%|███▏      | 5/16 [16:53<38:06, 207.85s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  38%|███▊      | 6/16 [20:22<34:44, 208.41s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  44%|████▍     | 7/16 [23:57<31:34, 210.47s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  50%|█████     | 8/16 [27:12<27:23, 205.49s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  56%|█████▋    | 9/16 [30:21<23:24, 200.62s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  62%|██████▎   | 10/16 [33:32<19:45, 197.56s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  69%|██████▉   | 11/16 [36:42<16:15, 195.16s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  75%|███████▌  | 12/16 [39:55<12:58, 194.59s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  81%|████████▏ | 13/16 [43:05<09:39, 193.08s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  88%|████████▊ | 14/16 [46:16<06:25, 192.65s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26:  94%|█████████▍| 15/16 [49:28<03:12, 192.29s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26: 100%|██████████| 16/16 [51:34<00:00, 172.43s/it]extend:sft_think_4gpu_12k_ckpt5000/aime26: 100%|██████████| 16/16 [51:34<00:00, 193.42s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/qwen3_1.7b_base/aime26/think/sft_think_4gpu_12k_a26.3352481.out
+[TOKEN_BUDGET]
+[aime26] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=10.00% (3/30)  Avg16=1.25%
+  @4k: Pass@8=10.00% (3/30)  Avg16=2.92%
+  @8k: Pass@8=23.33% (7/30)  Avg16=6.25%
+  @16k: Pass@8=23.33% (7/30)  Avg16=7.50%
+  @32k: Pass@8=23.33% (7/30)  Avg16=7.50%
+  @38k: Pass@8=23.33% (7/30)  Avg16=7.50%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime26] n=30  P@16=0.00%  Avg16=7.50%  L=23688.6  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime26] n=30  P@16=0.00%  Avg16=7.50%  L=23688.6  pass/log2(16L)=0.0000  avg/log2(16L)=0.4047
+[extend] done sft_think_4gpu_12k_ckpt5000/aime26: extended=124 Pass@8 23.33% -> 23.33% len 22133.5 -> 23688.6
+extend:sft_think_4gpu_12k_ckpt5000/hmmt25:   0%|          | 0/14 [00:00<?, ?it/s]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:   7%|▋         | 1/14 [03:10<41:16, 190.52s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  14%|█▍        | 2/14 [06:38<40:06, 200.52s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  21%|██▏       | 3/14 [10:24<38:56, 212.39s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  29%|██▊       | 4/14 [13:53<35:11, 211.15s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  36%|███▌      | 5/14 [17:20<31:27, 209.70s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  43%|████▎     | 6/14 [21:07<28:43, 215.48s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  50%|█████     | 7/14 [24:34<24:49, 212.73s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  57%|█████▋    | 8/14 [27:26<19:59, 199.84s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  64%|██████▍   | 9/14 [30:18<15:54, 190.96s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  71%|███████▏  | 10/14 [32:51<11:57, 179.43s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  79%|███████▊  | 11/14 [36:36<09:39, 193.31s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  86%|████████▌ | 12/14 [40:04<06:35, 197.83s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25:  93%|█████████▎| 13/14 [43:42<03:23, 203.91s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25: 100%|██████████| 14/14 [45:41<00:00, 178.08s/it]extend:sft_think_4gpu_12k_ckpt5000/hmmt25: 100%|██████████| 14/14 [45:41<00:00, 195.80s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/qwen3_1.7b_base/hmmt25/think/sft_think_4gpu_12k_h25.3352482.out
+[TOKEN_BUDGET]
+[hmmt25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=3.33% (1/30)  Avg16=0.83%
+  @8k: Pass@8=10.00% (3/30)  Avg16=1.67%
+  @16k: Pass@8=13.33% (4/30)  Avg16=2.50%
+  @32k: Pass@8=13.33% (4/30)  Avg16=2.50%
+  @38k: Pass@8=13.33% (4/30)  Avg16=2.50%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[hmmt25] n=30  P@16=0.00%  Avg16=2.50%  L=23591.3  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[hmmt25] n=30  P@16=0.00%  Avg16=2.50%  L=23591.3  pass/log2(16L)=0.0000  avg/log2(16L)=0.1349
+[extend] done sft_think_4gpu_12k_ckpt5000/hmmt25: extended=107 Pass@8 13.33% -> 13.33% len 22157.1 -> 23591.3

@@ -163,6 +163,17 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--beta",
+        type=float,
+        default=0.0,
+        help=(
+            "Generalized JSD interpolation in [0, 1]. "
+            "beta=0 → forward KL KL(teacher‖student); "
+            "beta=1 → reverse KL KL(student‖teacher); "
+            "beta=0.5 → symmetric JSD. Default 0.0 (forward KL)."
+        ),
+    )
+    parser.add_argument(
         "--top-k-loss",
         type=int,
         default=None,
@@ -312,6 +323,8 @@ def parse_args() -> argparse.Namespace:
     # <=0 disables clip (trainer expects None).
     if args.jsd_token_clip is not None and args.jsd_token_clip <= 0:
         args.jsd_token_clip = None
+    if not 0.0 <= args.beta <= 1.0:
+        raise ValueError(f"--beta must be in [0, 1], got {args.beta}")
     if args.high_entropy_ratio is not None and args.high_entropy_ratio >= 1.0:
         args.high_entropy_ratio = None
     if args.high_entropy_ratio is not None and args.high_entropy_ratio <= 0:
@@ -458,7 +471,7 @@ def main() -> None:
         min_p=args.min_p,
         presence_penalty=args.presence_penalty,
         repetition_penalty=args.repetition_penalty,
-        beta=0.0,
+        beta=args.beta,
         lmbda=1.0,
         use_vllm=True,
         rollout_backend=args.rollout_backend,
@@ -515,7 +528,7 @@ def main() -> None:
         f"use_peft={args.use_peft} fixed_teacher={args.fixed_teacher} "
         f"lora_r={args.lora_r if args.use_peft else None} "
         f"lora_alpha={args.lora_alpha if args.use_peft else None} "
-        f"lr={args.learning_rate} jsd_token_clip={args.jsd_token_clip} "
+        f"lr={args.learning_rate} beta={args.beta} jsd_token_clip={args.jsd_token_clip} "
         f"high_entropy_ratio={args.high_entropy_ratio} "
         f"low_entropy_ratio={args.low_entropy_ratio} "
         f"top_k_loss={args.top_k_loss} use_thinking_machines_loss={args.use_thinking_machines_loss} "

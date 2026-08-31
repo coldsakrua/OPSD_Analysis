@@ -612,7 +612,10 @@ class OPSDTrainer(SFTTrainer):
                 Tensor of shape (batch_size, sequence_length) with -100 for padding tokens to ignore when computing
                 loss
             beta:
-                Interpolation coefficient between 0 and 1 (default: 0.5)
+                Interpolation coefficient between 0 and 1 (default: 0.5).
+                beta=0 → forward KL KL(teacher‖student) via F.kl_div(student, teacher);
+                beta=1 → reverse KL KL(student‖teacher) via F.kl_div(teacher, student);
+                otherwise → generalized JSD with mixture weight beta.
             temperature:
                 Default softmax temperature when student/teacher temps are unset (default: 1.0)
             student_temperature:

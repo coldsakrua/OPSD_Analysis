@@ -5,7 +5,7 @@ from __future__ import annotations
 import torch
 import torch.nn.functional as F
 
-# train_opsd.py hardcodes beta=0.0 (forward KL). The "0.05" in jsd005 is jsd_token_clip.
+# train_opsd.py default --beta=0.0 (forward KL). The "0.05" in jsd005 is jsd_token_clip.
 DEFAULT_JSD_BETA = 0.0
 DEFAULT_JSD_TOKEN_CLIP = 0.05
 DEFAULT_TOPK_HIT_KS = (4, 8, 16, 32, 64)
@@ -29,7 +29,8 @@ def compute_jsd_kl(
     """Generalized JSD / KL per position (matches opsd_trainer.generalized_jsd_loss).
 
     Training default beta=0.0 → forward KL (teacher ‖ student) via F.kl_div swap.
-    beta=0.5 is symmetric JSD; not used by current train scripts.
+    beta=1.0 → reverse KL (student ‖ teacher).
+    beta=0.5 is symmetric JSD.
 
     Args:
         student_logits, teacher_logits: [L, V]

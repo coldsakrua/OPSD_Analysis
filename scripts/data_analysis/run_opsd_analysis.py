@@ -115,7 +115,11 @@ def parse_args() -> argparse.Namespace:
         "--jsd-beta",
         type=float,
         default=DEFAULT_JSD_BETA,
-        help="Mixture beta for generalized_jsd_loss (train_opsd hardcodes 0.0 = forward KL)",
+        help=(
+            "Which divergence is stored as jsd_kl and used for jsd_token_clip "
+            "(0=forward KL, 1=reverse KL, 0.5=symmetric JSD). "
+            "forward_kl / reverse_kl / jsd_sym are always computed regardless."
+        ),
     )
     p.add_argument(
         "--jsd-token-clip",
@@ -610,7 +614,10 @@ def _config_dict(args: argparse.Namespace, model_cfg, dataset) -> dict[str, Any]
         "teacher_prefixes": args.teacher_prefixes,
         "save_token_metrics": args.save_token_metrics,
         "metrics": {
-            "jsd_kl": f"generalized_jsd_loss beta={args.jsd_beta} full vocab",
+            "forward_kl": "KL(teacher ‖ student), generalized_jsd_loss beta=0",
+            "reverse_kl": "KL(student ‖ teacher), generalized_jsd_loss beta=1",
+            "jsd_sym": "symmetric JSD, generalized_jsd_loss beta=0.5",
+            "jsd_kl": f"train-aligned generalized_jsd_loss beta={args.jsd_beta} (default=forward_kl)",
             "jsd_kl_clipped": f"min(jsd_kl, {args.jsd_token_clip}) — aligns with train jsd_token_clip",
             "frac_jsd_clipped": f"fraction of tokens with jsd_kl > {args.jsd_token_clip}",
             "topk_kl_k16": "teacher top-16 renormalized KL",
@@ -691,7 +698,9 @@ def main() -> None:
     if isinstance(result, dict) and "metrics" in result:
         m = result["metrics"]
         print(
-            f"  mean_jsd_kl={m.get('mean_jsd_kl', 0):.4f} "
+            f"  mean_fwd_kl={m.get('mean_forward_kl', m.get('mean_jsd_kl', 0)):.4f} "
+            f"mean_rev_kl={m.get('mean_reverse_kl', 0):.4f} "
+            f"mean_jsd_sym={m.get('mean_jsd_sym', 0):.4f} "
             f"top1_agree={m.get('top1_agree_rate', 0):.3f} "
             f"mean_snr={m.get('mean_snr', 0):.4f} "
             f"n_tokens={m.get('n_tokens', 0)}",
@@ -700,25 +709,28 @@ def main() -> None:
     elif isinstance(result, dict) and "teacher_prefixes" in result:
         for name, m in result["teacher_prefixes"].items():
             print(
-                f"  [{name}] mean_jsd_kl={m.get('mean_jsd_kl', 0):.4f} "
-                f"top1_agree={m.get('top1_agree_rate', 0):.3f} "
-                f"mean_snr={m.get('mean_snr', 0):.4f}",
+                f"  [{name}] fwd={m.get('mean_forward_kl', m.get('mean_jsd_kl', 0)):.4f} "
+                f"rev={m.get('mean_reverse_kl', 0):.4f} "
+                f"jsd={m.get('mean_jsd_sym', 0):.4f} "
+                f"top1_agree={m.get('top1_agree_rate', 0):.3f}",
                 flush=True,
             )
     elif isinstance(result, dict) and "length_windows" in result:
         for name, m in result["length_windows"].items():
             print(
-                f"  [{name}] mean_jsd_kl={m.get('mean_jsd_kl', 0):.4f} "
-                f"top1_agree={m.get('top1_agree_rate', 0):.3f} "
-                f"mean_snr={m.get('mean_snr', 0):.4f} n={m.get('n_tokens', 0)}",
+                f"  [{name}] fwd={m.get('mean_forward_kl', m.get('mean_jsd_kl', 0)):.4f} "
+                f"rev={m.get('mean_reverse_kl', 0):.4f} "
+                f"jsd={m.get('mean_jsd_sym', 0):.4f} "
+                f"n={m.get('n_tokens', 0)}",
                 flush=True,
             )
     elif isinstance(result, dict) and "entropy_buckets" in result:
         for name, m in result["entropy_buckets"].items():
             print(
-                f"  [{name}] mean_jsd_kl={m.get('mean_jsd_kl', 0):.4f} "
-                f"top1_agree={m.get('top1_agree_rate', 0):.3f} "
-                f"mean_snr={m.get('mean_snr', 0):.4f} n={m.get('n_tokens', 0)}",
+                f"  [{name}] fwd={m.get('mean_forward_kl', m.get('mean_jsd_kl', 0)):.4f} "
+                f"rev={m.get('mean_reverse_kl', 0):.4f} "
+                f"jsd={m.get('mean_jsd_sym', 0):.4f} "
+                f"n={m.get('n_tokens', 0)}",
                 flush=True,
             )
 

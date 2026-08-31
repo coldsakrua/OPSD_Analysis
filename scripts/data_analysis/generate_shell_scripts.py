@@ -261,8 +261,12 @@ EXTRA_ARGS=(
 echo "[analysis] task=${{TASK}} model=${{MODEL_KEY}} combo=${{COMBO}} backend=${{BACKEND}}"
 echo "[analysis] output=${{OUTPUT_DIR}}"
 
-echo "[analysis] ===== phase 1: generate ====="
-python "${{BASE_DIR}}/scripts/data_analysis/run_opsd_analysis.py" "${{EXTRA_ARGS[@]}}" --skip-score
+if [[ "${{SKIP_GENERATE:-0}}" != "1" ]]; then
+  echo "[analysis] ===== phase 1: generate ====="
+  python "${{BASE_DIR}}/scripts/data_analysis/run_opsd_analysis.py" "${{EXTRA_ARGS[@]}}" --skip-score
+else
+  echo "[analysis] ===== phase 1: skipped (SKIP_GENERATE=1; reuse rollouts.jsonl) ====="
+fi
 
 echo "[analysis] ===== phase 2: score ====="
 python "${{BASE_DIR}}/scripts/data_analysis/run_opsd_analysis.py" "${{EXTRA_ARGS[@]}}" --skip-generate

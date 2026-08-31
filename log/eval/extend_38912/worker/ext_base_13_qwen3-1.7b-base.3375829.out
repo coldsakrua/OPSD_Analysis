@@ -1,0 +1,136 @@
+[extend] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[extend] shard=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/scripts/eval/extend_38912/manifest_base/shards/shard_13.jsonl
+[extend] generate_batch_size=8 (0=auto: 0.6b/1.7b=12, 4b=8, 8b=4)
+[extend] allow_long_max_model_len=1
+[extend] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/anchor
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[extend] VLLM_ALLOW_LONG_MAX_MODEL_LEN=1 (pos-capped base -> 40k)
+[extend] shard=shard_13.jsonl jobs=4 models=1 trunc=130
+[extend] loading model=/dfs/share/maleiLab/2501210611/model/qwen3-1.7b-base max_model_len=40960 jobs=4 generate_batch_size=8
+INFO 08-31 00:18:39 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 08-31 00:18:41 [__init__.py:239] Automatically detected platform cuda.
+INFO 08-31 00:18:45 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 08-31 00:18:45 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 08-31 00:18:45 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 08-31 00:18:45 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 08-31 00:18:45 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+WARNING 08-31 00:18:45 [config.py:3102] User-specified max_model_len (40960) is greater than the derived max_model_len (max_position_embeddings=32768 or model_max_length=None in model's config.json). This may lead to incorrect model outputs or CUDA errors. Make sure the value is correct and within the model context size.
+INFO 08-31 00:18:52 [config.py:717] This model supports multiple tasks: {'embed', 'classify', 'generate', 'reward', 'score'}. Defaulting to 'generate'.
+WARNING 08-31 00:18:52 [arg_utils.py:1525] Chunked prefill is enabled by default for models with max_model_len > 32K. Chunked prefill might not work with some features or models. If you encounter any issues, please disable by launching with --enable-chunked-prefill=False.
+INFO 08-31 00:18:52 [config.py:2003] Chunked prefill is enabled with max_num_batched_tokens=2048.
+INFO 08-31 00:18:52 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/dfs/share/maleiLab/2501210611/model/qwen3-1.7b-base', speculative_config=None, tokenizer='/dfs/share/maleiLab/2501210611/model/qwen3-1.7b-base', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=False, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/dfs/share/maleiLab/2501210611/model/qwen3-1.7b-base, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=True, use_async_output_proc=True, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[256,248,240,232,224,216,208,200,192,184,176,168,160,152,144,136,128,120,112,104,96,88,80,72,64,56,48,40,32,24,16,8,4,2,1],"max_capture_size":256}, use_cached_outputs=False, 
+INFO 08-31 00:18:52 [cuda.py:228] Using XFormers backend.
+INFO 08-31 00:19:18 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 08-31 00:19:18 [model_runner.py:1108] Starting to load model /dfs/share/maleiLab/2501210611/model/qwen3-1.7b-base...
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:09<00:00,  9.22s/it]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:09<00:00,  9.22s/it]
+
+INFO 08-31 00:19:27 [loader.py:458] Loading weights took 9.68 seconds
+INFO 08-31 00:19:28 [model_runner.py:1140] Model loading took 3.2132 GiB and 9.802743 seconds
+INFO 08-31 00:19:28 [worker.py:287] Memory profiling takes 0.45 seconds
+INFO 08-31 00:19:28 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.85) = 67.36GiB
+INFO 08-31 00:19:28 [worker.py:287] model weights take 3.21GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.39GiB; the rest of the memory reserved for KV Cache is 62.66GiB.
+INFO 08-31 00:19:28 [executor_base.py:112] # cuda blocks: 36667, # CPU blocks: 2340
+INFO 08-31 00:19:28 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 14.32x
+INFO 08-31 00:19:31 [model_runner.py:1450] Capturing cudagraphs for decoding. This may lead to unexpected consequences if the model is not static. To run the model in eager mode, set 'enforce_eager=True' or use '--enforce-eager' in the CLI. If out-of-memory error occurs during cudagraph capture, consider decreasing `gpu_memory_utilization` or switching to eager mode. You can also reduce the `max_num_seqs` as needed to decrease memory usage.
+Capturing CUDA graph shapes:   0%|          | 0/35 [00:00<?, ?it/s]Capturing CUDA graph shapes:   3%|▎         | 1/35 [00:00<00:14,  2.43it/s]Capturing CUDA graph shapes:   6%|▌         | 2/35 [00:00<00:12,  2.57it/s]Capturing CUDA graph shapes:   9%|▊         | 3/35 [00:01<00:12,  2.64it/s]Capturing CUDA graph shapes:  11%|█▏        | 4/35 [00:01<00:11,  2.67it/s]Capturing CUDA graph shapes:  14%|█▍        | 5/35 [00:01<00:11,  2.68it/s]Capturing CUDA graph shapes:  17%|█▋        | 6/35 [00:02<00:10,  2.70it/s]Capturing CUDA graph shapes:  20%|██        | 7/35 [00:02<00:10,  2.71it/s]Capturing CUDA graph shapes:  23%|██▎       | 8/35 [00:02<00:09,  2.72it/s]Capturing CUDA graph shapes:  26%|██▌       | 9/35 [00:03<00:09,  2.65it/s]Capturing CUDA graph shapes:  29%|██▊       | 10/35 [00:03<00:09,  2.68it/s]Capturing CUDA graph shapes:  31%|███▏      | 11/35 [00:04<00:08,  2.69it/s]Capturing CUDA graph shapes:  34%|███▍      | 12/35 [00:04<00:08,  2.70it/s]Capturing CUDA graph shapes:  37%|███▋      | 13/35 [00:04<00:08,  2.71it/s]Capturing CUDA graph shapes:  40%|████      | 14/35 [00:05<00:07,  2.72it/s]Capturing CUDA graph shapes:  43%|████▎     | 15/35 [00:05<00:07,  2.74it/s]Capturing CUDA graph shapes:  46%|████▌     | 16/35 [00:05<00:06,  2.75it/s]Capturing CUDA graph shapes:  49%|████▊     | 17/35 [00:06<00:06,  2.75it/s]Capturing CUDA graph shapes:  51%|█████▏    | 18/35 [00:06<00:06,  2.76it/s]Capturing CUDA graph shapes:  54%|█████▍    | 19/35 [00:07<00:05,  2.78it/s]Capturing CUDA graph shapes:  57%|█████▋    | 20/35 [00:07<00:05,  2.78it/s]Capturing CUDA graph shapes:  60%|██████    | 21/35 [00:07<00:05,  2.78it/s]Capturing CUDA graph shapes:  63%|██████▎   | 22/35 [00:08<00:04,  2.78it/s]Capturing CUDA graph shapes:  66%|██████▌   | 23/35 [00:08<00:04,  2.79it/s]Capturing CUDA graph shapes:  69%|██████▊   | 24/35 [00:08<00:03,  2.81it/s]Capturing CUDA graph shapes:  71%|███████▏  | 25/35 [00:09<00:03,  2.82it/s]Capturing CUDA graph shapes:  74%|███████▍  | 26/35 [00:09<00:03,  2.83it/s]Capturing CUDA graph shapes:  77%|███████▋  | 27/35 [00:09<00:02,  2.83it/s]Capturing CUDA graph shapes:  80%|████████  | 28/35 [00:10<00:02,  2.81it/s]Capturing CUDA graph shapes:  83%|████████▎ | 29/35 [00:10<00:02,  2.72it/s]Capturing CUDA graph shapes:  86%|████████▌ | 30/35 [00:10<00:01,  2.73it/s]Capturing CUDA graph shapes:  89%|████████▊ | 31/35 [00:11<00:01,  2.73it/s]Capturing CUDA graph shapes:  91%|█████████▏| 32/35 [00:11<00:01,  2.72it/s]Capturing CUDA graph shapes:  94%|█████████▍| 33/35 [00:12<00:00,  2.75it/s]Capturing CUDA graph shapes:  97%|█████████▋| 34/35 [00:12<00:00,  2.77it/s]Capturing CUDA graph shapes: 100%|██████████| 35/35 [00:12<00:00,  2.78it/s]Capturing CUDA graph shapes: 100%|██████████| 35/35 [00:12<00:00,  2.74it/s]
+INFO 08-31 00:19:43 [model_runner.py:1592] Graph capturing finished in 13 secs, took 0.33 GiB
+INFO 08-31 00:19:43 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 15.82 seconds
+extend:qwen3-1.7b-base/aime24:   0%|          | 0/6 [00:00<?, ?it/s]extend:qwen3-1.7b-base/aime24:  17%|█▋        | 1/6 [00:43<03:36, 43.34s/it]extend:qwen3-1.7b-base/aime24:  33%|███▎      | 2/6 [01:15<02:26, 36.63s/it]extend:qwen3-1.7b-base/aime24:  50%|█████     | 3/6 [01:47<01:43, 34.43s/it]extend:qwen3-1.7b-base/aime24:  67%|██████▋   | 4/6 [03:07<01:45, 52.64s/it]extend:qwen3-1.7b-base/aime24:  83%|████████▎ | 5/6 [03:39<00:45, 45.09s/it]extend:qwen3-1.7b-base/aime24: 100%|██████████| 6/6 [03:43<00:00, 31.04s/it]extend:qwen3-1.7b-base/aime24: 100%|██████████| 6/6 [03:43<00:00, 37.19s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/qwen3_1.7b_base/aime24/think/eval_1p7bb_a24.3299129.out
+[TOKEN_BUDGET]
+[aime24] n=30
+  @1k: Pass@8=6.67% (2/30)  Avg16=2.08%
+  @2k: Pass@8=13.33% (4/30)  Avg16=3.75%
+  @4k: Pass@8=13.33% (4/30)  Avg16=3.75%
+  @8k: Pass@8=13.33% (4/30)  Avg16=3.75%
+  @16k: Pass@8=13.33% (4/30)  Avg16=3.75%
+  @32k: Pass@8=13.33% (4/30)  Avg16=3.75%
+  @38k: Pass@8=13.33% (4/30)  Avg16=3.75%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime24] n=30  P@16=0.00%  Avg16=3.75%  L=6629.1  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime24] n=30  P@16=0.00%  Avg16=3.75%  L=6629.1  pass/log2(16L)=0.0000  avg/log2(16L)=0.2246
+[extend] done qwen3-1.7b-base/aime24: extended=41 Pass@8 13.33% -> 13.33% len 6627.1 -> 6629.1
+extend:qwen3-1.7b-base/aime25:   0%|          | 0/4 [00:00<?, ?it/s]extend:qwen3-1.7b-base/aime25:  25%|██▌       | 1/4 [00:31<01:34, 31.63s/it]extend:qwen3-1.7b-base/aime25:  50%|█████     | 2/4 [01:27<01:31, 45.88s/it]extend:qwen3-1.7b-base/aime25:  75%|███████▌  | 3/4 [01:58<00:39, 39.21s/it]extend:qwen3-1.7b-base/aime25: 100%|██████████| 4/4 [02:06<00:00, 26.80s/it]extend:qwen3-1.7b-base/aime25: 100%|██████████| 4/4 [02:06<00:00, 31.63s/it]
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+ERROR:math_verify.grader:Timeout during comparison
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/qwen3_1.7b_base/aime25/think/eval_1p7bb_a25.3299130.out
+[TOKEN_BUDGET]
+[aime25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=10.00% (3/30)  Avg16=1.25%
+  @4k: Pass@8=10.00% (3/30)  Avg16=1.25%
+  @8k: Pass@8=10.00% (3/30)  Avg16=1.25%
+  @16k: Pass@8=10.00% (3/30)  Avg16=1.25%
+  @32k: Pass@8=10.00% (3/30)  Avg16=1.25%
+  @38k: Pass@8=10.00% (3/30)  Avg16=1.25%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime25] n=30  P@16=0.00%  Avg16=1.25%  L=5213.8  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime25] n=30  P@16=0.00%  Avg16=1.25%  L=5213.8  pass/log2(16L)=0.0000  avg/log2(16L)=0.0765
+[extend] done qwen3-1.7b-base/aime25: extended=26 Pass@8 10.00% -> 10.00% len 5213.3 -> 5213.8
+extend:qwen3-1.7b-base/aime26:   0%|          | 0/5 [00:00<?, ?it/s]extend:qwen3-1.7b-base/aime26:  20%|██        | 1/5 [00:31<02:05, 31.30s/it]extend:qwen3-1.7b-base/aime26:  40%|████      | 2/5 [01:03<01:34, 31.59s/it]extend:qwen3-1.7b-base/aime26:  60%|██████    | 3/5 [01:34<01:03, 31.57s/it]extend:qwen3-1.7b-base/aime26:  80%|████████  | 4/5 [02:05<00:31, 31.46s/it]extend:qwen3-1.7b-base/aime26: 100%|██████████| 5/5 [02:13<00:00, 22.95s/it]extend:qwen3-1.7b-base/aime26: 100%|██████████| 5/5 [02:13<00:00, 26.76s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/qwen3_1.7b_base/aime26/think/eval_1p7bb_a26.3299131.out
+[TOKEN_BUDGET]
+[aime26] n=30
+  @1k: Pass@8=6.67% (2/30)  Avg16=1.67%
+  @2k: Pass@8=10.00% (3/30)  Avg16=3.33%
+  @4k: Pass@8=10.00% (3/30)  Avg16=3.33%
+  @8k: Pass@8=10.00% (3/30)  Avg16=3.33%
+  @16k: Pass@8=10.00% (3/30)  Avg16=3.33%
+  @32k: Pass@8=10.00% (3/30)  Avg16=3.33%
+  @38k: Pass@8=10.00% (3/30)  Avg16=3.33%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime26] n=30  P@16=0.00%  Avg16=3.33%  L=5653.8  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime26] n=30  P@16=0.00%  Avg16=3.33%  L=5653.8  pass/log2(16L)=0.0000  avg/log2(16L)=0.2024
+[extend] done qwen3-1.7b-base/aime26: extended=34 Pass@8 10.00% -> 10.00% len 5653.1 -> 5653.8
+extend:qwen3-1.7b-base/hmmt25:   0%|          | 0/4 [00:00<?, ?it/s]extend:qwen3-1.7b-base/hmmt25:  25%|██▌       | 1/4 [00:31<01:35, 31.87s/it]extend:qwen3-1.7b-base/hmmt25:  50%|█████     | 2/4 [01:03<01:03, 31.91s/it]extend:qwen3-1.7b-base/hmmt25:  75%|███████▌  | 3/4 [03:07<01:13, 73.75s/it]extend:qwen3-1.7b-base/hmmt25: 100%|██████████| 4/4 [03:27<00:00, 52.40s/it]extend:qwen3-1.7b-base/hmmt25: 100%|██████████| 4/4 [03:27<00:00, 51.76s/it]
+[postprocess] appended token budget + LNE to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/log/eval/qwen3_1.7b_base/hmmt25/think/eval_1p7bb_h25.3299132.out
+[TOKEN_BUDGET]
+[hmmt25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @8k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @16k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @32k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @38k: Pass@8=0.00% (0/30)  Avg16=0.00%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[hmmt25] n=30  P@16=0.00%  Avg16=0.00%  L=4805.4  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[hmmt25] n=30  P@16=0.00%  Avg16=0.00%  L=4805.4  pass/log2(16L)=0.0000  avg/log2(16L)=0.0000
+[extend] done qwen3-1.7b-base/hmmt25: extended=29 Pass@8 0.00% -> 0.00% len 4801.2 -> 4805.4

@@ -14,6 +14,7 @@ from .metrics import (
     argmax_token_ids,
     clip_jsd_per_token,
     compute_jsd_kl,
+    compute_kl_trio,
     compute_snr,
     compute_token_entropy,
     compute_topk_hit_and_ranks,
@@ -25,6 +26,9 @@ from .metrics import (
 )
 
 PER_TOKEN_SCALAR_KEYS = (
+    "forward_kl",
+    "reverse_kl",
+    "jsd_sym",
     "jsd_kl",
     "jsd_kl_clipped",
     "jsd_would_clip",
@@ -105,12 +109,20 @@ def _metrics_from_logits(
     t_logits = t_logits[:L]
     tok = torch.tensor(completion_ids[:L], dtype=torch.long, device=s_logits.device)
 
-    jsd = compute_jsd_kl(s_logits, t_logits, beta=jsd_beta, temperature=temperature).cpu()
-    jsd_clipped, jsd_would_clip = clip_jsd_per_token(
-        jsd.to(s_logits.device), jsd_token_clip
-    )
-    jsd_clipped = jsd_clipped.cpu()
-    jsd_would_clip = jsd_would_clip.cpu()
+    kl_trio = compute_kl_trio(s_logits, t_logits, temperature=temperature)
+    forward_kl = kl_trio["forward_kl"]
+    reverse_kl = kl_trio["reverse_kl"]
+    jsd_sym = kl_trio["jsd_sym"]
+    # Train-aligned metric: --jsd-beta selects which divergence is clipped / reported as jsd_kl.
+    if jsd_beta == 0.0:
+        jsd = forward_kl
+    elif jsd_beta == 1.0:
+        jsd = reverse_kl
+    elif jsd_beta == 0.5:
+        jsd = jsd_sym
+    else:
+        jsd = compute_jsd_kl(s_logits, t_logits, beta=jsd_beta, temperature=temperature)
+    jsd_clipped, jsd_would_clip = clip_jsd_per_token(jsd, jsd_token_clip)
 
     lr1 = log_ratio_k1(s_logits, t_logits, tok, temperature=temperature).cpu()
     advantage = (-lr1).contiguous()
@@ -151,9 +163,12 @@ def _metrics_from_logits(
     return {
         "n_tokens": L,
         "token_ids": completion_ids[:L],
-        "jsd_kl": jsd.numpy().tolist(),
-        "jsd_kl_clipped": jsd_clipped.numpy().tolist(),
-        "jsd_would_clip": jsd_would_clip.numpy().tolist(),
+        "forward_kl": forward_kl.cpu().numpy().tolist(),
+        "reverse_kl": reverse_kl.cpu().numpy().tolist(),
+        "jsd_sym": jsd_sym.cpu().numpy().tolist(),
+        "jsd_kl": jsd.cpu().numpy().tolist(),
+        "jsd_kl_clipped": jsd_clipped.cpu().numpy().tolist(),
+        "jsd_would_clip": jsd_would_clip.cpu().numpy().tolist(),
         "log_ratio_k1": lr1.numpy().tolist(),
         "advantage": advantage.numpy().tolist(),
         "student_entropy": s_ent.numpy().tolist(),
@@ -312,6 +327,9 @@ def rollout_metrics_summary(metrics: dict[str, Any]) -> dict[str, Any]:
 
     jsd = metrics["jsd_kl"]
     jsd_clip = metrics.get("jsd_kl_clipped", jsd)
+    forward_kl = metrics.get("forward_kl") or jsd
+    reverse_kl = metrics.get("reverse_kl") or []
+    jsd_sym = metrics.get("jsd_sym") or []
     adv = metrics.get("advantage") or [-x for x in metrics["log_ratio_k1"]]
     n_enc = sum(1 for a in adv if a > 0)
     n_dec = sum(1 for a in adv if a < 0)
@@ -322,6 +340,9 @@ def rollout_metrics_summary(metrics: dict[str, Any]) -> dict[str, Any]:
 
     out: dict[str, Any] = {
         "n_tokens": n,
+        "mean_forward_kl": sum(forward_kl) / n,
+        "mean_reverse_kl": (sum(reverse_kl) / n) if reverse_kl else None,
+        "mean_jsd_sym": (sum(jsd_sym) / n) if jsd_sym else None,
         "mean_jsd_kl": sum(jsd) / n,
         "max_jsd_kl": max(jsd),
         "mean_jsd_kl_clipped": sum(jsd_clip) / n,
@@ -355,6 +376,9 @@ def token_metrics_record(metrics: dict[str, Any], *, meta: dict[str, Any] | None
     rec = {
         "n_tokens": metrics.get("n_tokens", 0),
         "token_ids": metrics.get("token_ids", []),
+        "forward_kl": metrics.get("forward_kl", []),
+        "reverse_kl": metrics.get("reverse_kl", []),
+        "jsd_sym": metrics.get("jsd_sym", []),
         "jsd_kl": metrics.get("jsd_kl", []),
         "jsd_kl_clipped": metrics.get("jsd_kl_clipped", []),
         "jsd_would_clip": metrics.get("jsd_would_clip", []),
