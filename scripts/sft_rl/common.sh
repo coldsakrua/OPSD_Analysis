@@ -15,11 +15,14 @@ WEIGHT_DECAY=${WEIGHT_DECAY:-0.01}
 DAPO_EPSILON=${DAPO_EPSILON:-0.2}
 DAPO_EPSILON_HIGH=${DAPO_EPSILON_HIGH:-0.28}
 PPO_EPOCHS=${PPO_EPOCHS:-2}
-TEMPERATURE=${TEMPERATURE:-1.0}
+TEMPERATURE=${TEMPERATURE:-0.7}
 TOP_P=${TOP_P:-0.95}
 TOP_K=${TOP_K:-20}
-OVERLONG_BUFFER_LEN=${OVERLONG_BUFFER_LEN:-4096}
-OVERLONG_PENALTY_FACTOR=${OVERLONG_PENALTY_FACTOR:-1.0}
+# Soft overlong zone: [max_resp - len, max_resp]. With max=12288, len=2048 → ~10.2k–12k.
+# penalty = -min(exceed/len, 1) * factor; factor=0.4 → at most -0.4 at the hard max.
+OVERLONG_BUFFER_LEN=${OVERLONG_BUFFER_LEN:-2048}
+OVERLONG_PENALTY_FACTOR=${OVERLONG_PENALTY_FACTOR:-0.4}
+OVERLONG_PENALTY_ENABLE=${OVERLONG_PENALTY_ENABLE:-true}
 # Per-step rollout JSONL dump (verl trainer.rollout_data_dir); 0 = dump all.
 ROLLOUT_DUMP_N=${ROLLOUT_DUMP_N:-32}
 
@@ -42,6 +45,20 @@ export VLLM_USE_V1=${VLLM_USE_V1:-0}
 # Slurm/ROCm nodes often set both; verl workers refuse that combo.
 unset ROCR_VISIBLE_DEVICES
 unset HIP_VISIBLE_DEVICES
+
+# Cluster soft nproc≈200; Ray/vLLM spawn many procs under node packing → EAGAIN / dashboard EOF.
+ulimit -u 8192 2>/dev/null || true
+export OMP_NUM_THREADS=${OMP_NUM_THREADS:-1}
+export OPENBLAS_NUM_THREADS=${OPENBLAS_NUM_THREADS:-1}
+export MKL_NUM_THREADS=${MKL_NUM_THREADS:-1}
+export NUMEXPR_NUM_THREADS=${NUMEXPR_NUM_THREADS:-1}
+# Keep all GPUs visible; verl Worker.set_device(RAY_LOCAL_RANK). Avoids NCCL
+# Duplicate GPU when CUDA inits before Ray remaps CUDA_VISIBLE_DEVICES.
+export RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES=${RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES:-1}
+# Keep Ray within Slurm CPU allocation (default 7 CPU/GPU on GPUA800).
+RAY_NUM_CPUS=${RAY_NUM_CPUS:-${SLURM_CPUS_PER_TASK:-$((NUM_GPUS * 7))}}
+export RAY_NUM_CPUS
+echo "[grpo] nproc_limit=$(ulimit -u) OMP=${OMP_NUM_THREADS} ray_num_cpus=${RAY_NUM_CPUS} NOSET_CVD=${RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES}"
 
 # This verl build colocates actor+vLLM on all GPUs (hybrid). Split only budgets util.
 export ROLLOUT_GPUS=${ROLLOUT_GPUS:-2}

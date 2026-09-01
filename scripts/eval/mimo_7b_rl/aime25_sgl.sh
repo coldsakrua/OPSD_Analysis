@@ -10,6 +10,14 @@
 #SBATCH --time=48:00:00
 set -euo pipefail
 
+# SGLang spawns many procs; cluster soft nproc=200 causes EAGAIN under node packing.
+ulimit -u 8192 2>/dev/null || true
+export OMP_NUM_THREADS=${OMP_NUM_THREADS:-1}
+export OPENBLAS_NUM_THREADS=${OPENBLAS_NUM_THREADS:-1}
+export MKL_NUM_THREADS=${MKL_NUM_THREADS:-1}
+export NUMEXPR_NUM_THREADS=${NUMEXPR_NUM_THREADS:-1}
+echo "[eval] nproc_limit=$(ulimit -u) OMP=${OMP_NUM_THREADS} OPENBLAS=${OPENBLAS_NUM_THREADS}"
+
 # Xiaomi MiMo-7B-RL via SGLang (native mimo / mimo_mtp support in sglang>=0.5.x).
 # Official eval settings (HF / paper / ModelScope XiaomiMiMo/MiMo-7B-RL):
 #   temperature=0.6, top_p=0.95, max_tokens=32768 (math), empty system prompt,

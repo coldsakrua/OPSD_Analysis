@@ -1,0 +1,84 @@
+[launch] run=grpo_think_1p7b_sft15000_4gpu_3389007
+[launch] model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k/3299217/checkpoint-15000
+[launch] dataset=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/dapo/preprocessed/dapo-math-17k.qwen3.think.maxprompt1024.parquet
+[launch] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_sft15000_4gpu/3389007
+[launch] gpus=4 intended_split=rollout2+train2 (hybrid colocated)
+[launch] steps=100 save=25 n=8 resp=12288
+[launch] train_bs=64 mini=32 epochs=2 lr=1e-6
+[launch] vllm_util=0.80 free_cache_engine=true overlong_penalty=false
+[launch] reward=src/reward_math_dapo_boxed.py (boxed-first) + stop_token_ids auto from tokenizer
+[launch] rollout_dump=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_sft15000_4gpu/3389007/rollouts max_per_step=32
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[opsd-grpo] rollout.stop_token_ids=[151643, 151645]
+[opsd-grpo] intended_split=rollout2+train2 n_gpus=4 vllm_util=0.8 hybrid=1 free_cache_engine=True overlong_penalty=0
+[opsd-grpo] weight sync: each generate_sequences enters FSDPVLLMShardingManager → state_dict/update_params into vLLM, then sleep+empty_cache on exit (policy update then next-step rollout sees new weights).
+[opsd-grpo] reward: custom=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/reward_math_dapo_boxed.py (boxed-first + Answer: fallback; critic/acc from reward_extra_info).
+[opsd-grpo] rollout dump: dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_sft15000_4gpu/3389007/rollouts max_per_step=32
+2026-09-01 14:20:23,817	ERROR services.py:1362 -- Failed to start the dashboard 
+2026-09-01 14:20:23,818	ERROR services.py:1387 -- Error should be written to 'dashboard.log' or 'dashboard.err'. We are printing the last 20 lines for you. See 'https://docs.ray.io/en/master/ray-observability/user-guides/configure-logging.html#logging-directory-structure' to find where the log file is.
+2026-09-01 14:20:23,818	ERROR services.py:1431 -- 
+The last 20 lines of /tmp/ray/session_2026-09-01_14-19-59_928981_2119926/logs/dashboard.log (it contains the error message from the dashboard): 
+    buf = self._recv_bytes()
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/multiprocessing/connection.py", line 414, in _recv_bytes
+    buf = self._recv(4)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/multiprocessing/connection.py", line 383, in _recv
+    raise EOFError
+EOFError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/dashboard/dashboard.py", line 294, in <module>
+    loop.run_until_complete(dashboard.run())
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/dashboard/dashboard.py", line 95, in run
+    await self.dashboard_head.run()
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/dashboard/head.py", line 401, in run
+    handle.wait_for_module_ready()
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/dashboard/subprocesses/handle.py", line 146, in wait_for_module_ready
+    raise RuntimeError(
+RuntimeError: Module MetricsHead failed to start. Received EOF from pipe.
+Error executing job with overrides: ['algorithm.adv_estimator=grpo', 'algorithm.use_kl_in_reward=false', 'algorithm.norm_adv_by_std_in_grpo=true', 'data.train_files=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/dapo/preprocessed/dapo-math-17k.qwen3.think.maxprompt1024.parquet', 'data.val_files=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/dapo/preprocessed/dapo-math-17k.qwen3.think.maxprompt1024.parquet', 'data.train_batch_size=64', 'data.max_prompt_length=1024', 'data.max_response_length=12288', 'data.filter_overlong_prompts=true', 'data.truncation=error', 'data.return_raw_chat=true', '++data.apply_chat_template_kwargs.enable_thinking=true', 'actor_rollout_ref.hybrid_engine=true', 'actor_rollout_ref.model.path=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k/3299217/checkpoint-15000', 'actor_rollout_ref.model.trust_remote_code=true', 'actor_rollout_ref.model.use_remove_padding=true', 'actor_rollout_ref.model.enable_gradient_checkpointing=true', 'actor_rollout_ref.model.lora_rank=0', 'actor_rollout_ref.actor.optim.lr=1e-6', 'actor_rollout_ref.actor.optim.weight_decay=0.01', 'actor_rollout_ref.actor.grad_clip=1.0', 'actor_rollout_ref.actor.ppo_mini_batch_size=32', 'actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=2', 'actor_rollout_ref.actor.ppo_epochs=2', 'actor_rollout_ref.actor.use_dynamic_bsz=true', 'actor_rollout_ref.actor.ppo_max_token_len_per_gpu=32768', 'actor_rollout_ref.actor.clip_ratio=0.2', '++actor_rollout_ref.actor.clip_ratio_low=0.2', '++actor_rollout_ref.actor.clip_ratio_high=0.28', 'actor_rollout_ref.actor.loss_agg_mode=token-mean', 'actor_rollout_ref.actor.use_kl_loss=false', 'actor_rollout_ref.actor.entropy_coeff=0.0', 'actor_rollout_ref.rollout.name=vllm', 'actor_rollout_ref.rollout.mode=sync', 'actor_rollout_ref.rollout.dtype=bfloat16', 'actor_rollout_ref.rollout.free_cache_engine=true', 'actor_rollout_ref.rollout.enforce_eager=true', 'actor_rollout_ref.rollout.disable_log_stats=true', 'actor_rollout_ref.rollout.n=8', 'actor_rollout_ref.rollout.temperature=1.0', 'actor_rollout_ref.rollout.top_p=0.95', 'actor_rollout_ref.rollout.top_k=20', 'actor_rollout_ref.rollout.tensor_model_parallel_size=1', 'actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=4', 'actor_rollout_ref.rollout.log_prob_max_token_len_per_gpu=32768', 'actor_rollout_ref.rollout.max_num_batched_tokens=65536', 'actor_rollout_ref.rollout.max_model_len=13312', 'reward_model.enable=false', 'reward_model.reward_manager=dapo', '++reward_model.reward_kwargs.max_resp_len=12288', '++reward_model.reward_kwargs.overlong_buffer_cfg.enable=false', '++reward_model.reward_kwargs.overlong_buffer_cfg.len=4096', '++reward_model.reward_kwargs.overlong_buffer_cfg.penalty_factor=1.0', '++reward_model.reward_kwargs.overlong_buffer_cfg.log=false', '++custom_reward_function.path=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/reward_math_dapo_boxed.py', '++custom_reward_function.name=compute_score', 'trainer.nnodes=1', 'trainer.n_gpus_per_node=4', 'trainer.total_training_steps=100', 'trainer.save_freq=25', 'trainer.test_freq=-1', 'trainer.val_before_train=false', 'trainer.critic_warmup=0', 'trainer.logger=[console,wandb]', 'trainer.project_name=SFT_RL_GRPO', 'trainer.experiment_name=grpo_think_1p7b_sft15000_4gpu_3389007', 'trainer.default_local_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_sft15000_4gpu/3389007', 'trainer.resume_mode=disable', '++trainer.rollout_data_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_sft15000_4gpu/3389007/rollouts', '++opsd.rollout_dump_n=32', '++opsd.rollout_gpus=2', '++opsd.train_gpus=2', 'actor_rollout_ref.rollout.gpu_memory_utilization=0.80', '++opsd.chat_template_path=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b']
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/_private/node.py", line 368, in __init__
+    ray._private.services.wait_for_node(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/_private/services.py", line 470, in wait_for_node
+    raise TimeoutError(
+TimeoutError: Timed out after 30 seconds while waiting for node to startup. Did not find socket name /tmp/ray/session_2026-09-01_14-19-59_928981_2119926/sockets/plasma_store in the list of object store socket names.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_grpo_dapo.py", line 396, in <module>
+    main()
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/main.py", line 94, in decorated_main
+    _run_hydra(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/utils.py", line 394, in _run_hydra
+    _run_app(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/utils.py", line 457, in _run_app
+    run_and_report(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/utils.py", line 223, in run_and_report
+    raise ex
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/utils.py", line 220, in run_and_report
+    return func()
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/utils.py", line 458, in <lambda>
+    lambda: hydra.run(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/hydra.py", line 132, in run
+    _ = ret.return_value
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/core/utils.py", line 260, in return_value
+    raise self._return_value
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_grpo_dapo.py", line 392, in main
+    run_ppo(config)
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_grpo_dapo.py", line 160, in run_ppo
+    ray.init(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/_private/worker.py", line 1780, in init
+    _global_node = ray._private.node.Node(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/_private/node.py", line 373, in __init__
+    raise Exception(
+Exception: The current node timed out during startup. This could happen because some of the Ray processes failed to startup.

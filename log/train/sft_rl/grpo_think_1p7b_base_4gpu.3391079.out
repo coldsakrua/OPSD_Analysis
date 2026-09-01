@@ -1,0 +1,98 @@
+[grpo] nproc_limit=8192 OMP=1 ray_num_cpus=28
+[launch] run=grpo_think_1p7b_base_4gpu_3391079
+[launch] model=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b-base
+[launch] dataset=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/dapo/preprocessed/dapo-math-17k.qwen3.think.maxprompt1024.parquet
+[launch] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_base_4gpu/3391079
+[launch] gpus=4 intended_split=rollout2+train2 (hybrid colocated)
+[launch] steps=100 save=25 n=8 resp=12288
+[launch] train_bs=64 mini=32 epochs=2 lr=1e-6
+[launch] vllm_util=0.80 free_cache_engine=true overlong_penalty=false
+[launch] reward=src/reward_math_dapo_boxed.py (boxed-first) + stop_token_ids auto from tokenizer
+[launch] rollout_dump=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_base_4gpu/3391079/rollouts max_per_step=32
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[opsd-grpo] rollout.stop_token_ids=[151643, 151645]
+[opsd-grpo] intended_split=rollout2+train2 n_gpus=4 vllm_util=0.8 hybrid=1 free_cache_engine=True overlong_penalty=0
+[opsd-grpo] weight sync: each generate_sequences enters FSDPVLLMShardingManager → state_dict/update_params into vLLM, then sleep+empty_cache on exit (policy update then next-step rollout sees new weights).
+[opsd-grpo] reward: custom=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/reward_math_dapo_boxed.py (boxed-first + Answer: fallback; critic/acc from reward_extra_info).
+[opsd-grpo] rollout dump: dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_base_4gpu/3391079/rollouts max_per_step=32
+2026-09-01 17:26:02,497	INFO worker.py:1888 -- Started a local Ray instance.
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+[33m(raylet)[0m   warnings.warn(
+Error executing job with overrides: ['algorithm.adv_estimator=grpo', 'algorithm.use_kl_in_reward=false', 'algorithm.norm_adv_by_std_in_grpo=true', 'data.train_files=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/dapo/preprocessed/dapo-math-17k.qwen3.think.maxprompt1024.parquet', 'data.val_files=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/dapo/preprocessed/dapo-math-17k.qwen3.think.maxprompt1024.parquet', 'data.train_batch_size=64', 'data.max_prompt_length=1024', 'data.max_response_length=12288', 'data.filter_overlong_prompts=true', 'data.truncation=error', 'data.return_raw_chat=true', '++data.apply_chat_template_kwargs.enable_thinking=true', 'actor_rollout_ref.hybrid_engine=true', 'actor_rollout_ref.model.path=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b-base', 'actor_rollout_ref.model.trust_remote_code=true', 'actor_rollout_ref.model.use_remove_padding=true', 'actor_rollout_ref.model.enable_gradient_checkpointing=true', 'actor_rollout_ref.model.lora_rank=0', 'actor_rollout_ref.actor.optim.lr=1e-6', 'actor_rollout_ref.actor.optim.weight_decay=0.01', 'actor_rollout_ref.actor.grad_clip=1.0', 'actor_rollout_ref.actor.ppo_mini_batch_size=32', 'actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=2', 'actor_rollout_ref.actor.ppo_epochs=2', 'actor_rollout_ref.actor.use_dynamic_bsz=true', 'actor_rollout_ref.actor.ppo_max_token_len_per_gpu=32768', 'actor_rollout_ref.actor.clip_ratio=0.2', '++actor_rollout_ref.actor.clip_ratio_low=0.2', '++actor_rollout_ref.actor.clip_ratio_high=0.28', 'actor_rollout_ref.actor.loss_agg_mode=token-mean', 'actor_rollout_ref.actor.use_kl_loss=false', 'actor_rollout_ref.actor.entropy_coeff=0.0', 'actor_rollout_ref.rollout.name=vllm', 'actor_rollout_ref.rollout.mode=sync', 'actor_rollout_ref.rollout.dtype=bfloat16', 'actor_rollout_ref.rollout.free_cache_engine=true', 'actor_rollout_ref.rollout.enforce_eager=true', 'actor_rollout_ref.rollout.disable_log_stats=true', 'actor_rollout_ref.rollout.n=8', 'actor_rollout_ref.rollout.temperature=1.0', 'actor_rollout_ref.rollout.top_p=0.95', 'actor_rollout_ref.rollout.top_k=20', 'actor_rollout_ref.rollout.tensor_model_parallel_size=1', 'actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=4', 'actor_rollout_ref.rollout.log_prob_max_token_len_per_gpu=32768', 'actor_rollout_ref.rollout.max_num_batched_tokens=65536', 'actor_rollout_ref.rollout.max_model_len=13312', 'reward_model.enable=false', 'reward_model.reward_manager=dapo', '++reward_model.reward_kwargs.max_resp_len=12288', '++reward_model.reward_kwargs.overlong_buffer_cfg.enable=false', '++reward_model.reward_kwargs.overlong_buffer_cfg.len=4096', '++reward_model.reward_kwargs.overlong_buffer_cfg.penalty_factor=1.0', '++reward_model.reward_kwargs.overlong_buffer_cfg.log=false', '++custom_reward_function.path=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/reward_math_dapo_boxed.py', '++custom_reward_function.name=compute_score', 'trainer.nnodes=1', 'trainer.n_gpus_per_node=4', 'trainer.total_training_steps=100', 'trainer.save_freq=25', 'trainer.test_freq=-1', 'trainer.val_before_train=false', 'trainer.critic_warmup=0', 'trainer.logger=[console,wandb]', 'trainer.project_name=SFT_RL_GRPO', 'trainer.experiment_name=grpo_think_1p7b_base_4gpu_3391079', 'trainer.default_local_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_base_4gpu/3391079', 'trainer.resume_mode=disable', '++trainer.rollout_data_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_base_4gpu/3391079/rollouts', '++opsd.rollout_dump_n=32', '++opsd.rollout_gpus=2', '++opsd.train_gpus=2', 'ray_init.num_cpus=28', 'actor_rollout_ref.rollout.gpu_memory_utilization=0.80', '++opsd.chat_template_path=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b']
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_grpo_dapo.py", line 636, in <module>
+    main()
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/main.py", line 94, in decorated_main
+    _run_hydra(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/utils.py", line 394, in _run_hydra
+    _run_app(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/utils.py", line 457, in _run_app
+    run_and_report(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/utils.py", line 223, in run_and_report
+    raise ex
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/utils.py", line 220, in run_and_report
+    return func()
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/utils.py", line 458, in <lambda>
+    lambda: hydra.run(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/_internal/hydra.py", line 132, in run
+    _ = ret.return_value
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/core/utils.py", line 260, in return_value
+    raise self._return_value
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_grpo_dapo.py", line 632, in main
+    run_ppo(config)
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_grpo_dapo.py", line 329, in run_ppo
+    ray.get(runner.run.remote(config))
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/_private/worker.py", line 2822, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/ray/_private/worker.py", line 930, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(AssertionError): [36mray::TaskRunner.run()[39m (pid=345878, ip=172.16.3.38, actor_id=db290073c21da3e10d728a9501000000, repr=<train_grpo_dapo.TaskRunner object at 0x7f3eef889360>)
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_grpo_dapo.py", line 456, in run
+    from verl.trainer.ppo.ray_trainer import RayPPOTrainer, ResourcePoolManager, Role
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/verl/trainer/ppo/ray_trainer.py", line 53, in <module>
+    from verl.utils.checkpoint.checkpoint_manager import find_latest_ckpt_path
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/verl/utils/checkpoint/checkpoint_manager.py", line 24, in <module>
+    from transformers import PreTrainedTokenizer, ProcessorMixin
+  File "<frozen importlib._bootstrap>", line 1075, in _handle_fromlist
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/transformers/utils/import_utils.py", line 2317, in __getattr__
+    module = self._get_module(self._class_to_module[name])
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/transformers/utils/import_utils.py", line 2347, in _get_module
+    raise e
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/transformers/utils/import_utils.py", line 2345, in _get_module
+    return importlib.import_module("." + module_name, self.__name__)
+  File "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_grpo_dapo.py", line 170, in _import_module
+    mod = _orig_import_module(name, package=package)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/transformers/processing_utils.py", line 75, in <module>
+    from .modeling_utils import PreTrainedAudioTokenizerBase
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/transformers/modeling_utils.py", line 73, in <module>
+    from .quantizers import HfQuantizer
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/transformers/quantizers/__init__.py", line 14, in <module>
+    from .auto import AutoHfQuantizer, AutoQuantizationConfig, register_quantization_config, register_quantizer
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/transformers/quantizers/auto.py", line 62, in <module>
+    from .quantizer_torchao import TorchAoHfQuantizer
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/transformers/quantizers/quantizer_torchao.py", line 39, in <module>
+    import torchao
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torchao/__init__.py", line 46, in <module>
+    from torchao.quantization import (
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torchao/quantization/__init__.py", line 13, in <module>
+    from .autoquant import (
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torchao/quantization/autoquant.py", line 1113, in <module>
+    if is_sm_at_least_89():
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torchao/utils.py", line 640, in is_sm_at_least_89
+    and torch.cuda.get_device_capability() >= (8, 9)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/cuda/__init__.py", line 507, in get_device_capability
+    prop = get_device_properties(device)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/cuda/__init__.py", line 526, in get_device_properties
+    raise AssertionError("Invalid device id")
+AssertionError: Invalid device id
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+[33m(raylet)[0m   warnings.warn(

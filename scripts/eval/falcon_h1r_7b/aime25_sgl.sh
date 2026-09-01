@@ -10,6 +10,14 @@
 #SBATCH --time=48:00:00
 set -euo pipefail
 
+# SGLang spawns many procs; cluster soft nproc=200 causes EAGAIN under node packing.
+ulimit -u 8192 2>/dev/null || true
+export OMP_NUM_THREADS=${OMP_NUM_THREADS:-1}
+export OPENBLAS_NUM_THREADS=${OPENBLAS_NUM_THREADS:-1}
+export MKL_NUM_THREADS=${MKL_NUM_THREADS:-1}
+export NUMEXPR_NUM_THREADS=${NUMEXPR_NUM_THREADS:-1}
+echo "[eval] nproc_limit=$(ulimit -u) OMP=${OMP_NUM_THREADS} OPENBLAS=${OPENBLAS_NUM_THREADS}"
+
 # Falcon-H1R-7B via SGLang in conda env `falcon` (Hybrid Transformer+Mamba2).
 # Official sampling (https://huggingface.co/tiiuae/Falcon-H1R-7B):
 #   temperature=0.6, top_p=0.95, max_new_tokens=65536,

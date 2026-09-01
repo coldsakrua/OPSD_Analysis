@@ -38,6 +38,87 @@ def _intended_split(config: DictConfig) -> tuple[int, int]:
     return rollout, train
 
 
+def _patch_vllm_listconfig_coercion() -> None:
+    """OmegaConf ListConfig is list-like but fails vLLM `isinstance(..., list)`."""
+    from vllm.sampling_params import SamplingParams
+
+    if getattr(SamplingParams, "_opsd_listconfig_patched", False):
+        return
+
+    _orig = SamplingParams._verify_args
+
+    def _verify(self):  # noqa: ANN001
+        ids = getattr(self, "stop_token_ids", None)
+        if ids is not None and not isinstance(ids, list):
+            self.stop_token_ids = [int(x) for x in ids]
+        stop = getattr(self, "stop", None)
+        if stop is not None and not isinstance(stop, list):
+            self.stop = list(stop)
+        return _orig(self)
+
+    SamplingParams._verify_args = _verify  # type: ignore[method-assign]
+    SamplingParams._opsd_listconfig_patched = True  # type: ignore[attr-defined]
+
+
+def _shield_cpu_actor_cuda_probes() -> None:
+    """TaskRunner is num_gpus=0: Ray may set CUDA_VISIBLE_DEVICES=\"\".
+
+    On this cluster torch can still report is_available=True with device_count=0, so
+    transformers→torchao import-time CUDA probes crash. Force probes off for this
+    process only. Under RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES=1 this is usually
+    a no-op (device_count>0).
+    """
+    import torch
+
+    if int(torch.cuda.device_count()) != 0:
+        return
+
+    torch.cuda.is_available = lambda: False  # type: ignore[method-assign]
+    torch.cuda.device_count = lambda: 0  # type: ignore[method-assign]
+    torch.cuda.get_device_capability = lambda device=None: (0, 0)  # type: ignore[method-assign]
+    try:
+        import torch.utils._triton as _triton_utils
+
+        _triton_utils.has_triton = lambda: False  # type: ignore[assignment]
+    except Exception:
+        pass
+
+
+def _install_lazy_vllm_listconfig_patch() -> None:
+    """Ray worker_process_setup_hook entry.
+
+    With RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES=1, importing vllm here is safe:
+    CUDA may init with full CVD; verl Worker later calls set_device(RAY_LOCAL_RANK).
+    Keep an import hook as fallback if vllm is not yet importable at hook time.
+    """
+    import importlib
+    import sys
+
+    if getattr(sys, "_opsd_lazy_listconfig_hook", False):
+        return
+    sys._opsd_lazy_listconfig_hook = True  # type: ignore[attr-defined]
+
+    try:
+        _patch_vllm_listconfig_coercion()
+    except Exception:
+        pass
+
+    _orig_import_module = importlib.import_module
+
+    def _import_module(name, package=None):  # noqa: ANN001
+        mod = _orig_import_module(name, package=package)
+        if name == "vllm.sampling_params" or name == "vllm" or (
+            isinstance(name, str) and name.startswith("vllm.")
+        ):
+            try:
+                _patch_vllm_listconfig_coercion()
+            except Exception:
+                pass
+        return mod
+
+    importlib.import_module = _import_module  # type: ignore[assignment]
+
+
 def _apply_opsd_defaults(config: DictConfig) -> None:
     """Fill DAPO/GRPO knobs if missing; tune vLLM util from intended split."""
     rollout_gpus, train_gpus = _intended_split(config)
@@ -84,13 +165,44 @@ def _apply_opsd_defaults(config: DictConfig) -> None:
         if OmegaConf.select(buf, "enable") is None:
             buf.enable = False
 
+    # Boxed-first reward (Qwen SFT rarely emits Minerva ``Answer:`` alone).
+    reward_fn = OmegaConf.select(config, "custom_reward_function") or OmegaConf.create({})
+    if OmegaConf.select(reward_fn, "path") in (None, ""):
+        reward_path = str(Path(__file__).resolve().parent / "reward_math_dapo_boxed.py")
+        config.custom_reward_function = OmegaConf.create(
+            {"path": reward_path, "name": "compute_score"}
+        )
+    elif OmegaConf.select(config, "custom_reward_function") is None:
+        config.custom_reward_function = reward_fn
+
     # Full-param, no reference / KL.
     config.actor_rollout_ref.model.lora_rank = 0
     config.actor_rollout_ref.actor.use_kl_loss = False
     config.algorithm.use_kl_in_reward = False
     config.actor_rollout_ref.hybrid_engine = True
 
+    # Ensure vLLM stops on chat EOS (<|im_end|>) as well as <|endoftext|>.
+    # SFT/base generation_config often only lists the latter → length clip floods.
+    existing_stop = OmegaConf.select(config, "actor_rollout_ref.rollout.stop_token_ids")
+    if not existing_stop:
+        try:
+            from transformers import AutoTokenizer
+
+            from stop_tokens import resolve_stop_token_ids
+
+            model_path = str(config.actor_rollout_ref.model.path)
+            tok = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+            stop_ids = resolve_stop_token_ids(tok)
+            if stop_ids:
+                config.actor_rollout_ref.rollout.stop_token_ids = list(stop_ids)
+                print(f"[opsd-grpo] rollout.stop_token_ids={stop_ids}", flush=True)
+            else:
+                print("[opsd-grpo][WARN] could not resolve stop_token_ids", flush=True)
+        except Exception as exc:
+            print(f"[opsd-grpo][WARN] failed to set stop_token_ids: {exc}", flush=True)
+
     overlong_on = bool(OmegaConf.select(kwargs, "overlong_buffer_cfg.enable"))
+    reward_path = OmegaConf.select(config, "custom_reward_function.path")
     print(
         f"[opsd-grpo] intended_split=rollout{rollout_gpus}+train{train_gpus} "
         f"n_gpus={config.trainer.n_gpus_per_node} "
@@ -106,7 +218,8 @@ def _apply_opsd_defaults(config: DictConfig) -> None:
         flush=True,
     )
     print(
-        "[opsd-grpo] metrics: log critic/acc/mean (+ training/acc) from math_dapo reward_extra_info.",
+        f"[opsd-grpo] reward: custom={reward_path} "
+        "(boxed-first + Answer: fallback; critic/acc from reward_extra_info).",
         flush=True,
     )
     dump_n = int(OmegaConf.select(config, "opsd.rollout_dump_n") or 0)
@@ -125,6 +238,11 @@ def run_ppo(config: DictConfig) -> None:
         os.environ.pop(key, None)
 
     if not ray.is_initialized():
+        # Disable dashboard: MetricsHead often dies under cluster nproc soft-limit (EOF),
+        # which then stalls plasma_store and times out node startup.
+        src_dir = str(Path(__file__).resolve().parent)
+        py_path = os.environ.get("PYTHONPATH", "")
+        py_path = f"{src_dir}:{py_path}" if py_path else src_dir
         ray.init(
             runtime_env={
                 "env_vars": {
@@ -135,9 +253,21 @@ def run_ppo(config: DictConfig) -> None:
                     # Explicitly clear so Ray workers do not inherit Slurm ROCR/HIP.
                     "ROCR_VISIBLE_DEVICES": "",
                     "HIP_VISIBLE_DEVICES": "",
-                }
+                    # verl path: keep full CVD, Worker.set_device(RAY_LOCAL_RANK).
+                    "RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES": os.environ.get(
+                        "RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES", "1"
+                    ),
+                    "OMP_NUM_THREADS": os.environ.get("OMP_NUM_THREADS", "1"),
+                    "OPENBLAS_NUM_THREADS": os.environ.get("OPENBLAS_NUM_THREADS", "1"),
+                    "MKL_NUM_THREADS": os.environ.get("MKL_NUM_THREADS", "1"),
+                    "NUMEXPR_NUM_THREADS": os.environ.get("NUMEXPR_NUM_THREADS", "1"),
+                    "PYTHONPATH": py_path,
+                },
+                # Lazy: must not import vllm here (would init CUDA before per-worker CVD).
+                "worker_process_setup_hook": "train_grpo_dapo._install_lazy_vllm_listconfig_patch",
             },
             num_cpus=config.ray_init.num_cpus,
+            include_dashboard=False,
         )
 
     runner = TaskRunner.remote()
@@ -228,11 +358,15 @@ class TaskRunner:
     def run(self, config: DictConfig):
         from pprint import pprint
 
+        # Protect against empty-CVD torchao import crashes when Ray clears GPUs.
+        _shield_cpu_actor_cuda_probes()
+
         from verl.trainer.ppo.ray_trainer import RayPPOTrainer, ResourcePoolManager, Role
         from verl.trainer.ppo.reward import load_reward_manager
         from verl.utils import hf_processor, hf_tokenizer
         from verl.utils.fs import copy_to_local
 
+        _patch_vllm_listconfig_coercion()
         _patch_compute_data_metrics_with_acc()
         _patch_rollout_dump_subsample(config)
 

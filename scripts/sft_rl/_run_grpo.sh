@@ -62,7 +62,8 @@ echo "[launch] output=${OUTPUT_DIR}"
 echo "[launch] gpus=${NUM_GPUS} intended_split=rollout${ROLLOUT_GPUS}+train${TRAIN_GPUS} (hybrid colocated)"
 echo "[launch] steps=${MAX_STEPS} save=${SAVE_STEPS} n=${NUM_GENERATIONS} resp=${MAX_RESPONSE_LENGTH}"
 echo "[launch] train_bs=${TRAIN_BATCH_SIZE} mini=${PPO_MINI_BATCH_SIZE} epochs=${PPO_EPOCHS} lr=${LEARNING_RATE}"
-echo "[launch] vllm_util=${VLLM_GPU_MEM_UTIL:-auto} free_cache_engine=true overlong_penalty=false (+critic/acc/mean)"
+echo "[launch] vllm_util=${VLLM_GPU_MEM_UTIL:-auto} free_cache_engine=true overlong_penalty=${OVERLONG_PENALTY_ENABLE} len=${OVERLONG_BUFFER_LEN} factor=${OVERLONG_PENALTY_FACTOR}"
+echo "[launch] reward=src/reward_math_dapo_boxed.py (boxed-first) + stop_token_ids auto from tokenizer"
 echo "[launch] rollout_dump=${OUTPUT_DIR}/rollouts max_per_step=${ROLLOUT_DUMP_N:-32}"
 
 python -u "${BASE_DIR}/src/train_grpo_dapo.py" \
@@ -116,10 +117,12 @@ python -u "${BASE_DIR}/src/train_grpo_dapo.py" \
   reward_model.enable=false \
   reward_model.reward_manager=dapo \
   ++reward_model.reward_kwargs.max_resp_len="${MAX_RESPONSE_LENGTH}" \
-  ++reward_model.reward_kwargs.overlong_buffer_cfg.enable=false \
+  ++reward_model.reward_kwargs.overlong_buffer_cfg.enable="${OVERLONG_PENALTY_ENABLE}" \
   ++reward_model.reward_kwargs.overlong_buffer_cfg.len="${OVERLONG_BUFFER_LEN}" \
   ++reward_model.reward_kwargs.overlong_buffer_cfg.penalty_factor="${OVERLONG_PENALTY_FACTOR}" \
   ++reward_model.reward_kwargs.overlong_buffer_cfg.log=false \
+  ++custom_reward_function.path="${BASE_DIR}/src/reward_math_dapo_boxed.py" \
+  ++custom_reward_function.name=compute_score \
   trainer.nnodes=1 \
   trainer.n_gpus_per_node="${NUM_GPUS}" \
   trainer.total_training_steps="${MAX_STEPS}" \
@@ -136,6 +139,7 @@ python -u "${BASE_DIR}/src/train_grpo_dapo.py" \
   ++opsd.rollout_dump_n="${ROLLOUT_DUMP_N:-32}" \
   ++opsd.rollout_gpus="${ROLLOUT_GPUS}" \
   ++opsd.train_gpus="${TRAIN_GPUS}" \
+  ray_init.num_cpus="${RAY_NUM_CPUS}" \
   hydra.run.dir="${OUTPUT_DIR}/hydra" \
   hydra.job.chdir=false \
   "${UTIL_ARGS[@]}" \

@@ -48,6 +48,8 @@ from trl.extras.profiling import profiling_decorator
 from trl.import_utils import is_vllm_available
 from trl.models import prepare_deepspeed
 from trl.models.utils import unwrap_model_for_generation
+
+from stop_tokens import resolve_stop_token_ids
 from trl.trainer.sft_trainer import SFTTrainer
 from trl.trainer.utils import disable_dropout_in_model, empty_cache, pad, split_tensor_dict
 
@@ -1457,19 +1459,7 @@ class OPSDTrainer(SFTTrainer):
             self.args.repetition_penalty if hasattr(self.args, "repetition_penalty") else 1.0
         )
 
-        stop_ids: list[int] = []
-        eos = getattr(self.processing_class, "eos_token_id", None)
-        if isinstance(eos, int):
-            stop_ids.append(eos)
-        elif isinstance(eos, list):
-            stop_ids.extend(int(x) for x in eos if isinstance(x, int))
-        for tok in ("<|im_end|>", "<|endoftext|>"):
-            try:
-                tid = self.processing_class.convert_tokens_to_ids(tok)
-                if isinstance(tid, int) and tid >= 0 and tid not in stop_ids:
-                    stop_ids.append(tid)
-            except Exception:
-                pass
+        stop_ids = resolve_stop_token_ids(self.processing_class)
 
         sampling_params: dict[str, Any] = {
             "n": 1,
@@ -1606,6 +1596,10 @@ class OPSDTrainer(SFTTrainer):
         if self.vllm_mode == "server":
             all_prompts_text = gather_object(prompts_text_for_vllm)
             if self.accelerator.is_main_process:
+                stop_ids = resolve_stop_token_ids(self.processing_class)
+                generation_kwargs: dict[str, Any] = {"presence_penalty": presence_penalty}
+                if stop_ids:
+                    generation_kwargs["stop_token_ids"] = stop_ids
                 completion_ids = self.vllm_client.generate(
                     prompts=all_prompts_text,
                     n=1,  # In GKD, we generate 1 completion per prompt from student
@@ -1615,8 +1609,8 @@ class OPSDTrainer(SFTTrainer):
                     top_k=top_k,
                     min_p=min_p,
                     max_tokens=max_completion_length,
-                    presence_penalty=presence_penalty,
                     guided_decoding_regex=self.vllm_guided_decoding_regex,
+                    generation_kwargs=generation_kwargs,
                 )
             else:
                 completion_ids = [None] * len(all_prompts_text)
@@ -1633,17 +1627,21 @@ class OPSDTrainer(SFTTrainer):
                 )
             else:
                 guided_decoding = None
-            sampling_params = SamplingParams(
-                n=1,
-                repetition_penalty=repetition_penalty,
-                temperature=temperature,
-                top_p=top_p,
-                top_k=top_k,
-                min_p=min_p,
-                max_tokens=max_completion_length,
-                presence_penalty=presence_penalty,
-                guided_decoding=guided_decoding,
-            )
+            stop_ids = resolve_stop_token_ids(self.processing_class)
+            sp_kwargs: dict[str, Any] = {
+                "n": 1,
+                "repetition_penalty": repetition_penalty,
+                "temperature": temperature,
+                "top_p": top_p,
+                "top_k": top_k,
+                "min_p": min_p,
+                "max_tokens": max_completion_length,
+                "presence_penalty": presence_penalty,
+                "guided_decoding": guided_decoding,
+            }
+            if stop_ids:
+                sp_kwargs["stop_token_ids"] = stop_ids
+            sampling_params = SamplingParams(**sp_kwargs)
 
             if hasattr(self, "vllm_tp_group") and self.vllm_tensor_parallel_size > 1:
                 # Gather prompts from all ranks in the TP group and flatten.
@@ -1783,6 +1781,8 @@ class OPSDTrainer(SFTTrainer):
         if self.vllm_mode == "server":
             all_prompts_text = gather_object(prompts_text)
             if self.accelerator.is_main_process:
+                stop_ids = resolve_stop_token_ids(self.processing_class)
+                generation_kwargs = {"stop_token_ids": stop_ids} if stop_ids else None
                 completion_ids = self.vllm_client.generate(
                     prompts=all_prompts_text,
                     n=1,
@@ -1790,6 +1790,7 @@ class OPSDTrainer(SFTTrainer):
                     top_p=top_p,
                     top_k=top_k,
                     max_tokens=max_reasoning_length,
+                    generation_kwargs=generation_kwargs,
                 )
             else:
                 completion_ids = [None] * len(all_prompts_text)
@@ -1801,13 +1802,17 @@ class OPSDTrainer(SFTTrainer):
             completion_ids = completion_ids[process_slice]
 
         elif self.vllm_mode == "colocate":
-            sampling_params = SamplingParams(
-                n=1,
-                temperature=temperature,
-                top_p=top_p,
-                top_k=top_k,
-                max_tokens=max_reasoning_length,
-            )
+            stop_ids = resolve_stop_token_ids(self.processing_class)
+            sp_kwargs: dict[str, Any] = {
+                "n": 1,
+                "temperature": temperature,
+                "top_p": top_p,
+                "top_k": top_k,
+                "max_tokens": max_reasoning_length,
+            }
+            if stop_ids:
+                sp_kwargs["stop_token_ids"] = stop_ids
+            sampling_params = SamplingParams(**sp_kwargs)
 
             if hasattr(self, "vllm_tp_group") and self.vllm_tensor_parallel_size > 1:
                 orig_size = len(prompts_text)

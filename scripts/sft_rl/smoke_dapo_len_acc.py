@@ -13,7 +13,9 @@ from typing import Any
 import pandas as pd
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
-from verl.utils.reward_score import math_dapo
+
+from stop_tokens import resolve_stop_token_ids
+from reward_math_dapo_boxed import compute_score as boxed_compute_score
 
 
 def _as_messages(prompt_obj: Any) -> list[dict[str, str]]:
@@ -30,26 +32,6 @@ def _ground_truth(rm: Any) -> str:
     if hasattr(rm, "item"):
         return _ground_truth(rm.item())
     raise TypeError(f"unsupported reward_model type: {type(rm)}")
-
-
-def _stop_token_ids(tokenizer: Any) -> list[int]:
-    """EOS / chat-end ids aligned with eval_math_vllm_local (Qwen: <|im_end|>, <|endoftext|>)."""
-    ids: list[int] = []
-    for tok in ("<|im_end|>", "<|endoftext|>"):
-        try:
-            tid = tokenizer.convert_tokens_to_ids(tok)
-            if isinstance(tid, int) and tid >= 0 and tid not in ids:
-                ids.append(tid)
-        except Exception:
-            pass
-    eos = getattr(tokenizer, "eos_token_id", None)
-    if isinstance(eos, int) and eos not in ids:
-        ids.append(eos)
-    elif isinstance(eos, list):
-        for x in eos:
-            if isinstance(x, int) and x not in ids:
-                ids.append(x)
-    return ids
 
 
 def _config_max_pos(model_path: str) -> int | None:
@@ -128,7 +110,7 @@ def main() -> None:
         )
         max_model_len = cfg_max
 
-    stop_ids = _stop_token_ids(tokenizer)
+    stop_ids = resolve_stop_token_ids(tokenizer)
     print(
         f"[smoke] model={args.model_path} tp={args.tensor_parallel_size} "
         f"max_new={args.max_new_tokens} max_model_len={max_model_len} "
@@ -177,7 +159,13 @@ def main() -> None:
         lengths.append(int(tok_len))
         if int(tok_len) >= args.max_new_tokens:
             clipped += 1
-        scored = math_dapo.compute_score(text, gts[i])
+        # DAPO prompts ask for both "Answer:" and \boxed{}. Use boxed-first scorer
+        # shared with GRPO (src/reward_math_dapo_boxed.py).
+        scored = boxed_compute_score(
+            data_source="math_dapo",
+            solution_str=text,
+            ground_truth=gts[i],
+        )
         acc = float(bool(scored.get("acc")))
         accs.append(acc)
         rows.append(
@@ -187,6 +175,7 @@ def main() -> None:
                 "pred": scored.get("pred"),
                 "score": scored.get("score"),
                 "acc": acc,
+                "extract": scored.get("extract"),
                 "response_len": int(tok_len),
                 "clipped": int(tok_len) >= args.max_new_tokens,
                 "prompt": prompts[i],
