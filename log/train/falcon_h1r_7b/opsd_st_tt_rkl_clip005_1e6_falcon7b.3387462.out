@@ -1,0 +1,691 @@
+[launch] conda=falcon conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/falcon py_ver=python3.11
+[launch] LD_head=/gpfs/share/home/2501210611/miniconda3/envs/falcon/lib/python3.11/site-packages/nvidia/cuda_runtime/lib:/gpfs/share/home/2501210611/miniconda3/envs/falcon/lib/python3.11/site-packages/nvidia/cublas/lib:/gpfs/share/home/2501210611/miniconda3/envs/falcon/lib/python3.11/site-packages/nvidia/cuda_cupti/lib
+[launch] run=st_tt_rkl_clip005_1e_6_openthoughts_falcon7b_3387462 mode=opsd privilege_field=solution
+[launch] student_thinking=0 teacher_thinking=0 (Falcon: template CoT; match eval)
+[launch] lr=1e-6 beta=1.0 (reverse KL) jsd_token_clip=0.05
+[launch] micro=2 gas=4 gpus=4 → global_batch=32
+[launch] max_steps=100 save_steps=25 → total_samples=3200
+[launch] prompt=1024 completion=1024 max_seq=2048
+[launch] model=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b dataset=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/openthoughts/preprocessed/openthoughts.opsd.solution.nothink.falconh1r7b.maxprompt1024.parquet output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462
+[launch] master_port=27462 rollout=sglang sglang_mem=0.40 attn=triton sampling=pytorch
+[launch] reasoning_parser=deepseek-r1 disable_piecewise_cuda_graph=1
+W0901 00:07:02.329000 2806572 site-packages/torch/distributed/run.py:803] 
+W0901 00:07:02.329000 2806572 site-packages/torch/distributed/run.py:803] *****************************************
+W0901 00:07:02.329000 2806572 site-packages/torch/distributed/run.py:803] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0901 00:07:02.329000 2806572 site-packages/torch/distributed/run.py:803] *****************************************
+[INFO] Running in WANDB offline mode
+[INFO] Running in WANDB offline mode
+[INFO] Running in WANDB offline mode
+[INFO] Running in WANDB offline mode
+[dataset] already has problem/solution; skip field normalization[dataset] already has problem/solution; skip field normalization[dataset] already has problem/solution; skip field normalization
+
+
+[dataset] already has problem/solution; skip field normalization
+[dataset] prompt length already filtered offline; keep 16386 examples[dataset] prompt length already filtered offline; keep 16386 examples[dataset] prompt length already filtered offline; keep 16386 examples[dataset] prompt length already filtered offline; keep 16386 examples
+
+
+
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+NCCL version 2.27.5+cuda12.9
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b student_thinking=False teacher_thinking=False rollout_backend=sglang use_peft=False fixed_teacher=True lora_r=None lora_alpha=None lr=1e-06 beta=1.0 jsd_token_clip=0.05 high_entropy_ratio=None low_entropy_ratio=None top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.1 temp_s=1.1 temp_t=1.1 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=0.0 global_batch=32 (micro=2 gas=4 world=4) prompt=1024 response=1024
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b student_thinking=False teacher_thinking=False rollout_backend=sglang use_peft=False fixed_teacher=True lora_r=None lora_alpha=None lr=1e-06 beta=1.0 jsd_token_clip=0.05 high_entropy_ratio=None low_entropy_ratio=None top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.1 temp_s=1.1 temp_t=1.1 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=0.0 global_batch=32 (micro=2 gas=4 world=4) prompt=1024 response=1024
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b student_thinking=False teacher_thinking=False rollout_backend=sglang use_peft=False fixed_teacher=True lora_r=None lora_alpha=None lr=1e-06 beta=1.0 jsd_token_clip=0.05 high_entropy_ratio=None low_entropy_ratio=None top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.1 temp_s=1.1 temp_t=1.1 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=0.0 global_batch=32 (micro=2 gas=4 world=4) prompt=1024 response=1024
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b student_thinking=False teacher_thinking=False rollout_backend=sglang use_peft=False fixed_teacher=True lora_r=None lora_alpha=None lr=1e-06 beta=1.0 jsd_token_clip=0.05 high_entropy_ratio=None low_entropy_ratio=None top_k_loss=None use_thinking_machines_loss=False teacher_update_steps=None temp=1.1 temp_s=1.1 temp_t=1.1 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=0.0 global_batch=32 (micro=2 gas=4 world=4) prompt=1024 response=1024
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[transformers] The fast path for FalconH1 will be used when running the model on a GPU
+[transformers] The fast path for FalconH1 will be used when running the model on a GPU
+[transformers] The fast path for FalconH1 will be used when running the model on a GPU
+[transformers] The fast path for FalconH1 will be used when running the model on a GPU
+[RANK 0] You passed `model_init_kwargs` to the `SFTConfig`, but your model is already instantiated. The `model_init_kwargs` will be ignored.
+[RANK 0] Detected kernel version 4.18.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher is an independent frozen copy of the initial checkpoint
+Student updates all parameters; teacher receives no gradients
+================================================================================
+
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher is an independent frozen copy of the initial checkpoint
+Student updates all parameters; teacher receives no gradients
+================================================================================
+
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher is an independent frozen copy of the initial checkpoint
+Student updates all parameters; teacher receives no gradients
+================================================================================
+
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher is an independent frozen copy of the initial checkpoint
+Student updates all parameters; teacher receives no gradients
+================================================================================
+
+[sglang] init Engine model=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b attn=triton sampling=pytorch mem_fraction_static=0.4 context_length=2048 reasoning_parser=deepseek-r1 disable_piecewise_cuda_graph=True disable_hybrid_swa_memory=True world=4
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-09-01 00:09:36] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-09-01 00:09:36] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-09-01 00:09:36] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-09-01 00:09:36] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[2026-09-01 00:09:46] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[2026-09-01 00:09:46] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[2026-09-01 00:09:46] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[2026-09-01 00:09:46] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[INFO] Running in WANDB offline mode
+Multi-thread loading shards:   0% Completed | 0/4 [00:00<?, ?it/s][INFO] Running in WANDB offline mode
+Multi-thread loading shards:   0% Completed | 0/4 [00:00<?, ?it/s][INFO] Running in WANDB offline mode
+Multi-thread loading shards:   0% Completed | 0/4 [00:00<?, ?it/s][INFO] Running in WANDB offline mode
+Multi-thread loading shards:   0% Completed | 0/4 [00:00<?, ?it/s]Multi-thread loading shards:  25% Completed | 1/4 [00:20<01:00, 20.24s/it]Multi-thread loading shards:  25% Completed | 1/4 [00:20<01:00, 20.11s/it]Multi-thread loading shards:  25% Completed | 1/4 [00:19<00:59, 19.97s/it]Multi-thread loading shards:  25% Completed | 1/4 [00:20<01:00, 20.06s/it]Multi-thread loading shards:  50% Completed | 2/4 [00:20<00:17,  8.71s/it]Multi-thread loading shards:  50% Completed | 2/4 [00:20<00:17,  8.76s/it]Multi-thread loading shards:  50% Completed | 2/4 [00:20<00:17,  8.74s/it]Multi-thread loading shards:  50% Completed | 2/4 [00:21<00:18,  9.20s/it]Multi-thread loading shards:  75% Completed | 3/4 [00:39<00:13, 13.11s/it]Multi-thread loading shards:  75% Completed | 3/4 [00:39<00:13, 13.10s/it]Multi-thread loading shards:  75% Completed | 3/4 [00:39<00:13, 13.17s/it]Multi-thread loading shards:  75% Completed | 3/4 [00:39<00:12, 12.97s/it]Multi-thread loading shards: 100% Completed | 4/4 [00:57<00:00, 15.33s/it]Multi-thread loading shards: 100% Completed | 4/4 [00:58<00:00, 15.36s/it]Multi-thread loading shards: 100% Completed | 4/4 [00:57<00:00, 15.33s/it]Multi-thread loading shards: 100% Completed | 4/4 [00:57<00:00, 14.49s/it]
+Multi-thread loading shards: 100% Completed | 4/4 [00:58<00:00, 14.52s/it]
+Multi-thread loading shards: 100% Completed | 4/4 [00:57<00:00, 14.48s/it]
+Multi-thread loading shards: 100% Completed | 4/4 [00:57<00:00, 15.24s/it]Multi-thread loading shards: 100% Completed | 4/4 [00:57<00:00, 14.45s/it]
+  0%|          | 0/6 [00:00<?, ?it/s]Capturing batches (bs=14 avail_mem=42.33 GB):   0%|          | 0/6 [00:00<?, ?it/s]  0%|          | 0/6 [00:00<?, ?it/s]Capturing batches (bs=14 avail_mem=42.33 GB):   0%|          | 0/6 [00:00<?, ?it/s]  0%|          | 0/6 [00:00<?, ?it/s]Capturing batches (bs=14 avail_mem=42.33 GB):   0%|          | 0/6 [00:00<?, ?it/s]  0%|          | 0/6 [00:00<?, ?it/s]Capturing batches (bs=14 avail_mem=42.33 GB):   0%|          | 0/6 [00:00<?, ?it/s]Capturing batches (bs=14 avail_mem=42.33 GB):  17%|█▋        | 1/6 [00:02<00:13,  2.79s/it]Capturing batches (bs=12 avail_mem=42.27 GB):  17%|█▋        | 1/6 [00:02<00:13,  2.79s/it]Capturing batches (bs=14 avail_mem=42.33 GB):  17%|█▋        | 1/6 [00:03<00:18,  3.80s/it]Capturing batches (bs=12 avail_mem=42.27 GB):  17%|█▋        | 1/6 [00:03<00:18,  3.80s/it]Capturing batches (bs=14 avail_mem=42.33 GB):  17%|█▋        | 1/6 [00:03<00:18,  3.70s/it]Capturing batches (bs=12 avail_mem=42.27 GB):  17%|█▋        | 1/6 [00:03<00:18,  3.70s/it]Capturing batches (bs=14 avail_mem=42.33 GB):  17%|█▋        | 1/6 [00:03<00:19,  3.94s/it]Capturing batches (bs=12 avail_mem=42.27 GB):  17%|█▋        | 1/6 [00:03<00:19,  3.94s/it]Capturing batches (bs=12 avail_mem=42.27 GB):  33%|███▎      | 2/6 [00:02<00:04,  1.25s/it]Capturing batches (bs=8 avail_mem=42.26 GB):  33%|███▎      | 2/6 [00:02<00:04,  1.25s/it] Capturing batches (bs=12 avail_mem=42.27 GB):  33%|███▎      | 2/6 [00:03<00:06,  1.66s/it]Capturing batches (bs=8 avail_mem=42.26 GB):  33%|███▎      | 2/6 [00:03<00:06,  1.66s/it] Capturing batches (bs=12 avail_mem=42.27 GB):  33%|███▎      | 2/6 [00:03<00:06,  1.62s/it]Capturing batches (bs=8 avail_mem=42.26 GB):  33%|███▎      | 2/6 [00:03<00:06,  1.62s/it] Capturing batches (bs=12 avail_mem=42.27 GB):  33%|███▎      | 2/6 [00:04<00:06,  1.72s/it]Capturing batches (bs=8 avail_mem=42.26 GB):  33%|███▎      | 2/6 [00:04<00:06,  1.72s/it] Capturing batches (bs=8 avail_mem=42.26 GB):  50%|█████     | 3/6 [00:04<00:03,  1.02s/it]Capturing batches (bs=8 avail_mem=42.26 GB):  50%|█████     | 3/6 [00:04<00:02,  1.00it/s]Capturing batches (bs=8 avail_mem=42.26 GB):  50%|█████     | 3/6 [00:03<00:02,  1.25it/s]Capturing batches (bs=4 avail_mem=42.24 GB):  50%|█████     | 3/6 [00:04<00:03,  1.02s/it]Capturing batches (bs=4 avail_mem=42.24 GB):  50%|█████     | 3/6 [00:04<00:02,  1.00it/s]Capturing batches (bs=4 avail_mem=42.24 GB):  50%|█████     | 3/6 [00:03<00:02,  1.25it/s]Capturing batches (bs=8 avail_mem=42.26 GB):  50%|█████     | 3/6 [00:04<00:03,  1.05s/it]Capturing batches (bs=4 avail_mem=42.24 GB):  50%|█████     | 3/6 [00:04<00:03,  1.05s/it]Capturing batches (bs=4 avail_mem=42.24 GB):  67%|██████▋   | 4/6 [00:04<00:01,  1.48it/s]Capturing batches (bs=4 avail_mem=42.24 GB):  67%|██████▋   | 4/6 [00:03<00:01,  1.81it/s]Capturing batches (bs=2 avail_mem=42.23 GB):  67%|██████▋   | 4/6 [00:04<00:01,  1.48it/s]Capturing batches (bs=2 avail_mem=42.23 GB):  67%|██████▋   | 4/6 [00:03<00:01,  1.81it/s]Capturing batches (bs=4 avail_mem=42.24 GB):  67%|██████▋   | 4/6 [00:04<00:01,  1.45it/s]Capturing batches (bs=2 avail_mem=42.23 GB):  67%|██████▋   | 4/6 [00:04<00:01,  1.45it/s]Capturing batches (bs=4 avail_mem=42.24 GB):  67%|██████▋   | 4/6 [00:04<00:01,  1.41it/s]Capturing batches (bs=2 avail_mem=42.23 GB):  67%|██████▋   | 4/6 [00:04<00:01,  1.41it/s]Capturing batches (bs=2 avail_mem=42.23 GB):  83%|████████▎ | 5/6 [00:04<00:00,  2.01it/s]Capturing batches (bs=1 avail_mem=42.22 GB):  83%|████████▎ | 5/6 [00:04<00:00,  2.01it/s]Capturing batches (bs=2 avail_mem=42.23 GB):  83%|████████▎ | 5/6 [00:03<00:00,  2.43it/s]Capturing batches (bs=1 avail_mem=42.22 GB):  83%|████████▎ | 5/6 [00:03<00:00,  2.43it/s]Capturing batches (bs=2 avail_mem=42.23 GB):  83%|████████▎ | 5/6 [00:04<00:00,  2.04it/s]Capturing batches (bs=1 avail_mem=42.22 GB):  83%|████████▎ | 5/6 [00:04<00:00,  2.04it/s]Capturing batches (bs=2 avail_mem=42.23 GB):  83%|████████▎ | 5/6 [00:04<00:00,  1.95it/s]Capturing batches (bs=1 avail_mem=42.22 GB):  83%|████████▎ | 5/6 [00:04<00:00,  1.95it/s]Capturing batches (bs=1 avail_mem=42.22 GB): 100%|██████████| 6/6 [00:04<00:00,  2.36it/s]Capturing batches (bs=1 avail_mem=42.22 GB): 100%|██████████| 6/6 [00:04<00:00,  1.24it/s]
+Capturing batches (bs=1 avail_mem=42.22 GB): 100%|██████████| 6/6 [00:03<00:00,  2.72it/s]Capturing batches (bs=1 avail_mem=42.22 GB): 100%|██████████| 6/6 [00:04<00:00,  2.39it/s]Capturing batches (bs=1 avail_mem=42.22 GB): 100%|██████████| 6/6 [00:03<00:00,  1.56it/s]
+Capturing batches (bs=1 avail_mem=42.22 GB): 100%|██████████| 6/6 [00:04<00:00,  1.26it/s]
+Capturing batches (bs=1 avail_mem=42.22 GB): 100%|██████████| 6/6 [00:04<00:00,  2.32it/s]Capturing batches (bs=1 avail_mem=42.22 GB): 100%|██████████| 6/6 [00:04<00:00,  1.20it/s]
+[sglang] Engine init done
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': 17}.
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': 17}.
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': 17}.
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': 17}.
+[2026-09-01 00:11:05] [RANK 0] Gradient accumulation steps mismatch: GradientAccumulationPlugin has 1, DeepSpeed config has 4. Using DeepSpeed's value.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+wandb: Tracking run with wandb version 0.28.1
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/wandb/wandb/offline-run-20260901_001107-aa8qp2ru
+wandb: View this run in the terminal with `wandb leet`
+wandb: Detected [openai] in use.
+wandb: Use W&B Weave for improved LLM call tracing. Install Weave with `pip install weave` then add `import weave` to the top of your script.
+wandb: For more information, check out the docs at: https://weave-docs.wandb.ai
+  0%|          | 0/100 [00:00<?, ?it/s][transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+SGLang generation done - elapsed time: 0.71s, prompts: 2, total tokens: 35, avg length: 17.5, speed: 49.1 tok/s
+SGLang generation done - elapsed time: 0.65s, prompts: 2, total tokens: 16, avg length: 8.0, speed: 24.6 tok/s
+SGLang generation done - elapsed time: 0.72s, prompts: 2, total tokens: 18, avg length: 9.0, speed: 24.9 tok/s
+SGLang generation done - elapsed time: 0.78s, prompts: 2, total tokens: 30, avg length: 15.0, speed: 38.7 tok/s
+  1%|          | 1/100 [00:36<59:30, 36.07s/it]                                               {'loss': '0.04635', 'grad_norm': '1.553e+05', 'learning_rate': '0', 'on_policy_loss': '0.0463', 'rollout/tokens_per_second': '34.31', 'rollout/mean_response_length': '12.38', 'rollout/generated_tokens': '24.75', 'opsd/student_entropy': '2.251', 'opsd/teacher_entropy': '2.312', 'opsd/student_sampled_logp': '-19.37', 'opsd/teacher_sampled_logp': '-18.67', 'opsd/forward_kl_teacher_student': '0.2048', 'opsd/reverse_kl_student_teacher': '0.2081', 'opsd/valid_response_tokens': '99', 'opsd/loss': '0.04913', 'system/gpu_allocated_gib': '24.59', 'system/gpu_reserved_gib': '36.17', 'system/gpu_peak_allocated_gib': '31.04', 'epoch': '0.001952'}
+  1%|          | 1/100 [00:39<59:30, 36.07s/it]SGLang generation done - elapsed time: 18.65s, prompts: 8, total tokens: 6949, avg length: 868.6, speed: 372.5 tok/s
+  2%|▏         | 2/100 [01:06<53:16, 32.61s/it]                                               {'loss': '0.003207', 'grad_norm': '0.04034', 'learning_rate': '1e-07', 'on_policy_loss': '0.0032', 'rollout/tokens_per_second': '372.5', 'rollout/mean_response_length': '868.6', 'rollout/generated_tokens': '6949', 'opsd/student_entropy': '0.6056', 'opsd/teacher_entropy': '0.6517', 'opsd/student_sampled_logp': '-0.5165', 'opsd/teacher_sampled_logp': '-0.5635', 'opsd/forward_kl_teacher_student': '0.05885', 'opsd/reverse_kl_student_teacher': '0.04708', 'opsd/valid_response_tokens': '7742', 'opsd/loss': '0.003426', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.57', 'system/gpu_peak_allocated_gib': '44.58', 'epoch': '0.003904'}
+  2%|▏         | 2/100 [01:09<53:16, 32.61s/it]SGLang generation done - elapsed time: 18.35s, prompts: 8, total tokens: 6452, avg length: 806.5, speed: 351.5 tok/s
+  3%|▎         | 3/100 [01:35<50:29, 31.23s/it]                                               {'loss': '0.004019', 'grad_norm': '0.0449', 'learning_rate': '2e-07', 'on_policy_loss': '0.004', 'rollout/tokens_per_second': '351.5', 'rollout/mean_response_length': '806.5', 'rollout/generated_tokens': '6452', 'opsd/student_entropy': '0.6852', 'opsd/teacher_entropy': '0.7334', 'opsd/student_sampled_logp': '-0.5764', 'opsd/teacher_sampled_logp': '-0.6231', 'opsd/forward_kl_teacher_student': '0.056', 'opsd/reverse_kl_student_teacher': '0.04533', 'opsd/valid_response_tokens': '7342', 'opsd/loss': '0.002872', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.54', 'system/gpu_peak_allocated_gib': '44.63', 'epoch': '0.005857'}
+  3%|▎         | 3/100 [01:39<50:29, 31.23s/it]SGLang generation done - elapsed time: 17.33s, prompts: 8, total tokens: 5143, avg length: 642.9, speed: 296.8 tok/s
+  4%|▍         | 4/100 [02:06<49:18, 30.82s/it]                                               {'loss': '0.003983', 'grad_norm': '0.04468', 'learning_rate': '3e-07', 'on_policy_loss': '0.004', 'rollout/tokens_per_second': '296.8', 'rollout/mean_response_length': '642.9', 'rollout/generated_tokens': '5143', 'opsd/student_entropy': '0.612', 'opsd/teacher_entropy': '0.6605', 'opsd/student_sampled_logp': '-0.5112', 'opsd/teacher_sampled_logp': '-0.5668', 'opsd/forward_kl_teacher_student': '0.06735', 'opsd/reverse_kl_student_teacher': '0.05279', 'opsd/valid_response_tokens': '6721', 'opsd/loss': '0.003925', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.44', 'system/gpu_peak_allocated_gib': '44.63', 'epoch': '0.007809'}
+  4%|▍         | 4/100 [02:09<49:18, 30.82s/it]SGLang generation done - elapsed time: 18.81s, prompts: 8, total tokens: 7709, avg length: 963.6, speed: 409.7 tok/s
+  5%|▌         | 5/100 [02:36<48:51, 30.86s/it]                                               {'loss': '0.004007', 'grad_norm': '0.04486', 'learning_rate': '4e-07', 'on_policy_loss': '0.004', 'rollout/tokens_per_second': '409.7', 'rollout/mean_response_length': '963.6', 'rollout/generated_tokens': '7709', 'opsd/student_entropy': '0.6373', 'opsd/teacher_entropy': '0.6841', 'opsd/student_sampled_logp': '-0.526', 'opsd/teacher_sampled_logp': '-0.578', 'opsd/forward_kl_teacher_student': '0.06319', 'opsd/reverse_kl_student_teacher': '0.0517', 'opsd/valid_response_tokens': '7318', 'opsd/loss': '0.006241', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.52', 'system/gpu_peak_allocated_gib': '44.63', 'epoch': '0.009761'}
+  5%|▌         | 5/100 [02:40<48:51, 30.86s/it]SGLang generation done - elapsed time: 18.79s, prompts: 8, total tokens: 7133, avg length: 891.6, speed: 379.7 tok/s
+
+================================================================================
+Saved 48 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_5.json
+================================================================================
+
+  6%|▌         | 6/100 [03:06<47:47, 30.51s/it]                                               {'loss': '0.004044', 'grad_norm': '0.04417', 'learning_rate': '5e-07', 'on_policy_loss': '0.004', 'rollout/tokens_per_second': '379.7', 'rollout/mean_response_length': '891.6', 'rollout/generated_tokens': '7133', 'opsd/student_entropy': '0.6247', 'opsd/teacher_entropy': '0.6721', 'opsd/student_sampled_logp': '-0.5207', 'opsd/teacher_sampled_logp': '-0.5723', 'opsd/forward_kl_teacher_student': '0.0654', 'opsd/reverse_kl_student_teacher': '0.0522', 'opsd/valid_response_tokens': '7273', 'opsd/loss': '0.003895', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.54', 'system/gpu_peak_allocated_gib': '44.65', 'epoch': '0.01171'}
+  6%|▌         | 6/100 [03:10<47:47, 30.51s/it]SGLang generation done - elapsed time: 18.75s, prompts: 8, total tokens: 7703, avg length: 962.9, speed: 410.9 tok/s
+  7%|▋         | 7/100 [03:36<46:50, 30.22s/it]                                               {'loss': '0.004453', 'grad_norm': '0.04327', 'learning_rate': '6e-07', 'on_policy_loss': '0.0045', 'rollout/tokens_per_second': '410.9', 'rollout/mean_response_length': '962.9', 'rollout/generated_tokens': '7703', 'opsd/student_entropy': '0.6474', 'opsd/teacher_entropy': '0.6963', 'opsd/student_sampled_logp': '-0.5372', 'opsd/teacher_sampled_logp': '-0.5946', 'opsd/forward_kl_teacher_student': '0.07023', 'opsd/reverse_kl_student_teacher': '0.054', 'opsd/valid_response_tokens': '7353', 'opsd/loss': '0.006058', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.6', 'system/gpu_peak_allocated_gib': '44.65', 'epoch': '0.01367'}
+  7%|▋         | 7/100 [03:39<46:50, 30.22s/it]SGLang generation done - elapsed time: 18.40s, prompts: 8, total tokens: 6748, avg length: 843.5, speed: 366.8 tok/s
+  8%|▊         | 8/100 [04:05<45:52, 29.91s/it]                                               {'loss': '0.003791', 'grad_norm': '0.04645', 'learning_rate': '7e-07', 'on_policy_loss': '0.0038', 'rollout/tokens_per_second': '366.8', 'rollout/mean_response_length': '843.5', 'rollout/generated_tokens': '6748', 'opsd/student_entropy': '0.6282', 'opsd/teacher_entropy': '0.6785', 'opsd/student_sampled_logp': '-0.5272', 'opsd/teacher_sampled_logp': '-0.58', 'opsd/forward_kl_teacher_student': '0.06556', 'opsd/reverse_kl_student_teacher': '0.05195', 'opsd/valid_response_tokens': '6773', 'opsd/loss': '0.002534', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.44', 'system/gpu_peak_allocated_gib': '44.65', 'epoch': '0.01562'}
+  8%|▊         | 8/100 [04:08<45:52, 29.91s/it]SGLang generation done - elapsed time: 18.65s, prompts: 8, total tokens: 7037, avg length: 879.6, speed: 377.4 tok/s
+  9%|▉         | 9/100 [04:35<45:15, 29.84s/it]                                               {'loss': '0.003579', 'grad_norm': '0.04428', 'learning_rate': '8e-07', 'on_policy_loss': '0.0036', 'rollout/tokens_per_second': '377.4', 'rollout/mean_response_length': '879.6', 'rollout/generated_tokens': '7037', 'opsd/student_entropy': '0.654', 'opsd/teacher_entropy': '0.6973', 'opsd/student_sampled_logp': '-0.547', 'opsd/teacher_sampled_logp': '-0.593', 'opsd/forward_kl_teacher_student': '0.05272', 'opsd/reverse_kl_student_teacher': '0.04408', 'opsd/valid_response_tokens': '7372', 'opsd/loss': '0.003902', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.5', 'system/gpu_peak_allocated_gib': '44.71', 'epoch': '0.01757'}
+  9%|▉         | 9/100 [04:38<45:15, 29.84s/it]SGLang generation done - elapsed time: 18.43s, prompts: 8, total tokens: 6916, avg length: 864.5, speed: 375.3 tok/s
+ 10%|█         | 10/100 [05:04<44:37, 29.75s/it]                                                {'loss': '0.004324', 'grad_norm': '0.04599', 'learning_rate': '9e-07', 'on_policy_loss': '0.0043', 'rollout/tokens_per_second': '375.3', 'rollout/mean_response_length': '864.5', 'rollout/generated_tokens': '6916', 'opsd/student_entropy': '0.6772', 'opsd/teacher_entropy': '0.7245', 'opsd/student_sampled_logp': '-0.5656', 'opsd/teacher_sampled_logp': '-0.6148', 'opsd/forward_kl_teacher_student': '0.06127', 'opsd/reverse_kl_student_teacher': '0.04926', 'opsd/valid_response_tokens': '7156', 'opsd/loss': '0.002726', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.48', 'system/gpu_peak_allocated_gib': '44.73', 'epoch': '0.01952'}
+ 10%|█         | 10/100 [05:08<44:37, 29.75s/it]SGLang generation done - elapsed time: 18.44s, prompts: 8, total tokens: 6604, avg length: 825.5, speed: 358.1 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_10.json
+================================================================================
+
+ 11%|█         | 11/100 [05:35<44:25, 29.95s/it]                                                {'loss': '0.004457', 'grad_norm': '0.04437', 'learning_rate': '1e-06', 'on_policy_loss': '0.0045', 'rollout/tokens_per_second': '358.1', 'rollout/mean_response_length': '825.5', 'rollout/generated_tokens': '6604', 'opsd/student_entropy': '0.7056', 'opsd/teacher_entropy': '0.7514', 'opsd/student_sampled_logp': '-0.5902', 'opsd/teacher_sampled_logp': '-0.6398', 'opsd/forward_kl_teacher_student': '0.06236', 'opsd/reverse_kl_student_teacher': '0.04966', 'opsd/valid_response_tokens': '7164', 'opsd/loss': '0.004433', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.52', 'system/gpu_peak_allocated_gib': '44.73', 'epoch': '0.02147'}
+ 11%|█         | 11/100 [05:39<44:25, 29.95s/it]SGLang generation done - elapsed time: 18.71s, prompts: 8, total tokens: 7507, avg length: 938.4, speed: 401.2 tok/s
+ 12%|█▏        | 12/100 [06:05<43:59, 29.99s/it]                                                {'loss': '0.002714', 'grad_norm': '0.04039', 'learning_rate': '9.997e-07', 'on_policy_loss': '0.0027', 'rollout/tokens_per_second': '401.2', 'rollout/mean_response_length': '938.4', 'rollout/generated_tokens': '7507', 'opsd/student_entropy': '0.559', 'opsd/teacher_entropy': '0.6034', 'opsd/student_sampled_logp': '-0.4677', 'opsd/teacher_sampled_logp': '-0.5097', 'opsd/forward_kl_teacher_student': '0.05249', 'opsd/reverse_kl_student_teacher': '0.042', 'opsd/valid_response_tokens': '7119', 'opsd/loss': '0.003717', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.46', 'system/gpu_peak_allocated_gib': '44.73', 'epoch': '0.02343'}
+ 12%|█▏        | 12/100 [06:09<43:59, 29.99s/it]SGLang generation done - elapsed time: 18.76s, prompts: 8, total tokens: 7665, avg length: 958.1, speed: 408.6 tok/s
+ 13%|█▎        | 13/100 [06:35<43:36, 30.07s/it]                                                {'loss': '0.0024', 'grad_norm': '0.04252', 'learning_rate': '9.988e-07', 'on_policy_loss': '0.0024', 'rollout/tokens_per_second': '408.6', 'rollout/mean_response_length': '958.1', 'rollout/generated_tokens': '7665', 'opsd/student_entropy': '0.618', 'opsd/teacher_entropy': '0.665', 'opsd/student_sampled_logp': '-0.5104', 'opsd/teacher_sampled_logp': '-0.5553', 'opsd/forward_kl_teacher_student': '0.05369', 'opsd/reverse_kl_student_teacher': '0.04359', 'opsd/valid_response_tokens': '7148', 'opsd/loss': '0.003273', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.55', 'system/gpu_peak_allocated_gib': '44.75', 'epoch': '0.02538'}
+ 13%|█▎        | 13/100 [06:39<43:36, 30.07s/it]SGLang generation done - elapsed time: 18.75s, prompts: 8, total tokens: 6801, avg length: 850.1, speed: 362.7 tok/s
+ 14%|█▍        | 14/100 [07:05<42:59, 30.00s/it]                                                {'loss': '0.002677', 'grad_norm': '0.04346', 'learning_rate': '9.973e-07', 'on_policy_loss': '0.0027', 'rollout/tokens_per_second': '362.7', 'rollout/mean_response_length': '850.1', 'rollout/generated_tokens': '6801', 'opsd/student_entropy': '0.6499', 'opsd/teacher_entropy': '0.6953', 'opsd/student_sampled_logp': '-0.5433', 'opsd/teacher_sampled_logp': '-0.5887', 'opsd/forward_kl_teacher_student': '0.05254', 'opsd/reverse_kl_student_teacher': '0.04264', 'opsd/valid_response_tokens': '7000', 'opsd/loss': '0.0008812', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.51', 'system/gpu_peak_allocated_gib': '44.75', 'epoch': '0.02733'}
+ 14%|█▍        | 14/100 [07:08<42:59, 30.00s/it]SGLang generation done - elapsed time: 18.78s, prompts: 8, total tokens: 6837, avg length: 854.6, speed: 364.0 tok/s
+ 15%|█▌        | 15/100 [07:35<42:27, 29.97s/it]                                                {'loss': '0.003655', 'grad_norm': '0.04961', 'learning_rate': '9.951e-07', 'on_policy_loss': '0.0037', 'rollout/tokens_per_second': '364', 'rollout/mean_response_length': '854.6', 'rollout/generated_tokens': '6837', 'opsd/student_entropy': '0.65', 'opsd/teacher_entropy': '0.7077', 'opsd/student_sampled_logp': '-0.5462', 'opsd/teacher_sampled_logp': '-0.6013', 'opsd/forward_kl_teacher_student': '0.0706', 'opsd/reverse_kl_student_teacher': '0.05608', 'opsd/valid_response_tokens': '7108', 'opsd/loss': '0.002554', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.53', 'system/gpu_peak_allocated_gib': '44.75', 'epoch': '0.02928'}
+ 15%|█▌        | 15/100 [07:38<42:27, 29.97s/it]SGLang generation done - elapsed time: 18.15s, prompts: 8, total tokens: 6629, avg length: 828.6, speed: 365.2 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_15.json
+================================================================================
+
+ 16%|█▌        | 16/100 [08:05<42:12, 30.14s/it]                                                {'loss': '0.003139', 'grad_norm': '0.04459', 'learning_rate': '9.924e-07', 'on_policy_loss': '0.0031', 'rollout/tokens_per_second': '365.2', 'rollout/mean_response_length': '828.6', 'rollout/generated_tokens': '6629', 'opsd/student_entropy': '0.7163', 'opsd/teacher_entropy': '0.7672', 'opsd/student_sampled_logp': '-0.5996', 'opsd/teacher_sampled_logp': '-0.6439', 'opsd/forward_kl_teacher_student': '0.05741', 'opsd/reverse_kl_student_teacher': '0.04606', 'opsd/valid_response_tokens': '7556', 'opsd/loss': '0.0004921', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.76', 'system/gpu_peak_allocated_gib': '44.75', 'epoch': '0.03123'}
+ 16%|█▌        | 16/100 [08:09<42:12, 30.14s/it]SGLang generation done - elapsed time: 18.82s, prompts: 8, total tokens: 7689, avg length: 961.1, speed: 408.6 tok/s
+ 17%|█▋        | 17/100 [08:36<41:54, 30.29s/it]                                                {'loss': '0.002636', 'grad_norm': '0.04045', 'learning_rate': '9.891e-07', 'on_policy_loss': '0.0026', 'rollout/tokens_per_second': '408.6', 'rollout/mean_response_length': '961.1', 'rollout/generated_tokens': '7689', 'opsd/student_entropy': '0.6141', 'opsd/teacher_entropy': '0.6634', 'opsd/student_sampled_logp': '-0.5114', 'opsd/teacher_sampled_logp': '-0.559', 'opsd/forward_kl_teacher_student': '0.05933', 'opsd/reverse_kl_student_teacher': '0.04692', 'opsd/valid_response_tokens': '7360', 'opsd/loss': '0.003015', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.37', 'system/gpu_peak_allocated_gib': '44.75', 'epoch': '0.03319'}
+ 17%|█▋        | 17/100 [08:40<41:54, 30.29s/it]SGLang generation done - elapsed time: 18.74s, prompts: 8, total tokens: 7664, avg length: 958.0, speed: 409.1 tok/s
+ 18%|█▊        | 18/100 [09:06<41:16, 30.20s/it]                                                {'loss': '0.003196', 'grad_norm': '0.03914', 'learning_rate': '9.851e-07', 'on_policy_loss': '0.0032', 'rollout/tokens_per_second': '409.1', 'rollout/mean_response_length': '958', 'rollout/generated_tokens': '7664', 'opsd/student_entropy': '0.6215', 'opsd/teacher_entropy': '0.6704', 'opsd/student_sampled_logp': '-0.5231', 'opsd/teacher_sampled_logp': '-0.5702', 'opsd/forward_kl_teacher_student': '0.06002', 'opsd/reverse_kl_student_teacher': '0.04795', 'opsd/valid_response_tokens': '7250', 'opsd/loss': '0.003901', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.59', 'system/gpu_peak_allocated_gib': '44.75', 'epoch': '0.03514'}
+ 18%|█▊        | 18/100 [09:09<41:16, 30.20s/it]SGLang generation done - elapsed time: 18.78s, prompts: 8, total tokens: 7722, avg length: 965.2, speed: 411.3 tok/s
+ 19%|█▉        | 19/100 [09:36<40:30, 30.00s/it]                                                {'loss': '0.004448', 'grad_norm': '0.04772', 'learning_rate': '9.806e-07', 'on_policy_loss': '0.0044', 'rollout/tokens_per_second': '411.3', 'rollout/mean_response_length': '965.2', 'rollout/generated_tokens': '7722', 'opsd/student_entropy': '0.6917', 'opsd/teacher_entropy': '0.7458', 'opsd/student_sampled_logp': '-0.5802', 'opsd/teacher_sampled_logp': '-0.63', 'opsd/forward_kl_teacher_student': '0.06445', 'opsd/reverse_kl_student_teacher': '0.04986', 'opsd/valid_response_tokens': '7610', 'opsd/loss': '0.006641', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.53', 'system/gpu_peak_allocated_gib': '44.75', 'epoch': '0.03709'}
+ 19%|█▉        | 19/100 [09:39<40:30, 30.00s/it]SGLang generation done - elapsed time: 18.76s, prompts: 8, total tokens: 8112, avg length: 1014.0, speed: 432.5 tok/s
+ 20%|██        | 20/100 [10:06<40:02, 30.03s/it]                                                {'loss': '0.003599', 'grad_norm': '0.04343', 'learning_rate': '9.755e-07', 'on_policy_loss': '0.0036', 'rollout/tokens_per_second': '432.5', 'rollout/mean_response_length': '1014', 'rollout/generated_tokens': '8112', 'opsd/student_entropy': '0.668', 'opsd/teacher_entropy': '0.7222', 'opsd/student_sampled_logp': '-0.5564', 'opsd/teacher_sampled_logp': '-0.6063', 'opsd/forward_kl_teacher_student': '0.05917', 'opsd/reverse_kl_student_teacher': '0.04752', 'opsd/valid_response_tokens': '7663', 'opsd/loss': '0.003783', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.74', 'system/gpu_peak_allocated_gib': '44.75', 'epoch': '0.03904'}
+ 20%|██        | 20/100 [10:09<40:02, 30.03s/it]SGLang generation done - elapsed time: 18.76s, prompts: 8, total tokens: 7983, avg length: 997.9, speed: 425.5 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_20.json
+================================================================================
+
+ 21%|██        | 21/100 [10:36<39:33, 30.05s/it]                                                {'loss': '0.00396', 'grad_norm': '0.0448', 'learning_rate': '9.698e-07', 'on_policy_loss': '0.004', 'rollout/tokens_per_second': '425.5', 'rollout/mean_response_length': '997.9', 'rollout/generated_tokens': '7983', 'opsd/student_entropy': '0.7128', 'opsd/teacher_entropy': '0.7725', 'opsd/student_sampled_logp': '-0.6012', 'opsd/teacher_sampled_logp': '-0.6525', 'opsd/forward_kl_teacher_student': '0.06572', 'opsd/reverse_kl_student_teacher': '0.05008', 'opsd/valid_response_tokens': '7530', 'opsd/loss': '0.002808', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.62', 'system/gpu_peak_allocated_gib': '44.75', 'epoch': '0.041'}
+ 21%|██        | 21/100 [10:39<39:33, 30.05s/it]SGLang generation done - elapsed time: 18.61s, prompts: 8, total tokens: 7226, avg length: 903.2, speed: 388.3 tok/s
+ 22%|██▏       | 22/100 [11:07<39:22, 30.29s/it]                                                {'loss': '0.002138', 'grad_norm': '0.04566', 'learning_rate': '9.636e-07', 'on_policy_loss': '0.0021', 'rollout/tokens_per_second': '388.3', 'rollout/mean_response_length': '903.2', 'rollout/generated_tokens': '7226', 'opsd/student_entropy': '0.6404', 'opsd/teacher_entropy': '0.696', 'opsd/student_sampled_logp': '-0.5444', 'opsd/teacher_sampled_logp': '-0.593', 'opsd/forward_kl_teacher_student': '0.05745', 'opsd/reverse_kl_student_teacher': '0.04562', 'opsd/valid_response_tokens': '7338', 'opsd/loss': '0.001217', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.63', 'system/gpu_peak_allocated_gib': '44.75', 'epoch': '0.04295'}
+ 22%|██▏       | 22/100 [11:10<39:22, 30.29s/it]SGLang generation done - elapsed time: 18.76s, prompts: 8, total tokens: 7287, avg length: 910.9, speed: 388.4 tok/s
+ 23%|██▎       | 23/100 [11:38<39:12, 30.55s/it]                                                {'loss': '0.003091', 'grad_norm': '0.04484', 'learning_rate': '9.568e-07', 'on_policy_loss': '0.0031', 'rollout/tokens_per_second': '388.4', 'rollout/mean_response_length': '910.9', 'rollout/generated_tokens': '7287', 'opsd/student_entropy': '0.6298', 'opsd/teacher_entropy': '0.6867', 'opsd/student_sampled_logp': '-0.531', 'opsd/teacher_sampled_logp': '-0.5798', 'opsd/forward_kl_teacher_student': '0.06377', 'opsd/reverse_kl_student_teacher': '0.04996', 'opsd/valid_response_tokens': '7776', 'opsd/loss': '0.003326', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.56', 'system/gpu_peak_allocated_gib': '44.77', 'epoch': '0.0449'}
+ 23%|██▎       | 23/100 [11:41<39:12, 30.55s/it]SGLang generation done - elapsed time: 18.65s, prompts: 8, total tokens: 7201, avg length: 900.1, speed: 386.1 tok/s
+ 24%|██▍       | 24/100 [12:08<38:33, 30.44s/it]                                                {'loss': '0.0031', 'grad_norm': '0.04331', 'learning_rate': '9.494e-07', 'on_policy_loss': '0.0031', 'rollout/tokens_per_second': '386.1', 'rollout/mean_response_length': '900.1', 'rollout/generated_tokens': '7201', 'opsd/student_entropy': '0.6131', 'opsd/teacher_entropy': '0.6673', 'opsd/student_sampled_logp': '-0.5125', 'opsd/teacher_sampled_logp': '-0.5593', 'opsd/forward_kl_teacher_student': '0.06017', 'opsd/reverse_kl_student_teacher': '0.04735', 'opsd/valid_response_tokens': '7102', 'opsd/loss': '0.003605', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.77', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.04685'}
+ 24%|██▍       | 24/100 [12:11<38:33, 30.44s/it]SGLang generation done - elapsed time: 18.51s, prompts: 8, total tokens: 6317, avg length: 789.6, speed: 341.4 tok/s
+ 25%|██▌       | 25/100 [12:38<37:55, 30.34s/it]                                                {'loss': '0.002689', 'grad_norm': '0.0447', 'learning_rate': '9.415e-07', 'on_policy_loss': '0.0027', 'rollout/tokens_per_second': '341.4', 'rollout/mean_response_length': '789.6', 'rollout/generated_tokens': '6317', 'opsd/student_entropy': '0.646', 'opsd/teacher_entropy': '0.7037', 'opsd/student_sampled_logp': '-0.547', 'opsd/teacher_sampled_logp': '-0.5979', 'opsd/forward_kl_teacher_student': '0.06305', 'opsd/reverse_kl_student_teacher': '0.05044', 'opsd/valid_response_tokens': '7108', 'opsd/loss': '0.003038', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.59', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.0488'}
+ 25%|██▌       | 25/100 [12:42<37:55, 30.34s/it]wandb: WARNING URL not available in offline run
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s][A
+Writing model shards: 100%|██████████| 1/1 [00:05<00:00,  5.60s/it][AWriting model shards: 100%|██████████| 1/1 [00:05<00:00,  5.60s/it]
+SGLang generation done - elapsed time: 17.58s, prompts: 8, total tokens: 5880, avg length: 735.0, speed: 334.5 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_25.json
+================================================================================
+
+ 26%|██▌       | 26/100 [13:36<47:48, 38.77s/it]                                                {'loss': '0.003297', 'grad_norm': '0.04512', 'learning_rate': '9.33e-07', 'on_policy_loss': '0.0033', 'rollout/tokens_per_second': '334.5', 'rollout/mean_response_length': '735', 'rollout/generated_tokens': '5880', 'opsd/student_entropy': '0.6549', 'opsd/teacher_entropy': '0.7068', 'opsd/student_sampled_logp': '-0.5517', 'opsd/teacher_sampled_logp': '-0.5965', 'opsd/forward_kl_teacher_student': '0.0563', 'opsd/reverse_kl_student_teacher': '0.04367', 'opsd/valid_response_tokens': '6986', 'opsd/loss': '0.00268', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.42', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.05076'}
+ 26%|██▌       | 26/100 [13:40<47:48, 38.77s/it]SGLang generation done - elapsed time: 18.71s, prompts: 8, total tokens: 7165, avg length: 895.6, speed: 383.0 tok/s
+
+================================================================================
+STUDENT GENERATION SAMPLE (Step 26):
+================================================================================
+
+Prompt:
+<|im_start|>system
+You are Falcon, a helpful AI assistant created by Technology Innovation Institute (TII). To answer the user's question, you first think about the reasoning process and then provide the user with the answer. The reasoning process is enclosed within <think> </think> tags, i.e., <think> reasoning process here </think> answer here.
+<|im_end|>
+<|im_start|>user
+Problem: Given that a rectangle with length $3x$ inches and width $x + 5$ inches has the property that its area and perimeter have equal values, what is $x$?
+
+Please reason step by step, and put your final answer within \boxed{}.<|im_end|>
+<|im_start|>assistant
+
+
+Completion:
+<think>
+We have a rectangle with length L = 3x inches, width W = x + 5 inches.
+
+Area A = L * W = 3x * (x + 5) = 3x(x+5) = 3x^2 + 15x.
+
+Perimeter P = 2(L + W) = 2(3x + x + 5) = 2(4x + 5) = 8x + 10.
+
+We are told that area = perimeter.
+
+Set 3x^2 + 15x = 8x + 10.
+
+Solve for x.
+
+3x^2 + 15x - 8x - 10 = 0 => 3x^2 + 7x - 10 = 0.
+
+Solve quadratic: discriminant D = 7^2 - 4*3*(-10) = 49 + 120 = 169 = 13^2.
+
+So x = [-7 ± 13] / (2*3) = [-7 ± 13] / 6.
+
+Two solutions: x = (-7 + 13) / 6 = 6 / 6 = 1. Or x = (-7 - 13) / 6 = -20/6 = -10/3 ≈ -3.333.
+
+Since length and width are dimensions in inches, must be positive. So x must be positive. x = 1 satisfies positivity: length 3*1 = 3 inches, width 1+5 = 6 inches, area = 18, perimeter = 2(3+6)=2*9=18. Works. x = -10/3 leads to negative dimensions: length = -10, etc. Not acceptable.
+
+Thus x = 1.
+
+Answer: \boxed{1}.</think>
+The rectangle has length \(L = 3x\) inches and width \(W = x+5\) inches.
+
+**Step 1: Write the area.**  
+\[
+\text{Area}=LW = 3x(x+5)=3x^2+15x.
+\]
+
+**Step 2: Write the perimeter.**  
+\[
+\text{Perimeter}=2(L+W)=2\big(3x+(x+5)\big)=2(4x+5)=8x+10.
+\]
+
+**Step 3: Set area equal to perimeter (given condition).**  
+\[
+3x^2+15x = 8x+10.
+\]
+
+**Step 4: Solve the quadratic equation.**  
+\[
+3x^2+15x-8x-10=0 \;\Rightarrow\; 3x^2+7x-10=0.
+\]
+
+Compute the discriminant:
+\[
+\Delta = 7^2-4\cdot3\cdot(-10)=49+120=169=13^2.
+\]
+
+Thus,
+\[
+x = \frac{-7 \pm 13}{2\cdot3} = \frac{-7 \pm 13}{6}.
+\]
+
+The two solutions are:
+\[
+x_1 = \frac{-7+13}{6} = \frac{6}{6}=1,\qquad
+x_2 = \frac{-7-13}{6} = \frac{-20}{6}=-\frac{10}{3}.
+\]
+
+Since \(x\) represents a length, it must be positive. Therefore, we discard the negative solution.
+
+\[
+\boxed{1}
+\]
+<|im_end|>
+================================================================================
+
+ 27%|██▋       | 27/100 [14:06<43:47, 35.99s/it]                                                {'loss': '0.003089', 'grad_norm': '0.04676', 'learning_rate': '9.24e-07', 'on_policy_loss': '0.0031', 'rollout/tokens_per_second': '383', 'rollout/mean_response_length': '895.6', 'rollout/generated_tokens': '7165', 'opsd/student_entropy': '0.6805', 'opsd/teacher_entropy': '0.7448', 'opsd/student_sampled_logp': '-0.5697', 'opsd/teacher_sampled_logp': '-0.6275', 'opsd/forward_kl_teacher_student': '0.06823', 'opsd/reverse_kl_student_teacher': '0.05358', 'opsd/valid_response_tokens': '7392', 'opsd/loss': '0.0003242', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.39', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.05271'}
+ 27%|██▋       | 27/100 [14:09<43:47, 35.99s/it]SGLang generation done - elapsed time: 18.33s, prompts: 8, total tokens: 6704, avg length: 838.0, speed: 365.7 tok/s
+ 28%|██▊       | 28/100 [14:36<41:09, 34.29s/it]                                                {'loss': '0.001253', 'grad_norm': '0.04097', 'learning_rate': '9.145e-07', 'on_policy_loss': '0.0013', 'rollout/tokens_per_second': '365.7', 'rollout/mean_response_length': '838', 'rollout/generated_tokens': '6704', 'opsd/student_entropy': '0.6426', 'opsd/teacher_entropy': '0.7117', 'opsd/student_sampled_logp': '-0.5424', 'opsd/teacher_sampled_logp': '-0.5964', 'opsd/forward_kl_teacher_student': '0.06703', 'opsd/reverse_kl_student_teacher': '0.04988', 'opsd/valid_response_tokens': '7010', 'opsd/loss': '0.001535', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.63', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.05466'}
+ 28%|██▊       | 28/100 [14:40<41:09, 34.29s/it]SGLang generation done - elapsed time: 18.55s, prompts: 8, total tokens: 6507, avg length: 813.4, speed: 350.7 tok/s
+ 29%|██▉       | 29/100 [15:06<39:04, 33.02s/it]                                                {'loss': '0.001673', 'grad_norm': '0.04538', 'learning_rate': '9.045e-07', 'on_policy_loss': '0.0017', 'rollout/tokens_per_second': '350.7', 'rollout/mean_response_length': '813.4', 'rollout/generated_tokens': '6507', 'opsd/student_entropy': '0.58', 'opsd/teacher_entropy': '0.6407', 'opsd/student_sampled_logp': '-0.483', 'opsd/teacher_sampled_logp': '-0.5342', 'opsd/forward_kl_teacher_student': '0.06213', 'opsd/reverse_kl_student_teacher': '0.04772', 'opsd/valid_response_tokens': '6876', 'opsd/loss': '0.001074', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.72', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.05661'}
+ 29%|██▉       | 29/100 [15:10<39:04, 33.02s/it]SGLang generation done - elapsed time: 18.68s, prompts: 8, total tokens: 7651, avg length: 956.4, speed: 409.6 tok/s
+ 30%|███       | 30/100 [15:36<37:23, 32.05s/it]                                                {'loss': '0.002999', 'grad_norm': '0.04494', 'learning_rate': '8.94e-07', 'on_policy_loss': '0.003', 'rollout/tokens_per_second': '409.6', 'rollout/mean_response_length': '956.4', 'rollout/generated_tokens': '7651', 'opsd/student_entropy': '0.646', 'opsd/teacher_entropy': '0.709', 'opsd/student_sampled_logp': '-0.542', 'opsd/teacher_sampled_logp': '-0.5936', 'opsd/forward_kl_teacher_student': '0.06312', 'opsd/reverse_kl_student_teacher': '0.04889', 'opsd/valid_response_tokens': '7203', 'opsd/loss': '0.004826', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.59', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.05857'}
+ 30%|███       | 30/100 [15:40<37:23, 32.05s/it]SGLang generation done - elapsed time: 18.67s, prompts: 8, total tokens: 8192, avg length: 1024.0, speed: 438.7 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_30.json
+================================================================================
+
+ 31%|███       | 31/100 [16:06<36:08, 31.43s/it]                                                {'loss': '0.002032', 'grad_norm': '0.04397', 'learning_rate': '8.83e-07', 'on_policy_loss': '0.002', 'rollout/tokens_per_second': '438.7', 'rollout/mean_response_length': '1024', 'rollout/generated_tokens': '8192', 'opsd/student_entropy': '0.6241', 'opsd/teacher_entropy': '0.6942', 'opsd/student_sampled_logp': '-0.5228', 'opsd/teacher_sampled_logp': '-0.5736', 'opsd/forward_kl_teacher_student': '0.06092', 'opsd/reverse_kl_student_teacher': '0.04769', 'opsd/valid_response_tokens': '7457', 'opsd/loss': '0.0006895', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.26', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.06052'}
+ 31%|███       | 31/100 [16:10<36:08, 31.43s/it]SGLang generation done - elapsed time: 18.66s, prompts: 8, total tokens: 7290, avg length: 911.2, speed: 390.7 tok/s
+ 32%|███▏      | 32/100 [16:36<35:01, 30.91s/it]                                                {'loss': '0.0008138', 'grad_norm': '0.04364', 'learning_rate': '8.716e-07', 'on_policy_loss': '0.0008', 'rollout/tokens_per_second': '390.7', 'rollout/mean_response_length': '911.2', 'rollout/generated_tokens': '7290', 'opsd/student_entropy': '0.5843', 'opsd/teacher_entropy': '0.652', 'opsd/student_sampled_logp': '-0.4898', 'opsd/teacher_sampled_logp': '-0.5422', 'opsd/forward_kl_teacher_student': '0.06175', 'opsd/reverse_kl_student_teacher': '0.04811', 'opsd/valid_response_tokens': '6873', 'opsd/loss': '0.002374', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.51', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.06247'}
+ 32%|███▏      | 32/100 [16:39<35:01, 30.91s/it]SGLang generation done - elapsed time: 18.63s, prompts: 8, total tokens: 6997, avg length: 874.6, speed: 375.6 tok/s
+ 33%|███▎      | 33/100 [17:05<34:04, 30.51s/it]                                                {'loss': '0.002756', 'grad_norm': '0.04795', 'learning_rate': '8.597e-07', 'on_policy_loss': '0.0028', 'rollout/tokens_per_second': '375.6', 'rollout/mean_response_length': '874.6', 'rollout/generated_tokens': '6997', 'opsd/student_entropy': '0.5993', 'opsd/teacher_entropy': '0.6643', 'opsd/student_sampled_logp': '-0.5036', 'opsd/teacher_sampled_logp': '-0.5613', 'opsd/forward_kl_teacher_student': '0.07109', 'opsd/reverse_kl_student_teacher': '0.05416', 'opsd/valid_response_tokens': '7214', 'opsd/loss': '0.0008569', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.37', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.06442'}
+ 33%|███▎      | 33/100 [17:09<34:04, 30.51s/it]SGLang generation done - elapsed time: 18.70s, prompts: 8, total tokens: 8135, avg length: 1016.9, speed: 434.9 tok/s
+ 34%|███▍      | 34/100 [17:37<33:48, 30.73s/it]                                                {'loss': '0.002039', 'grad_norm': '0.04377', 'learning_rate': '8.473e-07', 'on_policy_loss': '0.002', 'rollout/tokens_per_second': '434.9', 'rollout/mean_response_length': '1017', 'rollout/generated_tokens': '8135', 'opsd/student_entropy': '0.6223', 'opsd/teacher_entropy': '0.6883', 'opsd/student_sampled_logp': '-0.5239', 'opsd/teacher_sampled_logp': '-0.5798', 'opsd/forward_kl_teacher_student': '0.06785', 'opsd/reverse_kl_student_teacher': '0.05198', 'opsd/valid_response_tokens': '7240', 'opsd/loss': '0.002796', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.54', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.06637'}
+ 34%|███▍      | 34/100 [17:40<33:48, 30.73s/it]SGLang generation done - elapsed time: 18.60s, prompts: 8, total tokens: 7954, avg length: 994.2, speed: 427.6 tok/s
+ 35%|███▌      | 35/100 [18:07<33:13, 30.67s/it]                                                {'loss': '0.001788', 'grad_norm': '0.04711', 'learning_rate': '8.346e-07', 'on_policy_loss': '0.0018', 'rollout/tokens_per_second': '427.6', 'rollout/mean_response_length': '994.2', 'rollout/generated_tokens': '7954', 'opsd/student_entropy': '0.6264', 'opsd/teacher_entropy': '0.7011', 'opsd/student_sampled_logp': '-0.5269', 'opsd/teacher_sampled_logp': '-0.5843', 'opsd/forward_kl_teacher_student': '0.06991', 'opsd/reverse_kl_student_teacher': '0.05256', 'opsd/valid_response_tokens': '7419', 'opsd/loss': '0.002914', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.43', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.06833'}
+ 35%|███▌      | 35/100 [18:11<33:13, 30.67s/it]SGLang generation done - elapsed time: 18.56s, prompts: 8, total tokens: 6696, avg length: 837.0, speed: 360.8 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_35.json
+================================================================================
+
+ 36%|███▌      | 36/100 [18:37<32:30, 30.48s/it]                                                {'loss': '0.001942', 'grad_norm': '0.04159', 'learning_rate': '8.214e-07', 'on_policy_loss': '0.0019', 'rollout/tokens_per_second': '360.8', 'rollout/mean_response_length': '837', 'rollout/generated_tokens': '6696', 'opsd/student_entropy': '0.6342', 'opsd/teacher_entropy': '0.7079', 'opsd/student_sampled_logp': '-0.5368', 'opsd/teacher_sampled_logp': '-0.594', 'opsd/forward_kl_teacher_student': '0.06794', 'opsd/reverse_kl_student_teacher': '0.05117', 'opsd/valid_response_tokens': '6920', 'opsd/loss': '0.0009089', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.56', 'system/gpu_peak_allocated_gib': '44.78', 'epoch': '0.07028'}
+ 36%|███▌      | 36/100 [18:40<32:30, 30.48s/it]SGLang generation done - elapsed time: 18.72s, prompts: 8, total tokens: 7468, avg length: 933.5, speed: 399.0 tok/s
+ 37%|███▋      | 37/100 [19:07<31:45, 30.24s/it]                                                {'loss': '0.002182', 'grad_norm': '0.04528', 'learning_rate': '8.078e-07', 'on_policy_loss': '0.0022', 'rollout/tokens_per_second': '399', 'rollout/mean_response_length': '933.5', 'rollout/generated_tokens': '7468', 'opsd/student_entropy': '0.6353', 'opsd/teacher_entropy': '0.7064', 'opsd/student_sampled_logp': '-0.5326', 'opsd/teacher_sampled_logp': '-0.5881', 'opsd/forward_kl_teacher_student': '0.06535', 'opsd/reverse_kl_student_teacher': '0.05125', 'opsd/valid_response_tokens': '7415', 'opsd/loss': '0.002416', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.72', 'system/gpu_peak_allocated_gib': '44.8', 'epoch': '0.07223'}
+ 37%|███▋      | 37/100 [19:10<31:45, 30.24s/it]SGLang generation done - elapsed time: 18.78s, prompts: 8, total tokens: 8192, avg length: 1024.0, speed: 436.3 tok/s
+ 38%|███▊      | 38/100 [19:37<31:04, 30.07s/it]                                                {'loss': '0.00171', 'grad_norm': '0.04875', 'learning_rate': '7.939e-07', 'on_policy_loss': '0.0017', 'rollout/tokens_per_second': '436.3', 'rollout/mean_response_length': '1024', 'rollout/generated_tokens': '8192', 'opsd/student_entropy': '0.6513', 'opsd/teacher_entropy': '0.7302', 'opsd/student_sampled_logp': '-0.5431', 'opsd/teacher_sampled_logp': '-0.5979', 'opsd/forward_kl_teacher_student': '0.06672', 'opsd/reverse_kl_student_teacher': '0.05123', 'opsd/valid_response_tokens': '7856', 'opsd/loss': '0.002514', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.5', 'system/gpu_peak_allocated_gib': '44.81', 'epoch': '0.07418'}
+ 38%|███▊      | 38/100 [19:40<31:04, 30.07s/it]SGLang generation done - elapsed time: 18.72s, prompts: 8, total tokens: 7349, avg length: 918.6, speed: 392.5 tok/s
+ 39%|███▉      | 39/100 [20:07<30:32, 30.04s/it]                                                {'loss': '0.001206', 'grad_norm': '0.04201', 'learning_rate': '7.796e-07', 'on_policy_loss': '0.0012', 'rollout/tokens_per_second': '392.5', 'rollout/mean_response_length': '918.6', 'rollout/generated_tokens': '7349', 'opsd/student_entropy': '0.6084', 'opsd/teacher_entropy': '0.6828', 'opsd/student_sampled_logp': '-0.5161', 'opsd/teacher_sampled_logp': '-0.5714', 'opsd/forward_kl_teacher_student': '0.06982', 'opsd/reverse_kl_student_teacher': '0.05213', 'opsd/valid_response_tokens': '7067', 'opsd/loss': '0.001963', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.59', 'system/gpu_peak_allocated_gib': '44.82', 'epoch': '0.07613'}
+ 39%|███▉      | 39/100 [20:10<30:32, 30.04s/it]SGLang generation done - elapsed time: 17.41s, prompts: 8, total tokens: 5077, avg length: 634.6, speed: 291.6 tok/s
+
+================================================================================
+STUDENT GENERATION SAMPLE (Step 39):
+================================================================================
+
+Prompt:
+<|im_start|>system
+You are Falcon, a helpful AI assistant created by Technology Innovation Institute (TII). To answer the user's question, you first think about the reasoning process and then provide the user with the answer. The reasoning process is enclosed within <think> </think> tags, i.e., <think> reasoning process here </think> answer here.
+<|im_end|>
+<|im_start|>user
+Problem: No two students in Mrs. Vale's 26-student mathematics class have the same two initials. Each student's first name and last name begin with the same letter. If the letter ``Y'' is considered a vowel, what is the probability of randomly picking a student whose initials are vowels? Express your answer as a common fraction.
+
+Please reason step by step, and put your final answer within \boxed{}.<|im_end|>
+<|im_start|>assistant
+
+
+Completion:
+<think>
+We have a class of 26 students. Each student has a first name and a last name that begin with the same letter. So each student has initials like AA, BB, CC, etc. No two students share the same two initials, meaning each pair of letters (same first and last initial) is unique across students. So we have 26 distinct pairs (like AA, BB, CC...). The problem is to find the probability that a randomly selected student has initials that are vowels. It says "the letter Y is considered a vowel". So we consider vowels to be A, E, I, O, U, and Y. So 6 vowels.
+
+Each student's initials are of form (letter, same letter). So we need to count how many possible vowels are there where the letter is a vowel. Since the two initials are the same letter, the initials are a double vowel like AA, EE, II, OO, UU, YY. So there are 6 such possibilities. However, the problem states there are 26 students total and all have distinct initials. So the number of possible distinct same-letter initials is at most the number of letters in the alphabet (presumably English alphabet 26 letters). There are 26 letters in the English alphabet, exactly 26 distinct initial possibilities (AA, BB, ..., ZZ). Indeed, we have 26 students total; each has a distinct initial pair, meaning they have one of each of the 26 possibilities (presumably exactly one student per each letter). Since there are 26 letters and 26 students, it's likely that each of the 26 letters is used exactly once. So the students have initials: AA, BB, CC, ..., ZZ. So the vowel initials correspond to the vowels: A, E, I, O, U, Y. So there are 6 out of 26 such students.
+
+Thus probability = 6/26 = simplify = 3/13. That would be the answer.
+
+But we need to check if any subtlety exists: Could it be possible that the class composition is not exactly one of each letter, but just some arbitrary selection of 26 distinct double-letter initials out of the possible 26? Since there are only 26 possibilities (AA-ZZ) and we have 26 students, it must be all 26. So yes.
+
+Thus answer = \boxed{\frac{3}{13}}.
+
+But the problem might consider the letter set maybe includes other letters? No. The assumption is that English alphabet.
+
+Check step-by-step reasoning:
+
+1. There are 26 letters (A-Z). Students have same initial for first and last name.
+2. No two students share the same initials.
+3. There are 26 students, thus each initial pair corresponds to each of the 26 letters exactly once.
+4. The vowels: A, E, I, O, U, Y (Y counted as vowel). So 6 of the letters are vowels.
+5. Therefore 6 out of 26 students have vowel initials. Probability = 6/26 = 3/13.
+
+Yes.
+
+Potential nuance: Could Y considered a vowel only for this problem, thus it's counted as vowel.
+
+All good.
+
+Thus final answer: \boxed{\frac{3}{13}}.
+
+But ensure we reason in the required style: Step by step with reasoning enclosed in \\boxed{ answer }.
+
+Thus produce final answer.</think>
+The class has 26 students.  
+Each student’s initials are of the form \(AA, BB, \dots , ZZ\) (the same letter for first and last name).  
+Since no two students share the same initials and there are 26 students, each of the 26 possible double‑letter initials appears exactly once.
+
+The vowels (including Y) are \(A, E, I, O, U, Y\). Thus the vowel initials are \(AA, EE, II, OO, UU, YY\) – 6 possibilities out of the 26 total possibilities.
+
+Hence the probability of picking a student whose initials are both vowels is  
+
+\[
+\frac{6}{26} = \frac{3}{13}.
+\]
+
+\[
+\boxed{\frac{3}{13}}
+\]
+<|im_end|>
+================================================================================
+
+ 40%|████      | 40/100 [20:38<30:31, 30.52s/it]                                                {'loss': '0.0009795', 'grad_norm': '0.04417', 'learning_rate': '7.65e-07', 'on_policy_loss': '0.001', 'rollout/tokens_per_second': '291.6', 'rollout/mean_response_length': '634.6', 'rollout/generated_tokens': '5077', 'opsd/student_entropy': '0.5905', 'opsd/teacher_entropy': '0.682', 'opsd/student_sampled_logp': '-0.4986', 'opsd/teacher_sampled_logp': '-0.5654', 'opsd/forward_kl_teacher_student': '0.08767', 'opsd/reverse_kl_student_teacher': '0.06451', 'opsd/valid_response_tokens': '6984', 'opsd/loss': '-0.001089', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.76', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.07809'}
+ 40%|████      | 40/100 [20:42<30:31, 30.52s/it]SGLang generation done - elapsed time: 18.51s, prompts: 8, total tokens: 6481, avg length: 810.1, speed: 350.1 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_40.json
+================================================================================
+
+ 41%|████      | 41/100 [21:09<30:02, 30.56s/it]                                                {'loss': '0.0002051', 'grad_norm': '0.04485', 'learning_rate': '7.5e-07', 'on_policy_loss': '0.0002', 'rollout/tokens_per_second': '350.1', 'rollout/mean_response_length': '810.1', 'rollout/generated_tokens': '6481', 'opsd/student_entropy': '0.5504', 'opsd/teacher_entropy': '0.6347', 'opsd/student_sampled_logp': '-0.4584', 'opsd/teacher_sampled_logp': '-0.5167', 'opsd/forward_kl_teacher_student': '0.07208', 'opsd/reverse_kl_student_teacher': '0.05225', 'opsd/valid_response_tokens': '7270', 'opsd/loss': '-0.0006428', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.53', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.08004'}
+ 41%|████      | 41/100 [21:12<30:02, 30.56s/it]SGLang generation done - elapsed time: 18.65s, prompts: 8, total tokens: 6659, avg length: 832.4, speed: 357.1 tok/s
+ 42%|████▏     | 42/100 [21:39<29:23, 30.41s/it]                                                {'loss': '0.0004136', 'grad_norm': '0.04929', 'learning_rate': '7.347e-07', 'on_policy_loss': '0.0004', 'rollout/tokens_per_second': '357.1', 'rollout/mean_response_length': '832.4', 'rollout/generated_tokens': '6659', 'opsd/student_entropy': '0.5824', 'opsd/teacher_entropy': '0.6881', 'opsd/student_sampled_logp': '-0.488', 'opsd/teacher_sampled_logp': '-0.5651', 'opsd/forward_kl_teacher_student': '0.09882', 'opsd/reverse_kl_student_teacher': '0.06991', 'opsd/valid_response_tokens': '6877', 'opsd/loss': '0.0001142', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.55', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.08199'}
+ 42%|████▏     | 42/100 [21:42<29:23, 30.41s/it]SGLang generation done - elapsed time: 18.77s, prompts: 8, total tokens: 7885, avg length: 985.6, speed: 420.0 tok/s
+ 43%|████▎     | 43/100 [22:09<28:42, 30.22s/it]                                                {'loss': '-0.001716', 'grad_norm': '0.03776', 'learning_rate': '7.192e-07', 'on_policy_loss': '-0.0017', 'rollout/tokens_per_second': '420', 'rollout/mean_response_length': '985.6', 'rollout/generated_tokens': '7885', 'opsd/student_entropy': '0.4128', 'opsd/teacher_entropy': '0.5215', 'opsd/student_sampled_logp': '-0.3526', 'opsd/teacher_sampled_logp': '-0.435', 'opsd/forward_kl_teacher_student': '0.1099', 'opsd/reverse_kl_student_teacher': '0.07414', 'opsd/valid_response_tokens': '6792', 'opsd/loss': '-0.0009041', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.51', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.08394'}
+ 43%|████▎     | 43/100 [22:12<28:42, 30.22s/it]SGLang generation done - elapsed time: 18.81s, prompts: 8, total tokens: 7414, avg length: 926.8, speed: 394.1 tok/s
+ 44%|████▍     | 44/100 [22:39<28:07, 30.13s/it]                                                {'loss': '-0.001117', 'grad_norm': '0.04119', 'learning_rate': '7.034e-07', 'on_policy_loss': '-0.0011', 'rollout/tokens_per_second': '394.1', 'rollout/mean_response_length': '926.8', 'rollout/generated_tokens': '7414', 'opsd/student_entropy': '0.5037', 'opsd/teacher_entropy': '0.6128', 'opsd/student_sampled_logp': '-0.4186', 'opsd/teacher_sampled_logp': '-0.4936', 'opsd/forward_kl_teacher_student': '0.09324', 'opsd/reverse_kl_student_teacher': '0.06457', 'opsd/valid_response_tokens': '7456', 'opsd/loss': '-0.00194', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.7', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.0859'}
+ 44%|████▍     | 44/100 [22:42<28:07, 30.13s/it]SGLang generation done - elapsed time: 18.73s, prompts: 8, total tokens: 7419, avg length: 927.4, speed: 396.1 tok/s
+ 45%|████▌     | 45/100 [23:09<27:41, 30.20s/it]                                                {'loss': '-0.000449', 'grad_norm': '0.03804', 'learning_rate': '6.873e-07', 'on_policy_loss': '-0.0004', 'rollout/tokens_per_second': '396.1', 'rollout/mean_response_length': '927.4', 'rollout/generated_tokens': '7419', 'opsd/student_entropy': '0.4943', 'opsd/teacher_entropy': '0.5937', 'opsd/student_sampled_logp': '-0.4126', 'opsd/teacher_sampled_logp': '-0.4783', 'opsd/forward_kl_teacher_student': '0.08904', 'opsd/reverse_kl_student_teacher': '0.0621', 'opsd/valid_response_tokens': '7156', 'opsd/loss': '8.535e-05', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.55', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.08785'}
+ 45%|████▌     | 45/100 [23:12<27:41, 30.20s/it]SGLang generation done - elapsed time: 18.64s, prompts: 8, total tokens: 7095, avg length: 886.9, speed: 380.7 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_45.json
+================================================================================
+
+ 46%|████▌     | 46/100 [23:40<27:25, 30.47s/it]                                                {'loss': '-0.002259', 'grad_norm': '0.0366', 'learning_rate': '6.71e-07', 'on_policy_loss': '-0.0023', 'rollout/tokens_per_second': '380.7', 'rollout/mean_response_length': '886.9', 'rollout/generated_tokens': '7095', 'opsd/student_entropy': '0.4785', 'opsd/teacher_entropy': '0.6143', 'opsd/student_sampled_logp': '-0.4053', 'opsd/teacher_sampled_logp': '-0.5012', 'opsd/forward_kl_teacher_student': '0.1355', 'opsd/reverse_kl_student_teacher': '0.08609', 'opsd/valid_response_tokens': '6712', 'opsd/loss': '-0.00165', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.66', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.0898'}
+ 46%|████▌     | 46/100 [23:43<27:25, 30.47s/it]SGLang generation done - elapsed time: 18.31s, prompts: 8, total tokens: 6167, avg length: 770.9, speed: 336.8 tok/s
+ 47%|████▋     | 47/100 [24:10<26:41, 30.22s/it]                                                {'loss': '-0.002906', 'grad_norm': '0.04109', 'learning_rate': '6.545e-07', 'on_policy_loss': '-0.0029', 'rollout/tokens_per_second': '336.8', 'rollout/mean_response_length': '770.9', 'rollout/generated_tokens': '6167', 'opsd/student_entropy': '0.4763', 'opsd/teacher_entropy': '0.6012', 'opsd/student_sampled_logp': '-0.4042', 'opsd/teacher_sampled_logp': '-0.4888', 'opsd/forward_kl_teacher_student': '0.1079', 'opsd/reverse_kl_student_teacher': '0.07364', 'opsd/valid_response_tokens': '7109', 'opsd/loss': '-0.001158', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.44', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.09175'}
+ 47%|████▋     | 47/100 [24:13<26:41, 30.22s/it]SGLang generation done - elapsed time: 18.71s, prompts: 8, total tokens: 7428, avg length: 928.5, speed: 397.0 tok/s
+ 48%|████▊     | 48/100 [24:40<26:05, 30.10s/it]                                                {'loss': '-0.001353', 'grad_norm': '0.0469', 'learning_rate': '6.378e-07', 'on_policy_loss': '-0.0014', 'rollout/tokens_per_second': '397', 'rollout/mean_response_length': '928.5', 'rollout/generated_tokens': '7428', 'opsd/student_entropy': '0.4931', 'opsd/teacher_entropy': '0.6105', 'opsd/student_sampled_logp': '-0.414', 'opsd/teacher_sampled_logp': '-0.4947', 'opsd/forward_kl_teacher_student': '0.107', 'opsd/reverse_kl_student_teacher': '0.07202', 'opsd/valid_response_tokens': '7454', 'opsd/loss': '-0.002382', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.76', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.0937'}
+ 48%|████▊     | 48/100 [24:43<26:05, 30.10s/it]SGLang generation done - elapsed time: 17.97s, prompts: 8, total tokens: 6137, avg length: 767.1, speed: 341.5 tok/s
+ 49%|████▉     | 49/100 [25:10<25:35, 30.10s/it]                                                {'loss': '-0.001144', 'grad_norm': '0.04017', 'learning_rate': '6.21e-07', 'on_policy_loss': '-0.0011', 'rollout/tokens_per_second': '341.5', 'rollout/mean_response_length': '767.1', 'rollout/generated_tokens': '6137', 'opsd/student_entropy': '0.4929', 'opsd/teacher_entropy': '0.6122', 'opsd/student_sampled_logp': '-0.4191', 'opsd/teacher_sampled_logp': '-0.5001', 'opsd/forward_kl_teacher_student': '0.1139', 'opsd/reverse_kl_student_teacher': '0.07436', 'opsd/valid_response_tokens': '6980', 'opsd/loss': '-0.00156', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.73', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.09566'}
+ 49%|████▉     | 49/100 [25:13<25:35, 30.10s/it]SGLang generation done - elapsed time: 18.58s, prompts: 8, total tokens: 6854, avg length: 856.8, speed: 369.0 tok/s
+ 50%|█████     | 50/100 [25:40<25:02, 30.05s/it]                                                {'loss': '-0.001604', 'grad_norm': '0.04001', 'learning_rate': '6.04e-07', 'on_policy_loss': '-0.0016', 'rollout/tokens_per_second': '369', 'rollout/mean_response_length': '856.8', 'rollout/generated_tokens': '6854', 'opsd/student_entropy': '0.5061', 'opsd/teacher_entropy': '0.6446', 'opsd/student_sampled_logp': '-0.4311', 'opsd/teacher_sampled_logp': '-0.5165', 'opsd/forward_kl_teacher_student': '0.1194', 'opsd/reverse_kl_student_teacher': '0.07584', 'opsd/valid_response_tokens': '6952', 'opsd/loss': '-0.001034', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.56', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.09761'}
+ 50%|█████     | 50/100 [25:43<25:02, 30.05s/it]wandb: WARNING URL not available in offline run
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s][A
+Writing model shards: 100%|██████████| 1/1 [00:12<00:00, 12.28s/it][AWriting model shards: 100%|██████████| 1/1 [00:12<00:00, 12.28s/it]
+SGLang generation done - elapsed time: 18.65s, prompts: 8, total tokens: 7636, avg length: 954.5, speed: 409.4 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_50.json
+================================================================================
+
+ 51%|█████     | 51/100 [26:44<33:04, 40.51s/it]                                                {'loss': '-0.001935', 'grad_norm': '0.04046', 'learning_rate': '5.868e-07', 'on_policy_loss': '-0.0019', 'rollout/tokens_per_second': '409.4', 'rollout/mean_response_length': '954.5', 'rollout/generated_tokens': '7636', 'opsd/student_entropy': '0.4865', 'opsd/teacher_entropy': '0.6208', 'opsd/student_sampled_logp': '-0.4117', 'opsd/teacher_sampled_logp': '-0.5018', 'opsd/forward_kl_teacher_student': '0.1264', 'opsd/reverse_kl_student_teacher': '0.08221', 'opsd/valid_response_tokens': '7337', 'opsd/loss': '-0.002602', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.47', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.09956'}
+ 51%|█████     | 51/100 [26:48<33:04, 40.51s/it]SGLang generation done - elapsed time: 18.58s, prompts: 8, total tokens: 6907, avg length: 863.4, speed: 371.7 tok/s
+ 52%|█████▏    | 52/100 [27:16<30:07, 37.66s/it]                                                {'loss': '-0.003653', 'grad_norm': '0.04136', 'learning_rate': '5.696e-07', 'on_policy_loss': '-0.0037', 'rollout/tokens_per_second': '371.7', 'rollout/mean_response_length': '863.4', 'rollout/generated_tokens': '6907', 'opsd/student_entropy': '0.4635', 'opsd/teacher_entropy': '0.6171', 'opsd/student_sampled_logp': '-0.3938', 'opsd/teacher_sampled_logp': '-0.4946', 'opsd/forward_kl_teacher_student': '0.1409', 'opsd/reverse_kl_student_teacher': '0.09137', 'opsd/valid_response_tokens': '6558', 'opsd/loss': '-0.002859', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.7', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1015'}
+ 52%|█████▏    | 52/100 [27:19<30:07, 37.66s/it]SGLang generation done - elapsed time: 18.54s, prompts: 8, total tokens: 7265, avg length: 908.1, speed: 391.8 tok/s
+ 53%|█████▎    | 53/100 [27:45<27:37, 35.26s/it]                                                {'loss': '-0.003011', 'grad_norm': '0.03791', 'learning_rate': '5.523e-07', 'on_policy_loss': '-0.003', 'rollout/tokens_per_second': '391.8', 'rollout/mean_response_length': '908.1', 'rollout/generated_tokens': '7265', 'opsd/student_entropy': '0.4985', 'opsd/teacher_entropy': '0.6786', 'opsd/student_sampled_logp': '-0.4243', 'opsd/teacher_sampled_logp': '-0.5351', 'opsd/forward_kl_teacher_student': '0.1577', 'opsd/reverse_kl_student_teacher': '0.1001', 'opsd/valid_response_tokens': '7330', 'opsd/loss': '-0.001999', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.44', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1035'}
+ 53%|█████▎    | 53/100 [27:49<27:37, 35.26s/it]SGLang generation done - elapsed time: 18.66s, prompts: 8, total tokens: 7531, avg length: 941.4, speed: 403.6 tok/s
+ 54%|█████▍    | 54/100 [28:15<25:43, 33.56s/it]                                                {'loss': '-0.002615', 'grad_norm': '0.03963', 'learning_rate': '5.349e-07', 'on_policy_loss': '-0.0026', 'rollout/tokens_per_second': '403.6', 'rollout/mean_response_length': '941.4', 'rollout/generated_tokens': '7531', 'opsd/student_entropy': '0.4929', 'opsd/teacher_entropy': '0.648', 'opsd/student_sampled_logp': '-0.4165', 'opsd/teacher_sampled_logp': '-0.5156', 'opsd/forward_kl_teacher_student': '0.1366', 'opsd/reverse_kl_student_teacher': '0.08642', 'opsd/valid_response_tokens': '6894', 'opsd/loss': '-0.002403', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.42', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1054'}
+ 54%|█████▍    | 54/100 [28:18<25:43, 33.56s/it]SGLang generation done - elapsed time: 18.57s, prompts: 8, total tokens: 7276, avg length: 909.5, speed: 391.7 tok/s
+ 55%|█████▌    | 55/100 [28:44<24:13, 32.31s/it]                                                {'loss': '-0.002711', 'grad_norm': '0.03892', 'learning_rate': '5.174e-07', 'on_policy_loss': '-0.0027', 'rollout/tokens_per_second': '391.7', 'rollout/mean_response_length': '909.5', 'rollout/generated_tokens': '7276', 'opsd/student_entropy': '0.4931', 'opsd/teacher_entropy': '0.6687', 'opsd/student_sampled_logp': '-0.4149', 'opsd/teacher_sampled_logp': '-0.5286', 'opsd/forward_kl_teacher_student': '0.1577', 'opsd/reverse_kl_student_teacher': '0.09851', 'opsd/valid_response_tokens': '7406', 'opsd/loss': '-0.004509', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.52', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1074'}
+ 55%|█████▌    | 55/100 [28:48<24:13, 32.31s/it]SGLang generation done - elapsed time: 18.36s, prompts: 8, total tokens: 6911, avg length: 863.9, speed: 376.4 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_55.json
+================================================================================
+
+ 56%|█████▌    | 56/100 [29:14<23:06, 31.50s/it]                                                {'loss': '-0.003366', 'grad_norm': '0.03917', 'learning_rate': '5e-07', 'on_policy_loss': '-0.0034', 'rollout/tokens_per_second': '376.4', 'rollout/mean_response_length': '863.9', 'rollout/generated_tokens': '6911', 'opsd/student_entropy': '0.4941', 'opsd/teacher_entropy': '0.6691', 'opsd/student_sampled_logp': '-0.4188', 'opsd/teacher_sampled_logp': '-0.531', 'opsd/forward_kl_teacher_student': '0.16', 'opsd/reverse_kl_student_teacher': '0.09927', 'opsd/valid_response_tokens': '7081', 'opsd/loss': '-0.00507', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.47', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1093'}
+ 56%|█████▌    | 56/100 [29:17<23:06, 31.50s/it]SGLang generation done - elapsed time: 18.61s, prompts: 8, total tokens: 7299, avg length: 912.4, speed: 392.2 tok/s
+ 57%|█████▋    | 57/100 [29:44<22:19, 31.16s/it]                                                {'loss': '-0.003203', 'grad_norm': '0.03874', 'learning_rate': '4.826e-07', 'on_policy_loss': '-0.0032', 'rollout/tokens_per_second': '392.2', 'rollout/mean_response_length': '912.4', 'rollout/generated_tokens': '7299', 'opsd/student_entropy': '0.4409', 'opsd/teacher_entropy': '0.5996', 'opsd/student_sampled_logp': '-0.3736', 'opsd/teacher_sampled_logp': '-0.4727', 'opsd/forward_kl_teacher_student': '0.1434', 'opsd/reverse_kl_student_teacher': '0.08918', 'opsd/valid_response_tokens': '7173', 'opsd/loss': '-0.002807', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.66', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1113'}
+ 57%|█████▋    | 57/100 [29:48<22:19, 31.16s/it]SGLang generation done - elapsed time: 18.65s, prompts: 8, total tokens: 7055, avg length: 881.9, speed: 378.3 tok/s
+ 58%|█████▊    | 58/100 [30:15<21:49, 31.18s/it]                                                {'loss': '-0.002824', 'grad_norm': '0.03887', 'learning_rate': '4.651e-07', 'on_policy_loss': '-0.0028', 'rollout/tokens_per_second': '378.3', 'rollout/mean_response_length': '881.9', 'rollout/generated_tokens': '7055', 'opsd/student_entropy': '0.4685', 'opsd/teacher_entropy': '0.6297', 'opsd/student_sampled_logp': '-0.3941', 'opsd/teacher_sampled_logp': '-0.5017', 'opsd/forward_kl_teacher_student': '0.1502', 'opsd/reverse_kl_student_teacher': '0.09524', 'opsd/valid_response_tokens': '7135', 'opsd/loss': '-0.002445', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.73', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1132'}
+ 58%|█████▊    | 58/100 [30:19<21:49, 31.18s/it]SGLang generation done - elapsed time: 18.75s, prompts: 8, total tokens: 7641, avg length: 955.1, speed: 407.5 tok/s
+ 59%|█████▉    | 59/100 [30:45<21:01, 30.78s/it]                                                {'loss': '-0.003747', 'grad_norm': '0.03943', 'learning_rate': '4.477e-07', 'on_policy_loss': '-0.0037', 'rollout/tokens_per_second': '407.5', 'rollout/mean_response_length': '955.1', 'rollout/generated_tokens': '7641', 'opsd/student_entropy': '0.483', 'opsd/teacher_entropy': '0.6598', 'opsd/student_sampled_logp': '-0.4072', 'opsd/teacher_sampled_logp': '-0.5203', 'opsd/forward_kl_teacher_student': '0.157', 'opsd/reverse_kl_student_teacher': '0.1004', 'opsd/valid_response_tokens': '7037', 'opsd/loss': '-0.00246', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.64', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1152'}
+ 59%|█████▉    | 59/100 [30:49<21:01, 30.78s/it]SGLang generation done - elapsed time: 18.79s, prompts: 8, total tokens: 7822, avg length: 977.8, speed: 416.2 tok/s
+ 60%|██████    | 60/100 [31:15<20:23, 30.58s/it]                                                {'loss': '-0.003167', 'grad_norm': '0.03412', 'learning_rate': '4.304e-07', 'on_policy_loss': '-0.0032', 'rollout/tokens_per_second': '416.2', 'rollout/mean_response_length': '977.8', 'rollout/generated_tokens': '7822', 'opsd/student_entropy': '0.4305', 'opsd/teacher_entropy': '0.5943', 'opsd/student_sampled_logp': '-0.3576', 'opsd/teacher_sampled_logp': '-0.467', 'opsd/forward_kl_teacher_student': '0.1565', 'opsd/reverse_kl_student_teacher': '0.09565', 'opsd/valid_response_tokens': '7276', 'opsd/loss': '-0.002032', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.57', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1171'}
+ 60%|██████    | 60/100 [31:19<20:23, 30.58s/it]SGLang generation done - elapsed time: 18.00s, prompts: 8, total tokens: 6037, avg length: 754.6, speed: 335.3 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_60.json
+================================================================================
+
+ 61%|██████    | 61/100 [31:46<19:48, 30.49s/it]                                                {'loss': '-0.002969', 'grad_norm': '0.0372', 'learning_rate': '4.132e-07', 'on_policy_loss': '-0.003', 'rollout/tokens_per_second': '335.3', 'rollout/mean_response_length': '754.6', 'rollout/generated_tokens': '6037', 'opsd/student_entropy': '0.4224', 'opsd/teacher_entropy': '0.5857', 'opsd/student_sampled_logp': '-0.3641', 'opsd/teacher_sampled_logp': '-0.4742', 'opsd/forward_kl_teacher_student': '0.1701', 'opsd/reverse_kl_student_teacher': '0.1035', 'opsd/valid_response_tokens': '6631', 'opsd/loss': '-0.003681', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.7', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1191'}
+ 61%|██████    | 61/100 [31:49<19:48, 30.49s/it]SGLang generation done - elapsed time: 18.60s, prompts: 8, total tokens: 6754, avg length: 844.2, speed: 363.2 tok/s
+ 62%|██████▏   | 62/100 [32:15<19:07, 30.20s/it]                                                {'loss': '-0.003505', 'grad_norm': '0.03349', 'learning_rate': '3.96e-07', 'on_policy_loss': '-0.0035', 'rollout/tokens_per_second': '363.2', 'rollout/mean_response_length': '844.2', 'rollout/generated_tokens': '6754', 'opsd/student_entropy': '0.425', 'opsd/teacher_entropy': '0.5887', 'opsd/student_sampled_logp': '-0.3558', 'opsd/teacher_sampled_logp': '-0.4678', 'opsd/forward_kl_teacher_student': '0.1547', 'opsd/reverse_kl_student_teacher': '0.09633', 'opsd/valid_response_tokens': '6957', 'opsd/loss': '-0.002682', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.73', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.121'}
+ 62%|██████▏   | 62/100 [32:19<19:07, 30.20s/it]SGLang generation done - elapsed time: 18.24s, prompts: 8, total tokens: 6630, avg length: 828.8, speed: 363.4 tok/s
+ 63%|██████▎   | 63/100 [32:46<18:45, 30.42s/it]                                                {'loss': '-0.004502', 'grad_norm': '0.03785', 'learning_rate': '3.79e-07', 'on_policy_loss': '-0.0045', 'rollout/tokens_per_second': '363.4', 'rollout/mean_response_length': '828.8', 'rollout/generated_tokens': '6630', 'opsd/student_entropy': '0.4527', 'opsd/teacher_entropy': '0.6395', 'opsd/student_sampled_logp': '-0.383', 'opsd/teacher_sampled_logp': '-0.4984', 'opsd/forward_kl_teacher_student': '0.1646', 'opsd/reverse_kl_student_teacher': '0.1021', 'opsd/valid_response_tokens': '7073', 'opsd/loss': '-0.006592', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.64', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.123'}
+ 63%|██████▎   | 63/100 [32:49<18:45, 30.42s/it]SGLang generation done - elapsed time: 18.33s, prompts: 8, total tokens: 6456, avg length: 807.0, speed: 352.2 tok/s
+ 64%|██████▍   | 64/100 [33:17<18:16, 30.45s/it]                                                {'loss': '-0.003097', 'grad_norm': '0.03702', 'learning_rate': '3.622e-07', 'on_policy_loss': '-0.0031', 'rollout/tokens_per_second': '352.2', 'rollout/mean_response_length': '807', 'rollout/generated_tokens': '6456', 'opsd/student_entropy': '0.4513', 'opsd/teacher_entropy': '0.6464', 'opsd/student_sampled_logp': '-0.3812', 'opsd/teacher_sampled_logp': '-0.5112', 'opsd/forward_kl_teacher_student': '0.1843', 'opsd/reverse_kl_student_teacher': '0.11', 'opsd/valid_response_tokens': '6898', 'opsd/loss': '-0.001989', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.38', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1249'}
+ 64%|██████▍   | 64/100 [33:20<18:16, 30.45s/it]SGLang generation done - elapsed time: 18.29s, prompts: 8, total tokens: 6494, avg length: 811.8, speed: 355.0 tok/s
+ 65%|██████▌   | 65/100 [33:47<17:40, 30.31s/it]                                                {'loss': '-0.003252', 'grad_norm': '0.03153', 'learning_rate': '3.455e-07', 'on_policy_loss': '-0.0033', 'rollout/tokens_per_second': '355', 'rollout/mean_response_length': '811.8', 'rollout/generated_tokens': '6494', 'opsd/student_entropy': '0.3613', 'opsd/teacher_entropy': '0.5141', 'opsd/student_sampled_logp': '-0.305', 'opsd/teacher_sampled_logp': '-0.4155', 'opsd/forward_kl_teacher_student': '0.1607', 'opsd/reverse_kl_student_teacher': '0.09894', 'opsd/valid_response_tokens': '6860', 'opsd/loss': '-0.003765', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.39', 'system/gpu_peak_allocated_gib': '44.83', 'epoch': '0.1269'}
+ 65%|██████▌   | 65/100 [33:50<17:40, 30.31s/it]SGLang generation done - elapsed time: 18.76s, prompts: 8, total tokens: 8081, avg length: 1010.1, speed: 430.9 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_65.json
+================================================================================
+
+ 66%|██████▌   | 66/100 [34:17<17:11, 30.35s/it]                                                {'loss': '-0.004709', 'grad_norm': '0.03397', 'learning_rate': '3.29e-07', 'on_policy_loss': '-0.0047', 'rollout/tokens_per_second': '430.9', 'rollout/mean_response_length': '1010', 'rollout/generated_tokens': '8081', 'opsd/student_entropy': '0.4443', 'opsd/teacher_entropy': '0.6469', 'opsd/student_sampled_logp': '-0.3732', 'opsd/teacher_sampled_logp': '-0.5003', 'opsd/forward_kl_teacher_student': '0.1788', 'opsd/reverse_kl_student_teacher': '0.1095', 'opsd/valid_response_tokens': '7560', 'opsd/loss': '-0.003063', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '48.19', 'system/gpu_peak_allocated_gib': '44.88', 'epoch': '0.1288'}
+ 66%|██████▌   | 66/100 [34:21<17:11, 30.35s/it]SGLang generation done - elapsed time: 18.71s, prompts: 8, total tokens: 7439, avg length: 929.9, speed: 397.7 tok/s
+
+================================================================================
+STUDENT GENERATION SAMPLE (Step 66):
+================================================================================
+
+Prompt:
+<|im_start|>system
+You are Falcon, a helpful AI assistant created by Technology Innovation Institute (TII). To answer the user's question, you first think about the reasoning process and then provide the user with the answer. The reasoning process is enclosed within <think> </think> tags, i.e., <think> reasoning process here </think> answer here.
+<|im_end|>
+<|im_start|>user
+Problem: Find the gradient of the function \( z = x^2 - xy + y^3 \) at the point \( A(1, -1) \) and the derivative in the direction of the vector \( \bar{a} = 3\bar{i} - 4\bar{j} \).
+
+Please reason step by step, and put your final answer within \boxed{}.<|im_end|>
+<|im_start|>assistant
+
+
+Completion:
+<think>
+Okay, let's tackle this problem step by step. The function given is \( z = x^2 - xy + y^3 \). We need to find the gradient at point A(1, -1), and then compute the derivative (directional derivative) in the direction of vector \(\bar{a} = 3\mathbf{i} - 4\mathbf{j}\).
+
+First, I remember that the gradient of a scalar function \(z(x, y)\) is the vector of its partial derivatives with respect to x and y. So, the gradient is \(\nabla z = \left(\frac{\partial z}{\partial x}, \frac{\partial z}{\partial y}\right)\).
+
+Let me compute the partial derivatives.
+
+For \(\frac{\partial z}{\partial x}\): The term \(x^2\) gives \(2x\). The term \(-xy\) gives \(-y\) (since derivative of \(x\) is 1 times y). The \(y^3\) term is constant with respect to x, so its derivative is 0. So \(\frac{\partial z}{\partial x} = 2x - y\).
+
+For \(\frac{\partial z}{\partial y}\): The \(x^2\) term is constant, so derivative 0. The \(-xy\) term gives \(-x\). The \(y^3\) term gives \(3y^2\). So \(\frac{\partial z}{\partial y} = -x + 3y^2\).
+
+Now, evaluate these at point A(1, -1). Plug in x = 1, y = -1.
+
+\(\frac{\partial z}{\partial x}(1, -1) = 2(1) - (-1) = 2 + 1 = 3\).
+
+\(\frac{\partial z}{\partial y}(1, -1) = -1 + 3(-1)^2 = -1 + 3(1) = -1 + 3 = 2\).
+
+Therefore, the gradient vector at A is \(\nabla z(1, -1) = (3, 2)\).
+
+Next, the directional derivative in the direction of vector \(\bar{a} = 3\mathbf{i} - 4\mathbf{j}\). The directional derivative of a function at a point in the direction of a vector \(\vec{v}\) is given by the dot product of the gradient with the unit vector in the direction of \(\vec{v}\). So \(D_{\vec{v}} z = \nabla z \cdot \hat{v}\), where \(\hat{v} = \frac{\vec{v}}{\|\vec{v}\|}\).
+
+First, compute the magnitude of \(\bar{a}\): \(\|\bar{a}\| = \sqrt{3^2 + (-4)^2} = \sqrt{9 + 16} = \sqrt{25} = 5\).
+
+Thus, the unit vector \(\hat{a} = \frac{1}{5} (3\mathbf{i} - 4\mathbf{j}) = \left(\frac{3}{5}, -\frac{4}{5}\right)\).
+
+Now, compute the dot product \(\nabla z \cdot \hat{a}\):
+
+\(\nabla z = (3, 2)\).
+
+Dot product: \(3 \cdot \frac{3}{5} + 2 \cdot \left(-\frac{4}{5}\right) = \frac{9}{5} - \frac{8}{5} = \frac{1}{5}\).
+
+Therefore, the directional derivative at point A in the direction of \(\bar{a}\) is \(\boxed{\frac{1}{5}}\).
+
+Wait, the problem asks for the gradient at A and the derivative in that direction. So the gradient is (3, 2) and the derivative is 1/5. But the user says to put the final answer within \boxed{}. The final answer should probably include both results. Let me check the problem statement again: "Find the gradient of the function at point A and the derivative in the direction of the vector". So they might expect both values in the box.
+
+But the instruction says "put your final answer within \boxed{{}}". So maybe we need to write the answer as \(\boxed{\nabla z = (3, 2
+================================================================================
+
+ 67%|██████▋   | 67/100 [34:47<16:39, 30.29s/it]                                                {'loss': '-0.002793', 'grad_norm': '0.03368', 'learning_rate': '3.127e-07', 'on_policy_loss': '-0.0028', 'rollout/tokens_per_second': '397.7', 'rollout/mean_response_length': '929.9', 'rollout/generated_tokens': '7439', 'opsd/student_entropy': '0.3931', 'opsd/teacher_entropy': '0.5833', 'opsd/student_sampled_logp': '-0.3348', 'opsd/teacher_sampled_logp': '-0.4669', 'opsd/forward_kl_teacher_student': '0.1977', 'opsd/reverse_kl_student_teacher': '0.1163', 'opsd/valid_response_tokens': '6794', 'opsd/loss': '-0.002758', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.59', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1308'}
+ 67%|██████▋   | 67/100 [34:50<16:39, 30.29s/it]SGLang generation done - elapsed time: 18.59s, prompts: 8, total tokens: 6843, avg length: 855.4, speed: 368.2 tok/s
+ 68%|██████▊   | 68/100 [35:17<16:03, 30.11s/it]                                                {'loss': '-0.003953', 'grad_norm': '0.03904', 'learning_rate': '2.966e-07', 'on_policy_loss': '-0.004', 'rollout/tokens_per_second': '368.2', 'rollout/mean_response_length': '855.4', 'rollout/generated_tokens': '6843', 'opsd/student_entropy': '0.4678', 'opsd/teacher_entropy': '0.667', 'opsd/student_sampled_logp': '-0.3964', 'opsd/teacher_sampled_logp': '-0.5192', 'opsd/forward_kl_teacher_student': '0.176', 'opsd/reverse_kl_student_teacher': '0.1119', 'opsd/valid_response_tokens': '7141', 'opsd/loss': '-0.004673', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.72', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1327'}
+ 68%|██████▊   | 68/100 [35:20<16:03, 30.11s/it]SGLang generation done - elapsed time: 18.81s, prompts: 8, total tokens: 7506, avg length: 938.2, speed: 399.1 tok/s
+ 69%|██████▉   | 69/100 [35:48<15:41, 30.38s/it]                                                {'loss': '-0.004204', 'grad_norm': '0.0317', 'learning_rate': '2.808e-07', 'on_policy_loss': '-0.0042', 'rollout/tokens_per_second': '399.1', 'rollout/mean_response_length': '938.2', 'rollout/generated_tokens': '7506', 'opsd/student_entropy': '0.3983', 'opsd/teacher_entropy': '0.5756', 'opsd/student_sampled_logp': '-0.3398', 'opsd/teacher_sampled_logp': '-0.4496', 'opsd/forward_kl_teacher_student': '0.1579', 'opsd/reverse_kl_student_teacher': '0.09843', 'opsd/valid_response_tokens': '7189', 'opsd/loss': '-0.003504', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.63', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1347'}
+ 69%|██████▉   | 69/100 [35:51<15:41, 30.38s/it]SGLang generation done - elapsed time: 18.40s, prompts: 8, total tokens: 6444, avg length: 805.5, speed: 350.3 tok/s
+ 70%|███████   | 70/100 [36:19<15:15, 30.52s/it]                                                {'loss': '-0.004636', 'grad_norm': '0.03792', 'learning_rate': '2.653e-07', 'on_policy_loss': '-0.0046', 'rollout/tokens_per_second': '350.3', 'rollout/mean_response_length': '805.5', 'rollout/generated_tokens': '6444', 'opsd/student_entropy': '0.4329', 'opsd/teacher_entropy': '0.6401', 'opsd/student_sampled_logp': '-0.3685', 'opsd/teacher_sampled_logp': '-0.5031', 'opsd/forward_kl_teacher_student': '0.1999', 'opsd/reverse_kl_student_teacher': '0.12', 'opsd/valid_response_tokens': '6658', 'opsd/loss': '-0.005581', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.6', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1367'}
+ 70%|███████   | 70/100 [36:22<15:15, 30.52s/it]SGLang generation done - elapsed time: 18.35s, prompts: 8, total tokens: 6537, avg length: 817.1, speed: 356.3 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_70.json
+================================================================================
+
+ 71%|███████   | 71/100 [36:48<14:36, 30.22s/it]                                                {'loss': '-0.00405', 'grad_norm': '0.03459', 'learning_rate': '2.5e-07', 'on_policy_loss': '-0.004', 'rollout/tokens_per_second': '356.3', 'rollout/mean_response_length': '817.1', 'rollout/generated_tokens': '6537', 'opsd/student_entropy': '0.4168', 'opsd/teacher_entropy': '0.5918', 'opsd/student_sampled_logp': '-0.351', 'opsd/teacher_sampled_logp': '-0.4691', 'opsd/forward_kl_teacher_student': '0.1707', 'opsd/reverse_kl_student_teacher': '0.1059', 'opsd/valid_response_tokens': '7117', 'opsd/loss': '-0.004585', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.67', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1386'}
+ 71%|███████   | 71/100 [36:51<14:36, 30.22s/it]SGLang generation done - elapsed time: 18.53s, prompts: 8, total tokens: 6684, avg length: 835.5, speed: 360.7 tok/s
+ 72%|███████▏  | 72/100 [37:18<14:01, 30.05s/it]                                                {'loss': '-0.004358', 'grad_norm': '0.03823', 'learning_rate': '2.35e-07', 'on_policy_loss': '-0.0044', 'rollout/tokens_per_second': '360.7', 'rollout/mean_response_length': '835.5', 'rollout/generated_tokens': '6684', 'opsd/student_entropy': '0.4472', 'opsd/teacher_entropy': '0.6283', 'opsd/student_sampled_logp': '-0.3764', 'opsd/teacher_sampled_logp': '-0.4897', 'opsd/forward_kl_teacher_student': '0.1602', 'opsd/reverse_kl_student_teacher': '0.1011', 'opsd/valid_response_tokens': '7316', 'opsd/loss': '-0.004284', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.66', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1406'}
+ 72%|███████▏  | 72/100 [37:21<14:01, 30.05s/it]SGLang generation done - elapsed time: 18.31s, prompts: 8, total tokens: 6523, avg length: 815.4, speed: 356.3 tok/s
+ 73%|███████▎  | 73/100 [37:47<13:26, 29.88s/it]                                                {'loss': '-0.004035', 'grad_norm': '0.03579', 'learning_rate': '2.204e-07', 'on_policy_loss': '-0.004', 'rollout/tokens_per_second': '356.3', 'rollout/mean_response_length': '815.4', 'rollout/generated_tokens': '6523', 'opsd/student_entropy': '0.3747', 'opsd/teacher_entropy': '0.5701', 'opsd/student_sampled_logp': '-0.3177', 'opsd/teacher_sampled_logp': '-0.4443', 'opsd/forward_kl_teacher_student': '0.198', 'opsd/reverse_kl_student_teacher': '0.1161', 'opsd/valid_response_tokens': '6491', 'opsd/loss': '-0.005959', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.43', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1425'}
+ 73%|███████▎  | 73/100 [37:51<13:26, 29.88s/it]SGLang generation done - elapsed time: 18.61s, prompts: 8, total tokens: 7108, avg length: 888.5, speed: 381.9 tok/s
+ 74%|███████▍  | 74/100 [38:17<12:55, 29.82s/it]                                                {'loss': '-0.004838', 'grad_norm': '0.03387', 'learning_rate': '2.061e-07', 'on_policy_loss': '-0.0048', 'rollout/tokens_per_second': '381.9', 'rollout/mean_response_length': '888.5', 'rollout/generated_tokens': '7108', 'opsd/student_entropy': '0.4028', 'opsd/teacher_entropy': '0.5835', 'opsd/student_sampled_logp': '-0.3413', 'opsd/teacher_sampled_logp': '-0.4601', 'opsd/forward_kl_teacher_student': '0.1764', 'opsd/reverse_kl_student_teacher': '0.1077', 'opsd/valid_response_tokens': '6625', 'opsd/loss': '-0.004473', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.44', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1445'}
+ 74%|███████▍  | 74/100 [38:21<12:55, 29.82s/it]SGLang generation done - elapsed time: 18.58s, prompts: 8, total tokens: 7209, avg length: 901.1, speed: 388.0 tok/s
+ 75%|███████▌  | 75/100 [38:48<12:35, 30.23s/it]                                                {'loss': '-0.003319', 'grad_norm': '0.03389', 'learning_rate': '1.922e-07', 'on_policy_loss': '-0.0033', 'rollout/tokens_per_second': '388', 'rollout/mean_response_length': '901.1', 'rollout/generated_tokens': '7209', 'opsd/student_entropy': '0.4627', 'opsd/teacher_entropy': '0.6591', 'opsd/student_sampled_logp': '-0.391', 'opsd/teacher_sampled_logp': '-0.5166', 'opsd/forward_kl_teacher_student': '0.1838', 'opsd/reverse_kl_student_teacher': '0.1078', 'opsd/valid_response_tokens': '7484', 'opsd/loss': '-0.004433', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.83', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1464'}
+ 75%|███████▌  | 75/100 [38:52<12:35, 30.23s/it]wandb: WARNING URL not available in offline run
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s][A
+Writing model shards: 100%|██████████| 1/1 [00:05<00:00,  5.65s/it][AWriting model shards: 100%|██████████| 1/1 [00:05<00:00,  5.65s/it]
+SGLang generation done - elapsed time: 18.53s, prompts: 8, total tokens: 6990, avg length: 873.8, speed: 377.2 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_75.json
+================================================================================
+
+ 76%|███████▌  | 76/100 [39:46<15:25, 38.55s/it]                                                {'loss': '-0.004574', 'grad_norm': '0.03469', 'learning_rate': '1.786e-07', 'on_policy_loss': '-0.0046', 'rollout/tokens_per_second': '377.2', 'rollout/mean_response_length': '873.8', 'rollout/generated_tokens': '6990', 'opsd/student_entropy': '0.4303', 'opsd/teacher_entropy': '0.6388', 'opsd/student_sampled_logp': '-0.3639', 'opsd/teacher_sampled_logp': '-0.4996', 'opsd/forward_kl_teacher_student': '0.2016', 'opsd/reverse_kl_student_teacher': '0.1184', 'opsd/valid_response_tokens': '7008', 'opsd/loss': '-0.005161', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.46', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1484'}
+ 76%|███████▌  | 76/100 [39:50<15:25, 38.55s/it]SGLang generation done - elapsed time: 18.65s, prompts: 8, total tokens: 7530, avg length: 941.2, speed: 403.7 tok/s
+ 77%|███████▋  | 77/100 [40:16<13:47, 35.97s/it]                                                {'loss': '-0.003206', 'grad_norm': '0.03575', 'learning_rate': '1.654e-07', 'on_policy_loss': '-0.0032', 'rollout/tokens_per_second': '403.7', 'rollout/mean_response_length': '941.2', 'rollout/generated_tokens': '7530', 'opsd/student_entropy': '0.4381', 'opsd/teacher_entropy': '0.6055', 'opsd/student_sampled_logp': '-0.3723', 'opsd/teacher_sampled_logp': '-0.4808', 'opsd/forward_kl_teacher_student': '0.1546', 'opsd/reverse_kl_student_teacher': '0.09413', 'opsd/valid_response_tokens': '6843', 'opsd/loss': '-0.004026', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.51', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1503'}
+ 77%|███████▋  | 77/100 [40:20<13:47, 35.97s/it]SGLang generation done - elapsed time: 17.74s, prompts: 8, total tokens: 5703, avg length: 712.9, speed: 321.4 tok/s
+ 78%|███████▊  | 78/100 [40:46<12:32, 34.21s/it]                                                {'loss': '-0.004638', 'grad_norm': '0.0337', 'learning_rate': '1.527e-07', 'on_policy_loss': '-0.0046', 'rollout/tokens_per_second': '321.4', 'rollout/mean_response_length': '712.9', 'rollout/generated_tokens': '5703', 'opsd/student_entropy': '0.3746', 'opsd/teacher_entropy': '0.5528', 'opsd/student_sampled_logp': '-0.3168', 'opsd/teacher_sampled_logp': '-0.4345', 'opsd/forward_kl_teacher_student': '0.1751', 'opsd/reverse_kl_student_teacher': '0.1074', 'opsd/valid_response_tokens': '6608', 'opsd/loss': '-0.005451', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.63', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1523'}
+ 78%|███████▊  | 78/100 [40:50<12:32, 34.21s/it]SGLang generation done - elapsed time: 18.60s, prompts: 8, total tokens: 6914, avg length: 864.2, speed: 371.7 tok/s
+ 79%|███████▉  | 79/100 [41:16<11:31, 32.92s/it]                                                {'loss': '-0.003908', 'grad_norm': '0.0339', 'learning_rate': '1.403e-07', 'on_policy_loss': '-0.0039', 'rollout/tokens_per_second': '371.7', 'rollout/mean_response_length': '864.2', 'rollout/generated_tokens': '6914', 'opsd/student_entropy': '0.4103', 'opsd/teacher_entropy': '0.6041', 'opsd/student_sampled_logp': '-0.3495', 'opsd/teacher_sampled_logp': '-0.4802', 'opsd/forward_kl_teacher_student': '0.1941', 'opsd/reverse_kl_student_teacher': '0.1152', 'opsd/valid_response_tokens': '6777', 'opsd/loss': '-0.00429', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.6', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1542'}
+ 79%|███████▉  | 79/100 [41:20<11:31, 32.92s/it]SGLang generation done - elapsed time: 18.66s, prompts: 8, total tokens: 6864, avg length: 858.0, speed: 367.9 tok/s
+ 80%|████████  | 80/100 [41:47<10:44, 32.21s/it]                                                {'loss': '-0.003621', 'grad_norm': '0.03443', 'learning_rate': '1.284e-07', 'on_policy_loss': '-0.0036', 'rollout/tokens_per_second': '367.9', 'rollout/mean_response_length': '858', 'rollout/generated_tokens': '6864', 'opsd/student_entropy': '0.4299', 'opsd/teacher_entropy': '0.6101', 'opsd/student_sampled_logp': '-0.3694', 'opsd/teacher_sampled_logp': '-0.4913', 'opsd/forward_kl_teacher_student': '0.1789', 'opsd/reverse_kl_student_teacher': '0.1094', 'opsd/valid_response_tokens': '6635', 'opsd/loss': '-0.003309', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.6', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1562'}
+ 80%|████████  | 80/100 [41:50<10:44, 32.21s/it]SGLang generation done - elapsed time: 18.50s, prompts: 8, total tokens: 6744, avg length: 843.0, speed: 364.5 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_80.json
+================================================================================
+
+ 81%|████████  | 81/100 [42:17<10:03, 31.78s/it]                                                {'loss': '-0.003196', 'grad_norm': '0.03526', 'learning_rate': '1.17e-07', 'on_policy_loss': '-0.0032', 'rollout/tokens_per_second': '364.5', 'rollout/mean_response_length': '843', 'rollout/generated_tokens': '6744', 'opsd/student_entropy': '0.444', 'opsd/teacher_entropy': '0.6304', 'opsd/student_sampled_logp': '-0.3735', 'opsd/teacher_sampled_logp': '-0.4987', 'opsd/forward_kl_teacher_student': '0.1839', 'opsd/reverse_kl_student_teacher': '0.1111', 'opsd/valid_response_tokens': '6993', 'opsd/loss': '-0.002354', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.51', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1581'}
+ 81%|████████  | 81/100 [42:21<10:03, 31.78s/it]SGLang generation done - elapsed time: 18.78s, prompts: 8, total tokens: 7670, avg length: 958.8, speed: 408.4 tok/s
+ 82%|████████▏ | 82/100 [42:48<09:26, 31.45s/it]                                                {'loss': '-0.004146', 'grad_norm': '0.03924', 'learning_rate': '1.06e-07', 'on_policy_loss': '-0.0041', 'rollout/tokens_per_second': '408.4', 'rollout/mean_response_length': '958.8', 'rollout/generated_tokens': '7670', 'opsd/student_entropy': '0.4936', 'opsd/teacher_entropy': '0.6913', 'opsd/student_sampled_logp': '-0.4222', 'opsd/teacher_sampled_logp': '-0.5359', 'opsd/forward_kl_teacher_student': '0.1651', 'opsd/reverse_kl_student_teacher': '0.1032', 'opsd/valid_response_tokens': '7208', 'opsd/loss': '-0.005342', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.44', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1601'}
+ 82%|████████▏ | 82/100 [42:52<09:26, 31.45s/it]SGLang generation done - elapsed time: 18.69s, prompts: 8, total tokens: 7085, avg length: 885.6, speed: 379.0 tok/s
+ 83%|████████▎ | 83/100 [43:18<08:46, 30.97s/it]                                                {'loss': '-0.004346', 'grad_norm': '0.03416', 'learning_rate': '9.549e-08', 'on_policy_loss': '-0.0043', 'rollout/tokens_per_second': '379', 'rollout/mean_response_length': '885.6', 'rollout/generated_tokens': '7085', 'opsd/student_entropy': '0.4592', 'opsd/teacher_entropy': '0.6639', 'opsd/student_sampled_logp': '-0.3945', 'opsd/teacher_sampled_logp': '-0.5264', 'opsd/forward_kl_teacher_student': '0.1969', 'opsd/reverse_kl_student_teacher': '0.118', 'opsd/valid_response_tokens': '7400', 'opsd/loss': '-0.004007', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.64', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.162'}
+ 83%|████████▎ | 83/100 [43:22<08:46, 30.97s/it]SGLang generation done - elapsed time: 18.41s, prompts: 8, total tokens: 7057, avg length: 882.1, speed: 383.3 tok/s
+ 84%|████████▍ | 84/100 [43:48<08:10, 30.63s/it]                                                {'loss': '-0.004291', 'grad_norm': '0.03164', 'learning_rate': '8.548e-08', 'on_policy_loss': '-0.0043', 'rollout/tokens_per_second': '383.3', 'rollout/mean_response_length': '882.1', 'rollout/generated_tokens': '7057', 'opsd/student_entropy': '0.3579', 'opsd/teacher_entropy': '0.5389', 'opsd/student_sampled_logp': '-0.3095', 'opsd/teacher_sampled_logp': '-0.4394', 'opsd/forward_kl_teacher_student': '0.1953', 'opsd/reverse_kl_student_teacher': '0.1152', 'opsd/valid_response_tokens': '6782', 'opsd/loss': '-0.004822', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.35', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.164'}
+ 84%|████████▍ | 84/100 [43:52<08:10, 30.63s/it]SGLang generation done - elapsed time: 18.66s, prompts: 8, total tokens: 7314, avg length: 914.2, speed: 392.0 tok/s
+ 85%|████████▌ | 85/100 [44:18<07:36, 30.45s/it]                                                {'loss': '-0.00502', 'grad_norm': '0.03259', 'learning_rate': '7.598e-08', 'on_policy_loss': '-0.005', 'rollout/tokens_per_second': '392', 'rollout/mean_response_length': '914.2', 'rollout/generated_tokens': '7314', 'opsd/student_entropy': '0.367', 'opsd/teacher_entropy': '0.5476', 'opsd/student_sampled_logp': '-0.3101', 'opsd/teacher_sampled_logp': '-0.4362', 'opsd/forward_kl_teacher_student': '0.1866', 'opsd/reverse_kl_student_teacher': '0.1138', 'opsd/valid_response_tokens': '6646', 'opsd/loss': '-0.005577', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.57', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1659'}
+ 85%|████████▌ | 85/100 [44:21<07:36, 30.45s/it]SGLang generation done - elapsed time: 18.77s, prompts: 8, total tokens: 8108, avg length: 1013.5, speed: 432.0 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_85.json
+================================================================================
+
+ 86%|████████▌ | 86/100 [44:48<07:05, 30.38s/it]                                                {'loss': '-0.004367', 'grad_norm': '0.03373', 'learning_rate': '6.699e-08', 'on_policy_loss': '-0.0044', 'rollout/tokens_per_second': '432', 'rollout/mean_response_length': '1014', 'rollout/generated_tokens': '8108', 'opsd/student_entropy': '0.4072', 'opsd/teacher_entropy': '0.5841', 'opsd/student_sampled_logp': '-0.348', 'opsd/teacher_sampled_logp': '-0.4617', 'opsd/forward_kl_teacher_student': '0.1675', 'opsd/reverse_kl_student_teacher': '0.1012', 'opsd/valid_response_tokens': '6790', 'opsd/loss': '-0.003382', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.5', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1679'}
+ 86%|████████▌ | 86/100 [44:51<07:05, 30.38s/it]SGLang generation done - elapsed time: 18.61s, prompts: 8, total tokens: 6909, avg length: 863.6, speed: 371.2 tok/s
+ 87%|████████▋ | 87/100 [45:19<06:36, 30.52s/it]                                                {'loss': '-0.004968', 'grad_norm': '0.03631', 'learning_rate': '5.853e-08', 'on_policy_loss': '-0.005', 'rollout/tokens_per_second': '371.2', 'rollout/mean_response_length': '863.6', 'rollout/generated_tokens': '6909', 'opsd/student_entropy': '0.4359', 'opsd/teacher_entropy': '0.6575', 'opsd/student_sampled_logp': '-0.3638', 'opsd/teacher_sampled_logp': '-0.5021', 'opsd/forward_kl_teacher_student': '0.2074', 'opsd/reverse_kl_student_teacher': '0.1229', 'opsd/valid_response_tokens': '6775', 'opsd/loss': '-0.00499', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.66', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1698'}
+ 87%|████████▋ | 87/100 [45:22<06:36, 30.52s/it]SGLang generation done - elapsed time: 18.78s, prompts: 8, total tokens: 7727, avg length: 965.9, speed: 411.3 tok/s
+ 88%|████████▊ | 88/100 [45:49<06:05, 30.50s/it]                                                {'loss': '-0.004411', 'grad_norm': '0.03583', 'learning_rate': '5.06e-08', 'on_policy_loss': '-0.0044', 'rollout/tokens_per_second': '411.3', 'rollout/mean_response_length': '965.9', 'rollout/generated_tokens': '7727', 'opsd/student_entropy': '0.4498', 'opsd/teacher_entropy': '0.6539', 'opsd/student_sampled_logp': '-0.3831', 'opsd/teacher_sampled_logp': '-0.5067', 'opsd/forward_kl_teacher_student': '0.1871', 'opsd/reverse_kl_student_teacher': '0.1107', 'opsd/valid_response_tokens': '7166', 'opsd/loss': '-0.004627', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.72', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1718'}
+ 88%|████████▊ | 88/100 [45:53<06:05, 30.50s/it]SGLang generation done - elapsed time: 18.72s, prompts: 8, total tokens: 7508, avg length: 938.5, speed: 401.0 tok/s
+ 89%|████████▉ | 89/100 [46:19<05:34, 30.36s/it]                                                {'loss': '-0.003219', 'grad_norm': '0.0352', 'learning_rate': '4.323e-08', 'on_policy_loss': '-0.0032', 'rollout/tokens_per_second': '401', 'rollout/mean_response_length': '938.5', 'rollout/generated_tokens': '7508', 'opsd/student_entropy': '0.4436', 'opsd/teacher_entropy': '0.6265', 'opsd/student_sampled_logp': '-0.3767', 'opsd/teacher_sampled_logp': '-0.5012', 'opsd/forward_kl_teacher_student': '0.1909', 'opsd/reverse_kl_student_teacher': '0.1149', 'opsd/valid_response_tokens': '6738', 'opsd/loss': '-0.001245', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.67', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1737'}
+ 89%|████████▉ | 89/100 [46:23<05:34, 30.36s/it]SGLang generation done - elapsed time: 18.61s, prompts: 8, total tokens: 6900, avg length: 862.5, speed: 370.8 tok/s
+ 90%|█████████ | 90/100 [46:49<05:01, 30.13s/it]                                                {'loss': '-0.003656', 'grad_norm': '0.03431', 'learning_rate': '3.641e-08', 'on_policy_loss': '-0.0037', 'rollout/tokens_per_second': '370.8', 'rollout/mean_response_length': '862.5', 'rollout/generated_tokens': '6900', 'opsd/student_entropy': '0.419', 'opsd/teacher_entropy': '0.6033', 'opsd/student_sampled_logp': '-0.3538', 'opsd/teacher_sampled_logp': '-0.4821', 'opsd/forward_kl_teacher_student': '0.1858', 'opsd/reverse_kl_student_teacher': '0.1119', 'opsd/valid_response_tokens': '6721', 'opsd/loss': '-0.002854', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.54', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1757'}
+ 90%|█████████ | 90/100 [46:52<05:01, 30.13s/it]SGLang generation done - elapsed time: 17.60s, prompts: 8, total tokens: 5596, avg length: 699.5, speed: 318.0 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_90.json
+================================================================================
+
+ 91%|█████████ | 91/100 [47:19<04:30, 30.00s/it]                                                {'loss': '-0.004657', 'grad_norm': '0.03189', 'learning_rate': '3.015e-08', 'on_policy_loss': '-0.0047', 'rollout/tokens_per_second': '318', 'rollout/mean_response_length': '699.5', 'rollout/generated_tokens': '5596', 'opsd/student_entropy': '0.3868', 'opsd/teacher_entropy': '0.5811', 'opsd/student_sampled_logp': '-0.3222', 'opsd/teacher_sampled_logp': '-0.4448', 'opsd/forward_kl_teacher_student': '0.1828', 'opsd/reverse_kl_student_teacher': '0.1111', 'opsd/valid_response_tokens': '7088', 'opsd/loss': '-0.006302', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.53', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1776'}
+ 91%|█████████ | 91/100 [47:22<04:30, 30.00s/it]SGLang generation done - elapsed time: 18.71s, prompts: 8, total tokens: 7315, avg length: 914.4, speed: 391.1 tok/s
+ 92%|█████████▏| 92/100 [47:49<04:01, 30.13s/it]                                                {'loss': '-0.004018', 'grad_norm': '0.03234', 'learning_rate': '2.447e-08', 'on_policy_loss': '-0.004', 'rollout/tokens_per_second': '391.1', 'rollout/mean_response_length': '914.4', 'rollout/generated_tokens': '7315', 'opsd/student_entropy': '0.4233', 'opsd/teacher_entropy': '0.6027', 'opsd/student_sampled_logp': '-0.3569', 'opsd/teacher_sampled_logp': '-0.4663', 'opsd/forward_kl_teacher_student': '0.1625', 'opsd/reverse_kl_student_teacher': '0.09835', 'opsd/valid_response_tokens': '7581', 'opsd/loss': '-0.004177', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.67', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1796'}
+ 92%|█████████▏| 92/100 [47:53<04:01, 30.13s/it]SGLang generation done - elapsed time: 18.57s, prompts: 8, total tokens: 6371, avg length: 796.4, speed: 343.2 tok/s
+ 93%|█████████▎| 93/100 [48:20<03:32, 30.40s/it]                                                {'loss': '-0.003169', 'grad_norm': '0.03846', 'learning_rate': '1.937e-08', 'on_policy_loss': '-0.0032', 'rollout/tokens_per_second': '343.2', 'rollout/mean_response_length': '796.4', 'rollout/generated_tokens': '6371', 'opsd/student_entropy': '0.5062', 'opsd/teacher_entropy': '0.6905', 'opsd/student_sampled_logp': '-0.4333', 'opsd/teacher_sampled_logp': '-0.5449', 'opsd/forward_kl_teacher_student': '0.1633', 'opsd/reverse_kl_student_teacher': '0.1016', 'opsd/valid_response_tokens': '7338', 'opsd/loss': '-0.001713', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.71', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1816'}
+ 93%|█████████▎| 93/100 [48:24<03:32, 30.40s/it]SGLang generation done - elapsed time: 18.54s, prompts: 8, total tokens: 6203, avg length: 775.4, speed: 334.6 tok/s
+ 94%|█████████▍| 94/100 [48:51<03:02, 30.43s/it]                                                {'loss': '-0.003235', 'grad_norm': '0.03598', 'learning_rate': '1.485e-08', 'on_policy_loss': '-0.0032', 'rollout/tokens_per_second': '334.6', 'rollout/mean_response_length': '775.4', 'rollout/generated_tokens': '6203', 'opsd/student_entropy': '0.445', 'opsd/teacher_entropy': '0.609', 'opsd/student_sampled_logp': '-0.3737', 'opsd/teacher_sampled_logp': '-0.486', 'opsd/forward_kl_teacher_student': '0.1684', 'opsd/reverse_kl_student_teacher': '0.1028', 'opsd/valid_response_tokens': '6742', 'opsd/loss': '-0.005278', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.65', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1835'}
+ 94%|█████████▍| 94/100 [48:54<03:02, 30.43s/it]SGLang generation done - elapsed time: 18.70s, prompts: 8, total tokens: 7627, avg length: 953.4, speed: 407.8 tok/s
+ 95%|█████████▌| 95/100 [49:21<02:31, 30.33s/it]                                                {'loss': '-0.004054', 'grad_norm': '0.03585', 'learning_rate': '1.093e-08', 'on_policy_loss': '-0.0041', 'rollout/tokens_per_second': '407.8', 'rollout/mean_response_length': '953.4', 'rollout/generated_tokens': '7627', 'opsd/student_entropy': '0.4661', 'opsd/teacher_entropy': '0.6485', 'opsd/student_sampled_logp': '-0.4008', 'opsd/teacher_sampled_logp': '-0.5168', 'opsd/forward_kl_teacher_student': '0.1685', 'opsd/reverse_kl_student_teacher': '0.1056', 'opsd/valid_response_tokens': '7244', 'opsd/loss': '-0.0037', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.54', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1855'}
+ 95%|█████████▌| 95/100 [49:24<02:31, 30.33s/it]SGLang generation done - elapsed time: 17.74s, prompts: 8, total tokens: 6044, avg length: 755.5, speed: 340.7 tok/s
+
+================================================================================
+Saved 40 generation outputs to:
+  /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_rkl_clip005_1e_6_openthoughts_falcon7b/3387462/generations/generations_step_95.json
+================================================================================
+
+ 96%|█████████▌| 96/100 [49:51<02:00, 30.19s/it]                                                {'loss': '-0.004405', 'grad_norm': '0.03238', 'learning_rate': '7.596e-09', 'on_policy_loss': '-0.0044', 'rollout/tokens_per_second': '340.7', 'rollout/mean_response_length': '755.5', 'rollout/generated_tokens': '6044', 'opsd/student_entropy': '0.4173', 'opsd/teacher_entropy': '0.6096', 'opsd/student_sampled_logp': '-0.3508', 'opsd/teacher_sampled_logp': '-0.485', 'opsd/forward_kl_teacher_student': '0.1972', 'opsd/reverse_kl_student_teacher': '0.119', 'opsd/valid_response_tokens': '7100', 'opsd/loss': '-0.005379', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.58', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1874'}
+ 96%|█████████▌| 96/100 [49:54<02:00, 30.19s/it]SGLang generation done - elapsed time: 17.97s, prompts: 8, total tokens: 6144, avg length: 768.0, speed: 341.8 tok/s
+ 97%|█████████▋| 97/100 [50:20<01:30, 30.07s/it]                                                {'loss': '-0.004261', 'grad_norm': '0.03302', 'learning_rate': '4.866e-09', 'on_policy_loss': '-0.0043', 'rollout/tokens_per_second': '341.8', 'rollout/mean_response_length': '768', 'rollout/generated_tokens': '6144', 'opsd/student_entropy': '0.4235', 'opsd/teacher_entropy': '0.631', 'opsd/student_sampled_logp': '-0.3587', 'opsd/teacher_sampled_logp': '-0.4933', 'opsd/forward_kl_teacher_student': '0.1908', 'opsd/reverse_kl_student_teacher': '0.1172', 'opsd/valid_response_tokens': '7010', 'opsd/loss': '-0.005077', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.64', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1894'}
+ 97%|█████████▋| 97/100 [50:24<01:30, 30.07s/it]SGLang generation done - elapsed time: 18.08s, prompts: 8, total tokens: 6566, avg length: 820.8, speed: 363.2 tok/s
+ 98%|█████████▊| 98/100 [50:51<01:00, 30.13s/it]                                                {'loss': '-0.004591', 'grad_norm': '0.03393', 'learning_rate': '2.739e-09', 'on_policy_loss': '-0.0046', 'rollout/tokens_per_second': '363.2', 'rollout/mean_response_length': '820.8', 'rollout/generated_tokens': '6566', 'opsd/student_entropy': '0.4137', 'opsd/teacher_entropy': '0.5998', 'opsd/student_sampled_logp': '-0.3491', 'opsd/teacher_sampled_logp': '-0.4745', 'opsd/forward_kl_teacher_student': '0.184', 'opsd/reverse_kl_student_teacher': '0.1144', 'opsd/valid_response_tokens': '7264', 'opsd/loss': '-0.005283', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.56', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1913'}
+ 98%|█████████▊| 98/100 [50:54<01:00, 30.13s/it]SGLang generation done - elapsed time: 18.49s, prompts: 8, total tokens: 6489, avg length: 811.1, speed: 350.9 tok/s
+ 99%|█████████▉| 99/100 [51:22<00:30, 30.39s/it]                                                {'loss': '-0.004137', 'grad_norm': '0.03516', 'learning_rate': '1.218e-09', 'on_policy_loss': '-0.0041', 'rollout/tokens_per_second': '350.9', 'rollout/mean_response_length': '811.1', 'rollout/generated_tokens': '6489', 'opsd/student_entropy': '0.4165', 'opsd/teacher_entropy': '0.6152', 'opsd/student_sampled_logp': '-0.3517', 'opsd/teacher_sampled_logp': '-0.4834', 'opsd/forward_kl_teacher_student': '0.1986', 'opsd/reverse_kl_student_teacher': '0.119', 'opsd/valid_response_tokens': '6515', 'opsd/loss': '-0.004784', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.38', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1933'}
+ 99%|█████████▉| 99/100 [51:25<00:30, 30.39s/it]SGLang generation done - elapsed time: 18.80s, prompts: 8, total tokens: 7402, avg length: 925.2, speed: 393.7 tok/s
+100%|██████████| 100/100 [51:52<00:00, 30.32s/it]                                                 {'loss': '-0.004801', 'grad_norm': '0.03287', 'learning_rate': '3.046e-10', 'on_policy_loss': '-0.0048', 'rollout/tokens_per_second': '393.7', 'rollout/mean_response_length': '925.2', 'rollout/generated_tokens': '7402', 'opsd/student_entropy': '0.3936', 'opsd/teacher_entropy': '0.5854', 'opsd/student_sampled_logp': '-0.3321', 'opsd/teacher_sampled_logp': '-0.4518', 'opsd/forward_kl_teacher_student': '0.1792', 'opsd/reverse_kl_student_teacher': '0.1103', 'opsd/valid_response_tokens': '7060', 'opsd/loss': '-0.005302', 'system/gpu_allocated_gib': '35.19', 'system/gpu_reserved_gib': '47.62', 'system/gpu_peak_allocated_gib': '44.9', 'epoch': '0.1952'}
+100%|██████████| 100/100 [51:55<00:00, 30.32s/it]wandb: WARNING URL not available in offline run
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s][A
+Writing model shards: 100%|██████████| 1/1 [00:05<00:00,  5.18s/it][AWriting model shards: 100%|██████████| 1/1 [00:05<00:00,  5.18s/it]
+                                                 {'train_runtime': '3144', 'train_samples_per_second': '1.018', 'train_steps_per_second': '0.032', 'train_loss': '-0.0004386', 'epoch': '0.1952'}
+100%|██████████| 100/100 [52:23<00:00, 30.32s/it]100%|██████████| 100/100 [52:23<00:00, 31.43s/it]
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:10<00:00, 10.54s/it]Writing model shards: 100%|██████████| 1/1 [00:10<00:00, 10.54s/it]
+[1;34mwandb[0m: 
+[1;34mwandb[0m: You can sync this run to the cloud by running:
+[1;34mwandb[0m: [1mwandb sync /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/wandb/wandb/offline-run-20260901_001107-aa8qp2ru[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/wandb/offline-run-20260901_001107-aa8qp2ru/logs[0m

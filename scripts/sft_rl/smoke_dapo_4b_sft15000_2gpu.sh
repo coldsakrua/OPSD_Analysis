@@ -11,7 +11,9 @@
 set -euo pipefail
 
 # 2-GPU smoke: Qwen3-4B SFT@15000 on DAPO-Math → length + math_dapo acc.
-# Matches GRPO think sampling (T=1.0, top_p=0.95, top_k=20); default max=38912.
+# Align stop tokens with eval_math_vllm_local (<|im_end|>, <|endoftext|>).
+# Default: cap max_model_len to config max_position_embeddings (32768), like the
+# working ck15000 AIME eval. Sampling matches GRPO think (T=1.0, top_p=0.95, top_k=20).
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}}
 MODEL_PATH=${MODEL_PATH:-${BASE_DIR}/outputs/qwen3_4b_base/checkpoint-15000}
@@ -19,7 +21,9 @@ CHAT_TEMPLATE_PATH=${CHAT_TEMPLATE_PATH:-/gpfs/share/home/2501210611/labShare/25
 DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/dapo/preprocessed/dapo-math-17k.qwen3.think.maxprompt1024.parquet}
 NUM_SAMPLES=${NUM_SAMPLES:-32}
 MAX_NEW_TOKENS=${MAX_NEW_TOKENS:-38912}
+# Requested budget; smoke_dapo_len_acc.py caps to config max_pos unless ALLOW_LONG=1.
 MAX_MODEL_LEN=${MAX_MODEL_LEN:-40960}
+ALLOW_LONG_MAX_MODEL_LEN=${ALLOW_LONG_MAX_MODEL_LEN:-0}
 TEMPERATURE=${TEMPERATURE:-1.0}
 TP=${TP:-2}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
@@ -37,14 +41,21 @@ export TOKENIZERS_PARALLELISM=false
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export VLLM_USE_V1=0
 export VLLM_LOGGING_LEVEL=ERROR
-export VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
+if [[ "${ALLOW_LONG_MAX_MODEL_LEN}" == "1" ]]; then
+  export VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
+fi
 unset ROCR_VISIBLE_DEVICES
 unset HIP_VISIBLE_DEVICES
 unset PYTORCH_CUDA_ALLOC_CONF
 
+EXTRA_ARGS=()
+if [[ "${ALLOW_LONG_MAX_MODEL_LEN}" == "1" ]]; then
+  EXTRA_ARGS+=(--allow-long-max-model-len)
+fi
+
 echo "[smoke] model=${MODEL_PATH}"
 echo "[smoke] dataset=${DATASET_PATH}"
-echo "[smoke] n=${NUM_SAMPLES} max_new=${MAX_NEW_TOKENS} max_model_len=${MAX_MODEL_LEN} temp=${TEMPERATURE} tp=${TP}"
+echo "[smoke] n=${NUM_SAMPLES} max_new=${MAX_NEW_TOKENS} max_model_len=${MAX_MODEL_LEN} allow_long=${ALLOW_LONG_MAX_MODEL_LEN} temp=${TEMPERATURE} tp=${TP}"
 echo "[smoke] output=${OUTPUT_JSON}"
 
 python -u "${BASE_DIR}/scripts/sft_rl/smoke_dapo_len_acc.py" \
@@ -58,4 +69,5 @@ python -u "${BASE_DIR}/scripts/sft_rl/smoke_dapo_len_acc.py" \
   --tensor-parallel-size "${TP}" \
   --gpu-memory-utilization 0.90 \
   --enable-thinking \
-  --output-json "${OUTPUT_JSON}"
+  --output-json "${OUTPUT_JSON}" \
+  "${EXTRA_ARGS[@]}"

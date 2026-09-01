@@ -32,6 +32,38 @@ def _ground_truth(rm: Any) -> str:
     raise TypeError(f"unsupported reward_model type: {type(rm)}")
 
 
+def _stop_token_ids(tokenizer: Any) -> list[int]:
+    """EOS / chat-end ids aligned with eval_math_vllm_local (Qwen: <|im_end|>, <|endoftext|>)."""
+    ids: list[int] = []
+    for tok in ("<|im_end|>", "<|endoftext|>"):
+        try:
+            tid = tokenizer.convert_tokens_to_ids(tok)
+            if isinstance(tid, int) and tid >= 0 and tid not in ids:
+                ids.append(tid)
+        except Exception:
+            pass
+    eos = getattr(tokenizer, "eos_token_id", None)
+    if isinstance(eos, int) and eos not in ids:
+        ids.append(eos)
+    elif isinstance(eos, list):
+        for x in eos:
+            if isinstance(x, int) and x not in ids:
+                ids.append(x)
+    return ids
+
+
+def _config_max_pos(model_path: str) -> int | None:
+    cfg = Path(model_path) / "config.json"
+    if not cfg.is_file():
+        return None
+    try:
+        data = json.loads(cfg.read_text(encoding="utf-8"))
+        v = data.get("max_position_embeddings")
+        return int(v) if v is not None else None
+    except Exception:
+        return None
+
+
 def main() -> None:
     for key in ("ROCR_VISIBLE_DEVICES", "HIP_VISIBLE_DEVICES"):
         os.environ.pop(key, None)
@@ -44,6 +76,11 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--max-new-tokens", type=int, default=12288)
     p.add_argument("--max-model-len", type=int, default=13312)  # 1024 prompt + 12288
+    p.add_argument(
+        "--allow-long-max-model-len",
+        action="store_true",
+        help="Allow max_model_len above config max_position_embeddings (default: cap).",
+    )
     p.add_argument("--temperature", type=float, default=1.0)
     p.add_argument("--top-p", type=float, default=0.95)
     p.add_argument("--top-k", type=int, default=20)
@@ -81,9 +118,21 @@ def main() -> None:
         prompts.append(text)
         gts.append(gt)
 
+    max_model_len = int(args.max_model_len)
+    cfg_max = _config_max_pos(args.model_path)
+    if cfg_max is not None and max_model_len > cfg_max and not args.allow_long_max_model_len:
+        print(
+            f"[smoke] capping max_model_len {max_model_len} -> {cfg_max} "
+            f"(config max_position_embeddings; pass --allow-long-max-model-len to override)",
+            flush=True,
+        )
+        max_model_len = cfg_max
+
+    stop_ids = _stop_token_ids(tokenizer)
     print(
         f"[smoke] model={args.model_path} tp={args.tensor_parallel_size} "
-        f"max_new={args.max_new_tokens} think={args.enable_thinking}",
+        f"max_new={args.max_new_tokens} max_model_len={max_model_len} "
+        f"think={args.enable_thinking} stop_token_ids={stop_ids}",
         flush=True,
     )
     llm = LLM(
@@ -93,7 +142,7 @@ def main() -> None:
         tensor_parallel_size=args.tensor_parallel_size,
         dtype="bfloat16",
         gpu_memory_utilization=args.gpu_memory_utilization,
-        max_model_len=args.max_model_len,
+        max_model_len=max_model_len,
         enforce_eager=True,
     )
     # Re-bind chat template onto the tokenizer vLLM loaded if needed.
@@ -103,13 +152,16 @@ def main() -> None:
         except Exception:
             pass
 
-    sp = SamplingParams(
-        temperature=args.temperature,
-        top_p=args.top_p,
-        top_k=args.top_k,
-        max_tokens=args.max_new_tokens,
-        n=1,
-    )
+    sp_kw: dict[str, Any] = {
+        "temperature": args.temperature,
+        "top_p": args.top_p,
+        "top_k": args.top_k,
+        "max_tokens": args.max_new_tokens,
+        "n": 1,
+    }
+    if stop_ids:
+        sp_kw["stop_token_ids"] = stop_ids
+    sp = SamplingParams(**sp_kw)
     outputs = llm.generate(prompts, sp)
 
     rows = []
@@ -147,6 +199,9 @@ def main() -> None:
         "dataset": args.dataset,
         "num_samples": n,
         "max_new_tokens": args.max_new_tokens,
+        "max_model_len": max_model_len,
+        "stop_token_ids": stop_ids,
+        "temperature": args.temperature,
         "enable_thinking": bool(args.enable_thinking),
         "acc_mean": float(sum(accs) / max(1, len(accs))),
         "acc_count": int(sum(accs)),
