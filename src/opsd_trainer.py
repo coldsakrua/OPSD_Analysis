@@ -194,6 +194,8 @@ class OPSDTrainer(SFTTrainer):
         jsd_token_clip: float | None = None,
         high_entropy_ratio: float | None = None,
         low_entropy_ratio: float | None = None,
+        uniform_loss_tokens: int | None = None,
+        last_loss_tokens: int | None = None,
         use_ema_teacher: bool = False,
         ema_decay: float = 0.999,
         teacher_update_steps: int | None = None,
@@ -301,10 +303,25 @@ class OPSDTrainer(SFTTrainer):
             low_entropy_ratio = None
         if low_entropy_ratio is not None and low_entropy_ratio <= 0:
             raise ValueError("low_entropy_ratio must be in (0, 1) or None/>=1 to disable")
-        if high_entropy_ratio is not None and low_entropy_ratio is not None:
-            raise ValueError("high_entropy_ratio and low_entropy_ratio are mutually exclusive")
+        if uniform_loss_tokens is not None and uniform_loss_tokens <= 0:
+            raise ValueError("uniform_loss_tokens must be a positive integer when set")
+        if last_loss_tokens is not None and last_loss_tokens <= 0:
+            raise ValueError("last_loss_tokens must be a positive integer when set")
+        token_select_flags = [
+            high_entropy_ratio is not None,
+            low_entropy_ratio is not None,
+            uniform_loss_tokens is not None,
+            last_loss_tokens is not None,
+        ]
+        if sum(token_select_flags) > 1:
+            raise ValueError(
+                "high_entropy_ratio, low_entropy_ratio, uniform_loss_tokens, "
+                "and last_loss_tokens are mutually exclusive"
+            )
         self.high_entropy_ratio = high_entropy_ratio
         self.low_entropy_ratio = low_entropy_ratio
+        self.uniform_loss_tokens = uniform_loss_tokens
+        self.last_loss_tokens = last_loss_tokens
         self.use_ema_teacher = use_ema_teacher
         self.ema_decay = ema_decay
         self.teacher_update_steps = teacher_update_steps if teacher_update_steps and teacher_update_steps > 0 else None
@@ -585,6 +602,42 @@ class OPSDTrainer(SFTTrainer):
         ratio=0.2 → le20 (bottom-20%); ratio=0.8 → le80 (bottom-80%).
         """
         return OPSDTrainer._entropy_topk_mask(entropy, valid_mask, ratio, largest=False)
+
+    @staticmethod
+    def _uniform_token_mask(valid_mask, k):
+        """Uniformly sample up to k valid response tokens per sequence for loss."""
+        if k <= 0:
+            raise ValueError("uniform_loss_tokens must be a positive integer")
+        selected_mask = torch.zeros_like(valid_mask, dtype=torch.bool)
+        batch_size = valid_mask.shape[0]
+        for i in range(batch_size):
+            valid_idx = valid_mask[i].nonzero(as_tuple=False).squeeze(-1)
+            if valid_idx.numel() == 0:
+                continue
+            n_valid = int(valid_idx.numel())
+            n_keep = min(k, n_valid)
+            if n_keep == n_valid:
+                selected_mask[i, valid_idx] = True
+            else:
+                perm = torch.randperm(n_valid, device=valid_idx.device)[:n_keep]
+                selected_mask[i, valid_idx[perm]] = True
+        return selected_mask
+
+    @staticmethod
+    def _last_token_mask(valid_mask, k):
+        """Keep only the last up to k valid response tokens per sequence for loss."""
+        if k <= 0:
+            raise ValueError("last_loss_tokens must be a positive integer")
+        selected_mask = torch.zeros_like(valid_mask, dtype=torch.bool)
+        batch_size = valid_mask.shape[0]
+        for i in range(batch_size):
+            valid_idx = valid_mask[i].nonzero(as_tuple=False).squeeze(-1)
+            if valid_idx.numel() == 0:
+                continue
+            n_valid = int(valid_idx.numel())
+            n_keep = min(k, n_valid)
+            selected_mask[i, valid_idx[-n_keep:]] = True
+        return selected_mask
 
     @staticmethod
     def generalized_jsd_loss(
@@ -970,15 +1023,27 @@ class OPSDTrainer(SFTTrainer):
         valid_mask = shifted_labels != -100
         loss_mask = None
 
-        if self.high_entropy_ratio is not None or self.low_entropy_ratio is not None:
+        if (
+            self.high_entropy_ratio is not None
+            or self.low_entropy_ratio is not None
+            or self.uniform_loss_tokens is not None
+            or self.last_loss_tokens is not None
+        ):
             with torch.no_grad():
-                entropy = self._compute_token_entropy(student_logits, self.student_temperature)
                 if self.high_entropy_ratio is not None:
+                    entropy = self._compute_token_entropy(student_logits, self.student_temperature)
                     loss_mask = self._high_entropy_mask(entropy, valid_mask, self.high_entropy_ratio)
                     metric_prefix = "high_entropy"
-                else:
+                elif self.low_entropy_ratio is not None:
+                    entropy = self._compute_token_entropy(student_logits, self.student_temperature)
                     loss_mask = self._low_entropy_mask(entropy, valid_mask, self.low_entropy_ratio)
                     metric_prefix = "low_entropy"
+                elif self.uniform_loss_tokens is not None:
+                    loss_mask = self._uniform_token_mask(valid_mask, self.uniform_loss_tokens)
+                    metric_prefix = "uniform"
+                else:
+                    loss_mask = self._last_token_mask(valid_mask, self.last_loss_tokens)
+                    metric_prefix = "last"
                 selected = loss_mask.sum().double()
                 valid_count = valid_mask.sum().double()
                 self._metrics["train"][f"opsd/{metric_prefix}_ratio"].append(

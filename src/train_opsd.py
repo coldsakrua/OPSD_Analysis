@@ -191,7 +191,8 @@ def parse_args() -> argparse.Namespace:
             "If set to a value in (0, 1), only the top-ρ fraction of highest-entropy "
             "response tokens per sequence contribute to loss (student entropy). "
             "Default None = all valid response tokens (existing behavior). "
-            "Mutually exclusive with --low-entropy-ratio."
+            "Mutually exclusive with --low-entropy-ratio / --uniform-loss-tokens / "
+            "--last-loss-tokens."
         ),
     )
     parser.add_argument(
@@ -203,7 +204,30 @@ def parse_args() -> argparse.Namespace:
             "response tokens per sequence contribute to loss (student entropy). "
             "E.g. 0.2 = le20 (bottom-20% only), 0.8 = le80 (bottom-80%). "
             "Default None = all valid response tokens (existing behavior). "
-            "Mutually exclusive with --high-entropy-ratio."
+            "Mutually exclusive with --high-entropy-ratio / --uniform-loss-tokens / "
+            "--last-loss-tokens."
+        ),
+    )
+    parser.add_argument(
+        "--uniform-loss-tokens",
+        type=int,
+        default=None,
+        help=(
+            "If set, uniformly sample this many valid response tokens per sequence "
+            "for loss (e.g. 256 with max_completion=1024 → uni256). "
+            "Sequences shorter than K keep all valid tokens. "
+            "Mutually exclusive with entropy / last-token selection."
+        ),
+    )
+    parser.add_argument(
+        "--last-loss-tokens",
+        type=int,
+        default=None,
+        help=(
+            "If set, only the last K valid response tokens per sequence contribute "
+            "to loss (e.g. 256 with max_completion=1024 → last256). "
+            "Sequences shorter than K keep all valid tokens. "
+            "Mutually exclusive with entropy / uniform selection."
         ),
     )
     parser.add_argument(
@@ -333,8 +357,24 @@ def parse_args() -> argparse.Namespace:
         args.low_entropy_ratio = None
     if args.low_entropy_ratio is not None and args.low_entropy_ratio <= 0:
         parser.error("--low-entropy-ratio must be in (0, 1) when set")
-    if args.high_entropy_ratio is not None and args.low_entropy_ratio is not None:
-        parser.error("--high-entropy-ratio and --low-entropy-ratio are mutually exclusive")
+    if args.uniform_loss_tokens is not None and args.uniform_loss_tokens <= 0:
+        parser.error("--uniform-loss-tokens must be a positive integer when set")
+    if args.last_loss_tokens is not None and args.last_loss_tokens <= 0:
+        parser.error("--last-loss-tokens must be a positive integer when set")
+    token_select_count = sum(
+        x is not None
+        for x in (
+            args.high_entropy_ratio,
+            args.low_entropy_ratio,
+            args.uniform_loss_tokens,
+            args.last_loss_tokens,
+        )
+    )
+    if token_select_count > 1:
+        parser.error(
+            "--high-entropy-ratio, --low-entropy-ratio, --uniform-loss-tokens, "
+            "and --last-loss-tokens are mutually exclusive"
+        )
     if args.top_k_loss is not None and args.top_k_loss <= 0:
         parser.error("--top-k-loss must be a positive integer when set")
     if args.use_thinking_machines_loss and args.top_k_loss is not None:
@@ -531,6 +571,8 @@ def main() -> None:
         f"lr={args.learning_rate} beta={args.beta} jsd_token_clip={args.jsd_token_clip} "
         f"high_entropy_ratio={args.high_entropy_ratio} "
         f"low_entropy_ratio={args.low_entropy_ratio} "
+        f"uniform_loss_tokens={args.uniform_loss_tokens} "
+        f"last_loss_tokens={args.last_loss_tokens} "
         f"top_k_loss={args.top_k_loss} use_thinking_machines_loss={args.use_thinking_machines_loss} "
         f"teacher_update_steps={args.teacher_update_steps} "
         f"temp={args.temperature} "
@@ -557,6 +599,8 @@ def main() -> None:
         jsd_token_clip=args.jsd_token_clip,
         high_entropy_ratio=args.high_entropy_ratio,
         low_entropy_ratio=args.low_entropy_ratio,
+        uniform_loss_tokens=args.uniform_loss_tokens,
+        last_loss_tokens=args.last_loss_tokens,
         teacher_update_steps=args.teacher_update_steps,
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,

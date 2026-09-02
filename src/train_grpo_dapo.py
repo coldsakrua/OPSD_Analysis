@@ -175,11 +175,12 @@ def _apply_opsd_defaults(config: DictConfig) -> None:
     elif OmegaConf.select(config, "custom_reward_function") is None:
         config.custom_reward_function = reward_fn
 
-    # Full-param, no reference / KL.
+    # Full-param GRPO. KL/ref is optional (enable via actor.use_kl_loss).
     config.actor_rollout_ref.model.lora_rank = 0
-    config.actor_rollout_ref.actor.use_kl_loss = False
-    config.algorithm.use_kl_in_reward = False
     config.actor_rollout_ref.hybrid_engine = True
+    # Prefer reward-KL off when using actor KL loss (GRPO-style).
+    if bool(OmegaConf.select(config, "actor_rollout_ref.actor.use_kl_loss")):
+        config.algorithm.use_kl_in_reward = False
 
     # Ensure vLLM stops on chat EOS (<|im_end|>) as well as <|endoftext|>.
     # SFT/base generation_config often only lists the latter → length clip floods.
@@ -202,13 +203,16 @@ def _apply_opsd_defaults(config: DictConfig) -> None:
             print(f"[opsd-grpo][WARN] failed to set stop_token_ids: {exc}", flush=True)
 
     overlong_on = bool(OmegaConf.select(kwargs, "overlong_buffer_cfg.enable"))
+    use_kl = bool(OmegaConf.select(config, "actor_rollout_ref.actor.use_kl_loss"))
+    kl_coef = OmegaConf.select(config, "actor_rollout_ref.actor.kl_loss_coef")
     reward_path = OmegaConf.select(config, "custom_reward_function.path")
     print(
         f"[opsd-grpo] intended_split=rollout{rollout_gpus}+train{train_gpus} "
         f"n_gpus={config.trainer.n_gpus_per_node} "
         f"vllm_util={config.actor_rollout_ref.rollout.gpu_memory_utilization} "
         f"hybrid=1 free_cache_engine={config.actor_rollout_ref.rollout.free_cache_engine} "
-        f"overlong_penalty={int(overlong_on)}",
+        f"overlong_penalty={int(overlong_on)} "
+        f"kl_loss={int(use_kl)} kl_coef={kl_coef}",
         flush=True,
     )
     print(
@@ -435,9 +439,16 @@ class TaskRunner:
             Role.Critic: ray.remote(CriticWorker),
         }
 
-        # Explicitly skip RefPolicy (no KL / no reference model).
+        # Reference policy when KL is enabled (same global pool as actor; prefer ref param offload).
         if config.algorithm.use_kl_in_reward or config.actor_rollout_ref.actor.use_kl_loss:
-            raise RuntimeError("opsd GRPO DAPO entry forbids reference/KL; set use_kl_loss=false")
+            role_worker_mapping[Role.RefPolicy] = ray.remote(actor_rollout_cls)
+            mapping[Role.RefPolicy] = global_pool_id
+            print(
+                "[opsd-grpo] RefPolicy enabled on global_pool "
+                f"(use_kl_loss={config.actor_rollout_ref.actor.use_kl_loss}, "
+                f"use_kl_in_reward={config.algorithm.use_kl_in_reward})",
+                flush=True,
+            )
 
         if config.reward_model.enable:
             if config.reward_model.strategy in ["fsdp", "fsdp2"]:

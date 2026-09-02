@@ -5,24 +5,31 @@
 : "${BASE_DIR:?BASE_DIR must be set before sourcing common.sh}"
 
 NUM_GPUS=${NUM_GPUS:-4}
-MAX_STEPS=${MAX_STEPS:-100}
+MAX_STEPS=${MAX_STEPS:-200}
 SAVE_STEPS=${SAVE_STEPS:-25}
 MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-1024}
-MAX_RESPONSE_LENGTH=${MAX_RESPONSE_LENGTH:-12288}
+MAX_RESPONSE_LENGTH=${MAX_RESPONSE_LENGTH:-20480}
 NUM_GENERATIONS=${NUM_GENERATIONS:-8}
-LEARNING_RATE=${LEARNING_RATE:-1e-6}
+# Slightly lower LR + 1 PPO epoch to reduce collapse risk with long CoT.
+LEARNING_RATE=${LEARNING_RATE:-5e-7}
 WEIGHT_DECAY=${WEIGHT_DECAY:-0.01}
 DAPO_EPSILON=${DAPO_EPSILON:-0.2}
 DAPO_EPSILON_HIGH=${DAPO_EPSILON_HIGH:-0.28}
-PPO_EPOCHS=${PPO_EPOCHS:-2}
-TEMPERATURE=${TEMPERATURE:-0.7}
+PPO_EPOCHS=${PPO_EPOCHS:-1}
+TEMPERATURE=${TEMPERATURE:-0.6}
 TOP_P=${TOP_P:-0.95}
 TOP_K=${TOP_K:-20}
-# Soft overlong zone: [max_resp - len, max_resp]. With max=12288, len=2048 → ~10.2k–12k.
+# Soft overlong zone: [max_resp - len, max_resp]. With max=20480, len=8192 → 12k–20k.
 # penalty = -min(exceed/len, 1) * factor; factor=0.4 → at most -0.4 at the hard max.
-OVERLONG_BUFFER_LEN=${OVERLONG_BUFFER_LEN:-2048}
+OVERLONG_BUFFER_LEN=${OVERLONG_BUFFER_LEN:-8192}
 OVERLONG_PENALTY_FACTOR=${OVERLONG_PENALTY_FACTOR:-0.4}
 OVERLONG_PENALTY_ENABLE=${OVERLONG_PENALTY_ENABLE:-true}
+# GRPO-style KL against frozen ref (needs RefPolicy worker).
+USE_KL_LOSS=${USE_KL_LOSS:-true}
+KL_LOSS_COEF=${KL_LOSS_COEF:-0.01}
+KL_LOSS_TYPE=${KL_LOSS_TYPE:-low_var_kl}
+# Offload ref params to CPU between forwards (saves GPU mem with 20k + hybrid vLLM).
+REF_PARAM_OFFLOAD=${REF_PARAM_OFFLOAD:-true}
 # Per-step rollout JSONL dump (verl trainer.rollout_data_dir); 0 = dump all.
 ROLLOUT_DUMP_N=${ROLLOUT_DUMP_N:-32}
 
