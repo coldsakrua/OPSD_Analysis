@@ -57,6 +57,32 @@ def compute_jsd_kl(
     return b * kl_t + (1 - b) * kl_s
 
 
+def compute_kl_trio(
+    student_logits: torch.Tensor,
+    teacher_logits: torch.Tensor,
+    *,
+    temperature: float = 1.0,
+) -> dict[str, torch.Tensor]:
+    """Return forward KL, reverse KL, and symmetric JSD per position.
+
+    Shares one log_softmax pair to avoid three full [L,V] passes.
+    """
+    s_logp = F.log_softmax(student_logits / temperature, dim=-1)
+    t_logp = F.log_softmax(teacher_logits / temperature, dim=-1)
+    forward_kl = F.kl_div(s_logp, t_logp, reduction="none", log_target=True).sum(dim=-1)
+    reverse_kl = F.kl_div(t_logp, s_logp, reduction="none", log_target=True).sum(dim=-1)
+    b = torch.tensor(0.5, dtype=s_logp.dtype, device=s_logp.device)
+    mixture = torch.logsumexp(
+        torch.stack([s_logp + torch.log1p(-b), t_logp + torch.log(b)]),
+        dim=0,
+    )
+    jsd_sym = 0.5 * (
+        F.kl_div(mixture, t_logp, reduction="none", log_target=True).sum(dim=-1)
+        + F.kl_div(mixture, s_logp, reduction="none", log_target=True).sum(dim=-1)
+    )
+    return {"forward_kl": forward_kl, "reverse_kl": reverse_kl, "jsd_sym": jsd_sym}
+
+
 def compute_topk_kl(
     student_logits: torch.Tensor,
     teacher_logits: torch.Tensor,

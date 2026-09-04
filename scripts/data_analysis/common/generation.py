@@ -46,7 +46,8 @@ def run_generation_vllm(
         dtype="bfloat16",
         tensor_parallel_size=1,
         gpu_memory_utilization=gpu_memory_utilization,
-        max_model_len=max_prompt_length + max_completion_length + 64,
+        # Match eval: prompt + completion (no pad). Qwen think: 2048+38912=40960.
+        max_model_len=max_prompt_length + max_completion_length,
         disable_custom_all_reduce=True,
     )
     sampling = SamplingParams(
@@ -99,7 +100,7 @@ def run_generation_sglang(
     from sglang import Engine
 
     tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
-    context_length = max_prompt_length + max_completion_length + 64
+    context_length = max_prompt_length + max_completion_length
     engine_kwargs: dict[str, Any] = {
         "model_path": model_path,
         "tokenizer_path": model_path,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate self-contained per-model SLURM scripts for sections 2.1–2.5."""
+"""Generate self-contained per-model SLURM scripts for sections 2.1–2.6."""
 
 from __future__ import annotations
 
@@ -8,6 +8,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 from common.model_registry import (  # noqa: E402
     SECTION_MODEL_COMBOS,
+    COTLEN_BANDS,
+    COTLEN_MAX_PROMPT,
+    cotlen_max_completion,
     get_model_config,
     model_launch_overrides,
     task_default_gen_batch_hint,
@@ -22,6 +25,7 @@ MODEL_SHORT = {
     "qwen3_4b_thinking": "4bt",
     "qwen3.5_4b": "q35",
     "qwen3_06b": "0p6b",
+    "qwen3_8b": "8b",
     "olmo3_7b_instruct": "olmo7bi",
     "olmo3_7b_think": "olmo7bt",
     "deepseek_r1_1.5b": "ds1p5b",
@@ -35,6 +39,7 @@ SECTION_TAG = {
     "2.3": "23",
     "2.4": "24",
     "2.5": "25",
+    "2.6": "26",
 }
 
 SECTION_DIR = {
@@ -43,6 +48,7 @@ SECTION_DIR = {
     "2.3": "2.3_entropy",
     "2.4": "2.4_other_models",
     "2.5": "2.5_length_windows",
+    "2.6": "2.6_cotlen",
 }
 
 SBATCH_EXCLUDE = {
@@ -155,7 +161,13 @@ def render_script(
     combo: str,
     description: str,
     entropy_bucket: str = "",
+    cotlen_band: str = "",
+    max_prompt: int | None = None,
     max_completion: int | None = None,
+    num_prompts: int | None = None,
+    n_rollouts: int | None = None,
+    time_limit: str = "48:00:00",
+    preference_separate: bool = False,
 ) -> str:
     m = get_model_config(model_key)
     ov = model_launch_overrides(model_key)
@@ -163,22 +175,34 @@ def render_script(
     mem_fraction = ov.get("mem_fraction_static", 0.80)
     reasoning_parser = m.reasoning_parser or ""
     disable_cuda_graph = bool(ov.get("disable_piecewise_cuda_graph"))
-    max_comp = max_completion if max_completion is not None else task_default_max_completion(task)
+    max_comp = (
+        max_completion
+        if max_completion is not None
+        else task_default_max_completion(task, model_key if task == "cotlen" else None)
+    )
+    max_prm = max_prompt if max_prompt is not None else 1024
+    n_prompts = num_prompts if num_prompts is not None else 2048
+    n_rolls = n_rollouts if n_rollouts is not None else (4 if task == "cotlen" else 2)
     score_batch = task_default_score_batch(task, model_key)
     gen_batch_hint = task_default_gen_batch_hint(task, model_key)
 
-    suffix = entropy_bucket
+    suffix_parts = [p for p in (entropy_bucket, cotlen_band) if p]
+    suffix = "_".join(suffix_parts)
     job_name = _job_name(section, combo, model_key, suffix)
     log_section = section.replace(".", "")
     exclude = SBATCH_EXCLUDE.get(model_key, "")
 
     run_suffix = combo
-    if entropy_bucket:
+    if cotlen_band:
+        run_suffix = f"{combo}_{cotlen_band}"
+    elif entropy_bucket:
         run_suffix = f"{combo}_{entropy_bucket}"
 
     extra_args = ""
     if entropy_bucket:
         extra_args += f'\nEXTRA_ARGS+=(--entropy-bucket "{entropy_bucket}")'
+    if cotlen_band:
+        extra_args += f'\nEXTRA_ARGS+=(--cotlen-band "{cotlen_band}")'
     if backend == "sglang":
         extra_args += f"\nEXTRA_ARGS+=(--attention-backend triton --sampling-backend pytorch --mem-fraction-static {mem_fraction})"
         if disable_cuda_graph:
@@ -191,6 +215,41 @@ def render_script(
         length_note = "# Entropy buckets: he20, le20, he80, le80 (single score pass).\n"
     elif section == "2.5":
         length_note = "# Length windows: 0-128 … 4096-6144.\n"
+    elif section == "2.6":
+        length_note = (
+            f"# OT cotlen band={cotlen_band}: prompt=2048 completion={max_comp}; "
+            f"n={n_rolls} rollouts.\n"
+            "# Default: generate + boxed accuracy only. "
+            "Preference/data-analysis: RUN_PREFERENCE=1 (or submit_preference.sh).\n"
+        )
+
+    if preference_separate:
+        phase_block = """if [[ "${SKIP_GENERATE:-0}" != "1" ]]; then
+  echo "[analysis] ===== phase A: generate + accuracy ====="
+  python "${BASE_DIR}/scripts/data_analysis/run_opsd_analysis.py" "${EXTRA_ARGS[@]}" --skip-score
+elif [[ "${RUN_ACCURACY:-1}" == "1" ]]; then
+  echo "[analysis] ===== phase A: accuracy only (reuse rollouts.jsonl) ====="
+  python "${BASE_DIR}/scripts/data_analysis/run_opsd_analysis.py" "${EXTRA_ARGS[@]}" --skip-generate --skip-score
+else
+  echo "[analysis] ===== phase A: skipped ====="
+fi
+
+if [[ "${RUN_PREFERENCE:-0}" == "1" ]]; then
+  echo "[analysis] ===== phase B: preference / data analysis ====="
+  python "${BASE_DIR}/scripts/data_analysis/run_opsd_analysis.py" "${EXTRA_ARGS[@]}" --skip-generate --skip-accuracy
+else
+  echo "[analysis] ===== phase B: preference skipped (set RUN_PREFERENCE=1) ====="
+fi"""
+    else:
+        phase_block = """if [[ "${SKIP_GENERATE:-0}" != "1" ]]; then
+  echo "[analysis] ===== phase 1: generate ====="
+  python "${BASE_DIR}/scripts/data_analysis/run_opsd_analysis.py" "${EXTRA_ARGS[@]}" --skip-score
+else
+  echo "[analysis] ===== phase 1: skipped (SKIP_GENERATE=1; reuse rollouts.jsonl) ====="
+fi
+
+echo "[analysis] ===== phase 2: score ====="
+python "${BASE_DIR}/scripts/data_analysis/run_opsd_analysis.py" "${EXTRA_ARGS[@]}" --skip-generate"""
 
     return f"""#!/bin/bash
 {exclude}#SBATCH --job-name={job_name}
@@ -201,11 +260,11 @@ def render_script(
 #SBATCH --cpus-per-task=7
 #SBATCH --gres=gpu:1
 #SBATCH --mem=80G
-#SBATCH --time=48:00:00
+#SBATCH --time={time_limit}
 set -euo pipefail
 
 # {description}
-{length_note}# Rollout: temp=1.1 top_p=0.95 top_k=20 max_prompt=1024 max_completion={max_comp}
+{length_note}# Rollout: temp=1.1 top_p=0.95 top_k=20 max_prompt={max_prm} max_completion={max_comp}
 
 BASE_DIR=${{BASE_DIR:-${{SLURM_SUBMIT_DIR:-$(cd "$(dirname "${{BASH_SOURCE[0]}}")/../../.." && pwd)}}}}
 JOB_TAG=${{SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}}
@@ -217,9 +276,9 @@ COMBO="{combo}"
 MODEL_PATH="{m.model_path}"
 CONDA_ENV="{m.conda_env}"
 BACKEND="{backend}"
-NUM_PROMPTS=${{NUM_PROMPTS:-2048}}
-N_ROLLOUTS=${{N_ROLLOUTS:-2}}
-MAX_PROMPT=${{MAX_PROMPT:-1024}}
+NUM_PROMPTS=${{NUM_PROMPTS:-{n_prompts}}}
+N_ROLLOUTS=${{N_ROLLOUTS:-{n_rolls}}}
+MAX_PROMPT=${{MAX_PROMPT:-{max_prm}}}
 MAX_COMPLETION=${{MAX_COMPLETION:-{max_comp}}}
 SCORE_BATCH=${{SCORE_BATCH:-{score_batch}}}
 GEN_BATCH_HINT=${{GEN_BATCH_HINT:-{gen_batch_hint}}}
@@ -261,15 +320,7 @@ EXTRA_ARGS=(
 echo "[analysis] task=${{TASK}} model=${{MODEL_KEY}} combo=${{COMBO}} backend=${{BACKEND}}"
 echo "[analysis] output=${{OUTPUT_DIR}}"
 
-if [[ "${{SKIP_GENERATE:-0}}" != "1" ]]; then
-  echo "[analysis] ===== phase 1: generate ====="
-  python "${{BASE_DIR}}/scripts/data_analysis/run_opsd_analysis.py" "${{EXTRA_ARGS[@]}}" --skip-score
-else
-  echo "[analysis] ===== phase 1: skipped (SKIP_GENERATE=1; reuse rollouts.jsonl) ====="
-fi
-
-echo "[analysis] ===== phase 2: score ====="
-python "${{BASE_DIR}}/scripts/data_analysis/run_opsd_analysis.py" "${{EXTRA_ARGS[@]}}" --skip-generate
+{phase_block}
 
 echo "[analysis] done -> ${{OUTPUT_DIR}}"
 ls -lah "${{OUTPUT_DIR}}"
@@ -368,6 +419,34 @@ def gen_25() -> list[Path]:
     return created
 
 
+def gen_26() -> list[Path]:
+    created = []
+    for model, combos in SECTION_MODEL_COMBOS["2.6"].items():
+        combo = combos[0]
+        max_comp = cotlen_max_completion(model)
+        for band in COTLEN_BANDS:
+            path = ROOT / SECTION_DIR["2.6"] / f"analyze_{combo}_{band}_{model}.sh"
+            content = render_script(
+                section="2.6",
+                task="cotlen",
+                model_key=model,
+                combo=combo,
+                cotlen_band=band,
+                description=f"2.6 cotlen-{band} {combo} on {model}",
+                # prompt=2048 matches train; completion matches project eval max_new_tokens.
+                max_prompt=COTLEN_MAX_PROMPT,
+                max_completion=max_comp,
+                num_prompts=2048,
+                n_rollouts=4,
+                # SGLang + eval-length completions; think easy/hard can exceed 48h.
+                time_limit="7-00:00:00",
+                preference_separate=True,
+            )
+            write_script(path, content)
+            created.append(path)
+    return created
+
+
 def main() -> None:
     all_paths: list[Path] = []
     all_paths.extend(gen_21())
@@ -375,6 +454,7 @@ def main() -> None:
     all_paths.extend(gen_23())
     all_paths.extend(gen_24())
     all_paths.extend(gen_25())
+    all_paths.extend(gen_26())
     print(f"generated {len(all_paths)} self-contained scripts")
 
 

@@ -87,6 +87,7 @@ def load_prompt_samples(
     max_prompt_length: int,
     seed: int,
     teacher_prefix: str = "sol",
+    allow_shortfall: bool = False,
 ) -> list[dict[str, Any]]:
     """Sample problems that fit under student/teacher prompts."""
     privilege_mode, privilege_field = privilege_for_prefix(teacher_prefix)
@@ -132,7 +133,10 @@ def load_prompt_samples(
             break
 
     if len(out) < num_prompts:
-        raise RuntimeError(f"only {len(out)} prompts fit (need {num_prompts})")
+        msg = f"only {len(out)} prompts fit (need {num_prompts})"
+        if not allow_shortfall or not out:
+            raise RuntimeError(msg)
+        print(f"[sample] WARN {msg}; using all that fit", flush=True)
     return out
 
 

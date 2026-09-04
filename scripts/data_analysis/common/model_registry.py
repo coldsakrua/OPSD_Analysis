@@ -27,6 +27,19 @@ LENGTH_WINDOWS = (
 DEFAULT_MAX_PROMPT = 1024
 DEFAULT_MAX_COMPLETION = 1024
 LENGTH_WINDOWS_MAX_COMPLETION = 6144
+# Match OT cotlen-easy/hard training (scripts/train/*/jsd005/*/…_cotlen_{easy,hard}.sh).
+COTLEN_MAX_PROMPT = 2048
+COTLEN_BANDS = ("easy", "hard")
+
+# Match project eval max_new_tokens (scripts/eval/{1.7b,4b,4b_instruct,olmo*}).
+EVAL_MAX_COMPLETION: dict[str, int] = {
+    "qwen3_1.7b": 38912,
+    "qwen3_4b": 38912,
+    "qwen3_4b_instruct": 32768,
+    "qwen3_8b": 38912,
+    "olmo3_7b_think": 32768,
+    "olmo3_7b_instruct": 32768,
+}
 
 COMBO_THINK = {
     "st_tt": (True, True),
@@ -102,6 +115,13 @@ MODELS: dict[str, ModelConfig] = {
         "anchor",
         "vllm",
         ".qwen3_06b",
+    ),
+    "qwen3_8b": ModelConfig(
+        "qwen3_8b",
+        f"{MODEL_ROOT}/qwen3-8b",
+        "anchor",
+        "vllm",
+        ".qwen3_8b",
     ),
     "olmo3_7b_instruct": ModelConfig(
         "olmo3_7b_instruct",
@@ -179,6 +199,27 @@ SECTION_MODEL_COMBOS: dict[str, dict[str, tuple[str, ...]]] = {
         "olmo3_7b_think": ("st_tt",),
         "olmo3_7b_instruct": ("snt_tnt",),
     },
+    # OT gold-CoT length bands (D0-4 easy / D7-9 hard); matches train …_cotlen_{easy,hard}.sh
+    "2.6": {
+        "qwen3_1.7b": ("st_tt",),
+        "qwen3_4b": ("st_tt",),
+        "qwen3_4b_instruct": ("snt_tnt",),
+        "olmo3_7b_think": ("st_tt",),
+        "olmo3_7b_instruct": ("snt_tnt",),
+        # Train scripts exist; preprocessed parquet may be missing until preprocess.
+        "qwen3_8b": ("st_tt",),
+    },
+}
+
+# Middle filename segment for cotlen preprocessed parquets (maxprompt2048).
+# Distinct from maxprompt1024 tags used by sections 2.1–2.5.
+COTLEN_DATASET_TAG: dict[tuple[str, str], str] = {
+    ("qwen3_1.7b", "st_tt"): "sthink_tthink.qwen3_1.7b",
+    ("qwen3_4b", "st_tt"): "sthink_tthink.qwen3_4b",
+    ("qwen3_4b_instruct", "snt_tnt"): "nothink.qwen3_4b_instruct",
+    ("olmo3_7b_think", "st_tt"): "sthink_tthink.olmo3_7b_think",
+    ("olmo3_7b_instruct", "snt_tnt"): "nothink.olmo3_7b_instruct",
+    ("qwen3_8b", "st_tt"): "sthink_tthink.qwen3_8b",
 }
 
 
@@ -212,6 +253,34 @@ def dataset_path(model_key: str, combo: str, base_dir: Path | None = None) -> Pa
     tag_part = _dataset_tag_part(model, combo)
     root = base_dir or DATA_ROOT
     name = f"openthoughts.opsd.solution.{tag_part}.maxprompt1024.parquet"
+    return Path(root) / name
+
+
+def cotlen_dataset_path(
+    model_key: str,
+    combo: str,
+    band: str,
+    *,
+    max_prompt: int = COTLEN_MAX_PROMPT,
+    base_dir: Path | None = None,
+) -> Path:
+    """OT cotlen-easy/hard parquet used by train …_cotlen_{easy,hard}.sh.
+
+    Always points at the train-preprocessed maxprompt2048 files (problem pool).
+    Analysis may still use a shorter --max-prompt-length (e.g. 1024 like 2.2).
+    """
+    if band not in COTLEN_BANDS:
+        raise ValueError(f"unknown cotlen band {band!r}; expected {COTLEN_BANDS}")
+    tag = COTLEN_DATASET_TAG.get((model_key, combo))
+    if tag is None:
+        raise KeyError(
+            f"no cotlen dataset tag for model={model_key!r} combo={combo!r}; "
+            f"known={sorted(COTLEN_DATASET_TAG)}"
+        )
+    root = base_dir or DATA_ROOT
+    # Train scripts use maxprompt2048; keep that filename regardless of analysis prompt cap.
+    _ = max_prompt
+    name = f"openthoughts.cotlen_{band}.opsd.solution.{tag}.maxprompt{COTLEN_MAX_PROMPT}.parquet"
     return Path(root) / name
 
 
@@ -258,11 +327,28 @@ def entropy_ratio(bucket: str) -> tuple[str, float]:
     return mapping[bucket]
 
 
-def task_default_max_completion(task: str) -> int:
+def task_default_max_completion(task: str, model_key: str | None = None) -> int:
     """Default rollout cap per analysis section."""
     if task == "length_windows":
         return LENGTH_WINDOWS_MAX_COMPLETION
+    if task == "cotlen":
+        if not model_key:
+            raise ValueError("model_key required for cotlen max_completion")
+        if model_key not in EVAL_MAX_COMPLETION:
+            raise KeyError(f"no eval max_completion for {model_key!r}; extend EVAL_MAX_COMPLETION")
+        return EVAL_MAX_COMPLETION[model_key]
     return DEFAULT_MAX_COMPLETION
+
+
+def cotlen_max_completion(model_key: str) -> int:
+    return task_default_max_completion("cotlen", model_key)
+
+
+def task_default_max_prompt(task: str) -> int:
+    """Default prompt cap. Cotlen uses 2048 (train); other sections use 1024."""
+    if task == "cotlen":
+        return COTLEN_MAX_PROMPT
+    return DEFAULT_MAX_PROMPT
 
 
 MODEL_SIZE_TIER: dict[str, str] = {
@@ -273,18 +359,21 @@ MODEL_SIZE_TIER: dict[str, str] = {
     "qwen3_4b_instruct": "medium",
     "qwen3_4b_thinking": "medium",
     "qwen3.5_4b": "medium",
+    "qwen3_8b": "large",
     "olmo3_7b_instruct": "large",
     "olmo3_7b_think": "large",
     "falcon_h1r_7b": "large",
     "mimo_7b_rl": "large",
 }
 
-# HF score microbatch: short tasks (max_completion=1024) vs 2.5 length_windows (6144).
+# HF score microbatch: short tasks (max_completion=1024) vs long (2.5 / cotlen-eval lengths).
 # Peak VRAM scales ~B * L * vocab during forward + metric temps on GPU.
 _SCORE_BATCH_SHORT = {"small": 8, "medium": 4, "large": 2}
 _SCORE_BATCH_LONG = {"small": 2, "medium": 1, "large": 1}
+_SCORE_BATCH_EVAL_LONG = {"small": 1, "medium": 1, "large": 1}
 _GEN_BATCH_SHORT = {"small": 64, "medium": 64, "large": 32}
 _GEN_BATCH_LONG = {"small": 32, "medium": 16, "large": 8}
+_GEN_BATCH_EVAL_LONG = {"small": 8, "medium": 4, "large": 2}
 
 
 def model_size_tier(model_key: str) -> str:
@@ -297,14 +386,24 @@ def model_size_tier(model_key: str) -> str:
 def task_default_score_batch(task: str, model_key: str) -> int:
     """HF scoring microbatch size tuned for A800 80GB."""
     tier = model_size_tier(model_key)
-    table = _SCORE_BATCH_LONG if task == "length_windows" else _SCORE_BATCH_SHORT
+    if task == "cotlen":
+        table = _SCORE_BATCH_EVAL_LONG
+    elif task == "length_windows":
+        table = _SCORE_BATCH_LONG
+    else:
+        table = _SCORE_BATCH_SHORT
     return table[tier]
 
 
 def task_default_gen_batch_hint(task: str, model_key: str) -> int:
     """SGLang prompt chunk size (vLLM ignores this; uses continuous batching)."""
     tier = model_size_tier(model_key)
-    table = _GEN_BATCH_LONG if task == "length_windows" else _GEN_BATCH_SHORT
+    if task == "cotlen":
+        table = _GEN_BATCH_EVAL_LONG
+    elif task == "length_windows":
+        table = _GEN_BATCH_LONG
+    else:
+        table = _GEN_BATCH_SHORT
     return table[tier]
 
 

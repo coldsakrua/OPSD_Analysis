@@ -14,6 +14,24 @@ DEFAULT_CHAT_TEMPLATE_PATH = (
     "/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b"
 )
 
+# Same instruction as OPSD / eval / GRPO (Qwen3 math).
+MATH_BOXED_INSTRUCTION = (
+    "Please reason step by step, and put your final answer within \\boxed{}."
+)
+
+
+def append_math_instruction(problem: str, *, instruction: str = MATH_BOXED_INSTRUCTION) -> str:
+    """Append boxed instruction to user problem if not already present."""
+    text = str(problem or "").strip()
+    instr = (instruction or "").strip()
+    if not instr:
+        return text
+    if instr in text:
+        return text
+    if not text:
+        return instr
+    return f"{text}\n\n{instr}"
+
 
 def load_sft_tokenizer(
     model_path: str,
@@ -76,11 +94,15 @@ def normalize_sft_row(
     row: dict[str, Any],
     *,
     enable_thinking: bool = True,
+    add_math_instruction: bool = True,
 ) -> dict[str, Any]:
     """Normalize to TRL prompt-completion conversational format.
 
     Qwen3 chat templates lack `{% generation %}`, so we use prompt/completion
     + completion_only_loss instead of assistant_only_loss.
+
+    By default appends the Qwen3 math boxed instruction to the user turn
+    (same string as OPSD / eval / GRPO).
     """
     if (
         isinstance(row.get("prompt"), list)
@@ -92,8 +114,19 @@ def normalize_sft_row(
         completion = [
             {"role": str(m["role"]), "content": str(m["content"])} for m in row["completion"]
         ]
+        if add_math_instruction:
+            # Only touch the last user message.
+            for i in range(len(prompt) - 1, -1, -1):
+                if str(prompt[i].get("role", "")).lower() == "user":
+                    prompt[i] = {
+                        **prompt[i],
+                        "content": append_math_instruction(str(prompt[i].get("content", ""))),
+                    }
+                    break
     else:
         problem, solution = _extract_problem_solution(row)
+        if add_math_instruction:
+            problem = append_math_instruction(problem)
         prompt = [{"role": "user", "content": problem}]
         completion = [{"role": "assistant", "content": solution}]
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """OPSD student/teacher on-policy analysis.
 
-Sections 2.1–2.5 share this entrypoint. Shell wrappers set --task and model/combo args.
+Sections 2.1–2.6 share this entrypoint. Shell wrappers set --task and model/combo args.
 
 Pipeline
 --------
@@ -10,6 +10,7 @@ Pipeline
 3. Score each completion token with student + teacher (same weights, different prompts).
 4. Aggregate KL/JSD, top-k KL, log-ratio, argmax preference, SNR, loss-dominant tokens.
    Persist per-token arrays to token_metrics*.jsonl when enabled.
+5. For cotlen (2.6): also score boxed answer accuracy (n rollouts per prompt).
 
 Tasks
 -----
@@ -17,11 +18,14 @@ Tasks
 - teacher_prefix (2.2): sol + answer + irrelevant_other_sol on same rollouts.
 - entropy (2.3): score once, aggregate he20/le20/he80/le80 buckets from student entropy.
 - length_windows (2.5): bucket metrics by completion position.
+- cotlen (2.6): OT gold-CoT length easy/hard bands; accuracy + preference.
 """
 
 from __future__ import annotations
 
 import argparse
+import gc
+import json
 import sys
 import time
 from pathlib import Path
@@ -36,21 +40,26 @@ ROOT = SCRIPT_DIR.parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(SCRIPT_DIR))
 
+from common.accuracy import aggregate_accuracy, score_rollout_accuracy  # noqa: E402
 from common.aggregation import MetricsAggregator  # noqa: E402
 from common.generation import run_generation  # noqa: E402
-from common.io import load_jsonl, save_jsonl, write_json  # noqa: E402
+from common.io import append_jsonl, load_jsonl, save_jsonl, write_json  # noqa: E402
 from common.metrics import DEFAULT_JSD_BETA, DEFAULT_JSD_TOKEN_CLIP, DEFAULT_TOPK_HIT_KS  # noqa: E402
 from common.model_registry import (  # noqa: E402
+    COTLEN_BANDS,
+    COTLEN_MAX_PROMPT,
     DEFAULT_MAX_PROMPT,
     ENTROPY_BUCKETS,
     LENGTH_WINDOWS,
     TEACHER_PREFIXES,
+    cotlen_dataset_path,
     dataset_path,
     entropy_ratio,
     get_model_config,
     model_launch_overrides,
     task_default_gen_batch_hint,
     task_default_max_completion,
+    task_default_max_prompt,
     task_default_score_batch,
     teacher_prefix_dataset,
 )
@@ -66,15 +75,29 @@ from common.scoring import (  # noqa: E402
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--task", choices=("combinations", "teacher_prefix", "entropy", "length_windows"), required=True)
+    p.add_argument(
+        "--task",
+        choices=("combinations", "teacher_prefix", "entropy", "length_windows", "cotlen"),
+        required=True,
+    )
     p.add_argument("--model-key", required=True, help="Registry key, e.g. qwen3_1.7b")
     p.add_argument("--combo", required=True, help="st_tt | snt_tnt | st_tnt | snt_tt")
     p.add_argument("--output-dir", required=True)
     p.add_argument("--model-path", default="", help="Override registry model path")
     p.add_argument("--dataset-path", default="", help="Override default parquet path")
+    p.add_argument(
+        "--cotlen-band",
+        default="",
+        help="Required for task=cotlen: easy (D0-4) or hard (D7-9)",
+    )
     p.add_argument("--num-prompts", type=int, default=2048)
     p.add_argument("--n-rollouts", type=int, default=2)
-    p.add_argument("--max-prompt-length", type=int, default=DEFAULT_MAX_PROMPT)
+    p.add_argument(
+        "--max-prompt-length",
+        type=int,
+        default=None,
+        help=f"Default: {COTLEN_MAX_PROMPT} for cotlen, {DEFAULT_MAX_PROMPT} otherwise",
+    )
     p.add_argument(
         "--max-completion-length",
         type=int,
@@ -142,6 +165,11 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--skip-generate", action="store_true")
     p.add_argument("--skip-score", action="store_true")
+    p.add_argument(
+        "--skip-accuracy",
+        action="store_true",
+        help="Reuse existing accuracy_*.json if present; only run preference scoring (cotlen).",
+    )
     p.add_argument("--max-rollouts", type=int, default=0, help="0 = all")
     return p.parse_args()
 
@@ -176,6 +204,10 @@ def _score_batch_kwargs(args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def _rollout_score_key(row: dict[str, Any]) -> tuple[Any, Any]:
+    return (row.get("row_id"), row.get("rollout_idx"))
+
+
 def score_rollouts(
     model: AutoModelForCausalLM,
     tokenizer: Any,
@@ -187,13 +219,23 @@ def score_rollouts(
     window_label: str | None = None,
     token_metrics_out: list[dict[str, Any]] | None = None,
     rollout_metrics_out: list[dict[str, Any]] | None = None,
+    rollout_metrics_path: Path | None = None,
+    token_metrics_path: Path | None = None,
+    scored_keys: set[tuple[Any, Any]] | None = None,
     metrics_tag: str = "",
 ) -> MetricsAggregator:
     agg = _make_aggregator(args)
     bs = max(1, args.score_batch_size)
     score_kw = _score_batch_kwargs(args)
+    scored_keys = scored_keys or set()
     for start in tqdm(range(0, len(rollouts), bs), desc=f"score/{teacher_key}"):
-        batch = rollouts[start : start + bs]
+        batch = [
+            r
+            for r in rollouts[start : start + bs]
+            if _rollout_score_key(r) not in scored_keys
+        ]
+        if not batch:
+            continue
         metrics_list = score_rollout_batch(
             model,
             model,
@@ -203,11 +245,15 @@ def score_rollouts(
             completion_ids_list=[r["completion_token_ids"] for r in batch],
             **score_kw,
         )
+        batch_rollout_rows: list[dict[str, Any]] = []
+        batch_token_rows: list[dict[str, Any]] = []
         for r, metrics in zip(batch, metrics_list):
             if filter_fn is not None:
                 metrics = filter_fn(metrics)
             agg.update(metrics, window_label=window_label)
-            if rollout_metrics_out is not None:
+            key = _rollout_score_key(r)
+            scored_keys.add(key)
+            if rollout_metrics_out is not None or rollout_metrics_path is not None:
                 rollout_rec = rollout_metrics_summary(metrics)
                 rollout_rec.update(
                     {
@@ -220,8 +266,13 @@ def score_rollouts(
                     rollout_rec["tag"] = metrics_tag
                 if window_label:
                     rollout_rec["window"] = window_label
-                rollout_metrics_out.append(rollout_rec)
-            if token_metrics_out is not None and args.save_token_metrics:
+                if rollout_metrics_out is not None:
+                    rollout_metrics_out.append(rollout_rec)
+                if rollout_metrics_path is not None:
+                    batch_rollout_rows.append(rollout_rec)
+            if args.save_token_metrics and (
+                token_metrics_out is not None or token_metrics_path is not None
+            ):
                 meta = {
                     "row_id": r.get("row_id"),
                     "rollout_idx": r.get("rollout_idx"),
@@ -231,8 +282,39 @@ def score_rollouts(
                     meta["tag"] = metrics_tag
                 if window_label:
                     meta["window"] = window_label
-                token_metrics_out.append(token_metrics_record(metrics, meta=meta))
+                token_rec = token_metrics_record(metrics, meta=meta)
+                if token_metrics_out is not None:
+                    token_metrics_out.append(token_rec)
+                if token_metrics_path is not None:
+                    batch_token_rows.append(token_rec)
+        if rollout_metrics_path is not None and batch_rollout_rows:
+            append_jsonl(rollout_metrics_path, batch_rollout_rows)
+        if token_metrics_path is not None and batch_token_rows:
+            append_jsonl(token_metrics_path, batch_token_rows)
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        gc.collect()
     return agg
+
+
+def _ensure_accuracy(
+    rollouts: list[dict[str, Any]],
+    out_dir: Path,
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    """Score boxed accuracy; keep per-rollout rows + aggregate summary."""
+    acc_rows = score_rollout_accuracy(rollouts)
+    save_jsonl(out_dir / "accuracy_rollouts.jsonl", acc_rows)
+    acc_summary = aggregate_accuracy(acc_rows, n_rollouts=args.n_rollouts)
+    write_json(out_dir / "accuracy_summary.json", acc_summary)
+    print(
+        f"[acc] mean={acc_summary['mean_accuracy_pct']:.2f}% "
+        f"format={acc_summary['format_rate_pct']:.1f}% "
+        f"pass@4={acc_summary.get('pass_at', {}).get('4', {}).get('rate_pct', 0):.2f}% "
+        f"n_gen={acc_summary['n_generations']}",
+        flush=True,
+    )
+    return acc_summary
 
 
 def run_combinations(
@@ -296,6 +378,153 @@ def run_combinations(
         "config": _config_dict(args, model_cfg, ds),
         "metrics": agg.summary(tokenizer, args.top_token_k),
     }
+    write_json(out_dir / "summary.json", summary)
+    return summary
+
+
+def run_cotlen(
+    args: argparse.Namespace,
+    model_cfg,
+    out_dir: Path,
+    overrides: dict[str, Any],
+) -> dict[str, Any]:
+    """Sample OT cotlen easy/hard; accuracy and preference analysis are separable.
+
+    - ``--skip-score``: generate (unless ``--skip-generate``) + boxed accuracy only.
+    - preference pass: same metrics as 2.2 sol; use ``--skip-generate`` (+ optional
+      ``--skip-accuracy`` to reuse ``accuracy_*.json``).
+    """
+    if args.cotlen_band not in COTLEN_BANDS:
+        raise ValueError(f"--cotlen-band must be one of {COTLEN_BANDS}, got {args.cotlen_band!r}")
+    ds = args.dataset_path or str(
+        cotlen_dataset_path(args.model_key, args.combo, args.cotlen_band)
+    )
+    if not Path(ds).is_file():
+        raise FileNotFoundError(
+            f"missing cotlen dataset: {ds}\n"
+            f"preprocess with scripts/data/preprocess_opsd_openthoughts.py "
+            f"on data/openthoughts/preprocessed/openthoughts.cotlen_{args.cotlen_band}.parquet"
+        )
+
+    rollouts_path = out_dir / "rollouts.jsonl"
+    model_path = args.model_path or model_cfg.model_path
+
+    if args.skip_generate and rollouts_path.is_file():
+        rollouts = load_jsonl(rollouts_path)
+    else:
+        if args.skip_generate:
+            raise FileNotFoundError(f"--skip-generate but missing rollouts: {rollouts_path}")
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+        if tokenizer.pad_token_id is None:
+            tokenizer.pad_token = tokenizer.eos_token
+        samples = load_prompt_samples(
+            ds,
+            tokenizer,
+            model_key=args.model_key,
+            combo=args.combo,
+            num_prompts=args.num_prompts,
+            max_prompt_length=args.max_prompt_length,
+            seed=args.seed,
+            allow_shortfall=True,
+        )
+        save_jsonl(out_dir / "samples.jsonl", samples)
+        backend = args.backend or model_cfg.backend
+        rollouts = run_generation(
+            model_path,
+            samples,
+            backend=backend,
+            **_generation_kwargs(args, overrides),
+        )
+        save_jsonl(rollouts_path, rollouts)
+
+    if args.max_rollouts > 0:
+        rollouts = rollouts[: args.max_rollouts]
+
+    # Accuracy: boxed match only (no HF preference forward).
+    acc_path = out_dir / "accuracy_summary.json"
+    if args.skip_accuracy and acc_path.is_file():
+        acc_summary = json.loads(acc_path.read_text())
+        print(f"[acc] reuse {acc_path}", flush=True)
+    else:
+        acc_summary = _ensure_accuracy(rollouts, out_dir, args)
+        write_json(
+            out_dir / "summary_accuracy.json",
+            {
+                "status": "accuracy",
+                "n_rollouts": len(rollouts),
+                "config": _config_dict(args, model_cfg, ds),
+                "accuracy": acc_summary,
+            },
+        )
+
+    if args.skip_score:
+        out = {
+            "status": "accuracy",
+            "n_rollouts": len(rollouts),
+            "config": _config_dict(args, model_cfg, ds),
+            "accuracy": acc_summary,
+        }
+        write_json(out_dir / "summary.json", out)
+        write_json(out_dir / "summary_accuracy.json", out)
+        return out
+
+    # Preference / data-analysis pass (2.2 sol metrics).
+    if args.max_completion_length > 8192 and args.save_token_metrics:
+        print(
+            "[score] long completions: disable per-token metrics to limit RAM "
+            f"(max_completion={args.max_completion_length})",
+            flush=True,
+        )
+        args.save_token_metrics = False
+
+    rollout_metrics_path = out_dir / "rollout_metrics_sol.jsonl"
+    token_metrics_path = out_dir / "token_metrics_sol.jsonl"
+    scored_keys: set[tuple[Any, Any]] = set()
+    if rollout_metrics_path.is_file():
+        for row in load_jsonl(rollout_metrics_path):
+            scored_keys.add(_rollout_score_key(row))
+        if scored_keys:
+            print(
+                f"[score] resume: {len(scored_keys)} rollouts already in "
+                f"{rollout_metrics_path.name}",
+                flush=True,
+            )
+
+    tokenizer, model = load_models(model_path)
+    token_rows: list[dict[str, Any]] = []
+    rollout_rows: list[dict[str, Any]] = []
+    agg = score_rollouts(
+        model,
+        tokenizer,
+        rollouts,
+        args,
+        teacher_key="teacher_prompt",
+        token_metrics_out=token_rows if args.save_token_metrics else None,
+        rollout_metrics_out=rollout_rows,
+        rollout_metrics_path=rollout_metrics_path,
+        token_metrics_path=token_metrics_path if args.save_token_metrics else None,
+        scored_keys=scored_keys,
+        metrics_tag="sol",
+    )
+    if rollout_metrics_path.is_file():
+        rollout_rows = load_jsonl(rollout_metrics_path)
+    save_jsonl(out_dir / "rollout_metrics.jsonl", rollout_rows)
+    save_jsonl(out_dir / "rollout_metrics_sol.jsonl", rollout_rows)
+    if args.save_token_metrics:
+        if token_metrics_path.is_file():
+            token_rows = load_jsonl(token_metrics_path)
+        save_jsonl(out_dir / "token_metrics.jsonl", token_rows)
+        save_jsonl(out_dir / "token_metrics_sol.jsonl", token_rows)
+
+    metrics = agg.summary(tokenizer, args.top_token_k)
+    summary = {
+        "status": "preference",
+        "config": _config_dict(args, model_cfg, ds),
+        "accuracy": acc_summary,
+        "metrics": metrics,
+        "teacher_prefixes": {"sol": metrics},
+    }
+    write_json(out_dir / "summary_preference.json", summary)
     write_json(out_dir / "summary.json", summary)
     return summary
 
@@ -596,6 +825,7 @@ def _config_dict(args: argparse.Namespace, model_cfg, dataset) -> dict[str, Any]
         "task": args.task,
         "model_key": args.model_key,
         "combo": args.combo,
+        "cotlen_band": getattr(args, "cotlen_band", "") or None,
         "model_path": args.model_path or model_cfg.model_path,
         "dataset": dataset,
         "num_prompts": args.num_prompts,
@@ -630,6 +860,7 @@ def _config_dict(args: argparse.Namespace, model_cfg, dataset) -> dict[str, Any]
             "snr": "|advantage| / (student_entropy + 1e-8)",
             "top1_agree": "student_argmax == teacher_argmax",
             "rollout_metrics.jsonl": "per-rollout means, frac_encourage, first/last-128 advantage, clip rate",
+            "accuracy": "boxed answer vs gold; mean@n + pass@k (cotlen task)",
         },
     }
 
@@ -659,8 +890,10 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     model_cfg = get_model_config(args.model_key)
     overrides = model_launch_overrides(args.model_key)
+    if args.max_prompt_length is None:
+        args.max_prompt_length = task_default_max_prompt(args.task)
     if args.max_completion_length is None:
-        args.max_completion_length = task_default_max_completion(args.task)
+        args.max_completion_length = task_default_max_completion(args.task, args.model_key)
     if args.score_batch_size <= 0:
         args.score_batch_size = task_default_score_batch(args.task, args.model_key)
     if args.gen_batch_hint <= 0:
@@ -676,6 +909,8 @@ def main() -> None:
 
     t0 = time.time()
     print(f"[cfg] task={args.task} model={args.model_key} combo={args.combo}", flush=True)
+    if args.task == "cotlen":
+        print(f"[cfg] cotlen_band={args.cotlen_band} max_prompt={args.max_prompt_length}", flush=True)
     print(f"[cfg] max_completion={args.max_completion_length} backend={args.backend} jsd_beta={args.jsd_beta}", flush=True)
     print(
         f"[cfg] score_batch={args.score_batch_size} gen_batch_hint={args.gen_batch_hint}",
@@ -691,10 +926,20 @@ def main() -> None:
         result = run_teacher_prefix(args, model_cfg, out_dir, overrides)
     elif args.task == "length_windows":
         result = run_length_windows(args, model_cfg, out_dir, overrides)
+    elif args.task == "cotlen":
+        result = run_cotlen(args, model_cfg, out_dir, overrides)
     else:
         raise ValueError(args.task)
 
     print(f"[done] {time.time() - t0:.1f}s", flush=True)
+    if isinstance(result, dict) and "accuracy" in result:
+        a = result["accuracy"]
+        print(
+            f"  acc_mean={a.get('mean_accuracy_pct', 0):.2f}% "
+            f"pass@4={a.get('pass_at', {}).get('4', {}).get('rate_pct', 0):.2f}% "
+            f"format={a.get('format_rate_pct', 0):.1f}%",
+            flush=True,
+        )
     if isinstance(result, dict) and "metrics" in result:
         m = result["metrics"]
         print(

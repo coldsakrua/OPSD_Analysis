@@ -77,19 +77,28 @@ def forward_completion_logits(
         attn[i, : len(s)] = 1
 
     out = model(input_ids=batch, attention_mask=attn)
+    # Keep logits on GPU briefly; slice completion span to CPU to free [B,S,V] peak.
     logits = out.logits.float()
+    del out
 
     results: list[torch.Tensor] = []
     for i, (plen, clen) in enumerate(zip(plens, clens)):
         if clen == 0:
             results.append(torch.empty(0, 0))
             continue
-        pos_logits = logits[i, plen - 1 : plen - 1 + clen, :].cpu()
+        pos_logits = logits[i, plen - 1 : plen - 1 + clen, :].contiguous().cpu()
         results.append(pos_logits)
+    del logits, batch, attn
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     return results
 
 
-def _metrics_from_logits(
+# Long eval completions (≤32k) make a full [L,V] fp32 tensor ~18GB; never move all L to GPU.
+_METRICS_SEQ_CHUNK = 512
+
+
+def _metrics_from_logits_chunk(
     s_logits: torch.Tensor,
     t_logits: torch.Tensor,
     completion_ids: list[int],
@@ -100,7 +109,7 @@ def _metrics_from_logits(
     jsd_beta: float,
     jsd_token_clip: float,
 ) -> dict[str, Any]:
-    """Per-position metrics from completion logits [L, V] on device."""
+    """Per-position metrics for a short span [L_chunk, V] already on the compute device."""
     L = min(s_logits.shape[0], t_logits.shape[0], len(completion_ids))
     if L == 0:
         return {"n_tokens": 0}
@@ -189,6 +198,79 @@ def _metrics_from_logits(
     }
 
 
+def _merge_metric_chunks(parts: list[dict[str, Any]]) -> dict[str, Any]:
+    if not parts:
+        return {"n_tokens": 0}
+    if len(parts) == 1:
+        return parts[0]
+    out: dict[str, Any] = {"n_tokens": int(sum(p.get("n_tokens", 0) for p in parts))}
+    list_keys = (
+        "token_ids",
+        *PER_TOKEN_SCALAR_KEYS,
+        *PER_TOKEN_ID_KEYS,
+    )
+    for key in list_keys:
+        if key not in parts[0]:
+            continue
+        merged: list[Any] = []
+        for p in parts:
+            merged.extend(p[key])
+        out[key] = merged
+
+    # Nested per-token structures.
+    topk_hit: dict[str, dict[str, list[Any]]] = {}
+    for k, sides in parts[0].get("topk_hit", {}).items():
+        topk_hit[k] = {
+            side: [x for p in parts for x in p["topk_hit"][k][side]] for side in sides
+        }
+    out["topk_hit"] = topk_hit
+    topk_kl: dict[str, list[Any]] = {}
+    for name in parts[0].get("topk_kl", {}):
+        topk_kl[name] = [x for p in parts for x in p["topk_kl"][name]]
+    out["topk_kl"] = topk_kl
+    return out
+
+
+def _metrics_from_logits(
+    s_logits_cpu: torch.Tensor,
+    t_logits_cpu: torch.Tensor,
+    completion_ids: list[int],
+    *,
+    device: torch.device,
+    temperature: float,
+    topk_ks: tuple[int, ...],
+    topk_hit_ks: tuple[int, ...],
+    jsd_beta: float,
+    jsd_token_clip: float,
+) -> dict[str, Any]:
+    """Per-position metrics; logits stay on CPU and are scored in seq chunks on ``device``."""
+    L = min(s_logits_cpu.shape[0], t_logits_cpu.shape[0], len(completion_ids))
+    if L == 0:
+        return {"n_tokens": 0}
+
+    parts: list[dict[str, Any]] = []
+    for start in range(0, L, _METRICS_SEQ_CHUNK):
+        end = min(start + _METRICS_SEQ_CHUNK, L)
+        s_chunk = s_logits_cpu[start:end].to(device, non_blocking=False)
+        t_chunk = t_logits_cpu[start:end].to(device, non_blocking=False)
+        parts.append(
+            _metrics_from_logits_chunk(
+                s_chunk,
+                t_chunk,
+                completion_ids[start:end],
+                temperature=temperature,
+                topk_ks=topk_ks,
+                topk_hit_ks=topk_hit_ks,
+                jsd_beta=jsd_beta,
+                jsd_token_clip=jsd_token_clip,
+            )
+        )
+        del s_chunk, t_chunk
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
+    return _merge_metric_chunks(parts)
+
+
 @torch.no_grad()
 def score_rollout_batch(
     student_model: AutoModelForCausalLM,
@@ -204,7 +286,7 @@ def score_rollout_batch(
     jsd_beta: float = DEFAULT_JSD_BETA,
     jsd_token_clip: float = DEFAULT_JSD_TOKEN_CLIP,
 ) -> list[dict[str, Any]]:
-    """Batched forward (student + teacher), per-rollout metrics on GPU one at a time."""
+    """Batched forward (student + teacher), per-rollout metrics in seq chunks."""
     if not student_prompts:
         return []
     device = student_model.device
@@ -213,13 +295,12 @@ def score_rollout_batch(
 
     results: list[dict[str, Any]] = []
     for s_cpu, t_cpu, cids in zip(s_logits_l, t_logits_l, completion_ids_list):
-        s_logits = s_cpu.to(device)
-        t_logits = t_cpu.to(device)
         results.append(
             _metrics_from_logits(
-                s_logits,
-                t_logits,
+                s_cpu,
+                t_cpu,
                 cids,
+                device=device,
                 temperature=temperature,
                 topk_ks=topk_ks,
                 topk_hit_ks=topk_hit_ks,
@@ -227,7 +308,9 @@ def score_rollout_batch(
                 jsd_token_clip=jsd_token_clip,
             )
         )
-        del s_logits, t_logits
+        del s_cpu, t_cpu
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
     return results
 
 

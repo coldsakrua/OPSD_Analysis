@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # Qwen3-4B SFT@15000 → GRPO on 8 GPUs.
-# 20k response + ref KL + overlong from 12k. Conservative util for hybrid+ref.
+# 20k response + ref KL; overlong OFF; 100 steps (ablation vs prior overlong@12k run).
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}}
 export NUM_GPUS=${NUM_GPUS:-8}
@@ -21,7 +21,12 @@ export TRAIN_GPUS=${TRAIN_GPUS:-5}
 MODEL_PATH=${MODEL_PATH:-${BASE_DIR}/outputs/qwen3_4b_base/checkpoint-15000}
 CHAT_TEMPLATE_PATH=${CHAT_TEMPLATE_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b}
 MODEL_TAG=${MODEL_TAG:-qwen3_4b_base}
-RUN_NAME=${RUN_NAME:-grpo_think_4b_sft15000_8gpu}
+RUN_NAME=${RUN_NAME:-grpo_think_4b_sft15000_8gpu_nooverlong}
+
+# Ablation: no soft length penalty; stop at 100 steps.
+MAX_STEPS=${MAX_STEPS:-100}
+SAVE_STEPS=${SAVE_STEPS:-25}
+OVERLONG_PENALTY_ENABLE=${OVERLONG_PENALTY_ENABLE:-false}
 
 # n=8 → any train_bs works on 8 GPUs. Keep small for 20k + RefPolicy.
 TRAIN_BATCH_SIZE=${TRAIN_BATCH_SIZE:-16}
@@ -34,9 +39,10 @@ PPO_MAX_TOKEN_LEN_PER_GPU=${PPO_MAX_TOKEN_LEN_PER_GPU:-24576}
 MAX_NUM_BATCHED_TOKENS=${MAX_NUM_BATCHED_TOKENS:-24576}
 VLLM_GPU_MEM_UTIL=${VLLM_GPU_MEM_UTIL:-0.75}
 
-export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-qwen3_4b_sft15000_grpo_dapo}
+export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-qwen3_4b_sft15000_grpo_dapo_nooverlong}
 
 export BASE_DIR MODEL_PATH CHAT_TEMPLATE_PATH MODEL_TAG RUN_NAME
+export MAX_STEPS SAVE_STEPS OVERLONG_PENALTY_ENABLE
 export TRAIN_BATCH_SIZE PPO_MINI_BATCH_SIZE PPO_MICRO_BATCH_SIZE_PER_GPU
 export LOG_PROB_MICRO_BATCH_SIZE_PER_GPU PPO_MAX_TOKEN_LEN_PER_GPU MAX_NUM_BATCHED_TOKENS
 export VLLM_GPU_MEM_UTIL
