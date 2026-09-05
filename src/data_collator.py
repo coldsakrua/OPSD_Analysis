@@ -78,6 +78,7 @@ class SelfDistillationDataCollator:
         student_thinking: bool = False,
         teacher_thinking: bool = False,
         teacher_tokenizer: Any | None = None,
+        purified_pmi: bool = False,
         **_: Any,
     ) -> None:
         if privilege_mode not in self.MODES:
@@ -93,6 +94,8 @@ class SelfDistillationDataCollator:
         self.teacher_privilege_field = teacher_privilege_field
         self.student_thinking = bool(student_thinking)
         self.teacher_thinking = bool(teacher_thinking)
+        # Purified OPSD (arXiv:2607.02234): also emit reference-only prompts for π_ref.
+        self.purified_pmi = bool(purified_pmi)
         self.reason_first = False
         self.tokenizer.padding_side = "right"
         self.teacher_tokenizer.padding_side = "right"
@@ -189,6 +192,37 @@ class SelfDistillationDataCollator:
         return SelfDistillationDataCollator._nogt_transition_teacher_user(problem)
 
     @staticmethod
+    def _opsd_reference_only_user(privileged: str) -> str:
+        """Reference probe π_ref: privileged text only (no question). Paper Sec. 3.2."""
+        text = str(privileged).strip()
+        if not text:
+            raise ValueError("purified PMI requires non-empty privilege text for the reference probe")
+        return (
+            "Here is a reference solution:\n"
+            f"=== Reference Solution Begin ===\n{text}\n=== Reference Solution End ===\n"
+            f"{OFFICIAL_TRANSITION_PROMPT}\n"
+            "Please reason step by step, and put your final answer within \\boxed{}."
+        )
+
+    @staticmethod
+    def _correct_reference_only_user(privileged: str, *, simple: bool) -> str:
+        """Reference-only probe for correct / correct_simple privilege templates."""
+        text = str(privileged).strip()
+        if not text:
+            raise ValueError("purified PMI requires non-empty privilege text for the reference probe")
+        if simple:
+            return (
+                f"Answer: {text}\n\n"
+                "Please reason step by step, and put your final answer within \\boxed{}."
+            )
+        return (
+            "Here is the verified answer:\n"
+            f"{text}\n\n"
+            "After understanding the privileged information, solve the problem using your own reasoning. "
+            "Please reason step by step and put the final answer within \\boxed{}."
+        )
+
+    @staticmethod
     def _normalize_prefix(prefix: str) -> str:
         """Ensure teacher prefix ends with a blank line before Problem:."""
         text = str(prefix or "").strip()
@@ -213,9 +247,11 @@ class SelfDistillationDataCollator:
             return IRRELEVANT_PREFIX
         return self._normalize_prefix(str(raw))
 
-    def format_prompts(self, feature: dict[str, Any]) -> tuple[str, str]:
+    def format_prompts(self, feature: dict[str, Any]) -> tuple[str, str] | tuple[str, str, str]:
+        """Return (student, teacher) or (student, teacher, ref_only) when purified_pmi=True."""
         problem = str(feature["problem"]).strip()
         privileged = self.privilege_text(feature)
+        ref_user: str | None = None
 
         if self.privilege_mode in NO_GT_MODES:
             # Student: plain problem prompt. Teacher: same / prefix / (+ transition, no GT).
@@ -251,6 +287,8 @@ class SelfDistillationDataCollator:
             # privilege_field=none → same no-GT transition template (no reference block).
             student_user = self._standard_student_user(problem)
             teacher_user = self._opsd_teacher_user(problem, privileged)
+            if self.purified_pmi:
+                ref_user = self._opsd_reference_only_user(privileged)
         elif self.privilege_mode == "instruction":
             student_instruction = (
                 "Give a concise solution with only the essential reasoning, and put the final answer "
@@ -266,6 +304,8 @@ class SelfDistillationDataCollator:
             # Concise answer privilege: problem + answer + please reason step by step
             student_user = self._standard_student_user(problem)
             teacher_user = self._concise_answer_teacher_user(problem, privileged)
+            if self.purified_pmi:
+                ref_user = self._correct_reference_only_user(privileged, simple=True)
         else:
             student_instruction = (
                 "Please reason step by step and put the final answer within \\boxed{}."
@@ -280,6 +320,14 @@ class SelfDistillationDataCollator:
                 "Please reason step by step and put the final answer within \\boxed{}."
             )
             student_user = f"Problem: {problem}\n\n{student_instruction}"
+            if self.purified_pmi and self.privilege_mode == "correct":
+                ref_user = self._correct_reference_only_user(privileged, simple=False)
+
+        if self.purified_pmi and ref_user is None:
+            raise ValueError(
+                f"purified PMI requires a GT privilege mode (opsd/correct/correct_simple); "
+                f"got privilege_mode={self.privilege_mode!r}"
+            )
 
         student_prompt = self._apply_chat_template(
             self.tokenizer,
@@ -291,7 +339,14 @@ class SelfDistillationDataCollator:
             [{"role": "user", "content": teacher_user}],
             enable_thinking=self.teacher_thinking,
         )
-        return student_prompt, teacher_prompt
+        if not self.purified_pmi:
+            return student_prompt, teacher_prompt
+        ref_prompt = self._apply_chat_template(
+            self.teacher_tokenizer,
+            [{"role": "user", "content": ref_user}],
+            enable_thinking=self.teacher_thinking,
+        )
+        return student_prompt, teacher_prompt, ref_prompt
 
     @staticmethod
     def _apply_chat_template(tokenizer: Any, messages: list[dict[str, str]], *, enable_thinking: bool) -> str:
@@ -307,16 +362,22 @@ class SelfDistillationDataCollator:
             kwargs.pop("enable_thinking", None)
             return tokenizer.apply_chat_template(messages, **kwargs)
 
-    def prompt_lengths(self, feature: dict[str, Any]) -> tuple[int, int]:
-        student, teacher = self.format_prompts(feature)
-        return (
+    def prompt_lengths(self, feature: dict[str, Any]) -> tuple[int, ...]:
+        prompts = self.format_prompts(feature)
+        student, teacher = prompts[0], prompts[1]
+        lengths = (
             len(self.tokenizer(student, add_special_tokens=False)["input_ids"]),
             len(self.teacher_tokenizer(teacher, add_special_tokens=False)["input_ids"]),
         )
+        if self.purified_pmi:
+            ref = prompts[2]
+            lengths = lengths + (
+                len(self.teacher_tokenizer(ref, add_special_tokens=False)["input_ids"]),
+            )
+        return lengths
 
     def fits(self, feature: dict[str, Any]) -> bool:
-        student_len, teacher_len = self.prompt_lengths(feature)
-        return student_len <= self.max_prompt_length and teacher_len <= self.max_prompt_length
+        return all(length <= self.max_prompt_length for length in self.prompt_lengths(feature))
 
     def _encode(
         self,
@@ -349,7 +410,7 @@ class SelfDistillationDataCollator:
         teacher_ids, teacher_mask, teacher_lengths = self._encode(
             [x[1] for x in pairs], tokenizer=self.teacher_tokenizer
         )
-        return {
+        batch = {
             "student_prompts": student_ids,
             "student_prompt_attention_mask": student_mask,
             "student_prompt_length": student_ids.shape[1],
@@ -359,3 +420,16 @@ class SelfDistillationDataCollator:
             "teacher_prompt_length": teacher_ids.shape[1],
             "teacher_prompt_lengths_per_example": torch.tensor(teacher_lengths),
         }
+        if self.purified_pmi:
+            ref_ids, ref_mask, ref_lengths = self._encode(
+                [x[2] for x in pairs], tokenizer=self.teacher_tokenizer
+            )
+            batch.update(
+                {
+                    "ref_prompts": ref_ids,
+                    "ref_prompt_attention_mask": ref_mask,
+                    "ref_prompt_length": ref_ids.shape[1],
+                    "ref_prompt_lengths_per_example": torch.tensor(ref_lengths),
+                }
+            )
+        return batch

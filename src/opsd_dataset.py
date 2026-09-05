@@ -60,13 +60,23 @@ def is_opsd_ready(dataset: Dataset) -> bool:
     return "problem" in cols and "solution" in cols
 
 
-def load_training_dataset(path: str) -> Dataset:
+def load_training_dataset(path: str | list[str]) -> Dataset:
+    # Comma-joined / list paths first — never Path() a multi-file string (ENAMETOOLONG).
+    if isinstance(path, list):
+        files = [str(x).strip() for x in path if str(x).strip()]
+        if not files:
+            raise ValueError("empty data_files list")
+        return load_dataset("parquet", data_files=files, split="train")
+    if "," in path:
+        files = [x.strip() for x in path.split(",") if x.strip()]
+        return load_dataset("parquet", data_files=files, split="train")
+    if any(ch in path for ch in "*?[]"):
+        return load_dataset("parquet", data_files=path, split="train")
     source = Path(path)
     if source.is_dir() and (source / "dataset_info.json").exists():
         dataset = load_from_disk(str(source))
         return dataset["train"] if hasattr(dataset, "keys") and "train" in dataset else dataset
-    files = [x.strip() for x in path.split(",") if x.strip()]
-    return load_dataset("parquet", data_files=files, split="train")
+    return load_dataset("parquet", data_files=str(source.resolve()), split="train")
 
 
 def dataset_meta_path(path: str) -> Path:

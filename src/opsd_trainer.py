@@ -202,6 +202,9 @@ class OPSDTrainer(SFTTrainer):
         student_thinking: bool = False,
         teacher_thinking: bool = True,
         teacher_model_path: str | None = None,
+        purified_pmi: bool = False,
+        pmi_beta: float = 1.0,
+        pmi_clip: float = 10.0,
     ):
         self.model_name_or_path = model if isinstance(model, str) else model.config._name_or_path
         # Cross-model distillation: frozen teacher from a different checkpoint than the student.
@@ -295,6 +298,13 @@ class OPSDTrainer(SFTTrainer):
         self.reason_first = reason_first
         self.top_k_loss = top_k_loss
         self.jsd_token_clip = jsd_token_clip
+        self.purified_pmi = bool(purified_pmi)
+        if float(pmi_beta) <= 0:
+            raise ValueError(f"pmi_beta must be > 0, got {pmi_beta}")
+        if float(pmi_clip) <= 0:
+            raise ValueError(f"pmi_clip must be > 0, got {pmi_clip}")
+        self.pmi_beta = float(pmi_beta)
+        self.pmi_clip = float(pmi_clip)
         if high_entropy_ratio is not None and high_entropy_ratio >= 1.0:
             high_entropy_ratio = None
         if high_entropy_ratio is not None and high_entropy_ratio <= 0:
@@ -757,6 +767,32 @@ class OPSDTrainer(SFTTrainer):
         else:
             return jsd
 
+    @staticmethod
+    def build_purified_pmi_target_logits(
+        teacher_logits: torch.Tensor,
+        ref_logits: torch.Tensor,
+        base_logits: torch.Tensor,
+        *,
+        temperature: float = 1.0,
+        pmi_beta: float = 1.0,
+        pmi_clip: float = 10.0,
+    ) -> torch.Tensor:
+        """Stabilized PMI target logits (paper Sec. 3.2, Eqs. 13–16).
+
+        Returns pre-softmax logits such that
+        softmax(out) = P_target ∝ π_0 * exp(Δ̃_it / β), with centered + tanh-clipped Δ_it.
+        """
+        temp = float(temperature) if temperature and temperature > 0 else 1.0
+        teacher_logp = F.log_softmax(teacher_logits / temp, dim=-1)
+        ref_logp = F.log_softmax(ref_logits / temp, dim=-1)
+        base_logp = F.log_softmax(base_logits / temp, dim=-1)
+        delta = teacher_logp - ref_logp
+        delta = delta - delta.mean(dim=-1, keepdim=True)
+        clip = float(pmi_clip)
+        delta = clip * torch.tanh(delta / clip)
+        # log P_target = log π_0 + Δ̃/β - log Z  ≡  log_softmax(log π_0 + Δ̃/β)
+        return base_logp + (delta / float(pmi_beta))
+
     def _update_ema(self):
         """Update EMA parameters after an optimizer step.
 
@@ -1075,7 +1111,7 @@ class OPSDTrainer(SFTTrainer):
         del outputs_student
         empty_cache()
 
-        # === TEACHER FORWARD - Extract log-probs immediately ===
+        # === TEACHER / PMI TARGET FORWARD - Extract log-probs immediately ===
         # Choose teacher context based on mode:
         #   use_ema_teacher       → swap in EMA weights temporarily
         #   teacher_model set     → frozen/periodic copy (fixed or hard-updated)
@@ -1094,10 +1130,40 @@ class OPSDTrainer(SFTTrainer):
                 input_ids=inputs["teacher_input_ids"],
                 attention_mask=inputs["teacher_attention_mask"],
             )
-
             teacher_logits = outputs_teacher.logits[:, teacher_prompt_len - 1 : -1, :]
+            del outputs_teacher
+            empty_cache()
 
-            if self.use_thinking_machines_loss:
+            if self.purified_pmi:
+                # Extra frozen forwards for reference probe π_ref and clean base π_0.
+                ref_prompt_len = int(inputs["ref_prompt_length"])
+                outputs_ref = teacher_forward_model(
+                    input_ids=inputs["ref_input_ids"],
+                    attention_mask=inputs["ref_attention_mask"],
+                )
+                ref_logits = outputs_ref.logits[:, ref_prompt_len - 1 : -1, :]
+                del outputs_ref
+                empty_cache()
+
+                outputs_base = teacher_forward_model(
+                    input_ids=inputs["student_input_ids"],
+                    attention_mask=inputs["student_attention_mask"],
+                )
+                base_logits = outputs_base.logits[:, student_prompt_len - 1 : -1, :]
+                del outputs_base
+                empty_cache()
+
+                teacher_logits_for_loss = self.build_purified_pmi_target_logits(
+                    teacher_logits,
+                    ref_logits,
+                    base_logits,
+                    temperature=self.teacher_temperature,
+                    pmi_beta=self.pmi_beta,
+                    pmi_clip=self.pmi_clip,
+                )
+                del teacher_logits, ref_logits, base_logits
+                empty_cache()
+            elif self.use_thinking_machines_loss:
                 teacher_log_probs = F.log_softmax(teacher_logits / self.teacher_temperature, dim=-1)
                 teacher_log_probs_sampled = torch.gather(
                     teacher_log_probs, dim=-1, index=sampled_token_ids.unsqueeze(-1)
@@ -1106,9 +1172,6 @@ class OPSDTrainer(SFTTrainer):
             else:
                 teacher_logits_for_loss = teacher_logits
                 del teacher_logits
-
-            del outputs_teacher
-            empty_cache()
 
         # === COMPUTE LOSS with only small tensors ===
         if self.use_thinking_machines_loss:
@@ -1151,21 +1214,26 @@ class OPSDTrainer(SFTTrainer):
                 sampled_token_ids,
                 valid_mask,
             )
-            # Temperature is applied inside generalized_jsd_loss
+            # Temperature is applied inside generalized_jsd_loss.
+            # Purified PMI already baked teacher_temperature into the target logits,
+            # so pass teacher_temperature=1.0 to avoid double-scaling the target.
             loss = self.generalized_jsd_loss(
                 student_logits=student_logits_for_loss,
                 teacher_logits=teacher_logits_for_loss,
                 labels=shifted_labels,
                 beta=self.beta,
                 student_temperature=self.student_temperature,
-                teacher_temperature=self.teacher_temperature,
+                teacher_temperature=1.0 if self.purified_pmi else self.teacher_temperature,
                 top_k=self.top_k_loss,
-                token_clip=self.jsd_token_clip,
+                token_clip=None if self.purified_pmi else self.jsd_token_clip,
                 loss_mask=loss_mask,
             )
             del student_logits_for_loss, teacher_logits_for_loss
 
         self._metrics["train"]["opsd/loss"].append(float(loss.detach()))
+        if self.purified_pmi:
+            self._metrics["train"]["opsd/pmi_beta"].append(self.pmi_beta)
+            self._metrics["train"]["opsd/pmi_clip"].append(self.pmi_clip)
 
         empty_cache()
 
@@ -2120,6 +2188,8 @@ class OPSDTrainer(SFTTrainer):
             merged["student_prompt_length"] = int(merged["student_prompts"].shape[-1])
         if "teacher_prompts" in merged:
             merged["teacher_prompt_length"] = int(merged["teacher_prompts"].shape[-1])
+        if "ref_prompts" in merged:
+            merged["ref_prompt_length"] = int(merged["ref_prompts"].shape[-1])
         return merged
 
     def _attach_rollouts_to_inputs(self, inputs: dict[str, Any]) -> dict[str, Any]:
@@ -2192,6 +2262,28 @@ class OPSDTrainer(SFTTrainer):
         inputs["labels"] = labels
         inputs["student_prompt_length"] = packed_student_prompt_len
         inputs["teacher_prompt_length"] = packed_teacher_prompt_len
+        if self.purified_pmi or ("ref_prompts" in inputs):
+            ref_prompt_len = int(inputs["ref_prompt_length"])
+            ref_lengths = inputs.get("ref_prompt_lengths_per_example")
+            if ref_lengths is None:
+                ref_lengths = torch.full(
+                    (generation_ids.shape[0],),
+                    ref_prompt_len,
+                    device=generation_ids.device,
+                    dtype=torch.long,
+                )
+            ref_full_ids, ref_attention_mask, _, packed_ref_prompt_len = (
+                left_align_prompt_completion(
+                    inputs["ref_prompts"].to(generation_ids.device),
+                    ref_lengths,
+                    generation_ids,
+                    response_attention_mask,
+                    pad_id,
+                )
+            )
+            inputs["ref_input_ids"] = ref_full_ids
+            inputs["ref_attention_mask"] = ref_attention_mask
+            inputs["ref_prompt_length"] = packed_ref_prompt_len
         inputs["prompt_texts"] = prompt_texts
         inputs["completion_texts"] = completion_texts
         inputs["_opsd_rollout_ready"] = True
@@ -2230,6 +2322,8 @@ class OPSDTrainer(SFTTrainer):
                     batch["student_prompt_length"] = int(batch["student_prompts"].shape[-1])
                 if "teacher_prompts" in batch:
                     batch["teacher_prompt_length"] = int(batch["teacher_prompts"].shape[-1])
+                if "ref_prompts" in batch:
+                    batch["ref_prompt_length"] = int(batch["ref_prompts"].shape[-1])
         return prepared, num_items_in_batch
 
     @profiling_decorator
@@ -2254,6 +2348,8 @@ class OPSDTrainer(SFTTrainer):
         rollout_ready = bool(inputs.pop("_opsd_rollout_ready", False)) and (
             "student_input_ids" in inputs and "teacher_input_ids" in inputs and "labels" in inputs
         )
+        if self.purified_pmi:
+            rollout_ready = rollout_ready and ("ref_input_ids" in inputs)
 
         # === REASONING PHASE (if enabled) ===
         if self.reason_first:
@@ -2347,6 +2443,13 @@ class OPSDTrainer(SFTTrainer):
                 [inputs["teacher_prompt_attention_mask"], response_attention_mask],
                 dim=1,
             )
+            if self.purified_pmi:
+                ref_full_ids = torch.cat([inputs["ref_prompts"], generation_ids], dim=1)
+                inputs["ref_input_ids"] = ref_full_ids
+                inputs["ref_attention_mask"] = torch.cat(
+                    [inputs["ref_prompt_attention_mask"], response_attention_mask],
+                    dim=1,
+                )
             labels = torch.full_like(generated_ids, -100)
             response_mask = generated_attention_mask[:, student_prompt_len:].bool()
             labels[:, student_prompt_len:][response_mask] = generation_ids[response_mask]

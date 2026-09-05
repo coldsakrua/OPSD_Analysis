@@ -334,6 +334,27 @@ def parse_args() -> argparse.Namespace:
         default="q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj",
         help="Comma-separated LoRA target modules (official Qwen3 list).",
     )
+    parser.add_argument(
+        "--purified-pmi",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Enable Purified OPSD (arXiv:2607.02234): distill from PMI target "
+            "P_target ∝ π_0 * exp((log π_T - log π_ref)/β) with centered + tanh soft-clip."
+        ),
+    )
+    parser.add_argument(
+        "--pmi-beta",
+        type=float,
+        default=1.0,
+        help="PMI correction strength β (paper default 1.0). Only used with --purified-pmi.",
+    )
+    parser.add_argument(
+        "--pmi-clip",
+        type=float,
+        default=10.0,
+        help="Tanh soft-clip threshold c for Δ_it (paper default 10). Only used with --purified-pmi.",
+    )
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
     if not args.dataset_path:
@@ -349,6 +370,30 @@ def parse_args() -> argparse.Namespace:
         args.jsd_token_clip = None
     if not 0.0 <= args.beta <= 1.0:
         raise ValueError(f"--beta must be in [0, 1], got {args.beta}")
+    if args.purified_pmi:
+        if args.pmi_beta <= 0:
+            parser.error("--pmi-beta must be > 0")
+        if args.pmi_clip <= 0:
+            parser.error("--pmi-clip must be > 0")
+        if args.use_thinking_machines_loss:
+            parser.error("--purified-pmi is incompatible with --use-thinking-machines-loss")
+        if args.teacher_privilege_field == "none":
+            parser.error("--purified-pmi requires --teacher-privilege-field answer|solution")
+        if args.privilege_mode in {
+            "same",
+            "encourage",
+            "irrelevant",
+            "same_trans",
+            "encourage_trans",
+            "irrelevant_trans",
+            "sample_irrelevant_trans",
+            "irrelevant_other_sol",
+            "instruction",
+            "pi",
+        }:
+            parser.error(
+                "--purified-pmi requires privilege-mode in {opsd,correct,correct_simple}"
+            )
     if args.high_entropy_ratio is not None and args.high_entropy_ratio >= 1.0:
         args.high_entropy_ratio = None
     if args.high_entropy_ratio is not None and args.high_entropy_ratio <= 0:
@@ -448,6 +493,7 @@ def main() -> None:
         teacher_privilege_field=args.teacher_privilege_field,
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,
+        purified_pmi=bool(args.purified_pmi),
     )
     train_dataset = normalize_dataset(load_training_dataset(args.dataset_path))
     before = len(train_dataset)
@@ -568,6 +614,8 @@ def main() -> None:
         f"use_peft={args.use_peft} fixed_teacher={args.fixed_teacher} "
         f"lora_r={args.lora_r if args.use_peft else None} "
         f"lora_alpha={args.lora_alpha if args.use_peft else None} "
+        f"purified_pmi={args.purified_pmi} pmi_beta={args.pmi_beta if args.purified_pmi else None} "
+        f"pmi_clip={args.pmi_clip if args.purified_pmi else None} "
         f"lr={args.learning_rate} beta={args.beta} jsd_token_clip={args.jsd_token_clip} "
         f"high_entropy_ratio={args.high_entropy_ratio} "
         f"low_entropy_ratio={args.low_entropy_ratio} "
@@ -605,6 +653,9 @@ def main() -> None:
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,
         teacher_model_path=args.teacher_model_path,
+        purified_pmi=bool(args.purified_pmi),
+        pmi_beta=float(args.pmi_beta),
+        pmi_clip=float(args.pmi_clip),
         callbacks=[_CopyProcessorAssetsCallback(args.model_path)],
     )
     trainer.train()

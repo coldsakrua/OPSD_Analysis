@@ -50,4 +50,54 @@ INFO 09-04 19:43:58 [llm_engine.py:437] init engine (profile, create kv cache, w
 prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s][eval] wrote partial json: 8/30 metrics=aime26_qwen3_4b_base_think.metrics.json results=aime26_qwen3_4b_base_think.results.json
 prompt_batches:  25%|██▌       | 1/4 [11:40<35:01, 700.64s/it]WARNING 09-04 20:04:30 [scheduler.py:1768] Sequence group 14_parallel_sample_7 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=1
 [eval] wrote partial json: 16/30 metrics=aime26_qwen3_4b_base_think.metrics.json results=aime26_qwen3_4b_base_think.results.json
-prompt_batches:  50%|█████     | 2/4 [52:16<57:22, 1721.35s/it]
+prompt_batches:  50%|█████     | 2/4 [52:16<57:22, 1721.35s/it][eval] wrote partial json: 24/30 metrics=aime26_qwen3_4b_base_think.metrics.json results=aime26_qwen3_4b_base_think.results.json
+prompt_batches:  75%|███████▌  | 3/4 [1:35:58<35:32, 2132.58s/it][eval] wrote partial json: 30/30 metrics=aime26_qwen3_4b_base_think.metrics.json results=aime26_qwen3_4b_base_think.results.json
+prompt_batches: 100%|██████████| 4/4 [2:10:33<00:00, 2109.78s/it]prompt_batches: 100%|██████████| 4/4 [2:10:33<00:00, 1958.31s/it]
+[eval] wrote partial json: 30/30 metrics=aime26_qwen3_4b_base_think.metrics.json results=aime26_qwen3_4b_base_think.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/grpo_think_4b_sft15000_8gpu_3451547_step100/aime26_qwen3_4b_base_think.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/grpo_think_4b_sft15000_8gpu_3451547_step100/aime26_qwen3_4b_base_think.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 30.00% (9/30)
+  Pass@4: 50.00% (15/30)
+  Pass@8: 70.00% (21/30)
+  Avg1(one-shot hit rate): 30.00%
+  Avg16(overall correctness): 35.83%
+  Avg output tokens: 13859.7
+[aime26] n=30
+  Pass@1: 30.00% (9/30)
+  Pass@4: 50.00% (15/30)
+  Pass@8: 70.00% (21/30)
+  Avg1(one-shot hit rate): 30.00%
+  Avg16(overall correctness): 35.83%
+  Avg output tokens: 13859.7
+[BY_CATEGORY]
+[__uncategorized__] n=30
+  Pass@1: 30.00% (9/30)
+  Pass@4: 50.00% (15/30)
+  Pass@8: 70.00% (21/30)
+  Avg1(one-shot hit rate): 30.00%
+  Avg16(overall correctness): 35.83%
+  Avg output tokens: 13859.7
+Avg correct / sample: 35.83%
+Majority vote: 43.33%
+Boxed format rate: 93.33%
+Avg output tokens: 13859.7
+[TOKEN_BUDGET]
+[aime26] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=6.67% (2/30)  Avg16=3.75%
+  @4k: Pass@8=36.67% (11/30)  Avg16=13.75%
+  @8k: Pass@8=53.33% (16/30)  Avg16=29.58%
+  @16k: Pass@8=66.67% (20/30)  Avg16=34.58%
+  @32k: Pass@8=70.00% (21/30)  Avg16=35.83%
+  @38k: Pass@8=70.00% (21/30)  Avg16=35.83%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime26] n=30  P@16=0.00%  Avg16=35.83%  L=13859.7  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime26] n=30  P@16=0.00%  Avg16=35.83%  L=13859.7  pass/log2(16L)=0.0000  avg/log2(16L)=2.0178
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/grpo_think_4b_sft15000_8gpu_3451547_step100/aime26_qwen3_4b_base_think.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/grpo_think_4b_sft15000_8gpu_3451547_step100/aime26_qwen3_4b_base_think.results.json
+============================================================
+[rank0]:[W904 21:55:08.975513575 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
