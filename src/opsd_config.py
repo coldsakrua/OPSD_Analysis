@@ -57,6 +57,16 @@ class OPSDConfig(SFTConfig):
     wandb_run_group: str | None = None
     wandb_log_unique_prompts: bool = True
 
+    # β-OPSD mix-target + optional return-to-go (arXiv:2607.28582).
+    # teacher_weight w corresponds to paper 1/β; JSD --beta is unrelated.
+    use_mixed_teacher_target: bool = False
+    mixed_teacher_target_teacher_weight: float = 0.5
+    mixed_teacher_target_teacher_weight_final: float = 0.5
+    mixed_teacher_target_teacher_weight_linear_decay: bool = False
+    mixed_teacher_target_reference_model: str = "current_student"
+    tinker_use_reward_to_go: bool = False
+    tinker_reward_to_go_discount: float = 1.0
+
     def __post_init__(self) -> None:
         if not 0.0 <= self.beta <= 1.0:
             raise ValueError("beta must be in [0, 1]")
@@ -66,4 +76,18 @@ class OPSDConfig(SFTConfig):
             self.steps_per_generation = self.gradient_accumulation_steps
         if self.rollout_backend not in {"vllm", "sglang"}:
             raise ValueError(f"rollout_backend must be vllm|sglang, got {self.rollout_backend}")
+        if self.mixed_teacher_target_reference_model not in {
+            "frozen_reference",
+            "current_student",
+        }:
+            raise ValueError(
+                "mixed_teacher_target_reference_model must be "
+                "'frozen_reference' or 'current_student'"
+            )
+        if not 0.0 <= self.mixed_teacher_target_teacher_weight <= 1.0:
+            raise ValueError("mixed_teacher_target_teacher_weight must be in [0, 1]")
+        if not 0.0 <= self.mixed_teacher_target_teacher_weight_final <= 1.0:
+            raise ValueError("mixed_teacher_target_teacher_weight_final must be in [0, 1]")
+        if not 0.0 <= self.tinker_reward_to_go_discount <= 1.0:
+            raise ValueError("tinker_reward_to_go_discount must be in [0, 1]")
         super().__post_init__()

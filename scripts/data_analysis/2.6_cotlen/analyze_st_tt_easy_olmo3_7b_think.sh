@@ -18,7 +18,13 @@ set -euo pipefail
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
-OUTPUT_DIR=${OUTPUT_DIR:-${BASE_DIR}/scripts/data_analysis/outputs/cotlen/olmo3_7b_think/st_tt_easy_${JOB_TAG}}
+# 2.2: POOL=long (default, +sol_long@12288) | POOL=short (legacy sol/answer/irrelevant)
+POOL=${POOL:-long}
+RUN_SUFFIX="st_tt_easy"
+if [[ "2.6" == "2.2" && "${POOL}" == "short" ]]; then
+  RUN_SUFFIX="st_tt_easy_short"
+fi
+OUTPUT_DIR=${OUTPUT_DIR:-${BASE_DIR}/scripts/data_analysis/outputs/cotlen/olmo3_7b_think/${RUN_SUFFIX}_${JOB_TAG}}
 
 TASK="cotlen"
 MODEL_KEY="olmo3_7b_think"

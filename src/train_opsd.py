@@ -170,7 +170,10 @@ def parse_args() -> argparse.Namespace:
             "Generalized JSD interpolation in [0, 1]. "
             "beta=0 → forward KL KL(teacher‖student); "
             "beta=1 → reverse KL KL(student‖teacher); "
-            "beta=0.5 → symmetric JSD. Default 0.0 (forward KL)."
+            "beta=0.5 → symmetric JSD. "
+            "With --top-k-loss, beta also selects the top-K source "
+            "(0=teacher TopK / forward; 1=student TopK / reverse). "
+            "Default 0.0 (forward KL)."
         ),
     )
     parser.add_argument(
@@ -178,8 +181,12 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=None,
         help=(
-            "If set, restrict JSD/KL to teacher top-K tokens (renormalized). "
-            "Default None = full-vocabulary forward KL. Mutually exclusive with "
+            "If set to K>1, restrict KL/JSD to a top-K support (both sides renormalized). "
+            "Paired with --beta: beta=0 → S_K=TopK(teacher,K), KL(q̃‖p̃); "
+            "beta=1 → S_K=TopK(student,K), KL(p̃‖q̃). "
+            "If K=1, on-policy token gap: beta=0 → log π_T(x)-log π_S(x); "
+            "beta=1 → log π_S(x)-log π_T(x) (no top-1 renorm). "
+            "Default None = full-vocabulary KL/JSD. Mutually exclusive with "
             "--use-thinking-machines-loss."
         ),
     )
@@ -192,7 +199,7 @@ def parse_args() -> argparse.Namespace:
             "response tokens per sequence contribute to loss (student entropy). "
             "Default None = all valid response tokens (existing behavior). "
             "Mutually exclusive with --low-entropy-ratio / --uniform-loss-tokens / "
-            "--last-loss-tokens."
+            "--first-loss-tokens / --last-loss-tokens / --pos-adv-teacher-topk."
         ),
     )
     parser.add_argument(
@@ -205,7 +212,7 @@ def parse_args() -> argparse.Namespace:
             "E.g. 0.2 = le20 (bottom-20% only), 0.8 = le80 (bottom-80%). "
             "Default None = all valid response tokens (existing behavior). "
             "Mutually exclusive with --high-entropy-ratio / --uniform-loss-tokens / "
-            "--last-loss-tokens."
+            "--first-loss-tokens / --last-loss-tokens / --pos-adv-teacher-topk."
         ),
     )
     parser.add_argument(
@@ -216,7 +223,18 @@ def parse_args() -> argparse.Namespace:
             "If set, uniformly sample this many valid response tokens per sequence "
             "for loss (e.g. 256 with max_completion=1024 → uni256). "
             "Sequences shorter than K keep all valid tokens. "
-            "Mutually exclusive with entropy / last-token selection."
+            "Mutually exclusive with entropy / first-token / last-token / pos-adv-teacher-topk selection."
+        ),
+    )
+    parser.add_argument(
+        "--first-loss-tokens",
+        type=int,
+        default=None,
+        help=(
+            "If set, only the first K valid response tokens per sequence contribute "
+            "to loss (e.g. 256 with max_completion=1024 → first256). "
+            "Sequences shorter than K keep all valid tokens. "
+            "Mutually exclusive with entropy / uniform / last-token / pos-adv-teacher-topk selection."
         ),
     )
     parser.add_argument(
@@ -227,7 +245,18 @@ def parse_args() -> argparse.Namespace:
             "If set, only the last K valid response tokens per sequence contribute "
             "to loss (e.g. 256 with max_completion=1024 → last256). "
             "Sequences shorter than K keep all valid tokens. "
-            "Mutually exclusive with entropy / uniform selection."
+            "Mutually exclusive with entropy / uniform / first-token / pos-adv-teacher-topk selection."
+        ),
+    )
+    parser.add_argument(
+        "--pos-adv-teacher-topk",
+        type=int,
+        default=None,
+        help=(
+            "If set (e.g. 4), only tokens with advantage>0 AND sampled token in teacher "
+            "top-K contribute to loss (high-confidence encourage tokens). "
+            "advantage = log π_T(x) - log π_S(x). "
+            "Mutually exclusive with entropy / uniform / first-token / last-token selection."
         ),
     )
     parser.add_argument(
@@ -237,8 +266,53 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Replace full-vocab JSD/KL with sampled-token logprob-diff PG loss: "
             "loss = -E[(log π_T - log π_S).detach() * log π_S]. "
-            "Mutually exclusive with --top-k-loss."
+            "Mutually exclusive with --top-k-loss. Required for β-OPSD mix-target."
         ),
+    )
+    parser.add_argument(
+        "--use-mixed-teacher-target",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "β-OPSD mix-target (arXiv:2607.28582): interpolate sampled-token target as "
+            "(1-w)·π_ref + w·π_T. Requires --use-thinking-machines-loss."
+        ),
+    )
+    parser.add_argument(
+        "--mixed-teacher-target-teacher-weight",
+        type=float,
+        default=0.5,
+        help="Initial mix-target teacher weight w (= paper 1/β). Paper start: 0.5.",
+    )
+    parser.add_argument(
+        "--mixed-teacher-target-teacher-weight-final",
+        type=float,
+        default=0.5,
+        help="Final mix-target teacher weight when linear decay is on. Paper end: 0.8.",
+    )
+    parser.add_argument(
+        "--mixed-teacher-target-teacher-weight-linear-decay",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Linearly schedule teacher weight from start to final over max_steps.",
+    )
+    parser.add_argument(
+        "--mixed-teacher-target-reference-model",
+        choices=("current_student", "frozen_reference"),
+        default="current_student",
+        help="Reference side of mix-target. Paper default: current_student (stop-grad).",
+    )
+    parser.add_argument(
+        "--tinker-use-reward-to-go",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Apply return-to-go over token advantages before the PG loss (paper γ=0.99).",
+    )
+    parser.add_argument(
+        "--tinker-reward-to-go-discount",
+        type=float,
+        default=1.0,
+        help="Discount γ for return-to-go. Paper default: 0.99.",
     )
     parser.add_argument(
         "--teacher-update-steps",
@@ -377,6 +451,8 @@ def parse_args() -> argparse.Namespace:
             parser.error("--pmi-clip must be > 0")
         if args.use_thinking_machines_loss:
             parser.error("--purified-pmi is incompatible with --use-thinking-machines-loss")
+        if args.use_mixed_teacher_target:
+            parser.error("--purified-pmi is incompatible with --use-mixed-teacher-target")
         if args.teacher_privilege_field == "none":
             parser.error("--purified-pmi requires --teacher-privilege-field answer|solution")
         if args.privilege_mode in {
@@ -394,6 +470,25 @@ def parse_args() -> argparse.Namespace:
             parser.error(
                 "--purified-pmi requires privilege-mode in {opsd,correct,correct_simple}"
             )
+    if args.use_mixed_teacher_target:
+        if not args.use_thinking_machines_loss:
+            parser.error("--use-mixed-teacher-target requires --use-thinking-machines-loss")
+        if not 0.0 <= args.mixed_teacher_target_teacher_weight <= 1.0:
+            parser.error("--mixed-teacher-target-teacher-weight must be in [0, 1]")
+        if not 0.0 <= args.mixed_teacher_target_teacher_weight_final <= 1.0:
+            parser.error("--mixed-teacher-target-teacher-weight-final must be in [0, 1]")
+        if (
+            args.mixed_teacher_target_reference_model == "frozen_reference"
+            and not args.use_peft
+        ):
+            parser.error(
+                "--mixed-teacher-target-reference-model frozen_reference requires --use-peft"
+            )
+    if args.tinker_use_reward_to_go:
+        if not args.use_thinking_machines_loss:
+            parser.error("--tinker-use-reward-to-go requires --use-thinking-machines-loss")
+        if not 0.0 <= args.tinker_reward_to_go_discount <= 1.0:
+            parser.error("--tinker-reward-to-go-discount must be in [0, 1]")
     if args.high_entropy_ratio is not None and args.high_entropy_ratio >= 1.0:
         args.high_entropy_ratio = None
     if args.high_entropy_ratio is not None and args.high_entropy_ratio <= 0:
@@ -404,21 +499,27 @@ def parse_args() -> argparse.Namespace:
         parser.error("--low-entropy-ratio must be in (0, 1) when set")
     if args.uniform_loss_tokens is not None and args.uniform_loss_tokens <= 0:
         parser.error("--uniform-loss-tokens must be a positive integer when set")
+    if args.first_loss_tokens is not None and args.first_loss_tokens <= 0:
+        parser.error("--first-loss-tokens must be a positive integer when set")
     if args.last_loss_tokens is not None and args.last_loss_tokens <= 0:
         parser.error("--last-loss-tokens must be a positive integer when set")
+    if args.pos_adv_teacher_topk is not None and args.pos_adv_teacher_topk <= 0:
+        parser.error("--pos-adv-teacher-topk must be a positive integer when set")
     token_select_count = sum(
         x is not None
         for x in (
             args.high_entropy_ratio,
             args.low_entropy_ratio,
             args.uniform_loss_tokens,
+            args.first_loss_tokens,
             args.last_loss_tokens,
+            args.pos_adv_teacher_topk,
         )
     )
     if token_select_count > 1:
         parser.error(
             "--high-entropy-ratio, --low-entropy-ratio, --uniform-loss-tokens, "
-            "and --last-loss-tokens are mutually exclusive"
+            "--first-loss-tokens, --last-loss-tokens, and --pos-adv-teacher-topk are mutually exclusive"
         )
     if args.top_k_loss is not None and args.top_k_loss <= 0:
         parser.error("--top-k-loss must be a positive integer when set")
@@ -620,8 +721,15 @@ def main() -> None:
         f"high_entropy_ratio={args.high_entropy_ratio} "
         f"low_entropy_ratio={args.low_entropy_ratio} "
         f"uniform_loss_tokens={args.uniform_loss_tokens} "
+        f"first_loss_tokens={args.first_loss_tokens} "
         f"last_loss_tokens={args.last_loss_tokens} "
+        f"pos_adv_teacher_topk={args.pos_adv_teacher_topk} "
         f"top_k_loss={args.top_k_loss} use_thinking_machines_loss={args.use_thinking_machines_loss} "
+        f"mixed_teacher_target={args.use_mixed_teacher_target} "
+        f"target_w={args.mixed_teacher_target_teacher_weight}"
+        f"{'→' + str(args.mixed_teacher_target_teacher_weight_final) if args.mixed_teacher_target_teacher_weight_linear_decay else ''} "
+        f"ref={args.mixed_teacher_target_reference_model} "
+        f"rtg={args.tinker_use_reward_to_go} γ={args.tinker_reward_to_go_discount} "
         f"teacher_update_steps={args.teacher_update_steps} "
         f"temp={args.temperature} "
         f"temp_s={args.student_temperature if args.student_temperature is not None else args.temperature} "
@@ -648,7 +756,9 @@ def main() -> None:
         high_entropy_ratio=args.high_entropy_ratio,
         low_entropy_ratio=args.low_entropy_ratio,
         uniform_loss_tokens=args.uniform_loss_tokens,
+        first_loss_tokens=args.first_loss_tokens,
         last_loss_tokens=args.last_loss_tokens,
+        pos_adv_teacher_topk=args.pos_adv_teacher_topk,
         teacher_update_steps=args.teacher_update_steps,
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,
@@ -656,6 +766,17 @@ def main() -> None:
         purified_pmi=bool(args.purified_pmi),
         pmi_beta=float(args.pmi_beta),
         pmi_clip=float(args.pmi_clip),
+        use_mixed_teacher_target=bool(args.use_mixed_teacher_target),
+        mixed_teacher_target_teacher_weight=float(args.mixed_teacher_target_teacher_weight),
+        mixed_teacher_target_teacher_weight_final=float(
+            args.mixed_teacher_target_teacher_weight_final
+        ),
+        mixed_teacher_target_teacher_weight_linear_decay=bool(
+            args.mixed_teacher_target_teacher_weight_linear_decay
+        ),
+        mixed_teacher_target_reference_model=str(args.mixed_teacher_target_reference_model),
+        tinker_use_reward_to_go=bool(args.tinker_use_reward_to_go),
+        tinker_reward_to_go_discount=float(args.tinker_reward_to_go_discount),
         callbacks=[_CopyProcessorAssetsCallback(args.model_path)],
     )
     trainer.train()

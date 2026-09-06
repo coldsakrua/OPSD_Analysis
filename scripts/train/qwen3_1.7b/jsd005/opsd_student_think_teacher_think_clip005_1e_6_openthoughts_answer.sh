@@ -24,6 +24,7 @@ TEACHER_THINKING=${TEACHER_THINKING:-1}
 
 LEARNING_RATE=${LEARNING_RATE:-1e-6}
 JSD_TOKEN_CLIP=${JSD_TOKEN_CLIP:-0.05}
+SEED=${SEED:-42}
 MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-1024}
 MAX_COMPLETION_LENGTH=${MAX_COMPLETION_LENGTH:-1024}
 PER_DEVICE_BATCH_SIZE=${PER_DEVICE_BATCH_SIZE:-8}
@@ -87,7 +88,7 @@ fi
 
 echo "[launch] run=${RUN_NAME_WITH_JOB} mode=${MODE} privilege_field=${TEACHER_PRIVILEGE_FIELD}"
 echo "[launch] student_thinking=${STUDENT_THINKING} teacher_thinking=${TEACHER_THINKING}"
-echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP}"
+echo "[launch] lr=${LEARNING_RATE} jsd_token_clip=${JSD_TOKEN_CLIP} seed=${SEED}"
 echo "[launch] micro=${PER_DEVICE_BATCH_SIZE} gas=${GRADIENT_ACCUMULATION_STEPS} gpus=${NUM_GPUS} → global_batch=${GLOBAL_BATCH}"
 echo "[launch] prompt=${MAX_PROMPT_LENGTH} completion=${MAX_COMPLETION_LENGTH}"
 echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS}"
@@ -115,4 +116,5 @@ accelerate launch \
   --jsd-token-clip "${JSD_TOKEN_CLIP}" \
   --vllm-gpu-memory-utilization "${VLLM_GPU_MEMORY_UTILIZATION}" \
   --deepspeed "${BASE_DIR}/configs/deepspeed_zero3.json" \
+  --seed "${SEED}" \
   "${THINK_ARGS[@]}"

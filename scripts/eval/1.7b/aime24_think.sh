@@ -10,6 +10,8 @@
 #SBATCH --time=24:00:00
 set -euo pipefail
 
+SEED=${SEED:-42}
+
 THINKING=1
 DATASET=aime24
 MODEL_TAG=1.7b
@@ -70,7 +72,7 @@ python "${BASE_DIR}/eval/eval_math_vllm_local.py" \
   --top-k 20 \
   --min-p 0.0 \
   --presence-penalty 0.0 \
-  --seed 42 \
+  --seed "${SEED}" \
   --tensor-parallel-size 1 \
   --gpu-memory-utilization 0.9 \
   --max-model-len 40960 \

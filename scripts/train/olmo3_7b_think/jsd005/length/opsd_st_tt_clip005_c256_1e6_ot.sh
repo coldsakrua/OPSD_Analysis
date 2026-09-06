@@ -20,7 +20,7 @@ export GRADIENT_ACCUMULATION_STEPS=4
 export TARGET_GLOBAL_BATCH=64
 export MAX_STEPS=100
 export SAVE_STEPS=25
-export RUN_NAME=st_tt_clip005_1e_6_ot_olmo7bt_c256
+export RUN_NAME=${RUN_NAME:-st_tt_clip005_1e_6_ot_olmo7bt_c256}
 export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-olmo3_7bt_st_tt_clip005_longgen_c256}
 export BASE_DIR="${BASE_DIR:-${SLURM_SUBMIT_DIR:-/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis}}"
 

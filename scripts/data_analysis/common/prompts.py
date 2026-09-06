@@ -15,7 +15,12 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from data_collator import SelfDistillationDataCollator  # noqa: E402
 
-from .model_registry import combo_think, privilege_for_prefix
+from .model_registry import (
+    LONG_TEACHER_MAX_PROMPT,
+    combo_think,
+    privilege_for_prefix,
+    teacher_prefix_max_prompt,
+)
 
 DISTRACTOR_COLUMNS = (
     "distractor_problems",
@@ -140,6 +145,46 @@ def load_prompt_samples(
     return out
 
 
+def _token_len(tokenizer: Any, text: str) -> int:
+    return len(tokenizer(text, add_special_tokens=False)["input_ids"])
+
+
+def _teacher_len(collator: Any, feature: dict[str, Any]) -> int:
+    _, teacher_prompt = collator.format_prompts(feature)[:2]
+    return _token_len(collator.teacher_tokenizer, teacher_prompt)
+
+
+def _truncate_solution_for_teacher(
+    collator: Any,
+    feature: dict[str, Any],
+    *,
+    max_prompt_length: int,
+) -> dict[str, Any] | None:
+    """Copy feature with solution truncated so teacher prompt fits ``max_prompt_length``.
+
+    Used for short ``sol`` when the binding pool allows long solutions (``sol_long``).
+    Returns None if even an empty solution cannot fit.
+    """
+    feat = dict(feature)
+    sol = str(feat.get("solution") or "")
+    if _teacher_len(collator, feat) <= max_prompt_length:
+        return feat
+    lo, hi = 0, len(sol)
+    best: str | None = None
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        feat["solution"] = sol[:mid]
+        if _teacher_len(collator, feat) <= max_prompt_length:
+            best = sol[:mid]
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    if best is None:
+        return None
+    feat["solution"] = best
+    return feat
+
+
 def load_multi_prefix_samples(
     dataset_paths: dict[str, str | Path],
     tokenizer: Any,
@@ -150,21 +195,39 @@ def load_multi_prefix_samples(
     max_prompt_length: int,
     seed: int,
 ) -> list[dict[str, Any]]:
-    """Sample prompts shared across teacher prefix variants (2.2)."""
+    """Sample prompts shared across teacher prefix variants (2.2).
+
+    Student generation stays under ``max_prompt_length`` (default 1024).
+    Each teacher prefix uses its own cap (``sol_long`` → 12288; others → max_prompt_length).
+    When both ``sol`` and ``sol_long`` are present, bind to the long solution pool and
+    truncate ``sol``'s solution so the short teacher prompt still fits.
+    """
+    prefix_max = {
+        name: teacher_prefix_max_prompt(name, default_max_prompt=max_prompt_length)
+        for name in dataset_paths
+    }
     collators = {
         name: make_collator(
             tokenizer,
             model_key=model_key,
             combo=combo,
-            max_prompt_length=max_prompt_length,
+            max_prompt_length=prefix_max[name],
             privilege_mode=privilege_for_prefix(name)[0],
             teacher_privilege_field=privilege_for_prefix(name)[1],
         )
         for name in dataset_paths
     }
 
-    # Binding dataset: use sol path rows; join distractors by problem text.
-    bind_path = dataset_paths["sol"]
+    # Prefer long sol pool when present so sol_long can exceed the short cap.
+    if "sol_long" in dataset_paths:
+        bind_path = dataset_paths["sol_long"]
+        student_col = collators["sol_long"]
+    elif "sol" in dataset_paths:
+        bind_path = dataset_paths["sol"]
+        student_col = collators["sol"]
+    else:
+        raise KeyError("teacher_prefix sampling needs sol or sol_long in dataset_paths")
+
     df = pd.read_parquet(bind_path, columns=["problem", "solution", "answer"])
     distractor_lookup: dict[str, dict[str, Any]] | None = None
     if "irrelevant_other_sol" in dataset_paths:
@@ -184,25 +247,52 @@ def load_multi_prefix_samples(
             continue
         if distractor_lookup is not None and not _merge_distractors(feature, distractor_lookup):
             continue
-        if not all(c.fits(feature) for c in collators.values()):
+
+        student_prompt, _ = student_col.format_prompts(feature)
+        student_len = _token_len(tokenizer, student_prompt)
+        if student_len > max_prompt_length:
             continue
 
-        student_prompt, _ = collators["sol"].format_prompts(feature)
+        teacher_prompts: dict[str, str] = {}
+        teacher_lens: dict[str, int] = {}
+        ok = True
+        for name, col in collators.items():
+            feat_for_prefix = feature
+            if (
+                name == "sol"
+                and "sol_long" in collators
+                and _teacher_len(col, feature) > prefix_max[name]
+            ):
+                truncated = _truncate_solution_for_teacher(
+                    col, feature, max_prompt_length=prefix_max[name]
+                )
+                if truncated is None:
+                    ok = False
+                    break
+                feat_for_prefix = truncated
+            _, tp = col.format_prompts(feat_for_prefix)
+            t_len = _token_len(col.teacher_tokenizer, tp)
+            if t_len > prefix_max[name]:
+                ok = False
+                break
+            teacher_prompts[name] = tp
+            teacher_lens[name] = t_len
+        if not ok:
+            continue
+
         rec: dict[str, Any] = {
             "row_id": int(idx),
             "problem": feature["problem"],
             "solution": feature["solution"],
             "answer": feature["answer"],
             "student_prompt": student_prompt,
-            "student_prompt_len": len(tokenizer(student_prompt, add_special_tokens=False)["input_ids"]),
+            "student_prompt_len": student_len,
             "combo": combo,
+            "long_teacher_max_prompt": LONG_TEACHER_MAX_PROMPT,
         }
-        for name, col in collators.items():
-            _, tp = col.format_prompts(feature)
-            rec[f"teacher_prompt_{name}"] = tp
-            rec[f"teacher_prompt_len_{name}"] = len(
-                tokenizer(tp, add_special_tokens=False)["input_ids"]
-            )
+        for name in collators:
+            rec[f"teacher_prompt_{name}"] = teacher_prompts[name]
+            rec[f"teacher_prompt_len_{name}"] = teacher_lens[name]
         out.append(rec)
         if len(out) >= num_prompts:
             break

@@ -12,7 +12,8 @@ MODEL_ROOT = Path("/gpfs/share/home/2501210611/labShare/2501210611/model")
 
 COMBOS = ("st_tt", "snt_tnt", "st_tnt", "snt_tt")
 ENTROPY_BUCKETS = ("he20", "le20", "he80", "le80")
-TEACHER_PREFIXES = ("sol", "answer", "irrelevant_other_sol")
+# 2.2: short solution / answer / distractors / long solution (teacher cap 12*1024, cf. openmath train).
+TEACHER_PREFIXES = ("sol", "answer", "irrelevant_other_sol", "sol_long")
 LENGTH_WINDOWS = (
     (0, 128),
     (128, 256),
@@ -29,6 +30,8 @@ DEFAULT_MAX_COMPLETION = 1024
 LENGTH_WINDOWS_MAX_COMPLETION = 6144
 # Match OT cotlen-easy/hard training (scripts/train/*/jsd005/*/…_cotlen_{easy,hard}.sh).
 COTLEN_MAX_PROMPT = 2048
+# Match openmath OPSD train (…_openmath.sh): teacher may embed full reference solution.
+LONG_TEACHER_MAX_PROMPT = 12 * 1024  # 12288
 COTLEN_BANDS = ("easy", "hard")
 
 # Match project eval max_new_tokens (scripts/eval/{1.7b,4b,4b_instruct,olmo*}).
@@ -177,6 +180,11 @@ SECTION_MODEL_COMBOS: dict[str, dict[str, tuple[str, ...]]] = {
         "olmo3_7b_think": ("st_tt",),
         "qwen3_4b": ("st_tt", "snt_tnt"),
         "qwen3_4b_instruct": ("snt_tnt",),
+        "qwen3_4b_thinking": ("st_tt",),
+        "qwen3_06b": ("st_tt",),
+        "deepseek_r1_1.5b": ("st_tt",),
+        "mimo_7b_rl": ("st_tt",),
+        "falcon_h1r_7b": ("st_tt",),
     },
     "2.3": {
         "qwen3_1.7b": ("st_tt", "snt_tnt"),
@@ -248,12 +256,27 @@ def _dataset_tag_part(model: ModelConfig, combo: str) -> str:
     return COMBO_DATASET_TAG[combo]
 
 
-def dataset_path(model_key: str, combo: str, base_dir: Path | None = None) -> Path:
+def dataset_path(
+    model_key: str,
+    combo: str,
+    base_dir: Path | None = None,
+    *,
+    max_prompt: int = DEFAULT_MAX_PROMPT,
+) -> Path:
     model = get_model_config(model_key)
     tag_part = _dataset_tag_part(model, combo)
     root = base_dir or DATA_ROOT
-    name = f"openthoughts.opsd.solution.{tag_part}.maxprompt1024.parquet"
+    name = f"openthoughts.opsd.solution.{tag_part}.maxprompt{int(max_prompt)}.parquet"
     return Path(root) / name
+
+
+def teacher_prefix_max_prompt(prefix: str, *, default_max_prompt: int = DEFAULT_MAX_PROMPT) -> int:
+    """Per-prefix teacher prompt cap for section 2.2."""
+    if prefix == "sol_long":
+        return LONG_TEACHER_MAX_PROMPT
+    if prefix in TEACHER_PREFIXES:
+        return int(default_max_prompt)
+    raise ValueError(f"unknown teacher prefix {prefix!r}")
 
 
 def cotlen_dataset_path(
@@ -289,23 +312,33 @@ def teacher_prefix_dataset(
     combo: str,
     prefix: str,
     base_dir: Path | None = None,
+    *,
+    default_max_prompt: int = DEFAULT_MAX_PROMPT,
 ) -> Path:
     """Dataset parquet for teacher-prefix variants (2.2)."""
     model = get_model_config(model_key)
     tag_part = _dataset_tag_part(model, combo)
     root = base_dir or DATA_ROOT
+    short = int(default_max_prompt)
     if prefix == "sol":
-        return dataset_path(model_key, combo, base_dir=root)
+        return dataset_path(model_key, combo, base_dir=root, max_prompt=short)
+    if prefix == "sol_long":
+        return dataset_path(
+            model_key, combo, base_dir=root, max_prompt=LONG_TEACHER_MAX_PROMPT
+        )
     if prefix == "answer":
-        return Path(root) / f"openthoughts.correct.answer.{tag_part}.maxprompt1024.parquet"
+        return Path(root) / f"openthoughts.correct.answer.{tag_part}.maxprompt{short}.parquet"
     if prefix == "irrelevant_other_sol":
-        return Path(root) / f"openthoughts.irrelevant_other_sol.{tag_part}.maxprompt1024.parquet"
+        return (
+            Path(root)
+            / f"openthoughts.irrelevant_other_sol.{tag_part}.maxprompt{short}.parquet"
+        )
     raise ValueError(f"unknown teacher prefix {prefix!r}")
 
 
 def privilege_for_prefix(prefix: str) -> tuple[str, str]:
     """Return (privilege_mode, teacher_privilege_field) for collator."""
-    if prefix == "sol":
+    if prefix in ("sol", "sol_long"):
         return "opsd", "solution"
     if prefix == "answer":
         return "correct", "answer"
@@ -368,12 +401,65 @@ MODEL_SIZE_TIER: dict[str, str] = {
 
 # HF score microbatch: short tasks (max_completion=1024) vs long (2.5 / cotlen-eval lengths).
 # Peak VRAM scales ~B * L * vocab during forward + metric temps on GPU.
+# Attention is ~B * S^2, so long teacher prompts need smaller B than short prefixes.
 _SCORE_BATCH_SHORT = {"small": 8, "medium": 4, "large": 2}
 _SCORE_BATCH_LONG = {"small": 2, "medium": 1, "large": 1}
 _SCORE_BATCH_EVAL_LONG = {"small": 1, "medium": 1, "large": 1}
 _GEN_BATCH_SHORT = {"small": 64, "medium": 64, "large": 32}
 _GEN_BATCH_LONG = {"small": 32, "medium": 16, "large": 8}
 _GEN_BATCH_EVAL_LONG = {"small": 8, "medium": 4, "large": 2}
+
+# Approx parameter count (B) for A800-80GB sol_long batch sizing.
+_MODEL_PARAMS_B: dict[str, float] = {
+    "qwen3_06b": 0.6,
+    "deepseek_r1_1.5b": 1.5,
+    "qwen3_1.7b": 1.7,
+    "qwen3_4b": 4.0,
+    "qwen3_4b_instruct": 4.0,
+    "qwen3_4b_thinking": 4.0,
+    "qwen3.5_4b": 4.0,
+    "qwen3_8b": 8.0,
+    "olmo3_7b_instruct": 7.0,
+    "olmo3_7b_think": 7.0,
+    "falcon_h1r_7b": 7.0,
+    "mimo_7b_rl": 7.0,
+}
+
+
+def model_params_b(model_key: str) -> float:
+    if model_key not in _MODEL_PARAMS_B:
+        raise KeyError(f"unknown param count for {model_key!r}; extend _MODEL_PARAMS_B")
+    return _MODEL_PARAMS_B[model_key]
+
+
+def score_batch_for_sol_long(model_key: str) -> int:
+    """HF score microbatch for sol_long (teacher≤12288 + completion≤1024) on A800 80GB.
+
+    Peak is dominated by one full forward on S≈13k (attention ~S²) plus transient [B,S,V]
+    logits. Calibrated from the short-prefix table (S≈2k → 8/4/2) with a small-model
+    boost because weight memory is far below 80GB:
+
+      params_B   short@2k   linear*(2k/13k)   chosen sol_long
+      0.6B         8           ~1.2              8
+      1.5–1.7B     8           ~1.2              4
+      4B           4           ~0.6              2
+      7–8B         2           ~0.3              1
+    """
+    params = model_params_b(model_key)
+    if params <= 0.8:
+        return 8
+    if params <= 2.0:
+        return 4
+    if params <= 5.0:
+        return 2
+    return 1
+
+
+def score_batch_for_teacher_prefix(model_key: str, prefix: str) -> int:
+    """Per-prefix score batch for section 2.2."""
+    if prefix == "sol_long":
+        return score_batch_for_sol_long(model_key)
+    return task_default_score_batch("teacher_prefix", model_key)
 
 
 def model_size_tier(model_key: str) -> str:
@@ -390,6 +476,9 @@ def task_default_score_batch(task: str, model_key: str) -> int:
         table = _SCORE_BATCH_EVAL_LONG
     elif task == "length_windows":
         table = _SCORE_BATCH_LONG
+    elif task == "teacher_prefix":
+        # Short prefixes only; sol_long uses score_batch_for_sol_long().
+        table = _SCORE_BATCH_SHORT
     else:
         table = _SCORE_BATCH_SHORT
     return table[tier]

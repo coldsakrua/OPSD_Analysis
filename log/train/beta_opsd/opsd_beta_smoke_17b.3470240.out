@@ -1,0 +1,115 @@
+[launch] β-OPSD (LoRA/Qwen) run=beta_opsd_smoke_1.7b_3470240
+[launch] mix-target w=0.5→0.8 linear; RTG γ=0.99; ref=current_student
+[launch] LoRA r=64 alpha=128 fixed_teacher=1
+[launch] lr=5e-6 jsd_token_clip=0.05
+[launch] micro=4 gas=4 gpus=2 → global_batch=32
+[launch] max_steps=2 save_steps=2 → total_samples=64
+[launch] model=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b dataset=data/openthoughts/preprocessed/openthoughts.opsd.solution.sthink_tthink.maxprompt1024.parquet output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b/beta_opsd_smoke_1.7b/3470240
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+W0905 14:48:34.279000 3492693 site-packages/torch/distributed/run.py:792] 
+W0905 14:48:34.279000 3492693 site-packages/torch/distributed/run.py:792] *****************************************
+W0905 14:48:34.279000 3492693 site-packages/torch/distributed/run.py:792] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0905 14:48:34.279000 3492693 site-packages/torch/distributed/run.py:792] *****************************************
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+⚙️  Running in WANDB offline mode
+⚙️  Running in WANDB offline mode
+[dataset] already has problem/solution; skip field normalization
+[dataset] prompt length already filtered offline; keep 21981 examples
+[dataset] already has problem/solution; skip field normalization
+[dataset] prompt length already filtered offline; keep 21981 examples
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b student_thinking=True teacher_thinking=True rollout_backend=vllm use_peft=True fixed_teacher=True lora_r=64 lora_alpha=128 purified_pmi=False pmi_beta=None pmi_clip=None lr=5e-06 beta=0.0 jsd_token_clip=0.05 high_entropy_ratio=None low_entropy_ratio=None uniform_loss_tokens=None last_loss_tokens=None top_k_loss=None use_thinking_machines_loss=True mixed_teacher_target=True target_w=0.5→0.8 ref=current_student rtg=True γ=0.99 teacher_update_steps=None temp=1.1 temp_s=1.1 temp_t=1.1 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=0.0 global_batch=32 (micro=4 gas=4 world=2) prompt=1024 response=1024
+`torch_dtype` is deprecated! Use `dtype` instead!
+[config] mode=opsd privilege_field=solution student=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b teacher=/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b student_thinking=True teacher_thinking=True rollout_backend=vllm use_peft=True fixed_teacher=True lora_r=64 lora_alpha=128 purified_pmi=False pmi_beta=None pmi_clip=None lr=5e-06 beta=0.0 jsd_token_clip=0.05 high_entropy_ratio=None low_entropy_ratio=None uniform_loss_tokens=None last_loss_tokens=None top_k_loss=None use_thinking_machines_loss=True mixed_teacher_target=True target_w=0.5→0.8 ref=current_student rtg=True γ=0.99 teacher_update_steps=None temp=1.1 temp_s=1.1 temp_t=1.1 top_p=0.95 top_k=20 min_p=0.0 presence_penalty=0.0 global_batch=32 (micro=4 gas=4 world=2) prompt=1024 response=1024
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:06<00:06,  6.76s/it]Loading checkpoint shards:  50%|█████     | 1/2 [00:06<00:06,  6.70s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:06<00:00,  2.85s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:06<00:00,  2.82s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:06<00:00,  3.44s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:06<00:00,  3.40s/it]
+You passed `model_init_kwargs` to the `SFTConfig`, but your model is already instantiated. The `model_init_kwargs` will be ignored.
+Detected kernel version 4.18.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher uses the initial base model with student LoRA adapters disabled
+================================================================================
+
+
+================================================================================
+FIXED TEACHER MODE ENABLED
+Teacher uses the initial base model with student LoRA adapters disabled
+================================================================================
+
+Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:06<00:00,  3.17s/it]
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:06<00:00,  3.17s/it]
+
+Capturing CUDA graph shapes:   0%|          | 0/5 [00:00<?, ?it/s]Capturing CUDA graph shapes:   0%|          | 0/5 [00:00<?, ?it/s]Capturing CUDA graph shapes:  20%|██        | 1/5 [00:00<00:02,  1.90it/s]Capturing CUDA graph shapes:  20%|██        | 1/5 [00:00<00:02,  1.88it/s]Capturing CUDA graph shapes:  40%|████      | 2/5 [00:01<00:01,  2.01it/s]Capturing CUDA graph shapes:  40%|████      | 2/5 [00:01<00:01,  1.98it/s]Capturing CUDA graph shapes:  60%|██████    | 3/5 [00:01<00:00,  2.06it/s]Capturing CUDA graph shapes:  60%|██████    | 3/5 [00:01<00:00,  2.03it/s]Capturing CUDA graph shapes:  80%|████████  | 4/5 [00:01<00:00,  2.09it/s]Capturing CUDA graph shapes:  80%|████████  | 4/5 [00:01<00:00,  2.06it/s]Capturing CUDA graph shapes: 100%|██████████| 5/5 [00:02<00:00,  1.91it/s]Capturing CUDA graph shapes: 100%|██████████| 5/5 [00:02<00:00,  1.96it/s]
+Capturing CUDA graph shapes: 100%|██████████| 5/5 [00:02<00:00,  1.92it/s]Capturing CUDA graph shapes: 100%|██████████| 5/5 [00:02<00:00,  1.96it/s]
+[rank0]:[W905 14:49:46.360872652 ProcessGroupNCCL.cpp:4561] [PG ID 0 PG GUID 0 Rank 0]  using GPU 0 to perform barrier as devices used by this process are currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. Specify device_ids in barrier() to force use of a particular device, or call init_process_group() with a device_id.
+NCCL version 2.21.5+cuda12.4
+[rank1]:[W905 14:49:46.368859417 ProcessGroupNCCL.cpp:4561] [PG ID 0 PG GUID 0 Rank 1]  using GPU 1 to perform barrier as devices used by this process are currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. Specify device_ids in barrier() to force use of a particular device, or call init_process_group() with a device_id.
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None, 'pad_token_id': 151643}.
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None, 'pad_token_id': 151643}.
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/utils/cpp_extension.py:2059: UserWarning: TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'].
+  warnings.warn(
+wandb: Tracking run with wandb version 0.26.1
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/wandb/wandb/offline-run-20260905_144951-rckcuytp
+wandb: Detected [openai] in use.
+wandb: Use W&B Weave for improved LLM call tracing. Weave is installed but not imported. Add `import weave` to the top of your script.
+wandb: For more information, check out the docs at: https://weave-docs.wandb.ai
+  0%|          | 0/2 [00:00<?, ?it/s]vLLM generation done - elapsed time: 9.11s, prompts: 16, total tokens: 16384, avg length: 1024.0, speed: 1797.8 tok/s
+Could not estimate the number of tokens of the input, floating-point operations will not be computed
+Could not estimate the number of tokens of the input, floating-point operations will not be computed
+ 50%|█████     | 1/2 [00:13<00:13, 13.51s/it]                                             {'loss': -0.2806, 'grad_norm': 0.35235682129859924, 'learning_rate': 0.0, 'on_policy_loss': -0.2806, 'rollout/tokens_per_second': 1797.8036003384145, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 16384.0, 'opsd/target_teacher_weight': 0.5, 'opsd/rtg_discount': 0.99, 'opsd/loss': -0.221923828125, 'system/gpu_allocated_gib': 34.850632548332214, 'system/gpu_reserved_gib': 42.07666015625, 'system/gpu_peak_allocated_gib': 41.1824826002121, 'epoch': 0.0}
+ 50%|█████     | 1/2 [00:14<00:13, 13.51s/it]vLLM generation done - elapsed time: 9.17s, prompts: 16, total tokens: 16384, avg length: 1024.0, speed: 1786.3 tok/s
+100%|██████████| 2/2 [00:27<00:00, 13.81s/it]                                             {'loss': -0.9263, 'grad_norm': 1.069677710533142, 'learning_rate': 5e-06, 'on_policy_loss': -0.9263, 'rollout/tokens_per_second': 1786.25290482103, 'rollout/mean_response_length': 1024.0, 'rollout/generated_tokens': 16384.0, 'opsd/target_teacher_weight': 0.8, 'opsd/rtg_discount': 0.99, 'opsd/loss': -1.0400390625, 'system/gpu_allocated_gib': 34.850666999816895, 'system/gpu_reserved_gib': 42.22509765625, 'system/gpu_peak_allocated_gib': 41.23985815048218, 'epoch': 0.0}
+100%|██████████| 2/2 [00:28<00:00, 13.81s/it]wandb: WARNING URL not available in offline run
+                                             {'train_runtime': 37.9096, 'train_samples_per_second': 1.688, 'train_steps_per_second': 0.053, 'train_loss': -0.60345458984375, 'epoch': 0.0}
+100%|██████████| 2/2 [00:30<00:00, 13.81s/it]100%|██████████| 2/2 [00:30<00:00, 15.15s/it]
+[1;34mwandb[0m: 
+[1;34mwandb[0m: You can sync this run to the cloud by running:
+[1;34mwandb[0m: [1mwandb sync /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/wandb/wandb/offline-run-20260905_144951-rckcuytp[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/wandb/offline-run-20260905_144951-rckcuytp/logs[0m
+[rank0]:[W905 14:50:30.216590857 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+E0905 14:50:34.634000 3492693 site-packages/torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: -6) local_rank: 0 (pid: 3492918) of binary: /gpfs/share/home/2501210611/miniconda3/envs/anchor/bin/python
+Traceback (most recent call last):
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/accelerate_cli.py", line 50, in main
+    args.func(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/launch.py", line 1183, in launch_command
+    deepspeed_launcher(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/accelerate/commands/launch.py", line 868, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/run.py", line 909, in run
+    elastic_launch(
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/train_opsd.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-09-05_14:50:34
+  host      : gpua800n02.hpc.pku.edu.cn
+  rank      : 1 (local_rank: 1)
+  exitcode  : -11 (pid: 3492919)
+  error_file: <N/A>
+  traceback : Signal 11 (SIGSEGV) received by PID 3492919
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-09-05_14:50:34
+  host      : gpua800n02.hpc.pku.edu.cn
+  rank      : 0 (local_rank: 0)
+  exitcode  : -6 (pid: 3492918)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 3492918
+============================================================

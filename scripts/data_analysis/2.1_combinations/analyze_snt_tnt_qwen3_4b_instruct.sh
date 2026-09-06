@@ -15,7 +15,13 @@ set -euo pipefail
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
-OUTPUT_DIR=${OUTPUT_DIR:-${BASE_DIR}/scripts/data_analysis/outputs/combinations/qwen3_4b_instruct/snt_tnt_${JOB_TAG}}
+# 2.2: POOL=long (default, +sol_long@12288) | POOL=short (legacy sol/answer/irrelevant)
+POOL=${POOL:-long}
+RUN_SUFFIX="snt_tnt"
+if [[ "2.1" == "2.2" && "${POOL}" == "short" ]]; then
+  RUN_SUFFIX="snt_tnt_short"
+fi
+OUTPUT_DIR=${OUTPUT_DIR:-${BASE_DIR}/scripts/data_analysis/outputs/combinations/qwen3_4b_instruct/${RUN_SUFFIX}_${JOB_TAG}}
 
 TASK="combinations"
 MODEL_KEY="qwen3_4b_instruct"

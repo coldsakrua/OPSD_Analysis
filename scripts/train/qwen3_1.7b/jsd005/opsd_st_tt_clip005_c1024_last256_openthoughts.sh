@@ -25,6 +25,7 @@ TEACHER_THINKING=${TEACHER_THINKING:-1}
 
 LEARNING_RATE=${LEARNING_RATE:-1e-6}
 JSD_TOKEN_CLIP=${JSD_TOKEN_CLIP:-0.05}
+SEED=${SEED:-42}
 MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-1024}
 MAX_COMPLETION_LENGTH=${MAX_COMPLETION_LENGTH:-1024}  # c1024 rollout
 LAST_LOSS_TOKENS=${LAST_LOSS_TOKENS:-256}             # last256 loss subsample
@@ -128,4 +129,5 @@ accelerate launch \
   --vllm-gpu-memory-utilization "${VLLM_GPU_MEMORY_UTILIZATION}" \
   --deepspeed "${BASE_DIR}/configs/deepspeed_zero3.json" \
   --last-loss-tokens "${LAST_LOSS_TOKENS}" \
+  --seed "${SEED}" \
   "${THINK_ARGS[@]}"

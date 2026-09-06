@@ -10,12 +10,20 @@
 #SBATCH --time=48:00:00
 set -euo pipefail
 
-# 2.2 teacher prefix snt_tnt on qwen3_1.7b
+# 2.2 teacher prefix snt_tnt on qwen3_1.7b (sol/answer/irrelevant/sol_long@12288)
+# Prefixes default=long: sol/answer/irrelevant/sol_long (≤12288). POOL=short → legacy 3 prefixes only.
+# Short SCORE_BATCH 8/4/2; sol_long auto-scales 8/4/2/1 by params.
 # Rollout: temp=1.1 top_p=0.95 top_k=20 max_prompt=1024 max_completion=1024
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
-OUTPUT_DIR=${OUTPUT_DIR:-${BASE_DIR}/scripts/data_analysis/outputs/teacher_prefix/qwen3_1.7b/snt_tnt_${JOB_TAG}}
+# 2.2: POOL=long (default, +sol_long@12288) | POOL=short (legacy sol/answer/irrelevant)
+POOL=${POOL:-long}
+RUN_SUFFIX="snt_tnt"
+if [[ "2.2" == "2.2" && "${POOL}" == "short" ]]; then
+  RUN_SUFFIX="snt_tnt_short"
+fi
+OUTPUT_DIR=${OUTPUT_DIR:-${BASE_DIR}/scripts/data_analysis/outputs/teacher_prefix/qwen3_1.7b/${RUN_SUFFIX}_${JOB_TAG}}
 
 TASK="teacher_prefix"
 MODEL_KEY="qwen3_1.7b"
@@ -67,6 +75,11 @@ EXTRA_ARGS=(
   --gpu-memory-utilization 0.90
   --seed 42
 )
+if [[ "${POOL}" == "short" ]]; then
+  EXTRA_ARGS+=(--teacher-prefixes sol answer irrelevant_other_sol --save-token-metrics)
+else
+  EXTRA_ARGS+=(--no-save-token-metrics)
+fi
 
 echo "[analysis] task=${TASK} model=${MODEL_KEY} combo=${COMBO} backend=${BACKEND}"
 echo "[analysis] output=${OUTPUT_DIR}"

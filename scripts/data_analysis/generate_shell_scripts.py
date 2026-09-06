@@ -211,7 +211,20 @@ def render_script(
             extra_args += f'\nEXTRA_ARGS+=(--reasoning-parser "{reasoning_parser}")'
 
     length_note = ""
-    if section == "2.3":
+    if section == "2.2":
+        length_note = (
+            "# Prefixes default=long: sol/answer/irrelevant/sol_long (≤12288). "
+            "POOL=short → legacy 3 prefixes only.\n"
+            "# Short SCORE_BATCH 8/4/2; sol_long auto-scales 8/4/2/1 by params.\n"
+        )
+        # long pool skips token_metrics; short pool matches legacy (save token metrics).
+        extra_args += """
+if [[ "${POOL}" == "short" ]]; then
+  EXTRA_ARGS+=(--teacher-prefixes sol answer irrelevant_other_sol --save-token-metrics)
+else
+  EXTRA_ARGS+=(--no-save-token-metrics)
+fi"""
+    elif section == "2.3":
         length_note = "# Entropy buckets: he20, le20, he80, le80 (single score pass).\n"
     elif section == "2.5":
         length_note = "# Length windows: 0-128 … 4096-6144.\n"
@@ -268,7 +281,13 @@ set -euo pipefail
 
 BASE_DIR=${{BASE_DIR:-${{SLURM_SUBMIT_DIR:-$(cd "$(dirname "${{BASH_SOURCE[0]}}")/../../.." && pwd)}}}}
 JOB_TAG=${{SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}}
-OUTPUT_DIR=${{OUTPUT_DIR:-${{BASE_DIR}}/scripts/data_analysis/outputs/{task}/{model_key}/{run_suffix}_${{JOB_TAG}}}}
+# 2.2: POOL=long (default, +sol_long@12288) | POOL=short (legacy sol/answer/irrelevant)
+POOL=${{POOL:-long}}
+RUN_SUFFIX="{run_suffix}"
+if [[ "{section}" == "2.2" && "${{POOL}}" == "short" ]]; then
+  RUN_SUFFIX="{run_suffix}_short"
+fi
+OUTPUT_DIR=${{OUTPUT_DIR:-${{BASE_DIR}}/scripts/data_analysis/outputs/{task}/{model_key}/${{RUN_SUFFIX}}_${{JOB_TAG}}}}
 
 TASK="{task}"
 MODEL_KEY="{model_key}"
@@ -360,7 +379,7 @@ def gen_22() -> list[Path]:
                 task="teacher_prefix",
                 model_key=model,
                 combo=combo,
-                description=f"2.2 teacher prefix {combo} on {model}",
+                description=f"2.2 teacher prefix {combo} on {model} (sol/answer/irrelevant/sol_long@12288)",
             )
             write_script(path, content)
             created.append(path)

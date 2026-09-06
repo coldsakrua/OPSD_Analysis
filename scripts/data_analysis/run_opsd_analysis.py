@@ -15,7 +15,7 @@ Pipeline
 Tasks
 -----
 - combinations (2.1, 2.4): single teacher prefix (opsd/solution).
-- teacher_prefix (2.2): sol + answer + irrelevant_other_sol on same rollouts.
+- teacher_prefix (2.2): sol + answer + irrelevant_other_sol + sol_long (teacher cap 12288) on same rollouts.
 - entropy (2.3): score once, aggregate he20/le20/he80/le80 buckets from student entropy.
 - length_windows (2.5): bucket metrics by completion position.
 - cotlen (2.6): OT gold-CoT length easy/hard bands; accuracy + preference.
@@ -57,6 +57,7 @@ from common.model_registry import (  # noqa: E402
     entropy_ratio,
     get_model_config,
     model_launch_overrides,
+    score_batch_for_teacher_prefix,
     task_default_gen_batch_hint,
     task_default_max_completion,
     task_default_max_prompt,
@@ -539,20 +540,34 @@ def run_teacher_prefix(
         name: str(teacher_prefix_dataset(args.model_key, args.combo, name))
         for name in args.teacher_prefixes
     }
+    missing = [f"{name}: {path}" for name, path in ds_map.items() if not Path(path).is_file()]
+    if missing:
+        raise FileNotFoundError(
+            "missing teacher-prefix dataset(s):\n  - "
+            + "\n  - ".join(missing)
+            + "\nRun scripts/data/preprocess_opsd_openthoughts_teacher_prefix_extras.sh "
+            "(or the per-model preprocess scripts) first."
+        )
     rollouts_path = out_dir / "rollouts.jsonl"
+    samples_path = out_dir / "samples.jsonl"
     model_path = args.model_path or model_cfg.model_path
 
     if args.skip_generate and rollouts_path.is_file():
+        print(f"[analysis] reuse existing rollouts: {rollouts_path}", flush=True)
         rollouts = load_jsonl(rollouts_path)
     else:
-        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
-        if tokenizer.pad_token_id is None:
-            tokenizer.pad_token = tokenizer.eos_token
-        samples = load_multi_prefix_samples(
-            ds_map, tokenizer, model_key=args.model_key, combo=args.combo, num_prompts=args.num_prompts,
-            max_prompt_length=args.max_prompt_length, seed=args.seed,
-        )
-        save_jsonl(out_dir / "samples.jsonl", samples)
+        if samples_path.is_file():
+            print(f"[analysis] reuse existing samples: {samples_path}", flush=True)
+            samples = load_jsonl(samples_path)
+        else:
+            tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+            if tokenizer.pad_token_id is None:
+                tokenizer.pad_token = tokenizer.eos_token
+            samples = load_multi_prefix_samples(
+                ds_map, tokenizer, model_key=args.model_key, combo=args.combo, num_prompts=args.num_prompts,
+                max_prompt_length=args.max_prompt_length, seed=args.seed,
+            )
+            save_jsonl(samples_path, samples)
         backend = args.backend or model_cfg.backend
         rollouts = run_generation(
             model_path,
@@ -569,23 +584,42 @@ def run_teacher_prefix(
 
     tokenizer, model = load_models(model_path)
     summaries: dict[str, Any] = {}
+    base_score_batch = max(1, args.score_batch_size)
     for prefix in args.teacher_prefixes:
         key = f"teacher_prompt_{prefix}"
+        # Short prefixes: CLI/default SCORE_BATCH (8/4/2 by size).
+        # sol_long: size-tuned smaller batch (teacher≤12288); see score_batch_for_sol_long().
+        args.score_batch_size = score_batch_for_teacher_prefix(args.model_key, prefix)
+        if prefix != "sol_long":
+            args.score_batch_size = base_score_batch
+        save_tok = args.save_token_metrics
+        if prefix == "sol_long":
+            # Per-token dumps for 12k prompts blow RAM; keep rollout aggregates only.
+            args.save_token_metrics = False
+        print(
+            f"[score] {prefix}: score_batch={args.score_batch_size}"
+            + (" (no token_metrics)" if prefix == "sol_long" else ""),
+            flush=True,
+        )
         token_rows: list[dict[str, Any]] = []
         rollout_rows: list[dict[str, Any]] = []
-        agg = score_rollouts(
-            model,
-            tokenizer,
-            rollouts,
-            args,
-            teacher_key=key,
-            token_metrics_out=token_rows if args.save_token_metrics else None,
-            rollout_metrics_out=rollout_rows,
-            metrics_tag=prefix,
-        )
+        try:
+            agg = score_rollouts(
+                model,
+                tokenizer,
+                rollouts,
+                args,
+                teacher_key=key,
+                token_metrics_out=token_rows if args.save_token_metrics else None,
+                rollout_metrics_out=rollout_rows,
+                metrics_tag=prefix,
+            )
+        finally:
+            args.save_token_metrics = save_tok
+            args.score_batch_size = base_score_batch
         summaries[prefix] = agg.summary(tokenizer, args.top_token_k)
         save_jsonl(out_dir / f"rollout_metrics_{prefix}.jsonl", rollout_rows)
-        if args.save_token_metrics:
+        if save_tok and token_rows:
             save_jsonl(out_dir / f"token_metrics_{prefix}.jsonl", token_rows)
 
     out = {"config": _config_dict(args, model_cfg, ds_map), "teacher_prefixes": summaries}

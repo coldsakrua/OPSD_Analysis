@@ -195,7 +195,9 @@ class OPSDTrainer(SFTTrainer):
         high_entropy_ratio: float | None = None,
         low_entropy_ratio: float | None = None,
         uniform_loss_tokens: int | None = None,
+        first_loss_tokens: int | None = None,
         last_loss_tokens: int | None = None,
+        pos_adv_teacher_topk: int | None = None,
         use_ema_teacher: bool = False,
         ema_decay: float = 0.999,
         teacher_update_steps: int | None = None,
@@ -205,6 +207,13 @@ class OPSDTrainer(SFTTrainer):
         purified_pmi: bool = False,
         pmi_beta: float = 1.0,
         pmi_clip: float = 10.0,
+        use_mixed_teacher_target: bool = False,
+        mixed_teacher_target_teacher_weight: float = 0.5,
+        mixed_teacher_target_teacher_weight_final: float = 0.5,
+        mixed_teacher_target_teacher_weight_linear_decay: bool = False,
+        mixed_teacher_target_reference_model: str = "current_student",
+        tinker_use_reward_to_go: bool = False,
+        tinker_reward_to_go_discount: float = 1.0,
     ):
         self.model_name_or_path = model if isinstance(model, str) else model.config._name_or_path
         # Cross-model distillation: frozen teacher from a different checkpoint than the student.
@@ -305,6 +314,44 @@ class OPSDTrainer(SFTTrainer):
             raise ValueError(f"pmi_clip must be > 0, got {pmi_clip}")
         self.pmi_beta = float(pmi_beta)
         self.pmi_clip = float(pmi_clip)
+
+        self.use_mixed_teacher_target = bool(use_mixed_teacher_target)
+        self.mixed_teacher_target_teacher_weight = float(mixed_teacher_target_teacher_weight)
+        self.mixed_teacher_target_teacher_weight_final = float(
+            mixed_teacher_target_teacher_weight_final
+        )
+        self.mixed_teacher_target_teacher_weight_linear_decay = bool(
+            mixed_teacher_target_teacher_weight_linear_decay
+        )
+        self.mixed_teacher_target_reference_model = str(mixed_teacher_target_reference_model)
+        self.tinker_use_reward_to_go = bool(tinker_use_reward_to_go)
+        self.tinker_reward_to_go_discount = float(tinker_reward_to_go_discount)
+        if self.use_mixed_teacher_target and not self.use_thinking_machines_loss:
+            raise ValueError("use_mixed_teacher_target=True requires use_thinking_machines_loss=True")
+        if self.mixed_teacher_target_reference_model not in {
+            "frozen_reference",
+            "current_student",
+        }:
+            raise ValueError(
+                "mixed_teacher_target_reference_model must be "
+                "'frozen_reference' or 'current_student'"
+            )
+        if not 0.0 <= self.mixed_teacher_target_teacher_weight <= 1.0:
+            raise ValueError("mixed_teacher_target_teacher_weight must be in [0, 1]")
+        if not 0.0 <= self.mixed_teacher_target_teacher_weight_final <= 1.0:
+            raise ValueError("mixed_teacher_target_teacher_weight_final must be in [0, 1]")
+        if not 0.0 <= self.tinker_reward_to_go_discount <= 1.0:
+            raise ValueError("tinker_reward_to_go_discount must be in [0, 1]")
+        if (
+            self.use_mixed_teacher_target
+            and self.mixed_teacher_target_reference_model == "frozen_reference"
+            and not (is_peft_available() and is_peft_model(self.model))
+        ):
+            raise ValueError(
+                "mixed_teacher_target_reference_model='frozen_reference' requires a PEFT model"
+            )
+        if self.tinker_use_reward_to_go and not self.use_thinking_machines_loss:
+            raise ValueError("tinker_use_reward_to_go=True requires use_thinking_machines_loss=True")
         if high_entropy_ratio is not None and high_entropy_ratio >= 1.0:
             high_entropy_ratio = None
         if high_entropy_ratio is not None and high_entropy_ratio <= 0:
@@ -315,23 +362,31 @@ class OPSDTrainer(SFTTrainer):
             raise ValueError("low_entropy_ratio must be in (0, 1) or None/>=1 to disable")
         if uniform_loss_tokens is not None and uniform_loss_tokens <= 0:
             raise ValueError("uniform_loss_tokens must be a positive integer when set")
+        if first_loss_tokens is not None and first_loss_tokens <= 0:
+            raise ValueError("first_loss_tokens must be a positive integer when set")
         if last_loss_tokens is not None and last_loss_tokens <= 0:
             raise ValueError("last_loss_tokens must be a positive integer when set")
+        if pos_adv_teacher_topk is not None and pos_adv_teacher_topk <= 0:
+            raise ValueError("pos_adv_teacher_topk must be a positive integer when set")
         token_select_flags = [
             high_entropy_ratio is not None,
             low_entropy_ratio is not None,
             uniform_loss_tokens is not None,
+            first_loss_tokens is not None,
             last_loss_tokens is not None,
+            pos_adv_teacher_topk is not None,
         ]
         if sum(token_select_flags) > 1:
             raise ValueError(
                 "high_entropy_ratio, low_entropy_ratio, uniform_loss_tokens, "
-                "and last_loss_tokens are mutually exclusive"
+                "first_loss_tokens, last_loss_tokens, and pos_adv_teacher_topk are mutually exclusive"
             )
         self.high_entropy_ratio = high_entropy_ratio
         self.low_entropy_ratio = low_entropy_ratio
         self.uniform_loss_tokens = uniform_loss_tokens
+        self.first_loss_tokens = first_loss_tokens
         self.last_loss_tokens = last_loss_tokens
+        self.pos_adv_teacher_topk = pos_adv_teacher_topk
         self.use_ema_teacher = use_ema_teacher
         self.ema_decay = ema_decay
         self.teacher_update_steps = teacher_update_steps if teacher_update_steps and teacher_update_steps > 0 else None
@@ -634,6 +689,22 @@ class OPSDTrainer(SFTTrainer):
         return selected_mask
 
     @staticmethod
+    def _first_token_mask(valid_mask, k):
+        """Keep only the first up to k valid response tokens per sequence for loss."""
+        if k <= 0:
+            raise ValueError("first_loss_tokens must be a positive integer")
+        selected_mask = torch.zeros_like(valid_mask, dtype=torch.bool)
+        batch_size = valid_mask.shape[0]
+        for i in range(batch_size):
+            valid_idx = valid_mask[i].nonzero(as_tuple=False).squeeze(-1)
+            if valid_idx.numel() == 0:
+                continue
+            n_valid = int(valid_idx.numel())
+            n_keep = min(k, n_valid)
+            selected_mask[i, valid_idx[:n_keep]] = True
+        return selected_mask
+
+    @staticmethod
     def _last_token_mask(valid_mask, k):
         """Keep only the last up to k valid response tokens per sequence for loss."""
         if k <= 0:
@@ -648,6 +719,114 @@ class OPSDTrainer(SFTTrainer):
             n_keep = min(k, n_valid)
             selected_mask[i, valid_idx[-n_keep:]] = True
         return selected_mask
+
+    @staticmethod
+    def _pos_adv_teacher_topk_mask(
+        *,
+        teacher_logits,
+        sampled_token_ids,
+        valid_mask,
+        k,
+        student_log_probs_sampled=None,
+        student_logits=None,
+        student_temperature=1.0,
+        teacher_temperature=1.0,
+    ):
+        """Keep tokens with advantage>0 and sampled token in teacher top-k.
+
+        advantage = log π_T(x) - log π_S(x) on the on-policy sampled token x.
+        High-confidence = (advantage > 0) ∧ (x ∈ teacher top-k).
+        """
+        if k <= 0:
+            raise ValueError("pos_adv_teacher_topk must be a positive integer")
+        if student_log_probs_sampled is None and student_logits is None:
+            raise ValueError("need student_log_probs_sampled or student_logits")
+
+        teacher_scaled = teacher_logits / teacher_temperature
+        teacher_log_probs = F.log_softmax(teacher_scaled, dim=-1)
+        t_sampled = torch.gather(
+            teacher_log_probs, dim=-1, index=sampled_token_ids.unsqueeze(-1)
+        ).squeeze(-1)
+
+        if student_log_probs_sampled is None:
+            student_log_probs = F.log_softmax(student_logits / student_temperature, dim=-1)
+            student_log_probs_sampled = torch.gather(
+                student_log_probs, dim=-1, index=sampled_token_ids.unsqueeze(-1)
+            ).squeeze(-1)
+
+        advantage = t_sampled - student_log_probs_sampled
+        _, topk_ids = torch.topk(teacher_scaled, k=k, dim=-1)
+        hit = (topk_ids == sampled_token_ids.unsqueeze(-1)).any(dim=-1)
+        return valid_mask & (advantage > 0) & hit
+
+    def _current_mixed_teacher_target_teacher_weight(self) -> float:
+        """Linear schedule for mix-target teacher weight w (= paper 1/β)."""
+        if not self.use_mixed_teacher_target:
+            return 0.0
+        if not self.mixed_teacher_target_teacher_weight_linear_decay:
+            return self.mixed_teacher_target_teacher_weight
+
+        total_steps = getattr(self.state, "max_steps", 0) or getattr(self.args, "max_steps", 0) or 0
+        if total_steps <= 1:
+            return self.mixed_teacher_target_teacher_weight_final
+
+        progress = min(max(self.state.global_step / (total_steps - 1), 0.0), 1.0)
+        return (
+            self.mixed_teacher_target_teacher_weight
+            + (
+                self.mixed_teacher_target_teacher_weight_final
+                - self.mixed_teacher_target_teacher_weight
+            )
+            * progress
+        )
+
+    @staticmethod
+    def _reward_to_go(
+        rewards: torch.Tensor,
+        mask: torch.Tensor | None = None,
+        discount: float = 1.0,
+    ) -> torch.Tensor:
+        """Suffix (discounted) sum of per-token rewards along the sequence dim."""
+        if mask is not None:
+            mask_f = mask.to(dtype=rewards.dtype)
+            rewards = rewards * mask_f
+        if discount == 1.0:
+            rtg = torch.flip(torch.cumsum(torch.flip(rewards, dims=[1]), dim=1), dims=[1])
+        else:
+            rtg = torch.zeros_like(rewards)
+            running = torch.zeros(rewards.size(0), dtype=rewards.dtype, device=rewards.device)
+            for t in range(rewards.size(1) - 1, -1, -1):
+                running = rewards[:, t] + discount * running
+                rtg[:, t] = running
+        if mask is not None:
+            rtg = rtg * mask_f
+        return rtg
+
+    @staticmethod
+    def _mix_sampled_log_probs(
+        reference_log_probs_sampled: torch.Tensor,
+        teacher_log_probs_sampled: torch.Tensor,
+        teacher_weight: float,
+    ) -> torch.Tensor:
+        """log((1-w) * p_ref + w * p_T) on sampled tokens."""
+        if teacher_weight <= 0.0:
+            return reference_log_probs_sampled
+        if teacher_weight >= 1.0:
+            return teacher_log_probs_sampled
+        alpha = torch.tensor(
+            teacher_weight,
+            dtype=teacher_log_probs_sampled.dtype,
+            device=teacher_log_probs_sampled.device,
+        )
+        return torch.logsumexp(
+            torch.stack(
+                [
+                    reference_log_probs_sampled + torch.log1p(-alpha),
+                    teacher_log_probs_sampled + torch.log(alpha),
+                ]
+            ),
+            dim=0,
+        )
 
     @staticmethod
     def generalized_jsd_loss(
@@ -690,9 +869,13 @@ class OPSDTrainer(SFTTrainer):
             reduction:
                 Specifies the reduction to apply to the output (default: 'batchmean')
             top_k:
-                If set, restricts the loss to only the top-k tokens of the teacher distribution. Both student and
-                teacher distributions are renormalized over these k tokens before computing JSD. This reduces memory
-                and focuses distillation on the teacher's most probable tokens. (default: None = full vocabulary)
+                If set to k>1, restricts the loss to a top-k support then renormalizes both sides:
+                beta=0 (forward) → S_K=TopK(teacher,K), L=KL(q̃‖p̃);
+                beta=1 (reverse) → S_K=TopK(student,K), L=KL(p̃‖q̃);
+                otherwise → teacher TopK + generalized JSD with mixture weight beta.
+                If set to k=1, uses the on-policy label token x (no top-1 renormalization):
+                beta=0 → log π_T(x) − log π_S(x); beta=1 → log π_S(x) − log π_T(x).
+                (default: None = full vocabulary)
             token_clip:
                 if set, clips per-token divergence values to this maximum before reduction. Prevents style tokens from dominating the gradient signal over math tokens.
             loss_mask:
@@ -706,18 +889,49 @@ class OPSDTrainer(SFTTrainer):
         student_temp = temperature if student_temperature is None else student_temperature
         teacher_temp = temperature if teacher_temperature is None else teacher_temperature
 
-        if logits_are_probs:
+        # k=1: on-policy token score gap (renormalized top-1 KL is always 0).
+        # beta=0 → log π_T(x)−log π_S(x); beta=1 → log π_S(x)−log π_T(x).
+        if (not logits_are_probs) and top_k is not None and top_k == 1:
+            student_logits = student_logits / student_temp
+            teacher_logits = teacher_logits / teacher_temp
+            student_log_probs = F.log_softmax(student_logits, dim=-1)
+            teacher_log_probs = F.log_softmax(teacher_logits, dim=-1)
+            if labels is not None:
+                token_ids = labels.clamp(min=0)
+            else:
+                token_ids = teacher_logits.argmax(dim=-1)
+            s_x = student_log_probs.gather(-1, token_ids.unsqueeze(-1)).squeeze(-1)
+            t_x = teacher_log_probs.gather(-1, token_ids.unsqueeze(-1)).squeeze(-1)
+            jsd = (s_x - t_x) if beta == 1 else (t_x - s_x)
+        elif logits_are_probs:
             student_log_probs = torch.log(student_logits.clamp_min(1e-8))
             teacher_log_probs = torch.log(teacher_logits.clamp_min(1e-8))
+            if beta == 0:
+                jsd = F.kl_div(student_log_probs, teacher_log_probs, reduction="none", log_target=True)
+            elif beta == 1:
+                jsd = F.kl_div(teacher_log_probs, student_log_probs, reduction="none", log_target=True)
+            else:
+                beta_t = torch.tensor(beta, dtype=student_log_probs.dtype, device=student_log_probs.device)
+                mixture_log_probs = torch.logsumexp(
+                    torch.stack(
+                        [student_log_probs + torch.log1p(-beta_t), teacher_log_probs + torch.log(beta_t)]
+                    ),
+                    dim=0,
+                )
+                kl_teacher = F.kl_div(mixture_log_probs, teacher_log_probs, reduction="none", log_target=True)
+                kl_student = F.kl_div(mixture_log_probs, student_log_probs, reduction="none", log_target=True)
+                jsd = beta_t * kl_teacher + (1 - beta_t) * kl_student
         else:
             # Apply temperature scaling to logits before computing probabilities
             student_logits = student_logits / student_temp
             teacher_logits = teacher_logits / teacher_temp
 
-            if top_k is not None and top_k > 0:
-                # Restrict to top-k tokens of the teacher distribution and renormalize.
+            if top_k is not None and top_k > 1:
+                # Restrict to top-k support then renormalize via log_softmax below.
+                # beta=0: teacher TopK + forward KL; beta=1: student TopK + reverse KL.
                 # Shape: [batch, seq_len, top_k]
-                _, top_k_indices = torch.topk(teacher_logits, k=top_k, dim=-1)
+                source_logits = student_logits if beta == 1 else teacher_logits
+                _, top_k_indices = torch.topk(source_logits, k=top_k, dim=-1)
                 student_logits = torch.gather(student_logits, dim=-1, index=top_k_indices)
                 teacher_logits = torch.gather(teacher_logits, dim=-1, index=top_k_indices)
 
@@ -725,26 +939,28 @@ class OPSDTrainer(SFTTrainer):
             student_log_probs = F.log_softmax(student_logits, dim=-1)
             teacher_log_probs = F.log_softmax(teacher_logits, dim=-1)
 
-        if beta == 0:
-            jsd = F.kl_div(student_log_probs, teacher_log_probs, reduction="none", log_target=True)
-        elif beta == 1:
-            jsd = F.kl_div(teacher_log_probs, student_log_probs, reduction="none", log_target=True)
-        else:
-            # Compute the log of the mixture distribution
-            # log(a + b) = log(exp(log(a)) + exp(log(b))) -> for mixture
-            beta = torch.tensor(beta, dtype=student_log_probs.dtype, device=student_log_probs.device)
-            mixture_log_probs = torch.logsumexp(
-                torch.stack([student_log_probs + torch.log1p(-beta), teacher_log_probs + torch.log(beta)]),
-                dim=0,
-            )
+            if beta == 0:
+                jsd = F.kl_div(student_log_probs, teacher_log_probs, reduction="none", log_target=True)
+            elif beta == 1:
+                jsd = F.kl_div(teacher_log_probs, student_log_probs, reduction="none", log_target=True)
+            else:
+                # Compute the log of the mixture distribution
+                # log(a + b) = log(exp(log(a)) + exp(log(b))) -> for mixture
+                beta_t = torch.tensor(beta, dtype=student_log_probs.dtype, device=student_log_probs.device)
+                mixture_log_probs = torch.logsumexp(
+                    torch.stack(
+                        [student_log_probs + torch.log1p(-beta_t), teacher_log_probs + torch.log(beta_t)]
+                    ),
+                    dim=0,
+                )
 
-            # Compute KL divergences using F.kl_div
-            # PyTorch differs from the standard mathematical definition, so the order of the probability distributions is swapped compared to that defined in the paper.
-            kl_teacher = F.kl_div(mixture_log_probs, teacher_log_probs, reduction="none", log_target=True)
-            kl_student = F.kl_div(mixture_log_probs, student_log_probs, reduction="none", log_target=True)
+                # Compute KL divergences using F.kl_div
+                # PyTorch differs from the standard mathematical definition, so the order of the probability distributions is swapped compared to that defined in the paper.
+                kl_teacher = F.kl_div(mixture_log_probs, teacher_log_probs, reduction="none", log_target=True)
+                kl_student = F.kl_div(mixture_log_probs, student_log_probs, reduction="none", log_target=True)
 
-            # Compute the Generalized Jensen-Shannon Divergence
-            jsd = beta * kl_teacher + (1 - beta) * kl_student
+                # Compute the Generalized Jensen-Shannon Divergence
+                jsd = beta_t * kl_teacher + (1 - beta_t) * kl_student
 
         # Per-token clipping: cap each token's divergence value
         if token_clip is not None:
@@ -759,7 +975,9 @@ class OPSDTrainer(SFTTrainer):
 
         # Apply reduction
         if reduction == "batchmean":
-            return jsd.sum() / mask.sum() if mask is not None else jsd.sum() / jsd.size(0)
+            if mask is not None:
+                return jsd.sum() / mask.sum().clamp(min=1)
+            return jsd.sum() / jsd.size(0)
         elif reduction == "sum":
             return jsd.sum()
         elif reduction == "mean":
@@ -1063,6 +1281,7 @@ class OPSDTrainer(SFTTrainer):
             self.high_entropy_ratio is not None
             or self.low_entropy_ratio is not None
             or self.uniform_loss_tokens is not None
+            or self.first_loss_tokens is not None
             or self.last_loss_tokens is not None
         ):
             with torch.no_grad():
@@ -1077,6 +1296,9 @@ class OPSDTrainer(SFTTrainer):
                 elif self.uniform_loss_tokens is not None:
                     loss_mask = self._uniform_token_mask(valid_mask, self.uniform_loss_tokens)
                     metric_prefix = "uniform"
+                elif self.first_loss_tokens is not None:
+                    loss_mask = self._first_token_mask(valid_mask, self.first_loss_tokens)
+                    metric_prefix = "first"
                 else:
                     loss_mask = self._last_token_mask(valid_mask, self.last_loss_tokens)
                     metric_prefix = "last"
@@ -1163,47 +1385,127 @@ class OPSDTrainer(SFTTrainer):
                 )
                 del teacher_logits, ref_logits, base_logits
                 empty_cache()
-            elif self.use_thinking_machines_loss:
-                teacher_log_probs = F.log_softmax(teacher_logits / self.teacher_temperature, dim=-1)
-                teacher_log_probs_sampled = torch.gather(
-                    teacher_log_probs, dim=-1, index=sampled_token_ids.unsqueeze(-1)
-                ).squeeze(-1)
-                del teacher_logits, teacher_log_probs  # Free immediately!
+                teacher_logits_for_mask = teacher_logits_for_loss
+                teacher_temp_for_mask = 1.0
             else:
-                teacher_logits_for_loss = teacher_logits
-                del teacher_logits
+                teacher_logits_for_mask = teacher_logits
+                teacher_temp_for_mask = self.teacher_temperature
+
+            if self.pos_adv_teacher_topk is not None:
+                if self.use_thinking_machines_loss:
+                    loss_mask = self._pos_adv_teacher_topk_mask(
+                        teacher_logits=teacher_logits_for_mask,
+                        sampled_token_ids=sampled_token_ids,
+                        valid_mask=valid_mask,
+                        k=self.pos_adv_teacher_topk,
+                        student_log_probs_sampled=student_log_probs_sampled,
+                        student_temperature=self.student_temperature,
+                        teacher_temperature=teacher_temp_for_mask,
+                    )
+                else:
+                    loss_mask = self._pos_adv_teacher_topk_mask(
+                        teacher_logits=teacher_logits_for_mask,
+                        sampled_token_ids=sampled_token_ids,
+                        valid_mask=valid_mask,
+                        k=self.pos_adv_teacher_topk,
+                        student_logits=student_logits_for_loss,
+                        student_temperature=self.student_temperature,
+                        teacher_temperature=teacher_temp_for_mask,
+                    )
+                selected = loss_mask.sum().double()
+                valid_count = valid_mask.sum().double()
+                self._metrics["train"]["opsd/pos_adv_t_topk_ratio"].append(
+                    (selected / valid_count.clamp(min=1)).item()
+                )
+                self._metrics["train"]["opsd/pos_adv_t_topk_loss_tokens"].append(selected.item())
+
+            if not self.purified_pmi:
+                if self.use_thinking_machines_loss:
+                    teacher_log_probs = F.log_softmax(
+                        teacher_logits / self.teacher_temperature, dim=-1
+                    )
+                    teacher_log_probs_sampled = torch.gather(
+                        teacher_log_probs, dim=-1, index=sampled_token_ids.unsqueeze(-1)
+                    ).squeeze(-1)
+                    del teacher_logits, teacher_log_probs  # Free immediately!
+                else:
+                    teacher_logits_for_loss = teacher_logits
+                    del teacher_logits
 
         # === COMPUTE LOSS with only small tensors ===
         if self.use_thinking_machines_loss:
-            # Thinking Machines uses RL-style policy gradient:
-            # Advantage = log π_teacher(x) - log π_student(x)
-            # Loss = -E[Advantage * log π_student(x)]
-            #
+            # Thinking Machines / β-OPSD sampled-token PG:
+            # Advantage = log π_target - log π_student (detached), optional RTG.
+            # With mix-target: π_target = (1-w)·π_ref + w·π_T (paper β-OPSD).
+            target_log_probs_sampled = teacher_log_probs_sampled
+            teacher_weight = 0.0
+            if self.use_mixed_teacher_target:
+                teacher_weight = self._current_mixed_teacher_target_teacher_weight()
+                if self.mixed_teacher_target_reference_model == "current_student":
+                    reference_log_probs_sampled = student_log_probs_sampled.detach()
+                else:
+                    with torch.no_grad(), self.accelerator.unwrap_model(model).disable_adapter():
+                        outputs_reference = model(
+                            input_ids=inputs["student_input_ids"],
+                            attention_mask=inputs["student_attention_mask"],
+                        )
+                        reference_logits = outputs_reference.logits[
+                            :, student_prompt_len - 1 : -1, :
+                        ]
+                        reference_log_probs = F.log_softmax(
+                            reference_logits / self.student_temperature, dim=-1
+                        )
+                        reference_log_probs_sampled = torch.gather(
+                            reference_log_probs,
+                            dim=-1,
+                            index=sampled_token_ids.unsqueeze(-1),
+                        ).squeeze(-1)
+                        del outputs_reference, reference_logits, reference_log_probs
+                        empty_cache()
+                target_log_probs_sampled = self._mix_sampled_log_probs(
+                    reference_log_probs_sampled=reference_log_probs_sampled,
+                    teacher_log_probs_sampled=teacher_log_probs_sampled,
+                    teacher_weight=teacher_weight,
+                )
+
             # CRITICAL: advantage must be detached to prevent gradients flowing through it.
-            # We want: ∇θ L = -E[A(x) * ∇θ log π_student(x)]
-            # NOT: ∇θ L = -E[(T(x) - S(x)) * ∇θ S(x)] where both terms differentiate
+            advantage = (target_log_probs_sampled - student_log_probs_sampled).detach()
 
-            advantage = (teacher_log_probs_sampled - student_log_probs_sampled).detach()
-
-            # Apply masking before computing loss
             if shifted_labels is not None:
                 mask = loss_mask if loss_mask is not None else valid_mask
+                if self.tinker_use_reward_to_go:
+                    advantage = self._reward_to_go(
+                        advantage,
+                        mask,
+                        discount=self.tinker_reward_to_go_discount,
+                    )
                 advantage = advantage[mask]
                 student_log_probs_sampled_masked = student_log_probs_sampled[mask]
             else:
+                if self.tinker_use_reward_to_go:
+                    advantage = self._reward_to_go(
+                        advantage,
+                        discount=self.tinker_reward_to_go_discount,
+                    )
                 student_log_probs_sampled_masked = student_log_probs_sampled
                 mask = None
 
-            # Policy gradient loss: -advantage * log π_student
-            # Negative because we minimize loss (gradient descent), but want to maximize reward
             if mask is not None:
                 loss = -(advantage * student_log_probs_sampled_masked).sum() / mask.sum().clamp(min=1)
             else:
                 loss = -(advantage * student_log_probs_sampled_masked).mean()
 
+            if self.use_mixed_teacher_target:
+                self._metrics["train"]["opsd/target_teacher_weight"].append(float(teacher_weight))
+            if self.tinker_use_reward_to_go:
+                self._metrics["train"]["opsd/rtg_discount"].append(
+                    float(self.tinker_reward_to_go_discount)
+                )
+
             del (
                 student_log_probs_sampled,
                 teacher_log_probs_sampled,
+                target_log_probs_sampled,
                 advantage,
                 student_log_probs_sampled_masked,
             )

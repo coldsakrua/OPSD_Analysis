@@ -11,7 +11,7 @@ scripts/data_analysis/
 ├── _common_launch.sh         # Legacy launcher (prefer generated scripts)
 ├── common/                   # Shared Python modules
 ├── 2.1_combinations/         # Four st/tt combos per model
-├── 2.2_teacher_prefix/       # sol / answer / irrelevant_other_sol
+├── 2.2_teacher_prefix/       # sol / answer / irrelevant_other_sol / sol_long (≤12288)
 ├── 2.3_entropy/              # he20, le20, he80, le80 buckets
 ├── 2.4_other_models/         # deepseek, falcon, mimo, qwen3-0.6b
 ├── 2.5_length_windows/       # Position buckets 0-128 … 4096-6144
@@ -82,6 +82,8 @@ python scripts/data_analysis/generate_shell_scripts.py
 - Preprocessed parquet under `data/openthoughts/preprocessed/` (same paths as training scripts)
 - Conda: `anchor` (Qwen), `qwen3_5` (Qwen3.5), `sglang` (Olmo/Mimo), `falcon` (Falcon-H1R; env matches train scripts)
 - Default rollout: 2048 prompts × 2 rollouts, max_completion=1024 (sections 2.1–2.4)
+- Section 2.2 teacher prefixes: `sol` / `answer` / `irrelevant_other_sol` (max_prompt=1024) plus `sol_long` (teacher max_prompt=12288 = 12×1024, matching openmath OPSD train). Sampling binds to the long sol pool; short `sol` truncates the reference when needed so all four share the same student rollouts.
+- Preprocess extras: `scripts/data/preprocess_opsd_openthoughts_teacher_prefix_extras.sh` / `submit_teacher_prefix_preprocess_all.sh`
 - Section 2.5 length windows: max_prompt=1024, max_completion=6144 (matches length training)
 - Section 2.6 cotlen: sample easy/hard OT pool; **max_prompt=2048** (train); **max_completion = eval `max_new_tokens`** (Qwen think 38912 / instruct&olmo 32768); **2048 prompts × 4 rollouts** (falls back to all that fit); preference metrics identical to 2.2 `sol` (+ boxed accuracy)
 - Batch sizes auto-tune by **task + model size** on A800 80GB (override with `SCORE_BATCH` / `GEN_BATCH_HINT`):

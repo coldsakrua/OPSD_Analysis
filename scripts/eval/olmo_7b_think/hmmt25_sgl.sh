@@ -10,6 +10,8 @@
 #SBATCH --time=48:00:00
 set -euo pipefail
 
+SEED=${SEED:-42}
+
 # Olmo-3-7B-Think via SGLang (local: triton attn + pytorch sampling).
 # Official recommended settings (allenai/Olmo-3-7B-Think):
 #   temperature=0.6, top_p=0.95, max_tokens=32768
@@ -68,7 +70,7 @@ python "${BASE_DIR}/eval/eval_math_sglang_local.py" \
   --top-p 0.95 \
   --top-k -1 \
   --generate-batch-size 4 \
-  --seed 42 \
+  --seed "${SEED}" \
   --attention-backend triton \
   --mem-fraction-static 0.80 \
   --context-length 40960 \
