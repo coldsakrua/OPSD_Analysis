@@ -48,4 +48,42 @@ echo "[array] OUTPUT_JSON=${OUTPUT_JSON:-<(unset)>}"
 
 # Child scripts already contain #SBATCH headers; running via bash ignores them
 # and uses this array task's allocated resources.
-exec bash "${script}"
+bash "${script}"
+status=$?
+
+# Rename Slurm out to include model + variant + dataset when possible.
+# Expected final: seed{SEED}_{1p7b|olmo7bt}_{variant}_{dataset}.{A}_{a}.out
+seed_tok="seed${SEED:-42}"
+case "${ARRAY_SCRIPT_DIR}" in
+  */eval/1.7b*) model_short=1p7b; log_root="log/eval/1.7b/array" ;;
+  */eval/olmo_7b_think*) model_short=olmo7bt; log_root="log/eval/olmo_7b_think/array" ;;
+  *) model_short=model; log_root="log/eval/array" ;;
+esac
+tag="${EVAL_TAG:-unk}"
+variant=unk
+for v in topk16_rkl topk4_rkl topk1_rkl topk16 topk4 topk1 first256 uni256 last256 irr_other_sol answer c256; do
+  if [[ "${tag}" == *"${v}"* ]]; then
+    if [[ "${v}" == irr_other_sol ]]; then variant=ios; else variant="${v}"; fi
+    break
+  fi
+done
+if [[ "${variant}" == unk && "${tag}" == *openthoughts* ]]; then variant=c1024; fi
+if [[ "${variant}" == unk && ( "${tag}" == qwen3-1.7b* || "${tag}" == olmo-3-7b-think* ) ]]; then variant=base; fi
+# attach train-seed for multi-seed trained variants when present in tag
+if [[ "${tag}" =~ seed([0-9]+) && "${variant}" != unk && "${variant}" != base && "${variant}" != topk* ]]; then
+  if [[ "${tag}" == *"${variant}_seed${BASH_REMATCH[1]}"* || "${tag}" == *"seed${BASH_REMATCH[1]}_${variant}"* || "${tag}" == *"_seed${BASH_REMATCH[1]}"* ]]; then
+    # only when this looks like a train-seed run name (contains seed before checkpoint)
+    if [[ "${tag}" == *"_seed${BASH_REMATCH[1]}_"* || "${tag}" == *"_${variant}_seed${BASH_REMATCH[1]}"* ]]; then
+      variant="${variant}_s${BASH_REMATCH[1]}"
+    fi
+  fi
+fi
+
+slurm_log="${log_root}/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_${idx}.out"
+desc_log="${log_root}/${seed_tok}_${model_short}_${variant}_${ds}.${SLURM_ARRAY_JOB_ID}_${idx}.out"
+if [[ -f "${slurm_log}" && "${slurm_log}" != "${desc_log}" ]]; then
+  mv -f "${slurm_log}" "${desc_log}" 2>/dev/null || true
+  echo "[array] renamed log -> ${desc_log}"
+fi
+
+exit "${status}"

@@ -1,15 +1,18 @@
 #!/bin/bash
 #SBATCH --job-name=beta_olmo_merge
 #SBATCH --output=log/eval/beta_opsd/merge/%x.%j.out
-#SBATCH --partition=C64M256G,C64M512G
+#SBATCH --partition=C64M256G
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=96G
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=60G
 #SBATCH --time=4:00:00
 set -euo pipefail
 
-# CPU merge: β-OPSD LoRA adapter → Olmo dense weights for SGLang eval.
+# CPU merge: β-OPSD LoRA → Olmo dense for SGLang eval.
+# Device-IV: mem/cpu must sit in (DefMemPerCPUMin, DefMemPerCPU] for the chosen partition.
+# C64M256G ≈ 3662–3906 MB/cpu → 16cpu × 60G (=3840 MB/cpu) passes.
+# Do NOT list C64M512G together: its DefMemPerCPUMin≈7470 conflicts with 256G ratio.
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
 cd "${BASE_DIR}"

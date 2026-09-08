@@ -55,7 +55,9 @@ MODEL_TAG=${MODEL_TAG:-olmo3_7b_think}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
 OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/${JOB_TAG}}
-RUN_NAME_WITH_JOB=${RUN_NAME}_${JOB_TAG}
+RUN_NAME_WITH_JOB=${RUN_NAME_WITH_JOB:-${RUN_NAME}_${JOB_TAG}}
+RESUME_FROM_CHECKPOINT=${RESUME_FROM_CHECKPOINT:-}
+SAVE_TOTAL_LIMIT=${SAVE_TOTAL_LIMIT:-5}
 
 cd "${BASE_DIR}"
 set +u
@@ -144,6 +146,14 @@ echo "[launch] prompt=${MAX_PROMPT_LENGTH} completion=${MAX_COMPLETION_LENGTH} m
 echo "[launch] max_steps=${MAX_STEPS} save_steps=${SAVE_STEPS}"
 echo "[launch] model=${MODEL_PATH} dataset=${DATASET_PATH} output=${OUTPUT_DIR}"
 echo "[launch] master_port=${MASTER_PORT} rollout=${ROLLOUT_BACKEND} sglang_mem=${SGLANG_MEM_FRACTION_STATIC} attn=${SGLANG_ATTENTION_BACKEND}"
+if [[ -n "${RESUME_FROM_CHECKPOINT}" ]]; then
+  echo "[launch] resume_from_checkpoint=${RESUME_FROM_CHECKPOINT} save_total_limit=${SAVE_TOTAL_LIMIT}"
+fi
+
+RESUME_ARGS=()
+if [[ -n "${RESUME_FROM_CHECKPOINT}" ]]; then
+  RESUME_ARGS+=(--resume-from-checkpoint "${RESUME_FROM_CHECKPOINT}")
+fi
 
 accelerate launch \
   --config_file "${BASE_DIR}/configs/accelerate_zero3.yaml" \
@@ -158,6 +168,7 @@ accelerate launch \
   --teacher-privilege-field "${TEACHER_PRIVILEGE_FIELD}" \
   --max-steps "${MAX_STEPS}" \
   --save-steps "${SAVE_STEPS}" \
+  --save-total-limit "${SAVE_TOTAL_LIMIT}" \
   --max-prompt-length "${MAX_PROMPT_LENGTH}" \
   --max-completion-length "${MAX_COMPLETION_LENGTH}" \
   --per-device-batch-size "${PER_DEVICE_BATCH_SIZE}" \
@@ -169,4 +180,5 @@ accelerate launch \
   --sglang-attention-backend "${SGLANG_ATTENTION_BACKEND}" \
   --deepspeed "${BASE_DIR}/configs/deepspeed_zero3.json" \
   --seed "${SEED}" \
+  "${RESUME_ARGS[@]}" \
   "${THINK_ARGS[@]}"

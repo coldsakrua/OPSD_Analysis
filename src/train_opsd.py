@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import sys
@@ -71,6 +72,38 @@ class _CopyProcessorAssetsCallback(TrainerCallback):
         ckpt = Path(args.output_dir) / f"checkpoint-{state.global_step}"
         _copy_processor_assets(self.model_path, ckpt)
         return control
+
+
+def resolve_resume_checkpoint(output_dir: Path, resume: str | None) -> str | None:
+    """Resolve checkpoint path for Trainer.resume_from_checkpoint."""
+    if not resume:
+        return None
+
+    resume = resume.strip()
+    if resume in {"true", "True", "1", "latest"}:
+        checkpoints = sorted(
+            output_dir.glob("checkpoint-*"),
+            key=lambda p: int(p.name.rsplit("-", 1)[-1])
+            if p.name.rsplit("-", 1)[-1].isdigit()
+            else -1,
+        )
+        if not checkpoints:
+            raise FileNotFoundError(f"No checkpoint-* directories found under {output_dir}")
+        return str(checkpoints[-1].resolve())
+
+    checkpoint = Path(resume).expanduser()
+    if not checkpoint.is_absolute():
+        candidate = output_dir / checkpoint
+        checkpoint = candidate if candidate.is_dir() else checkpoint.resolve()
+    else:
+        checkpoint = checkpoint.resolve()
+    if not checkpoint.is_dir():
+        raise FileNotFoundError(f"Resume checkpoint not found: {checkpoint}")
+    if not (checkpoint / "trainer_state.json").exists():
+        raise FileNotFoundError(
+            f"Resume checkpoint missing trainer_state.json: {checkpoint}"
+        )
+    return str(checkpoint)
 
 
 def parse_args() -> argparse.Namespace:
@@ -151,6 +184,21 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--max-steps", type=int, default=100)
     parser.add_argument("--save-steps", type=int, default=25)
+    parser.add_argument(
+        "--save-total-limit",
+        type=int,
+        default=int(os.environ.get("SAVE_TOTAL_LIMIT", "5")),
+        help="Max checkpoints to keep under output-dir (HF Trainer rotation).",
+    )
+    parser.add_argument(
+        "--resume-from-checkpoint",
+        default=os.environ.get("RESUME_FROM_CHECKPOINT"),
+        help=(
+            "Resume training from a checkpoint directory. "
+            "Use 'latest' to pick the newest checkpoint-* under output-dir, "
+            "or a relative/absolute path (e.g. checkpoint-100)."
+        ),
+    )
     parser.add_argument("--max-prompt-length", type=int, default=1024)
     parser.add_argument("--max-completion-length", type=int, default=1024)
     parser.add_argument("--per-device-batch-size", type=int, default=4)
@@ -557,6 +605,22 @@ def main() -> None:
     args = parse_args()
     set_seed(args.seed)
     max_length = args.max_prompt_length + args.max_completion_length
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    resume_from_checkpoint = resolve_resume_checkpoint(
+        output_dir, args.resume_from_checkpoint
+    )
+    if resume_from_checkpoint:
+        state_path = Path(resume_from_checkpoint) / "trainer_state.json"
+        with state_path.open(encoding="utf-8") as f:
+            state = json.load(f)
+        print(
+            f"[resume] checkpoint={resume_from_checkpoint} "
+            f"global_step={state.get('global_step')} → max_steps={args.max_steps}",
+            flush=True,
+        )
+    else:
+        print("[resume] disabled (fresh run)", flush=True)
 
     if args.chat_template_path:
         tokenizer = load_sft_tokenizer(
@@ -628,7 +692,7 @@ def main() -> None:
         max_steps=args.max_steps,
         save_steps=args.save_steps,
         save_strategy="steps",
-        save_total_limit=5,
+        save_total_limit=args.save_total_limit,
         logging_steps=1,
         logging_strategy="steps",
         eval_strategy="no",
@@ -779,7 +843,7 @@ def main() -> None:
         tinker_reward_to_go_discount=float(args.tinker_reward_to_go_discount),
         callbacks=[_CopyProcessorAssetsCallback(args.model_path)],
     )
-    trainer.train()
+    trainer.train(resume_from_checkpoint=resume_from_checkpoint)
     final_dir = Path(args.output_dir) / "final"
     trainer.save_model(str(final_dir))
     tokenizer.save_pretrained(str(final_dir))
