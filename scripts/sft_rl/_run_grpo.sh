@@ -20,6 +20,9 @@ MAX_NUM_BATCHED_TOKENS=${MAX_NUM_BATCHED_TOKENS:-32768}
 VLLM_GPU_MEM_UTIL=${VLLM_GPU_MEM_UTIL:-}
 VLLM_TP_SIZE=${VLLM_TP_SIZE:-1}
 CHAT_TEMPLATE_PATH=${CHAT_TEMPLATE_PATH:-}
+# Manual FSDP offload between update_actor and next vLLM wake (not FSDP CPUOffload-during-backward).
+ACTOR_PARAM_OFFLOAD=${ACTOR_PARAM_OFFLOAD:-false}
+ACTOR_OPTIMIZER_OFFLOAD=${ACTOR_OPTIMIZER_OFFLOAD:-false}
 
 OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
@@ -64,6 +67,7 @@ echo "[launch] steps=${MAX_STEPS} save=${SAVE_STEPS} n=${NUM_GENERATIONS} resp=$
 echo "[launch] train_bs=${TRAIN_BATCH_SIZE} mini=${PPO_MINI_BATCH_SIZE} epochs=${PPO_EPOCHS} lr=${LEARNING_RATE}"
 echo "[launch] vllm_util=${VLLM_GPU_MEM_UTIL:-auto} free_cache_engine=true overlong_penalty=${OVERLONG_PENALTY_ENABLE} len=${OVERLONG_BUFFER_LEN} factor=${OVERLONG_PENALTY_FACTOR}"
 echo "[launch] kl_loss=${USE_KL_LOSS} kl_coef=${KL_LOSS_COEF} kl_type=${KL_LOSS_TYPE} ref_param_offload=${REF_PARAM_OFFLOAD}"
+echo "[launch] actor_param_offload=${ACTOR_PARAM_OFFLOAD} actor_optim_offload=${ACTOR_OPTIMIZER_OFFLOAD}"
 echo "[launch] reward=src/reward_math_dapo_boxed.py (boxed-first) + stop_token_ids auto from tokenizer"
 echo "[launch] rollout_dump=${OUTPUT_DIR}/rollouts max_per_step=${ROLLOUT_DUMP_N:-32}"
 
@@ -102,6 +106,8 @@ python -u "${BASE_DIR}/src/train_grpo_dapo.py" \
   actor_rollout_ref.actor.kl_loss_coef="${KL_LOSS_COEF}" \
   actor_rollout_ref.actor.kl_loss_type="${KL_LOSS_TYPE}" \
   actor_rollout_ref.actor.entropy_coeff=0.0 \
+  actor_rollout_ref.actor.fsdp_config.param_offload="${ACTOR_PARAM_OFFLOAD}" \
+  actor_rollout_ref.actor.fsdp_config.optimizer_offload="${ACTOR_OPTIMIZER_OFFLOAD}" \
   actor_rollout_ref.ref.fsdp_config.param_offload="${REF_PARAM_OFFLOAD}" \
   actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu="${LOG_PROB_MICRO_BATCH_SIZE_PER_GPU}" \
   actor_rollout_ref.ref.log_prob_max_token_len_per_gpu="${PPO_MAX_TOKEN_LEN_PER_GPU}" \

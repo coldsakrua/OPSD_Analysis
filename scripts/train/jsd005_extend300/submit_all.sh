@@ -32,11 +32,12 @@ MODEL_KEY=olmo3_7b_think CHECKPOINT_PATH="${CKPT50_OLMO}" EVAL_TAG=st_tt_clip005
   SEED=42 bash "${SUBMIT}"
 
 echo "=== [2/3] submit resume trains (100 → 300) ==="
-jid_1p7b=$(sbatch --parsable "${DIR}/opsd_1p7b_resume_to_300.sh")
+# Always export BASE_DIR: Slurm spool copies break BASH_SOURCE-based path resolution.
+jid_1p7b=$(sbatch --parsable --export=ALL,BASE_DIR="${BASE_DIR}" "${DIR}/opsd_1p7b_resume_to_300.sh")
 jid_1p7b="${jid_1p7b%%;*}"
 echo "[submit] 1.7b resume jid=${jid_1p7b}"
 
-jid_olmo=$(sbatch --parsable "${DIR}/opsd_olmo7bt_resume_to_300.sh")
+jid_olmo=$(sbatch --parsable --export=ALL,BASE_DIR="${BASE_DIR}" "${DIR}/opsd_olmo7bt_resume_to_300.sh")
 jid_olmo="${jid_olmo%%;*}"
 echo "[submit] olmo7bt resume jid=${jid_olmo}"
 

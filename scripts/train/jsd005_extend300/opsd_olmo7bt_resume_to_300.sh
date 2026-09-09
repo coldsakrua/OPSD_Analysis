@@ -13,9 +13,16 @@ set -euo pipefail
 
 # Resume Olmo-3-7B-Think st/tt clip005 1e-6 from checkpoint-100 → max_steps=300.
 # Saves every 50 steps (150/200/250/300) for think evals.
+#
+# NOTE: Slurm copies this script under /var/spool/... so never derive BASE_DIR
+# from BASH_SOURCE. Prefer explicit BASE_DIR / SLURM_SUBMIT_DIR / hardcoded root.
 
-_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export BASE_DIR=${BASE_DIR:-$(cd "${_SCRIPT_DIR}/../../.." && pwd)}
+export BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis}}
+if [[ ! -d "${BASE_DIR}/outputs" || ! -d "${BASE_DIR}/scripts" ]]; then
+  BASE_DIR=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+  export BASE_DIR
+fi
+
 RUN_NAME=${RUN_NAME:-st_tt_clip005_1e_6_openthoughts_olmo7bt}
 MODEL_TAG=${MODEL_TAG:-olmo3_7b_think}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
@@ -39,4 +46,3 @@ echo "[resume-olmo] RESUME_FROM_CHECKPOINT=${RESUME_FROM_CHECKPOINT} MAX_STEPS=$
 
 cd "${BASE_DIR}"
 exec bash "${BASE_DIR}/scripts/train/olmo3_7b_think/jsd005/opsd_student_think_teacher_think_clip005_1e_6_openthoughts.sh"
-

@@ -45,4 +45,38 @@ export RUN_NAME="${run_name}"
 # Avoid accidental collision if a parent still uses SLURM_JOB_ID as JOB_TAG.
 export JOB_TAG="${job_tag}"
 
-exec bash "${script}"
+bash "${script}"
+status=$?
+
+# Rename Slurm out: tr_s{seed}_{1p7b|olmo7bt}_st_tt_{variant}.{A}_{a}.out
+case "${model_key}" in
+  qwen3_1.7b) model_short=1p7b ;;
+  olmo3_7b_think) model_short=olmo7bt ;;
+  *) model_short="${model_key//./p}" ;;
+esac
+# OPSD mode tag from run_name (st_tt / snt_tnt / ...)
+mode=opsd
+if [[ "${run_name}" == st_tt_* ]]; then mode=st_tt
+elif [[ "${run_name}" == snt_tnt_* ]]; then mode=snt_tnt
+fi
+variant=unk
+for v in first256 uni256 last256 answer ios c256 c1024; do
+  if [[ "${run_name}" == *"_${v}_"* || "${run_name}" == *"_${v}" ]]; then
+    variant="${v}"
+    break
+  fi
+done
+seed_tok="s?"
+if [[ "${run_name}" =~ seed([0-9]+) ]]; then
+  seed_tok="s${BASH_REMATCH[1]}"
+elif [[ "${SLURM_JOB_NAME}" =~ tr_s([0-9]+) ]]; then
+  seed_tok="s${BASH_REMATCH[1]}"
+fi
+slurm_log="log/train/robustness/array/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_${idx}.out"
+desc_log="log/train/robustness/array/tr_${seed_tok}_${model_short}_${mode}_${variant}.${SLURM_ARRAY_JOB_ID}_${idx}.out"
+if [[ -f "${slurm_log}" && "${slurm_log}" != "${desc_log}" ]]; then
+  mv -f "${slurm_log}" "${desc_log}" 2>/dev/null || true
+  echo "[array-train] renamed log -> ${desc_log}"
+fi
+
+exit "${status}"

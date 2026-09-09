@@ -7,26 +7,25 @@
 #SBATCH --cpus-per-task=28
 #SBATCH --gres=gpu:4
 #SBATCH --mem=400G
-#SBATCH --time=6:00:00
+#SBATCH --time=24:00:00
 set -euo pipefail
 
-# Pipeline: CE-SFT 10 steps → OPSD 100 steps (same 4 GPUs as baseline Olmo OPSD).
-# SFT data: same OT integer_answer parquet as scripts/sft/qwen3_1.7b (problem/solution).
-# OPSD hyperparams match olmo jsd005 clip005 1e-6, but teacher has NO privilege:
-#   MODE=same, TEACHER_PRIVILEGE_FIELD=none → teacher prompt == student prompt.
+# Pipeline: CE-SFT 10 steps (OMR long CoT parquet) → OPSD 100 steps (OT maxprompt1024).
+# SFT uses raw OMR parquet (not qwen-pretokenized .tok) so Olmo chat template applies.
+# OPSD: MODE=same, no teacher privilege.
 
 NUM_GPUS=4
 SEED=${SEED:-42}
 
 SFT_LEARNING_RATE=${SFT_LEARNING_RATE:-1e-5}
 SFT_WARMUP_RATIO=${SFT_WARMUP_RATIO:-0.03}
-SFT_MAX_LENGTH=${SFT_MAX_LENGTH:-2048}
-SFT_PER_DEVICE_BATCH_SIZE=${SFT_PER_DEVICE_BATCH_SIZE:-2}
-SFT_GRADIENT_ACCUMULATION_STEPS=${SFT_GRADIENT_ACCUMULATION_STEPS:-8}
+SFT_MAX_LENGTH=${SFT_MAX_LENGTH:-12288}
+SFT_PER_DEVICE_BATCH_SIZE=${SFT_PER_DEVICE_BATCH_SIZE:-1}
+SFT_GRADIENT_ACCUMULATION_STEPS=${SFT_GRADIENT_ACCUMULATION_STEPS:-16}
 SFT_TARGET_GLOBAL_BATCH=${SFT_TARGET_GLOBAL_BATCH:-64}
 SFT_MAX_STEPS=${SFT_MAX_STEPS:-10}
 SFT_SAVE_STEPS=${SFT_SAVE_STEPS:-10}
-SFT_RUN_NAME=${SFT_RUN_NAME:-sft_think_10step_ot_olmo7bt}
+SFT_RUN_NAME=${SFT_RUN_NAME:-sft_think_10step_omr12k_olmo7bt}
 
 MODE=${MODE:-same}
 TEACHER_PRIVILEGE_FIELD=${TEACHER_PRIVILEGE_FIELD:-none}
@@ -43,12 +42,12 @@ SAVE_TOTAL_LIMIT=${SAVE_TOTAL_LIMIT:-5}
 SGLANG_MEM_FRACTION_STATIC=${SGLANG_MEM_FRACTION_STATIC:-0.40}
 SGLANG_ATTENTION_BACKEND=${SGLANG_ATTENTION_BACKEND:-triton}
 ROLLOUT_BACKEND=${ROLLOUT_BACKEND:-sglang}
-OPSD_RUN_NAME=${OPSD_RUN_NAME:-st_tt_same_clip005_1e_6_ot_olmo7bt_sft10}
+OPSD_RUN_NAME=${OPSD_RUN_NAME:-st_tt_same_clip005_1e_6_ot1024_olmo7bt_sft10omr}
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
 BASE_MODEL_PATH=${BASE_MODEL_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/olmo-3-7b-think}
 CHAT_TEMPLATE_PATH=${CHAT_TEMPLATE_PATH:-${BASE_MODEL_PATH}}
-SFT_DATASET_PATH=${SFT_DATASET_PATH:-${BASE_DIR}/data/openthoughts/preprocessed/openthoughts.opsd.solution.sthink_tthink.maxprompt1024.integer_answer.parquet}
+SFT_DATASET_PATH=${SFT_DATASET_PATH:-${BASE_DIR}/data/openmathreasoning/preprocessed/omr.integer_answer.think.le12k.parquet}
 OPSD_DATASET_PATH=${OPSD_DATASET_PATH:-${BASE_DIR}/data/openthoughts/preprocessed/openthoughts.opsd.solution.sthink_tthink.olmo7bthink.maxprompt1024.parquet}
 MODEL_TAG=${MODEL_TAG:-olmo3_7b_think}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
@@ -105,7 +104,7 @@ mkdir -p "${SFT_OUTPUT_DIR}" "${OPSD_OUTPUT_DIR}" "${WANDB_DIR}" "${HF_HOME}" \
   "${BASE_DIR}/log/train/sft10_then_opsd"
 
 for p in "${SFT_DATASET_PATH}" "${OPSD_DATASET_PATH}"; do
-  if [[ ! -f "${p}" ]]; then
+  if [[ ! -e "${p}" ]]; then
     echo "[error] missing dataset: ${p}" >&2
     exit 1
   fi
@@ -130,8 +129,8 @@ echo "[meta] job=${JOB_TAG} model=${MODEL_TAG} CUDA_HOME=${CUDA_HOME:-unset}"
 echo "[meta] sft_out=${SFT_OUTPUT_DIR}"
 echo "[meta] opsd_out=${OPSD_OUTPUT_DIR}"
 
-export WANDB_PROJECT=${WANDB_PROJECT_SFT:-SFT_OpenThoughts}
-export WANDB_RUN_GROUP=${WANDB_RUN_GROUP_SFT:-olmo7bt_sft10_ot}
+export WANDB_PROJECT=${WANDB_PROJECT_SFT:-SFT_OpenMath}
+export WANDB_RUN_GROUP=${WANDB_RUN_GROUP_SFT:-olmo7bt_sft10_omr12k}
 echo "[phase1] SFT steps=${SFT_MAX_STEPS} micro=${SFT_PER_DEVICE_BATCH_SIZE} gas=${SFT_GRADIENT_ACCUMULATION_STEPS} gbs=${SFT_GBS}"
 accelerate launch \
   --config_file "${BASE_DIR}/configs/accelerate_zero2_no_offload.yaml" \

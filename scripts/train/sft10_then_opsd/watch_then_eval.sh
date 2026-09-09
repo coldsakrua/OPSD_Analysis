@@ -57,9 +57,9 @@ ckpt_complete() {
 eval_tag_for() {
   local model_key=$1 kind=$2 step=$3
   case "${model_key}" in
-    qwen3_1.7b|1.7b) echo "sft10_same_1p7b_${kind}_ckpt${step}" ;;
-    olmo3_7b_think|olmo_7b_think) echo "sft10_same_olmo7bt_${kind}_ckpt${step}" ;;
-    qwen3_4b_thinking|4b_thinking) echo "sft10_same_4bt_${kind}_ckpt${step}" ;;
+    qwen3_1.7b|1.7b) echo "sft10omr_same_1p7b_${kind}_ckpt${step}" ;;
+    olmo3_7b_think|olmo_7b_think) echo "sft10omr_same_olmo7bt_${kind}_ckpt${step}" ;;
+    qwen3_4b_thinking|4b_thinking) echo "sft10omr_same_4bt_${kind}_ckpt${step}" ;;
     *) echo "${model_key}_${kind}_ckpt${step}" ;;
   esac
 }

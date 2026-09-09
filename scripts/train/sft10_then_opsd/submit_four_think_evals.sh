@@ -33,9 +33,9 @@ step="${step#checkpoint-}"
 
 if [[ -z "${EVAL_TAG:-}" ]]; then
   case "${MODEL_KEY}" in
-    qwen3_1.7b|1.7b) EVAL_TAG="sft10_same_1p7b_${KIND:-ckpt}${step}" ;;
-    olmo3_7b_think|olmo_7b_think) EVAL_TAG="sft10_same_olmo7bt_${KIND:-ckpt}${step}" ;;
-    qwen3_4b_thinking|4b_thinking) EVAL_TAG="sft10_same_4bt_${KIND:-ckpt}${step}" ;;
+    qwen3_1.7b|1.7b) EVAL_TAG="sft10omr_same_1p7b_${KIND:-ckpt}${step}" ;;
+    olmo3_7b_think|olmo_7b_think) EVAL_TAG="sft10omr_same_olmo7bt_${KIND:-ckpt}${step}" ;;
+    qwen3_4b_thinking|4b_thinking) EVAL_TAG="sft10omr_same_4bt_${KIND:-ckpt}${step}" ;;
     *)
       _run="$(basename "$(dirname "$(dirname "${CHECKPOINT_PATH}")")")"
       EVAL_TAG="${_run}_checkpoint-${step}"
