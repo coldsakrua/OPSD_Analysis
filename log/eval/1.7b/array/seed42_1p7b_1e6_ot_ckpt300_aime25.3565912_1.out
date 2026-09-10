@@ -48,4 +48,56 @@ INFO 09-09 20:43:27 [model_runner.py:1592] Graph capturing finished in 13 secs, 
 INFO 09-09 20:43:27 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 15.61 seconds
 [eval] generating 30 prompts x n=8 (pass-at-k=[1, 4, 8], generate_batch_size=8) ...
 prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s][eval] wrote partial json: 8/30 metrics=aime25_1.7b_think_seed42.metrics.json results=aime25_1.7b_think_seed42.results.json
-prompt_batches:  25%|██▌       | 1/4 [17:57<53:51, 1077.07s/it]
+prompt_batches:  25%|██▌       | 1/4 [17:57<53:51, 1077.07s/it]WARNING 09-09 21:10:05 [scheduler.py:1768] Sequence group 15_parallel_sample_2 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=1
+[eval] wrote partial json: 16/30 metrics=aime25_1.7b_think_seed42.metrics.json results=aime25_1.7b_think_seed42.results.json
+prompt_batches:  50%|█████     | 2/4 [57:23<1:01:10, 1835.48s/it][eval] wrote partial json: 24/30 metrics=aime25_1.7b_think_seed42.metrics.json results=aime25_1.7b_think_seed42.results.json
+prompt_batches:  75%|███████▌  | 3/4 [1:19:22<26:39, 1599.66s/it][eval] wrote partial json: 30/30 metrics=aime25_1.7b_think_seed42.metrics.json results=aime25_1.7b_think_seed42.results.json
+prompt_batches: 100%|██████████| 4/4 [1:50:03<00:00, 1695.08s/it]prompt_batches: 100%|██████████| 4/4 [1:50:03<00:00, 1650.96s/it]
+[eval] wrote partial json: 30/30 metrics=aime25_1.7b_think_seed42.metrics.json results=aime25_1.7b_think_seed42.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_clip005_1e6_ot_1p7b_ckpt300/aime25_1.7b_think_seed42.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_clip005_1e6_ot_1p7b_ckpt300/aime25_1.7b_think_seed42.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 33.33% (10/30)
+  Pass@4: 50.00% (15/30)
+  Pass@8: 60.00% (18/30)
+  Avg1(one-shot hit rate): 33.33%
+  Avg16(overall correctness): 29.58%
+  Avg output tokens: 18901.8
+[aime25] n=30
+  Pass@1: 33.33% (10/30)
+  Pass@4: 50.00% (15/30)
+  Pass@8: 60.00% (18/30)
+  Avg1(one-shot hit rate): 33.33%
+  Avg16(overall correctness): 29.58%
+  Avg output tokens: 18901.8
+[BY_CATEGORY]
+[__uncategorized__] n=30
+  Pass@1: 33.33% (10/30)
+  Pass@4: 50.00% (15/30)
+  Pass@8: 60.00% (18/30)
+  Avg1(one-shot hit rate): 33.33%
+  Avg16(overall correctness): 29.58%
+  Avg output tokens: 18901.8
+Avg correct / sample: 29.58%
+Majority vote: 43.33%
+Boxed format rate: 89.17%
+Avg output tokens: 18901.8
+[TOKEN_BUDGET]
+[aime25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @4k: Pass@8=16.67% (5/30)  Avg16=6.67%
+  @8k: Pass@8=36.67% (11/30)  Avg16=20.42%
+  @16k: Pass@8=50.00% (15/30)  Avg16=25.83%
+  @32k: Pass@8=60.00% (18/30)  Avg16=29.58%
+  @38k: Pass@8=60.00% (18/30)  Avg16=29.58%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime25] n=30  P@16=0.00%  Avg16=29.58%  L=18901.8  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime25] n=30  P@16=0.00%  Avg16=29.58%  L=18901.8  pass/log2(16L)=0.0000  avg/log2(16L)=1.6249
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_clip005_1e6_ot_1p7b_ckpt300/aime25_1.7b_think_seed42.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_clip005_1e6_ot_1p7b_ckpt300/aime25_1.7b_think_seed42.results.json
+============================================================
+[rank0]:[W909 22:34:23.752746257 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())

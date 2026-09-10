@@ -45,4 +45,57 @@ INFO 09-09 20:54:20 [model_runner.py:1450] Capturing cudagraphs for decoding. Th
 INFO 09-09 20:54:38 [model_runner.py:1592] Graph capturing finished in 19 secs, took 0.33 GiB
 INFO 09-09 20:54:38 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 22.88 seconds
 [eval] generating 30 prompts x n=8 (pass-at-k=[1, 4, 8], generate_batch_size=8) ...
-prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s]
+prompt_batches:   0%|          | 0/4 [00:00<?, ?it/s][eval] wrote partial json: 8/30 metrics=aime25_1.7b_think_seed42.metrics.json results=aime25_1.7b_think_seed42.results.json
+prompt_batches:  25%|██▌       | 1/4 [14:57<44:53, 897.84s/it]WARNING 09-09 21:17:29 [scheduler.py:1768] Sequence group 15_parallel_sample_3 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=1
+[eval] wrote partial json: 16/30 metrics=aime25_1.7b_think_seed42.metrics.json results=aime25_1.7b_think_seed42.results.json
+prompt_batches:  50%|█████     | 2/4 [46:51<49:50, 1495.14s/it][eval] wrote partial json: 24/30 metrics=aime25_1.7b_think_seed42.metrics.json results=aime25_1.7b_think_seed42.results.json
+prompt_batches:  75%|███████▌  | 3/4 [1:07:30<22:58, 1378.20s/it][eval] wrote partial json: 30/30 metrics=aime25_1.7b_think_seed42.metrics.json results=aime25_1.7b_think_seed42.results.json
+prompt_batches: 100%|██████████| 4/4 [1:27:41<00:00, 1312.17s/it]prompt_batches: 100%|██████████| 4/4 [1:27:41<00:00, 1315.27s/it]
+[eval] wrote partial json: 30/30 metrics=aime25_1.7b_think_seed42.metrics.json results=aime25_1.7b_think_seed42.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft10omr_same_1p7b_sft_ckpt10/aime25_1.7b_think_seed42.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft10omr_same_1p7b_sft_ckpt10/aime25_1.7b_think_seed42.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 33.33% (10/30)
+  Pass@4: 43.33% (13/30)
+  Pass@8: 46.67% (14/30)
+  Avg1(one-shot hit rate): 33.33%
+  Avg16(overall correctness): 30.00%
+  Avg output tokens: 15926.5
+[aime25] n=30
+  Pass@1: 33.33% (10/30)
+  Pass@4: 43.33% (13/30)
+  Pass@8: 46.67% (14/30)
+  Avg1(one-shot hit rate): 33.33%
+  Avg16(overall correctness): 30.00%
+  Avg output tokens: 15926.5
+[BY_CATEGORY]
+[__uncategorized__] n=30
+  Pass@1: 33.33% (10/30)
+  Pass@4: 43.33% (13/30)
+  Pass@8: 46.67% (14/30)
+  Avg1(one-shot hit rate): 33.33%
+  Avg16(overall correctness): 30.00%
+  Avg output tokens: 15926.5
+Avg correct / sample: 30.00%
+Majority vote: 40.00%
+Boxed format rate: 94.17%
+Avg output tokens: 15926.5
+[TOKEN_BUDGET]
+[aime25] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=10.00% (3/30)  Avg16=2.92%
+  @4k: Pass@8=23.33% (7/30)  Avg16=10.42%
+  @8k: Pass@8=33.33% (10/30)  Avg16=20.00%
+  @16k: Pass@8=43.33% (13/30)  Avg16=27.92%
+  @32k: Pass@8=46.67% (14/30)  Avg16=30.00%
+  @38k: Pass@8=46.67% (14/30)  Avg16=30.00%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime25] n=30  P@16=0.00%  Avg16=30.00%  L=15926.5  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime25] n=30  P@16=0.00%  Avg16=30.00%  L=15926.5  pass/log2(16L)=0.0000  avg/log2(16L)=1.6705
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft10omr_same_1p7b_sft_ckpt10/aime25_1.7b_think_seed42.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft10omr_same_1p7b_sft_ckpt10/aime25_1.7b_think_seed42.results.json
+============================================================
+[rank0]:[W909 22:23:00.884245468 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
