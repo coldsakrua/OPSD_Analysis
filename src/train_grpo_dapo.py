@@ -84,6 +84,26 @@ def _shield_cpu_actor_cuda_probes() -> None:
         pass
 
 
+def _patch_nccl_process_group_timeout() -> None:
+    """Raise torch PG watchdog past the 1800s default (24k generate can exceed 30min)."""
+    import datetime
+
+    import torch.distributed as dist
+
+    if getattr(dist, "_opsd_nccl_timeout_patched", False):
+        return
+    seconds = int(os.environ.get("OPSD_NCCL_TIMEOUT_SEC", "10800"))
+    _orig = dist.init_process_group
+
+    def _init(*args, **kwargs):  # noqa: ANN001
+        kwargs.setdefault("timeout", datetime.timedelta(seconds=seconds))
+        return _orig(*args, **kwargs)
+
+    dist.init_process_group = _init  # type: ignore[method-assign]
+    dist._opsd_nccl_timeout_patched = True  # type: ignore[attr-defined]
+    print(f"[opsd-grpo] nccl init_process_group timeout={seconds}s", flush=True)
+
+
 def _install_lazy_vllm_listconfig_patch() -> None:
     """Ray worker_process_setup_hook entry.
 
@@ -98,6 +118,10 @@ def _install_lazy_vllm_listconfig_patch() -> None:
         return
     sys._opsd_lazy_listconfig_hook = True  # type: ignore[attr-defined]
 
+    try:
+        _patch_nccl_process_group_timeout()
+    except Exception:
+        pass
     try:
         _patch_vllm_listconfig_coercion()
     except Exception:
@@ -252,6 +276,14 @@ def run_ppo(config: DictConfig) -> None:
                 "env_vars": {
                     "TOKENIZERS_PARALLELISM": "true",
                     "NCCL_DEBUG": os.environ.get("NCCL_DEBUG", "WARN"),
+                    "OPSD_NCCL_TIMEOUT_SEC": os.environ.get("OPSD_NCCL_TIMEOUT_SEC", "10800"),
+                    "TORCH_NCCL_HEARTBEAT_TIMEOUT_SEC": os.environ.get(
+                        "TORCH_NCCL_HEARTBEAT_TIMEOUT_SEC",
+                        os.environ.get("OPSD_NCCL_TIMEOUT_SEC", "10800"),
+                    ),
+                    "NCCL_TIMEOUT": os.environ.get(
+                        "NCCL_TIMEOUT", os.environ.get("OPSD_NCCL_TIMEOUT_SEC", "10800")
+                    ),
                     "VLLM_LOGGING_LEVEL": os.environ.get("VLLM_LOGGING_LEVEL", "WARN"),
                     "VLLM_ALLOW_RUNTIME_LORA_UPDATING": "true",
                     # Explicitly clear so Ray workers do not inherit Slurm ROCR/HIP.
@@ -370,6 +402,7 @@ class TaskRunner:
         from verl.utils import hf_processor, hf_tokenizer
         from verl.utils.fs import copy_to_local
 
+        _patch_nccl_process_group_timeout()
         _patch_vllm_listconfig_coercion()
         _patch_compute_data_metrics_with_acc()
         _patch_rollout_dump_subsample(config)

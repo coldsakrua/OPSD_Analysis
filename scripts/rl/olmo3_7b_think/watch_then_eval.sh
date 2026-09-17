@@ -1,6 +1,6 @@
 #!/bin/bash
 # CPU-node watcher: wait until global_step_{target_step} is ready (even if train
-# is still running), merge FSDP→HF, then submit 4 think evals
+# is still running), merge FSDP→HF, then submit 4 Olmo think evals
 # (aime24/25/26 + hmmt25).
 #
 # Manifest TSV columns:
@@ -10,16 +10,13 @@ set -euo pipefail
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
 cd "${BASE_DIR}"
 
-MANIFEST=${MANIFEST:-${BASE_DIR}/log/train/rl/qwen3_1.7b_think/watch_grpo_latest.tsv}
+MANIFEST=${MANIFEST:-${BASE_DIR}/log/train/rl/olmo3_7b_think/watch_grpo_latest.tsv}
 INTERVAL=${INTERVAL:-120}
-POST_DONE_WAIT=${POST_DONE_WAIT:-90}
-# Optional: do not submit GPU evals until this job is RUNNING (so a queued
-# 4-GPU train can claim the hole first). Merge may still run earlier (CPU).
-WAIT_FOR_JID=${WAIT_FOR_JID:-}
+POST_DONE_WAIT=${POST_DONE_WAIT:-120}
 MERGE_SCRIPT="${BASE_DIR}/scripts/eval/qwen3_4b_base/merge_fsdp_ckpt.sh"
-SUBMIT="${BASE_DIR}/scripts/eval/1.7b/seed/submit_four_seed.sh"
-STATE_DIR="${BASE_DIR}/log/train/rl/qwen3_1.7b_think/watch_state"
-LOG="${BASE_DIR}/log/train/rl/qwen3_1.7b_think/watch.${SLURM_JOB_ID:-manual}.log"
+SUBMIT="${BASE_DIR}/scripts/eval/olmo_7b_think/seed/submit_four_seed.sh"
+STATE_DIR="${BASE_DIR}/log/train/rl/olmo3_7b_think/watch_state"
+LOG="${BASE_DIR}/log/train/rl/olmo3_7b_think/watch.${SLURM_JOB_ID:-manual}.log"
 mkdir -p "${STATE_DIR}" "$(dirname "${LOG}")"
 chmod +x "${SUBMIT}" "${MERGE_SCRIPT}" 2>/dev/null || true
 
@@ -41,19 +38,6 @@ normalize_state() {
   local st=$1
   st="${st%%+*}"
   echo "${st}"
-}
-
-job_active() {
-  local st
-  st=$(normalize_state "$(job_state "$1")")
-  case "${st}" in
-    PENDING|RUNNING|CONFIGURING|COMPLETING|RESIZING|SUSPENDED|REQUEUED|STAGE_OUT)
-      return 0
-      ;;
-    *)
-      return 1
-      ;;
-  esac
 }
 
 actor_dir_ready() {
@@ -109,7 +93,7 @@ if [[ "${total}" -eq 0 ]]; then
 fi
 
 log "host=$(hostname) job=${SLURM_JOB_ID:-none} interval=${INTERVAL}s post_wait=${POST_DONE_WAIT}s"
-log "manifest=${MANIFEST} rows=${total} wait_for_jid=${WAIT_FOR_JID:-none}"
+log "manifest=${MANIFEST} rows=${total}"
 
 while true; do
   done_count=0
@@ -160,8 +144,8 @@ while true; do
     if ! hf_merged_ready "${merged}"; then
       log "MERGE start local_dir=${actor} -> ${merged}"
       merge_jid=$(sbatch --parsable --chdir="${BASE_DIR}" --wait \
-        --job-name="merge_grpo1p7_${train_jid}" \
-        --output="${BASE_DIR}/log/train/rl/qwen3_1.7b_think/merge_%j.out" \
+        --job-name="merge_grpoolmo_${train_jid}" \
+        --output="${BASE_DIR}/log/train/rl/olmo3_7b_think/merge_%j.out" \
         --export=ALL,BASE_DIR="${BASE_DIR}",LOCAL_DIR="${actor}",TARGET_DIR="${merged}" \
         "${MERGE_SCRIPT}" 2>>"${LOG}" | tail -1 || true)
       merge_jid="${merge_jid%%;*}"
@@ -176,30 +160,7 @@ while true; do
     fi
 
     step_name="$(basename "$(dirname "${actor}")")"
-    tag="${eval_tag:-grpo_omr_int_1p7b_${step_name}}"
-
-    if [[ -n "${WAIT_FOR_JID}" ]]; then
-      wait_st=$(normalize_state "$(job_state "${WAIT_FOR_JID}")")
-      case "${wait_st}" in
-        RUNNING|COMPLETING|COMPLETED)
-          log "WAIT_FOR ${WAIT_FOR_JID} state=${wait_st} — ok to submit evals"
-          ;;
-        PENDING|CONFIGURING|REQUEUED|RESIZING|SUSPENDED)
-          pending=$((pending + 1))
-          log "HOLD evals until ${WAIT_FOR_JID} is RUNNING (now ${wait_st})"
-          continue
-          ;;
-        FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY|PREEMPTED)
-          log "WAIT_FOR ${WAIT_FOR_JID} ended ${wait_st} — submit evals anyway"
-          ;;
-        *)
-          pending=$((pending + 1))
-          log "HOLD evals: ${WAIT_FOR_JID} state=${wait_st}"
-          continue
-          ;;
-      esac
-    fi
-
+    tag="${eval_tag:-grpo_omr_int_olmo7bt_${step_name}}"
     preserve_conflicting_eval_dir "${tag}" "${merged}"
     log "SUBMIT evals ckpt=${merged} seed=${seed} tag=${tag}"
     if CHECKPOINT_PATH="${merged}" EVAL_TAG="${tag}" SEED="${seed}" BASE_DIR="${BASE_DIR}" \
