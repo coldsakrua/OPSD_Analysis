@@ -229,23 +229,6 @@ for seed in 1024 65536; do
   submit_eval_seed "${seed}"
 done
 
-# ---------- restart watch on new manifest ----------
-OLD_WATCH=$(cat "${OUT_DIR}/watch_jid_20260906_032824.txt" 2>/dev/null || true)
-# also find running robust_watch_eval
-mapfile -t WATCHES < <(squeue -u 2501210611 -h -o '%i %j' | awk '$2=="robust_watch_eval"{print $1}')
-if ((${#WATCHES[@]} > 0)); then
-  echo "[compress] scancel old watch: ${WATCHES[*]}"
-  scancel "${WATCHES[@]}"
-fi
-# clear stale done stamps for rescinded seed trains (optional: only seed-related)
-# keep topk done stamps if any
-watch_jid=$(sbatch --parsable --chdir="${ROOT}" \
-  --export=ALL,BASE_DIR="${ROOT}",MANIFEST="${NEW_MANIFEST}" \
-  "${ROOT}/scripts/train/robustness/sbatch_watch.sh")
-watch_jid="${watch_jid%%;*}"
-echo "[compress] new watch -> ${watch_jid}"
-echo "${watch_jid}" >"${OUT_DIR}/watch_jid_${STAMP}.txt"
-
 echo "[compress] queue snapshot (robustness-related):"
 squeue -u 2501210611 -o '%.18i %.12P %.28j %.2t %.10M' | awk '
   NR==1 || /tr_s|ev_s|robust_watch|topk|snt_tnt_clip005|st_tt_clip005_topk/ {print}'

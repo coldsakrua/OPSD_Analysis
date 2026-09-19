@@ -1,5 +1,5 @@
 #!/bin/bash
-# Submit 5 c256+adv_t4 trains, write manifest, then start CPU watcher for think evals.
+# Submit 5 c256+adv_t4 trains and write a manifest.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
@@ -38,10 +38,5 @@ done
 cp -f "${MANIFEST_STAMPED}" "${MANIFEST}"
 echo "[submit] manifest=${MANIFEST}"
 echo "[submit] stamped=${MANIFEST_STAMPED}"
-
-watch_jid=$(sbatch --parsable --chdir="${ROOT}" \
-  --export=ALL,BASE_DIR="${ROOT}",MANIFEST="${MANIFEST}" \
-  "${ROOT}/scripts/train/jsd005_c256_adv_t4/sbatch_watch.sh")
-echo "[submit] watch -> jid=${watch_jid}"
 echo "[submit] done"
 cat "${MANIFEST}"

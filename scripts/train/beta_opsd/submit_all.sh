@@ -83,12 +83,8 @@ submit_olmo \
   "${OT_PRE}/openthoughts.opsd.solution.nothink.olmo7bit.maxprompt1024.parquet" \
   0 0
 
-WATCH_SH="${ROOT}/scripts/train/beta_opsd/sbatch_watch_eval.sh"
-chmod +x "${WATCH_SH}" "${ROOT}/scripts/train/beta_opsd/watch_and_eval.sh" \
-  "${ROOT}/scripts/train/beta_opsd/submit_four_evals.sh" \
+chmod +x "${ROOT}/scripts/train/beta_opsd/submit_four_evals.sh" \
   "${ROOT}/scripts/train/beta_opsd/merge_olmo_lora.sh"
-echo "[submit] beta_watch_eval (ckpt-200 → 4 evals each)"
-sbatch --job-name=beta_watch_eval "${WATCH_SH}"
 
-echo "[done] submitted 5 β-OPSD LoRA trains + 1 watch/eval job"
+echo "[done] submitted 5 β-OPSD LoRA trains"
 squeue -u "${USER}" | head -40

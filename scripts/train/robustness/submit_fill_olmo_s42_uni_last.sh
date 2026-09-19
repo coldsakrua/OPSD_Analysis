@@ -1,6 +1,5 @@
 #!/bin/bash
-# Fill missing Olmo-3-7B-Think seed=42 uni256 / last256 trains, then CPU-watch
-# for 4 evals (AIME24/25/26 + HMMT25, eval SEED=42) once checkpoint-100 is ready.
+# Fill missing Olmo-3-7B-Think seed=42 uni256 / last256 trains.
 #
 # Does NOT touch already-running/pending jobs:
 #   last256 seed1024 train 3561990 (watched by 3561991)
@@ -53,16 +52,9 @@ if [[ -s "${FAIL_LOG}" ]]; then
   cat "${FAIL_LOG}"
 fi
 if [[ "${n_ok}" -eq 0 ]]; then
-  echo "[error] no trains submitted; skip watch" >&2
+  echo "[error] no trains submitted" >&2
   exit 1
 fi
 
-watch_jid=$(sbatch --parsable --chdir="${ROOT}" \
-  --job-name=fill_olmo_s42_watch \
-  --export=ALL,BASE_DIR="${ROOT}",MANIFEST="${MANIFEST}",INTERVAL=120,POST_DONE_WAIT=60 \
-  "${ROOT}/scripts/train/robustness/sbatch_watch.sh")
-watch_jid="${watch_jid%%;*}"
-echo "[submit] watch -> jid=${watch_jid}"
-echo "${watch_jid}" >"${OUT_DIR}/watch_jid_fill_olmo_s42_${STAMP}.txt"
 echo "[submit] done"
 cat "${MANIFEST}"

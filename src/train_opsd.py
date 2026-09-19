@@ -144,6 +144,7 @@ def parse_args() -> argparse.Namespace:
             "encourage_trans",
             "irrelevant_trans",
             "sample_irrelevant_trans",
+            "instruction_zh",
             "irrelevant_other_sol",
         ),
         required=True,
@@ -152,6 +153,7 @@ def parse_args() -> argparse.Namespace:
             "same/encourage/irrelevant (no-GT), or "
             "same_trans/encourage_trans/irrelevant_trans (no-GT + transition, no reference solution), or "
             "sample_irrelevant_trans (per-row irrelevant_prefix + transition), or "
+            "instruction_zh (no-GT: student 请你给出快速简短的解答 / teacher 请你给出详细的解答), or "
             "irrelevant_other_sol (unrelated problem_B+solution_B then problem_A; no 'B solves A' claim). "
             "correct_simple = problem + answer + Qwen3 boxed instruction."
         ),
@@ -511,6 +513,7 @@ def parse_args() -> argparse.Namespace:
             "encourage_trans",
             "irrelevant_trans",
             "sample_irrelevant_trans",
+            "instruction_zh",
             "irrelevant_other_sol",
             "instruction",
             "pi",

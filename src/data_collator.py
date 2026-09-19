@@ -32,6 +32,10 @@ IRRELEVANT_PREFIX = (
     "The weather is nice today. Let's work on a problem together.\n\n"
 )
 
+# No-GT Chinese instruction-shift: student brief vs teacher detailed (problem only).
+ZH_BRIEF_STUDENT_INSTRUCTION = "请你给出快速简短的解答"
+ZH_DETAIL_TEACHER_INSTRUCTION = "请你给出详细的解答"
+
 # Modes that never inject ground-truth privilege text.
 NO_GT_MODES = {
     "same",
@@ -41,6 +45,7 @@ NO_GT_MODES = {
     "encourage_trans",
     "irrelevant_trans",
     "sample_irrelevant_trans",
+    "instruction_zh",
 }
 
 # Teacher gets an unrelated (problem_B, solution_B) block, not A's GT.
@@ -65,6 +70,7 @@ class SelfDistillationDataCollator:
         "encourage_trans",
         "irrelevant_trans",
         "sample_irrelevant_trans",
+        "instruction_zh",
         "irrelevant_other_sol",
     }
 
@@ -254,24 +260,29 @@ class SelfDistillationDataCollator:
         ref_user: str | None = None
 
         if self.privilege_mode in NO_GT_MODES:
-            # Student: plain problem prompt. Teacher: same / prefix / (+ transition, no GT).
-            student_user = self._standard_student_user(problem)
-            if self.privilege_mode == "same":
-                teacher_user = student_user
-            elif self.privilege_mode == "encourage":
-                teacher_user = f"{ENCOURAGE_PREFIX}{student_user}"
-            elif self.privilege_mode == "irrelevant":
-                teacher_user = f"{IRRELEVANT_PREFIX}{student_user}"
-            elif self.privilege_mode == "same_trans":
-                teacher_user = self._nogt_transition_teacher_user(problem)
-            elif self.privilege_mode == "encourage_trans":
-                teacher_user = self._nogt_transition_teacher_user(problem, prefix=ENCOURAGE_PREFIX)
-            elif self.privilege_mode == "irrelevant_trans":
-                teacher_user = self._nogt_transition_teacher_user(problem, prefix=IRRELEVANT_PREFIX)
-            else:  # sample_irrelevant_trans
-                teacher_user = self._nogt_transition_teacher_user(
-                    problem, prefix=self._sampled_irrelevant_prefix(feature)
-                )
+            if self.privilege_mode == "instruction_zh":
+                # Problem only; student brief vs teacher detailed (no GT / no boxed suffix).
+                student_user = f"Problem: {problem}\n\n{ZH_BRIEF_STUDENT_INSTRUCTION}"
+                teacher_user = f"Problem: {problem}\n\n{ZH_DETAIL_TEACHER_INSTRUCTION}"
+            else:
+                # Student: plain problem prompt. Teacher: same / prefix / (+ transition, no GT).
+                student_user = self._standard_student_user(problem)
+                if self.privilege_mode == "same":
+                    teacher_user = student_user
+                elif self.privilege_mode == "encourage":
+                    teacher_user = f"{ENCOURAGE_PREFIX}{student_user}"
+                elif self.privilege_mode == "irrelevant":
+                    teacher_user = f"{IRRELEVANT_PREFIX}{student_user}"
+                elif self.privilege_mode == "same_trans":
+                    teacher_user = self._nogt_transition_teacher_user(problem)
+                elif self.privilege_mode == "encourage_trans":
+                    teacher_user = self._nogt_transition_teacher_user(problem, prefix=ENCOURAGE_PREFIX)
+                elif self.privilege_mode == "irrelevant_trans":
+                    teacher_user = self._nogt_transition_teacher_user(problem, prefix=IRRELEVANT_PREFIX)
+                else:  # sample_irrelevant_trans
+                    teacher_user = self._nogt_transition_teacher_user(
+                        problem, prefix=self._sampled_irrelevant_prefix(feature)
+                    )
         elif self.privilege_mode == "irrelevant_other_sol":
             # Unrelated B1..Bk (problem+solution) inserted before A; no claim they solve A.
             student_user = self._standard_student_user(problem)

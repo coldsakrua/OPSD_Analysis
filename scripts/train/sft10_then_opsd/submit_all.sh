@@ -1,5 +1,5 @@
 #!/bin/bash
-# Submit SFT10(OMR long CoT)→OPSD(same, OT1024) for 1.7b / olmo7bt / 4bt, then CPU watcher.
+# Submit SFT10(OMR long CoT)→OPSD(same, OT1024) for 1.7b / olmo7bt / 4bt.
 #
 # Usage (from OPSD_Analysis):
 #   bash scripts/train/sft10_then_opsd/submit_all.sh
@@ -23,8 +23,6 @@ chmod +x \
   "${DIR}/sft10_opsd_olmo7bt.sh" \
   "${DIR}/sft10_opsd_qwen3_4bt.sh" \
   "${DIR}/submit_four_think_evals.sh" \
-  "${DIR}/watch_then_eval.sh" \
-  "${DIR}/sbatch_watch.sh" \
   "${BASE_DIR}/scripts/eval/qwen3_4b_thinking/submit_four.sh"
 
 STAMP="$(date +%Y%m%d_%H%M%S)"
@@ -58,13 +56,6 @@ echo "[submit] 4bt jid=${jid_4bt}"
 cp -f "${MANIFEST_STAMPED}" "${MANIFEST}"
 echo "[submit] manifest=${MANIFEST}"
 
-echo "=== submit CPU watcher (eval sft10 + opsd100 after opsd ckpt-100) ==="
-watch_jid=$(sbatch --parsable --chdir="${BASE_DIR}" \
-  --export=ALL,BASE_DIR="${BASE_DIR}",MANIFEST="${MANIFEST}" \
-  "${DIR}/sbatch_watch.sh")
-watch_jid="${watch_jid%%;*}"
-echo "[submit] watcher jid=${watch_jid}"
-
 REPORT="${BASE_DIR}/log/train/sft10_then_opsd/submit_report.${STAMP}.txt"
 {
   echo "submitted_at=$(date -Is)"
@@ -74,7 +65,6 @@ REPORT="${BASE_DIR}/log/train/sft10_then_opsd/submit_report.${STAMP}.txt"
   echo "train_1p7b=${jid_1p7b}"
   echo "train_olmo=${jid_olmo}"
   echo "train_4bt=${jid_4bt}"
-  echo "watch=${watch_jid}"
   echo "manifest=${MANIFEST}"
   echo "stamped=${MANIFEST_STAMPED}"
 } | tee "${REPORT}"

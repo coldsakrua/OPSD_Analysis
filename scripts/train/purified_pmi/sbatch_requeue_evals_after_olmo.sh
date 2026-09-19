@@ -10,14 +10,13 @@
 set -euo pipefail
 
 # Wait until Olmo PMI trains are running (or finished), then resubmit
-# cancelled qwen3_4b / qwen3_4b_thinking evals (4×4=16) and restart watch.
+# cancelled qwen3_4b / qwen3_4b_thinking evals (4×4=16).
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
 cd "${BASE_DIR}"
 SUBMIT="${BASE_DIR}/scripts/train/purified_pmi/submit_four_evals.sh"
-WATCH="${BASE_DIR}/scripts/train/purified_pmi/sbatch_watch_eval.sh"
 INTERVAL=${INTERVAL:-60}
-chmod +x "${SUBMIT}" "${WATCH}" "${BASE_DIR}/scripts/train/purified_pmi/watch_and_eval.sh"
+chmod +x "${SUBMIT}"
 
 log() { echo "[$(date -Is)] $*"; }
 
@@ -77,8 +76,5 @@ resubmit_one qwen3_4b answer qwen3_4b pmi_answer_lora_lr5e6_ot_qwen3_4b
 resubmit_one qwen3_4b solution qwen3_4b pmi_solution_lora_lr5e6_ot_qwen3_4b
 resubmit_one qwen3_4b_thinking answer qwen3_4b_thinking pmi_answer_lora_lr5e6_ot_qwen3_4b_thinking
 resubmit_one qwen3_4b_thinking solution qwen3_4b_thinking pmi_solution_lora_lr5e6_ot_qwen3_4b_thinking
-
-log "restarting pmi_watch_eval for remaining olmo runs"
-sbatch "${WATCH}"
 
 log "done"
