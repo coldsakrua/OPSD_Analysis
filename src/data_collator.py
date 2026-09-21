@@ -36,6 +36,16 @@ IRRELEVANT_PREFIX = (
 ZH_BRIEF_STUDENT_INSTRUCTION = "请你给出快速简短的解答"
 ZH_DETAIL_TEACHER_INSTRUCTION = "请你给出详细的解答"
 
+# No-GT English instruction-shift: brief vs detailed (problem only, boxed suffix).
+EN_BRIEF_INSTRUCTION = (
+    "Give a concise solution with only the essential reasoning, and put the final answer "
+    "within \\boxed{}."
+)
+EN_DETAIL_INSTRUCTION = (
+    "Give a detailed, rigorous solution. Explain every important derivation, check the result, "
+    "and put the final answer within \\boxed{}."
+)
+
 # Modes that never inject ground-truth privilege text.
 NO_GT_MODES = {
     "same",
@@ -62,6 +72,7 @@ class SelfDistillationDataCollator:
         "correct_simple",
         "pi",
         "instruction",
+        "instruction_rev",
         "opsd",
         "same",
         "encourage",
@@ -300,17 +311,15 @@ class SelfDistillationDataCollator:
             teacher_user = self._opsd_teacher_user(problem, privileged)
             if self.purified_pmi:
                 ref_user = self._opsd_reference_only_user(privileged)
-        elif self.privilege_mode == "instruction":
-            student_instruction = (
-                "Give a concise solution with only the essential reasoning, and put the final answer "
-                "within \\boxed{}."
-            )
-            teacher_user = (
-                f"Problem: {problem}\n\n"
-                "Give a detailed, rigorous solution. Explain every important derivation, check the result, "
-                "and put the final answer within \\boxed{}."
-            )
+        elif self.privilege_mode in {"instruction", "instruction_rev"}:
+            # instruction: student brief / teacher detailed.
+            # instruction_rev: student detailed / teacher brief.
+            if self.privilege_mode == "instruction_rev":
+                student_instruction, teacher_instruction = EN_DETAIL_INSTRUCTION, EN_BRIEF_INSTRUCTION
+            else:
+                student_instruction, teacher_instruction = EN_BRIEF_INSTRUCTION, EN_DETAIL_INSTRUCTION
             student_user = f"Problem: {problem}\n\n{student_instruction}"
+            teacher_user = f"Problem: {problem}\n\n{teacher_instruction}"
         elif self.privilege_mode == "correct_simple":
             # Concise answer privilege: problem + answer + please reason step by step
             student_user = self._standard_student_user(problem)

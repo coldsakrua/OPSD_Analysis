@@ -145,6 +145,7 @@ def prompt_length_filter_applied(
         "irrelevant_trans",
         "sample_irrelevant_trans",
         "instruction_zh",
+        "instruction_rev",
     }
     other_problem_modes = {"irrelevant_other_sol"}
     field_ok = (
