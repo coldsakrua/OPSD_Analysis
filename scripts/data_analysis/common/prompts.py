@@ -198,12 +198,19 @@ def load_multi_prefix_samples(
     """Sample prompts shared across teacher prefix variants (2.2).
 
     Student generation stays under ``max_prompt_length`` (default 1024).
-    Each teacher prefix uses its own cap (``sol_long`` → 12288; others → max_prompt_length).
+    Each teacher prefix uses its own cap (``sol_long`` → 12288; ``cot_gold`` → 10240;
+    others → max_prompt_length).
     When both ``sol`` and ``sol_long`` are present, bind to the long solution pool and
     truncate ``sol``'s solution so the short teacher prompt still fits.
+    ``cot_gold`` uses the solution column from a parquet with the same row order
+    as that bind pool (CoT + gold solution).
     """
     prefix_max = {
-        name: teacher_prefix_max_prompt(name, default_max_prompt=max_prompt_length)
+        name: teacher_prefix_max_prompt(
+            name,
+            default_max_prompt=max_prompt_length,
+            dataset_path=dataset_paths[name],
+        )
         for name in dataset_paths
     }
     collators = {
@@ -225,10 +232,23 @@ def load_multi_prefix_samples(
     elif "sol" in dataset_paths:
         bind_path = dataset_paths["sol"]
         student_col = collators["sol"]
+    elif "same" in dataset_paths:
+        bind_path = dataset_paths["same"]
+        student_col = collators["same"]
     else:
-        raise KeyError("teacher_prefix sampling needs sol or sol_long in dataset_paths")
+        raise KeyError("teacher_prefix sampling needs sol, sol_long, or same in dataset_paths")
 
     df = pd.read_parquet(bind_path, columns=["problem", "solution", "answer"])
+    cot_df: pd.DataFrame | None = None
+    if "cot_gold" in dataset_paths:
+        cot_df = pd.read_parquet(
+            dataset_paths["cot_gold"], columns=["problem", "solution", "answer"]
+        )
+        if len(cot_df) != len(df):
+            raise RuntimeError(
+                f"cot_gold rows={len(cot_df)} != bind rows={len(df)} ({bind_path}). "
+                "Rebuild cot+gold with the same row order as the sol_long parquet."
+            )
     distractor_lookup: dict[str, dict[str, Any]] | None = None
     if "irrelevant_other_sol" in dataset_paths:
         distractor_lookup = _distractor_lookup(dataset_paths["irrelevant_other_sol"])
@@ -247,6 +267,18 @@ def load_multi_prefix_samples(
             continue
         if distractor_lookup is not None and not _merge_distractors(feature, distractor_lookup):
             continue
+        cot_feature: dict[str, Any] | None = None
+        if cot_df is not None:
+            cot_row = cot_df.iloc[int(idx)]
+            cot_problem = str(cot_row["problem"]).strip()
+            if cot_problem != feature["problem"]:
+                raise RuntimeError(
+                    f"cot_gold row {int(idx)} problem mismatch vs bind pool"
+                )
+            cot_feature = dict(feature)
+            cot_feature["solution"] = (
+                str(cot_row["solution"]).strip() if cot_row["solution"] is not None else ""
+            )
 
         student_prompt, _ = student_col.format_prompts(feature)
         student_len = _token_len(tokenizer, student_prompt)
@@ -257,7 +289,10 @@ def load_multi_prefix_samples(
         teacher_lens: dict[str, int] = {}
         ok = True
         for name, col in collators.items():
-            feat_for_prefix = feature
+            feat_for_prefix = cot_feature if name == "cot_gold" else feature
+            if feat_for_prefix is None:
+                ok = False
+                break
             if (
                 name == "sol"
                 and "sol_long" in collators

@@ -213,9 +213,9 @@ def render_script(
     length_note = ""
     if section == "2.2":
         length_note = (
-            "# Prefixes default=long: sol/answer/irrelevant/sol_long (≤12288). "
-            "POOL=short → legacy 3 prefixes only.\n"
-            "# Short SCORE_BATCH 8/4/2; sol_long auto-scales 8/4/2/1 by params.\n"
+            "# Prefixes default=long: sol/answer/irrelevant/sol_long (≤12288) / "
+            "cot_gold (teacher cap 10240). POOL=short → legacy 3 prefixes only.\n"
+            "# Short SCORE_BATCH 8/4/2; sol_long and cot_gold auto-scale by teacher length.\n"
         )
         # long pool skips token_metrics; short pool matches legacy (save token metrics).
         extra_args += """
@@ -281,7 +281,7 @@ set -euo pipefail
 
 BASE_DIR=${{BASE_DIR:-${{SLURM_SUBMIT_DIR:-$(cd "$(dirname "${{BASH_SOURCE[0]}}")/../../.." && pwd)}}}}
 JOB_TAG=${{SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}}
-# 2.2: POOL=long (default, +sol_long@12288) | POOL=short (legacy sol/answer/irrelevant)
+# 2.2: POOL=long (default, +sol_long@12288 +cot_gold) | POOL=short (legacy sol/answer/irrelevant)
 POOL=${{POOL:-long}}
 RUN_SUFFIX="{run_suffix}"
 if [[ "{section}" == "2.2" && "${{POOL}}" == "short" ]]; then
@@ -379,7 +379,7 @@ def gen_22() -> list[Path]:
                 task="teacher_prefix",
                 model_key=model,
                 combo=combo,
-                description=f"2.2 teacher prefix {combo} on {model} (sol/answer/irrelevant/sol_long@12288)",
+                description=f"2.2 teacher prefix {combo} on {model} (sol/answer/irrelevant/sol_long@12288/cot_gold)",
             )
             write_script(path, content)
             created.append(path)

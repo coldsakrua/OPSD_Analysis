@@ -10,14 +10,14 @@
 #SBATCH --time=48:00:00
 set -euo pipefail
 
-# 2.2 teacher prefix st_tt on qwen3_4b_thinking (sol/answer/irrelevant/sol_long@12288)
-# Prefixes default=long: sol/answer/irrelevant/sol_long (≤12288). POOL=short → legacy 3 prefixes only.
-# Short SCORE_BATCH 8/4/2; sol_long auto-scales 8/4/2/1 by params.
+# 2.2 teacher prefix st_tt on qwen3_4b_thinking (sol/answer/irrelevant/sol_long@12288/cot_gold)
+# Prefixes default=long: sol/answer/irrelevant/sol_long (≤12288) / cot_gold (teacher cap 10240). POOL=short → legacy 3 prefixes only.
+# Short SCORE_BATCH 8/4/2; sol_long and cot_gold auto-scale by teacher length.
 # Rollout: temp=1.1 top_p=0.95 top_k=20 max_prompt=1024 max_completion=1024
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
-# 2.2: POOL=long (default, +sol_long@12288) | POOL=short (legacy sol/answer/irrelevant)
+# 2.2: POOL=long (default, +sol_long@12288 +cot_gold) | POOL=short (legacy sol/answer/irrelevant)
 POOL=${POOL:-long}
 RUN_SUFFIX="st_tt"
 if [[ "2.2" == "2.2" && "${POOL}" == "short" ]]; then

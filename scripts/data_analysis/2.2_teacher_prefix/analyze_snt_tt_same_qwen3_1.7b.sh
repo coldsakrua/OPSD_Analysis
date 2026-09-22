@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=da22_snt_tnt_4b
+#SBATCH --job-name=da22_snt_tt_same_1p7b
 #SBATCH --output=log/data_analysis/22/%x.%j.out
 #SBATCH --partition=GPUA800,GPUA800S,GPUA800L
 #SBATCH --nodes=1
@@ -10,35 +10,41 @@
 #SBATCH --time=48:00:00
 set -euo pipefail
 
-# 2.2 teacher prefix snt_tnt on qwen3_4b (sol/answer/irrelevant/sol_long@12288)
-# Prefixes default=long: sol/answer/irrelevant/sol_long (≤12288). POOL=short → legacy 3 prefixes only.
-# Short SCORE_BATCH 8/4/2; sol_long auto-scales 8/4/2/1 by params.
+# 2.2 snt_tt, privilege_mode=same: teacher user text == student, no solution/answer.
+# Student enable_thinking=0, teacher enable_thinking=1 (chat template only).
+# Reuses the latest student-nothink rollouts (snt_tnt_3470468). Does not rescore sol/answer/irrelevant/sol_long/cot_gold.
 # Rollout: temp=1.1 top_p=0.95 top_k=20 max_prompt=1024 max_completion=1024
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
-# 2.2: POOL=long (default, +sol_long@12288) | POOL=short (legacy sol/answer/irrelevant)
-POOL=${POOL:-long}
-RUN_SUFFIX="snt_tnt"
-if [[ "2.2" == "2.2" && "${POOL}" == "short" ]]; then
-  RUN_SUFFIX="snt_tnt_short"
-fi
-OUTPUT_DIR=${OUTPUT_DIR:-${BASE_DIR}/scripts/data_analysis/outputs/teacher_prefix/qwen3_4b/${RUN_SUFFIX}_${JOB_TAG}}
+RUN_SUFFIX="snt_tt_same"
+OUTPUT_DIR=${OUTPUT_DIR:-${BASE_DIR}/scripts/data_analysis/outputs/teacher_prefix/qwen3_1.7b/${RUN_SUFFIX}_${JOB_TAG}}
+ROLLOUT_SRC=${ROLLOUT_SRC:-${BASE_DIR}/scripts/data_analysis/outputs/teacher_prefix/qwen3_1.7b/snt_tnt_3470468/rollouts.jsonl}
 
 TASK="teacher_prefix"
-MODEL_KEY="qwen3_4b"
-COMBO="snt_tnt"
-MODEL_PATH="/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b"
+MODEL_KEY="qwen3_1.7b"
+COMBO="snt_tt"
+MODEL_PATH="/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b"
 CONDA_ENV="anchor"
 BACKEND="vllm"
 NUM_PROMPTS=${NUM_PROMPTS:-2048}
 N_ROLLOUTS=${N_ROLLOUTS:-2}
 MAX_PROMPT=${MAX_PROMPT:-1024}
 MAX_COMPLETION=${MAX_COMPLETION:-1024}
-SCORE_BATCH=${SCORE_BATCH:-4}
+SCORE_BATCH=${SCORE_BATCH:-8}
 GEN_BATCH_HINT=${GEN_BATCH_HINT:-64}
 
 mkdir -p "${OUTPUT_DIR}" "${BASE_DIR}/log/data_analysis/22"
+
+if [[ -n "${ROLLOUT_SRC}" ]]; then
+  if [[ ! -f "${ROLLOUT_SRC}" ]]; then
+    echo "[error] missing rollout source: ${ROLLOUT_SRC}" >&2
+    exit 1
+  fi
+  ln -sfn "${ROLLOUT_SRC}" "${OUTPUT_DIR}/rollouts.jsonl"
+  export SKIP_GENERATE=1
+  echo "[analysis] reuse rollouts: ${ROLLOUT_SRC}"
+fi
 
 cd "${BASE_DIR}"
 set +u
@@ -74,24 +80,21 @@ EXTRA_ARGS=(
   --backend "${BACKEND}"
   --gpu-memory-utilization 0.90
   --seed 42
+  --teacher-prefixes same
+  --no-save-token-metrics
 )
-if [[ "${POOL}" == "short" ]]; then
-  EXTRA_ARGS+=(--teacher-prefixes sol answer irrelevant_other_sol --save-token-metrics)
-else
-  EXTRA_ARGS+=(--no-save-token-metrics)
-fi
 
-echo "[analysis] task=${TASK} model=${MODEL_KEY} combo=${COMBO} backend=${BACKEND}"
+echo "[analysis] task=${TASK} model=${MODEL_KEY} combo=${COMBO} prefix=same backend=${BACKEND}"
 echo "[analysis] output=${OUTPUT_DIR}"
 
 if [[ "${SKIP_GENERATE:-0}" != "1" ]]; then
   echo "[analysis] ===== phase 1: generate ====="
   python "${BASE_DIR}/scripts/data_analysis/run_opsd_analysis.py" "${EXTRA_ARGS[@]}" --skip-score
 else
-  echo "[analysis] ===== phase 1: skipped (SKIP_GENERATE=1; reuse rollouts.jsonl) ====="
+  echo "[analysis] ===== phase 1: skipped (reuse rollouts.jsonl) ====="
 fi
 
-echo "[analysis] ===== phase 2: score ====="
+echo "[analysis] ===== phase 2: score same (no privilege) ====="
 python "${BASE_DIR}/scripts/data_analysis/run_opsd_analysis.py" "${EXTRA_ARGS[@]}" --skip-generate
 
 echo "[analysis] done -> ${OUTPUT_DIR}"

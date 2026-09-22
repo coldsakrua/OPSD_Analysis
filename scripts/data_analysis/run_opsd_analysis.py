@@ -15,7 +15,7 @@ Pipeline
 Tasks
 -----
 - combinations (2.1, 2.4): single teacher prefix (opsd/solution).
-- teacher_prefix (2.2): sol + answer + irrelevant_other_sol + sol_long (teacher cap 12288) on same rollouts.
+- teacher_prefix (2.2): sol + answer + irrelevant_other_sol + sol_long (teacher cap 12288) + cot_gold (cap from parquet meta) on same rollouts. Prefix ``same`` is no-GT (teacher user text equals the student).
 - entropy (2.3): score once, aggregate he20/le20/he80/le80 buckets from student entropy.
 - length_windows (2.5): bucket metrics by completion position.
 - cotlen (2.6): OT gold-CoT length easy/hard bands; accuracy + preference.
@@ -57,6 +57,7 @@ from common.model_registry import (  # noqa: E402
     entropy_ratio,
     get_model_config,
     model_launch_overrides,
+    cot_gold_teacher_cap,
     score_batch_for_teacher_prefix,
     task_default_gen_batch_hint,
     task_default_max_completion,
@@ -64,7 +65,7 @@ from common.model_registry import (  # noqa: E402
     task_default_score_batch,
     teacher_prefix_dataset,
 )
-from common.prompts import load_multi_prefix_samples, load_prompt_samples  # noqa: E402
+from common.prompts import load_multi_prefix_samples, load_prompt_samples, make_collator  # noqa: E402
 from common.scoring import (  # noqa: E402
     apply_entropy_bucket,
     apply_length_window,
@@ -530,6 +531,56 @@ def run_cotlen(
     return summary
 
 
+def _attach_same_teacher_prompts(
+    rollouts: list[dict[str, Any]],
+    tokenizer: Any,
+    *,
+    model_key: str,
+    combo: str,
+    max_prompt_length: int,
+) -> None:
+    """Fill teacher_prompt_same on reused rollouts.
+
+    User text matches the student (privilege_mode=same). Thinking flags follow combo,
+    so snt_tt keeps the stored nothink student prompt and a thinking teacher prompt.
+    """
+    collator = make_collator(
+        tokenizer,
+        model_key=model_key,
+        combo=combo,
+        max_prompt_length=max_prompt_length,
+        privilege_mode="same",
+        teacher_privilege_field="none",
+    )
+    cache: dict[str, tuple[str, str]] = {}
+    for r in rollouts:
+        problem = str(r.get("problem") or "").strip()
+        if not problem:
+            raise RuntimeError("rollout missing problem; cannot build same teacher prompt")
+        pair = cache.get(problem)
+        if pair is None:
+            feature = {
+                "problem": problem,
+                "solution": str(r.get("solution") or ""),
+                "answer": str(r.get("answer") or ""),
+            }
+            pair = collator.format_prompts(feature)
+            cache[problem] = pair
+        student_prompt, teacher_prompt = pair
+        stored = r.get("student_prompt")
+        if stored != student_prompt:
+            raise RuntimeError(
+                "reused rollout student_prompt does not match this combo's same-prompt "
+                f"student (model={model_key} combo={combo} row_id={r.get('row_id')}). "
+                "Point ROLLOUT_SRC at a student-nothink rollout for snt_tt."
+            )
+        r["teacher_prompt_same"] = teacher_prompt
+    print(
+        f"[analysis] teacher_prompt_same attached for {len(cache)} problems / {len(rollouts)} rollouts",
+        flush=True,
+    )
+
+
 def run_teacher_prefix(
     args: argparse.Namespace,
     model_cfg,
@@ -546,7 +597,7 @@ def run_teacher_prefix(
             "missing teacher-prefix dataset(s):\n  - "
             + "\n  - ".join(missing)
             + "\nRun scripts/data/preprocess_opsd_openthoughts_teacher_prefix_extras.sh "
-            "(or the per-model preprocess scripts) first."
+            "and scripts/data/preprocess_opsd_openthoughts_cotgold_teacher_prefix.sh first."
         )
     rollouts_path = out_dir / "rollouts.jsonl"
     samples_path = out_dir / "samples.jsonl"
@@ -583,22 +634,43 @@ def run_teacher_prefix(
         return {"status": "generate_only"}
 
     tokenizer, model = load_models(model_path)
+    if (
+        "same" in args.teacher_prefixes
+        and rollouts
+        and "teacher_prompt_same" not in rollouts[0]
+    ):
+        _attach_same_teacher_prompts(
+            rollouts,
+            tokenizer,
+            model_key=args.model_key,
+            combo=args.combo,
+            max_prompt_length=args.max_prompt_length,
+        )
     summaries: dict[str, Any] = {}
     base_score_batch = max(1, args.score_batch_size)
+    cot_cap = (
+        cot_gold_teacher_cap(ds_map["cot_gold"]) if "cot_gold" in ds_map else None
+    )
+    long_prefixes = {"sol_long", "cot_gold"}
     for prefix in args.teacher_prefixes:
         key = f"teacher_prompt_{prefix}"
         # Short prefixes: CLI/default SCORE_BATCH (8/4/2 by size).
-        # sol_long: size-tuned smaller batch (teacher≤12288); see score_batch_for_sol_long().
-        args.score_batch_size = score_batch_for_teacher_prefix(args.model_key, prefix)
-        if prefix != "sol_long":
+        # sol_long / cot_gold: smaller batch from teacher length.
+        if prefix in long_prefixes:
+            args.score_batch_size = score_batch_for_teacher_prefix(
+                args.model_key,
+                prefix,
+                teacher_cap=cot_cap if prefix == "cot_gold" else None,
+            )
+        else:
             args.score_batch_size = base_score_batch
         save_tok = args.save_token_metrics
-        if prefix == "sol_long":
-            # Per-token dumps for 12k prompts blow RAM; keep rollout aggregates only.
+        if prefix in long_prefixes:
+            # Per-token dumps for long teacher prompts blow RAM; keep rollout aggregates only.
             args.save_token_metrics = False
         print(
             f"[score] {prefix}: score_batch={args.score_batch_size}"
-            + (" (no token_metrics)" if prefix == "sol_long" else ""),
+            + (" (no token_metrics)" if prefix in long_prefixes else ""),
             flush=True,
         )
         token_rows: list[dict[str, Any]] = []

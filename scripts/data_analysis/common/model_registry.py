@@ -12,8 +12,9 @@ MODEL_ROOT = Path("/gpfs/share/home/2501210611/labShare/2501210611/model")
 
 COMBOS = ("st_tt", "snt_tnt", "st_tnt", "snt_tt")
 ENTROPY_BUCKETS = ("he20", "le20", "he80", "le80")
-# 2.2: short solution / answer / distractors / long solution (teacher cap 12*1024, cf. openmath train).
-TEACHER_PREFIXES = ("sol", "answer", "irrelevant_other_sol", "sol_long")
+# 2.2: short solution / answer / distractors / long solution (teacher cap 12*1024)
+# / cot+gold (same row order as sol_long; teacher cap from parquet meta).
+TEACHER_PREFIXES = ("sol", "answer", "irrelevant_other_sol", "sol_long", "cot_gold")
 LENGTH_WINDOWS = (
     (0, 128),
     (128, 256),
@@ -32,6 +33,8 @@ LENGTH_WINDOWS_MAX_COMPLETION = 6144
 COTLEN_MAX_PROMPT = 2048
 # Match openmath OPSD train (…_openmath.sh): teacher may embed full reference solution.
 LONG_TEACHER_MAX_PROMPT = 12 * 1024  # 12288
+# 2.2 cot+gold teacher cap (chat template included). Covers the measured maxima.
+COT_GOLD_TEACHER_MAX_PROMPT = 10 * 1024  # 10240
 COTLEN_BANDS = ("easy", "hard")
 
 # Match project eval max_new_tokens (scripts/eval/{1.7b,4b,4b_instruct,olmo*}).
@@ -175,10 +178,10 @@ SECTION_MODEL_COMBOS: dict[str, dict[str, tuple[str, ...]]] = {
         "olmo3_7b_think": ("st_tt",),
     },
     "2.2": {
-        "qwen3_1.7b": ("st_tt", "snt_tnt"),
+        "qwen3_1.7b": ("st_tt",),
         "olmo3_7b_instruct": ("snt_tnt",),
         "olmo3_7b_think": ("st_tt",),
-        "qwen3_4b": ("st_tt", "snt_tnt"),
+        "qwen3_4b": ("st_tt",),
         "qwen3_4b_instruct": ("snt_tnt",),
         "qwen3_4b_thinking": ("st_tt",),
         "qwen3_06b": ("st_tt",),
@@ -270,11 +273,25 @@ def dataset_path(
     return Path(root) / name
 
 
-def teacher_prefix_max_prompt(prefix: str, *, default_max_prompt: int = DEFAULT_MAX_PROMPT) -> int:
+def cot_gold_teacher_cap(parquet_path: str | Path | None = None) -> int:
+    """Teacher prompt cap for cot+gold. Fixed at 10240 for every model."""
+    _ = parquet_path
+    return COT_GOLD_TEACHER_MAX_PROMPT
+
+
+def teacher_prefix_max_prompt(
+    prefix: str,
+    *,
+    default_max_prompt: int = DEFAULT_MAX_PROMPT,
+    dataset_path: str | Path | None = None,
+) -> int:
     """Per-prefix teacher prompt cap for section 2.2."""
     if prefix == "sol_long":
         return LONG_TEACHER_MAX_PROMPT
-    if prefix in TEACHER_PREFIXES:
+    if prefix == "cot_gold":
+        return COT_GOLD_TEACHER_MAX_PROMPT
+    # same: no GT; teacher user text equals the student. Cap is the student prompt cap.
+    if prefix == "same" or prefix in TEACHER_PREFIXES:
         return int(default_max_prompt)
     raise ValueError(f"unknown teacher prefix {prefix!r}")
 
@@ -333,17 +350,33 @@ def teacher_prefix_dataset(
             Path(root)
             / f"openthoughts.irrelevant_other_sol.{tag_part}.maxprompt{short}.parquet"
         )
+    if prefix == "cot_gold":
+        # Same rows / order as sol_long (maxprompt12288). Cap lives in the meta.
+        return Path(root) / f"openthoughts.opsd.solution.{tag_part}.cotgold.same12288.parquet"
+    if prefix == "same":
+        # Problem pool only. privilege_mode=same ignores solution/answer.
+        path = dataset_path(model_key, combo, base_dir=root, max_prompt=short)
+        if path.is_file():
+            return path
+        shared = Path(root) / (
+            f"openthoughts.opsd.solution.{COMBO_DATASET_TAG[combo]}.maxprompt{short}.parquet"
+        )
+        if shared.is_file():
+            return shared
+        return path
     raise ValueError(f"unknown teacher prefix {prefix!r}")
 
 
 def privilege_for_prefix(prefix: str) -> tuple[str, str]:
     """Return (privilege_mode, teacher_privilege_field) for collator."""
-    if prefix in ("sol", "sol_long"):
+    if prefix in ("sol", "sol_long", "cot_gold"):
         return "opsd", "solution"
     if prefix == "answer":
         return "correct", "answer"
     if prefix == "irrelevant_other_sol":
         return "irrelevant_other_sol", "none"
+    if prefix == "same":
+        return "same", "none"
     raise ValueError(prefix)
 
 
@@ -455,10 +488,28 @@ def score_batch_for_sol_long(model_key: str) -> int:
     return 1
 
 
-def score_batch_for_teacher_prefix(model_key: str, prefix: str) -> int:
+def score_batch_for_long_teacher(model_key: str, teacher_cap: int) -> int:
+    """Scale the sol_long batch (calibrated at 12288) by attention ~S^2."""
+    base = score_batch_for_sol_long(model_key)
+    cap = int(teacher_cap)
+    if cap <= LONG_TEACHER_MAX_PROMPT:
+        return base
+    scaled = int(base * (LONG_TEACHER_MAX_PROMPT / cap) ** 2)
+    return max(1, scaled)
+
+
+def score_batch_for_teacher_prefix(
+    model_key: str,
+    prefix: str,
+    *,
+    teacher_cap: int | None = None,
+) -> int:
     """Per-prefix score batch for section 2.2."""
     if prefix == "sol_long":
         return score_batch_for_sol_long(model_key)
+    if prefix == "cot_gold":
+        cap = LONG_TEACHER_MAX_PROMPT if teacher_cap is None else int(teacher_cap)
+        return score_batch_for_long_teacher(model_key, cap)
     return task_default_score_batch("teacher_prefix", model_key)
 
 
