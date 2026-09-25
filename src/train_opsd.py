@@ -312,6 +312,16 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--distill-exclude-preset",
+        choices=("reasoning", "structure"),
+        default=None,
+        help=(
+            "Drop matching completion tokens from distillation loss (gradients). "
+            "reasoning: deliberation words for think-mode st_tt; "
+            "structure: newlines/format/Final Answer/EOS for instruct snt_tnt."
+        ),
+    )
+    parser.add_argument(
         "--use-thinking-machines-loss",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -794,6 +804,7 @@ def main() -> None:
         f"first_loss_tokens={args.first_loss_tokens} "
         f"last_loss_tokens={args.last_loss_tokens} "
         f"pos_adv_teacher_topk={args.pos_adv_teacher_topk} "
+        f"distill_exclude_preset={args.distill_exclude_preset} "
         f"top_k_loss={args.top_k_loss} use_thinking_machines_loss={args.use_thinking_machines_loss} "
         f"mixed_teacher_target={args.use_mixed_teacher_target} "
         f"target_w={args.mixed_teacher_target_teacher_weight}"
@@ -829,6 +840,7 @@ def main() -> None:
         first_loss_tokens=args.first_loss_tokens,
         last_loss_tokens=args.last_loss_tokens,
         pos_adv_teacher_topk=args.pos_adv_teacher_topk,
+        distill_exclude_preset=args.distill_exclude_preset,
         teacher_update_steps=args.teacher_update_steps,
         student_thinking=args.student_thinking,
         teacher_thinking=args.teacher_thinking,

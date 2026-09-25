@@ -44,6 +44,7 @@ from transformers.utils import (
     is_rich_available,
 )
 
+from distill_token_mask import build_distill_exclude_mask
 from trl.extras.profiling import profiling_decorator
 from trl.import_utils import is_vllm_available
 from trl.models import prepare_deepspeed
@@ -198,6 +199,7 @@ class OPSDTrainer(SFTTrainer):
         first_loss_tokens: int | None = None,
         last_loss_tokens: int | None = None,
         pos_adv_teacher_topk: int | None = None,
+        distill_exclude_preset: str | None = None,
         use_ema_teacher: bool = False,
         ema_decay: float = 0.999,
         teacher_update_steps: int | None = None,
@@ -387,6 +389,15 @@ class OPSDTrainer(SFTTrainer):
         self.first_loss_tokens = first_loss_tokens
         self.last_loss_tokens = last_loss_tokens
         self.pos_adv_teacher_topk = pos_adv_teacher_topk
+        if distill_exclude_preset is not None:
+            from distill_mask_presets import DISTILL_EXCLUDE_PRESETS
+
+            if distill_exclude_preset not in DISTILL_EXCLUDE_PRESETS:
+                raise ValueError(
+                    f"distill_exclude_preset must be one of {sorted(DISTILL_EXCLUDE_PRESETS)}, "
+                    f"got {distill_exclude_preset!r}"
+                )
+        self.distill_exclude_preset = distill_exclude_preset
         self.use_ema_teacher = use_ema_teacher
         self.ema_decay = ema_decay
         self.teacher_update_steps = teacher_update_steps if teacher_update_steps and teacher_update_steps > 0 else None
@@ -1276,6 +1287,7 @@ class OPSDTrainer(SFTTrainer):
         student_logits = outputs_student.logits[:, student_prompt_len - 1 : -1, :]
         valid_mask = shifted_labels != -100
         loss_mask = None
+        distill_exclude_mask = None
 
         if (
             self.high_entropy_ratio is not None
@@ -1419,6 +1431,21 @@ class OPSDTrainer(SFTTrainer):
                 )
                 self._metrics["train"]["opsd/pos_adv_t_topk_loss_tokens"].append(selected.item())
 
+            if self.distill_exclude_preset:
+                distill_exclude_mask = build_distill_exclude_mask(
+                    self.processing_class,
+                    sampled_token_ids,
+                    valid_mask,
+                    self.distill_exclude_preset,
+                )
+                distill_exclude_mask = distill_exclude_mask.to(device=valid_mask.device)
+                excluded = distill_exclude_mask.sum().double()
+                valid_count = valid_mask.sum().double()
+                self._metrics["train"]["opsd/distill_exclude_ratio"].append(
+                    (excluded / valid_count.clamp(min=1)).item()
+                )
+                self._metrics["train"]["opsd/distill_exclude_tokens"].append(excluded.item())
+
             if not self.purified_pmi:
                 if self.use_thinking_machines_loss:
                     teacher_log_probs = F.log_softmax(
@@ -1431,6 +1458,10 @@ class OPSDTrainer(SFTTrainer):
                 else:
                     teacher_logits_for_loss = teacher_logits
                     del teacher_logits
+
+        if distill_exclude_mask is not None:
+            base_mask = loss_mask if loss_mask is not None else valid_mask
+            loss_mask = base_mask & ~distill_exclude_mask
 
         # === COMPUTE LOSS with only small tensors ===
         if self.use_thinking_machines_loss:
