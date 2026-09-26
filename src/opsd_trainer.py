@@ -173,6 +173,22 @@ class OPSDTrainer(SFTTrainer):
     _tag_names = ["trl", "opsd"]
     _name = "OPSD"
 
+    def _get_train_sampler(self, train_dataset=None):
+        """Optional SequentialSampler so a pre-materialized GRPO order is preserved.
+
+        Set env ``OPSD_SEQUENTIAL_DATA=1`` when the parquet rows are already in
+        verl RandomSampler consumption order (see
+        preprocess_opsd_omr_integer_solution_postthink.py).
+        """
+        flag = os.environ.get("OPSD_SEQUENTIAL_DATA", "").strip().lower()
+        if flag in {"1", "true", "yes", "on"}:
+            from torch.utils.data import SequentialSampler
+
+            dataset = self.train_dataset if train_dataset is None else train_dataset
+            print("[opsd] OPSD_SEQUENTIAL_DATA=1 → SequentialSampler (no reshuffle)", flush=True)
+            return SequentialSampler(dataset)
+        return super()._get_train_sampler(train_dataset)
+
     def __init__(
         self,
         model: PreTrainedModel | nn.Module | str | None = None,

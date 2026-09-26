@@ -235,8 +235,14 @@ def load_multi_prefix_samples(
     elif "same" in dataset_paths:
         bind_path = dataset_paths["same"]
         student_col = collators["same"]
+    elif "answer" in dataset_paths:
+        # DAPO answer-only / single-prefix runs: bind on the answer pool.
+        bind_path = dataset_paths["answer"]
+        student_col = collators["answer"]
     else:
-        raise KeyError("teacher_prefix sampling needs sol, sol_long, or same in dataset_paths")
+        raise KeyError(
+            "teacher_prefix sampling needs sol, sol_long, same, or answer in dataset_paths"
+        )
 
     df = pd.read_parquet(bind_path, columns=["problem", "solution", "answer"])
     cot_df: pd.DataFrame | None = None

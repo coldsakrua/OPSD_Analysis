@@ -587,17 +587,22 @@ def run_teacher_prefix(
     out_dir: Path,
     overrides: dict[str, Any],
 ) -> dict[str, Any]:
-    ds_map = {
-        name: str(teacher_prefix_dataset(args.model_key, args.combo, name))
-        for name in args.teacher_prefixes
-    }
+    if args.dataset_path:
+        # Shared override (e.g. DAPO answer-only shared2048) for every requested prefix.
+        ds_map = {name: str(args.dataset_path) for name in args.teacher_prefixes}
+    else:
+        ds_map = {
+            name: str(teacher_prefix_dataset(args.model_key, args.combo, name))
+            for name in args.teacher_prefixes
+        }
     missing = [f"{name}: {path}" for name, path in ds_map.items() if not Path(path).is_file()]
     if missing:
         raise FileNotFoundError(
             "missing teacher-prefix dataset(s):\n  - "
             + "\n  - ".join(missing)
             + "\nRun scripts/data/preprocess_opsd_openthoughts_teacher_prefix_extras.sh "
-            "and scripts/data/preprocess_opsd_openthoughts_cotgold_teacher_prefix.sh first."
+            "and scripts/data/preprocess_opsd_openthoughts_cotgold_teacher_prefix.sh first "
+            "(or pass --dataset-path for a shared pool such as DAPO answer-only)."
         )
     rollouts_path = out_dir / "rollouts.jsonl"
     samples_path = out_dir / "samples.jsonl"
