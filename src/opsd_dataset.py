@@ -76,6 +76,12 @@ def load_training_dataset(path: str | list[str]) -> Dataset:
     if source.is_dir() and (source / "dataset_info.json").exists():
         dataset = load_from_disk(str(source))
         return dataset["train"] if hasattr(dataset, "keys") and "train" in dataset else dataset
+    # Single parquet: read via pyarrow to avoid multi-process HF cache races
+    # (accelerate local ranks concurrently calling load_dataset → .incomplete missing).
+    if source.is_file() and source.suffix == ".parquet":
+        import pyarrow.parquet as pq
+
+        return Dataset(pq.read_table(str(source.resolve())))
     return load_dataset("parquet", data_files=str(source.resolve()), split="train")
 
 
@@ -129,6 +135,10 @@ def prompt_length_filter_applied(
         and teacher_thinking is True
     ):
         thinking_ok = True
+    # Shared intersection parquet: every row already fits all listed think/nothink
+    # templates, so any training combo may skip the online length filter.
+    if meta.get("shared_intersection"):
+        thinking_ok = True
 
     # Older metas used solution_field; prefer teacher_privilege_field.
     meta_priv_field = str(
@@ -166,11 +176,17 @@ def prompt_length_filter_applied(
     )
 
     meta_model = str(meta.get("model_path", ""))
+    meta_models = [str(x) for x in meta.get("model_paths", []) if str(x)]
     # Qwen3-1.7B / 4B share a tokenizer; allow reusing a 4b-filtered ios parquet on 1.7b.
-    model_ok = meta_model == str(model_path) or (
-        str(privilege_mode) in other_problem_modes
-        and "qwen3-4b" in meta_model
-        and ("qwen3-1.7b" in str(model_path) or "qwen3_1.7b" in str(model_path))
+    model_ok = (
+        meta.get("shared_intersection") is True
+        or meta_model == str(model_path)
+        or str(model_path) in meta_models
+        or (
+            str(privilege_mode) in other_problem_modes
+            and "qwen3-4b" in meta_model
+            and ("qwen3-1.7b" in str(model_path) or "qwen3_1.7b" in str(model_path))
+        )
     )
 
     return (

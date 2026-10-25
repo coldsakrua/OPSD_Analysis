@@ -23,6 +23,8 @@ CHAT_TEMPLATE_PATH=${CHAT_TEMPLATE_PATH:-}
 # Manual FSDP offload between update_actor and next vLLM wake (not FSDP CPUOffload-during-backward).
 ACTOR_PARAM_OFFLOAD=${ACTOR_PARAM_OFFLOAD:-false}
 ACTOR_OPTIMIZER_OFFLOAD=${ACTOR_OPTIMIZER_OFFLOAD:-false}
+# CPU activation offload during actor backward (needs gradient checkpointing; slower, saves GPU mem).
+ENABLE_ACTIVATION_OFFLOAD=${ENABLE_ACTIVATION_OFFLOAD:-false}
 
 OUTPUT_ROOT=${OUTPUT_ROOT:-${BASE_DIR}/outputs/${MODEL_TAG}}
 JOB_TAG=${SLURM_JOB_ID:-manual_$(date +%Y%m%d_%H%M%S)}
@@ -67,7 +69,7 @@ echo "[launch] steps=${MAX_STEPS} save=${SAVE_STEPS} n=${NUM_GENERATIONS} resp=$
 echo "[launch] train_bs=${TRAIN_BATCH_SIZE} mini=${PPO_MINI_BATCH_SIZE} epochs=${PPO_EPOCHS} lr=${LEARNING_RATE}"
 echo "[launch] vllm_util=${VLLM_GPU_MEM_UTIL:-auto} free_cache_engine=true overlong_penalty=${OVERLONG_PENALTY_ENABLE} len=${OVERLONG_BUFFER_LEN} factor=${OVERLONG_PENALTY_FACTOR}"
 echo "[launch] kl_loss=${USE_KL_LOSS} kl_coef=${KL_LOSS_COEF} kl_type=${KL_LOSS_TYPE} ref_param_offload=${REF_PARAM_OFFLOAD}"
-echo "[launch] actor_param_offload=${ACTOR_PARAM_OFFLOAD} actor_optim_offload=${ACTOR_OPTIMIZER_OFFLOAD}"
+echo "[launch] actor_param_offload=${ACTOR_PARAM_OFFLOAD} actor_optim_offload=${ACTOR_OPTIMIZER_OFFLOAD} activation_offload=${ENABLE_ACTIVATION_OFFLOAD}"
 echo "[launch] reward=src/reward_math_dapo_boxed.py (boxed-first) + stop_token_ids auto from tokenizer"
 echo "[launch] rollout_dump=${OUTPUT_DIR}/rollouts max_per_step=${ROLLOUT_DUMP_N:-32}"
 
@@ -89,6 +91,7 @@ python -u "${BASE_DIR}/src/train_grpo_dapo.py" \
   actor_rollout_ref.model.trust_remote_code=true \
   actor_rollout_ref.model.use_remove_padding=true \
   actor_rollout_ref.model.enable_gradient_checkpointing=true \
+  actor_rollout_ref.model.enable_activation_offload="${ENABLE_ACTIVATION_OFFLOAD}" \
   actor_rollout_ref.model.lora_rank=0 \
   actor_rollout_ref.actor.optim.lr="${LEARNING_RATE}" \
   actor_rollout_ref.actor.optim.weight_decay="${WEIGHT_DECAY}" \

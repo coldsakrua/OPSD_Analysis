@@ -1,0 +1,69 @@
+#!/bin/bash
+#SBATCH --job-name=grpo_4b_apps
+#SBATCH --output=log/train_code/sft_rl/grpo_think_4b_apps_4gpu.%j.out
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=28
+#SBATCH --gres=gpu:4
+#SBATCH --mem=400G
+#SBATCH --time=240:00:00
+set -euo pipefail
+
+# Qwen3-4B (think) → GRPO on APPS (4-GPU).
+# Same hyperparams as grpo_think_4b_sft15000_apps_4gpu.sh; only MODEL_PATH differs
+# (pretrained qwen3-4b instead of OCR-SFT@15000 on 4b-base).
+#
+# GPU: this verl build ALWAYS colocates actor+vLLM on all 4 GPUs (simultaneous
+# rollout on every card). ROLLOUT_GPUS/TRAIN_GPUS only bias util budgeting
+# (cannot be 4+0 — train_grpo_dapo requires ≥1 each). Prefer 3+1 → more KV.
+#
+# CPU: 28 (=4×DefCpuPerGPU); BatchRewardManager ~24 parallel APPS judges.
+
+BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
+export NUM_GPUS=${NUM_GPUS:-4}
+export ROLLOUT_GPUS=${ROLLOUT_GPUS:-3}
+export TRAIN_GPUS=${TRAIN_GPUS:-1}
+
+MODEL_PATH=${MODEL_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b}
+CHAT_TEMPLATE_PATH=${CHAT_TEMPLATE_PATH:-${MODEL_PATH}}
+MODEL_TAG=${MODEL_TAG:-qwen3_4b}
+RUN_NAME=${RUN_NAME:-grpo_think_4b_apps_4gpu}
+
+NUM_GENERATIONS=${NUM_GENERATIONS:-4}
+MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-2048}
+MAX_RESPONSE_LENGTH=${MAX_RESPONSE_LENGTH:-24576}
+MAX_STEPS=${MAX_STEPS:-100}
+SAVE_STEPS=${SAVE_STEPS:-25}
+OVERLONG_PENALTY_ENABLE=${OVERLONG_PENALTY_ENABLE:-false}
+
+# n=4 → 48×4=192 rollouts / step
+TRAIN_BATCH_SIZE=${TRAIN_BATCH_SIZE:-48}
+PPO_MINI_BATCH_SIZE=${PPO_MINI_BATCH_SIZE:-24}
+PPO_MICRO_BATCH_SIZE_PER_GPU=${PPO_MICRO_BATCH_SIZE_PER_GPU:-1}
+LOG_PROB_MICRO_BATCH_SIZE_PER_GPU=${LOG_PROB_MICRO_BATCH_SIZE_PER_GPU:-1}
+# max_model_len = 2048+24576 = 26624
+PPO_MAX_TOKEN_LEN_PER_GPU=${PPO_MAX_TOKEN_LEN_PER_GPU:-26624}
+MAX_NUM_BATCHED_TOKENS=${MAX_NUM_BATCHED_TOKENS:-106496}
+VLLM_GPU_MEM_UTIL=${VLLM_GPU_MEM_UTIL:-0.90}
+ACTOR_PARAM_OFFLOAD=${ACTOR_PARAM_OFFLOAD:-true}
+ACTOR_OPTIMIZER_OFFLOAD=${ACTOR_OPTIMIZER_OFFLOAD:-true}
+
+# Parallel code judges (ThreadPool → each check_correctness Process)
+APPS_REWARD_WORKERS=${APPS_REWARD_WORKERS:-24}
+
+DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/apps/preprocessed/apps.traintest.qwen3.think.maxprompt${MAX_PROMPT_LENGTH}.maxtests10.parquet}
+VAL_DATASET_PATH=${VAL_DATASET_PATH:-${DATASET_PATH}}
+
+export WANDB_PROJECT=${WANDB_PROJECT:-SFT_RL_GRPO_APPS}
+export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-qwen3_4b_grpo_apps}
+
+export BASE_DIR MODEL_PATH CHAT_TEMPLATE_PATH MODEL_TAG RUN_NAME
+export NUM_GENERATIONS MAX_PROMPT_LENGTH MAX_RESPONSE_LENGTH
+export MAX_STEPS SAVE_STEPS OVERLONG_PENALTY_ENABLE
+export TRAIN_BATCH_SIZE PPO_MINI_BATCH_SIZE PPO_MICRO_BATCH_SIZE_PER_GPU
+export LOG_PROB_MICRO_BATCH_SIZE_PER_GPU PPO_MAX_TOKEN_LEN_PER_GPU MAX_NUM_BATCHED_TOKENS
+export VLLM_GPU_MEM_UTIL ACTOR_PARAM_OFFLOAD ACTOR_OPTIMIZER_OFFLOAD
+export APPS_REWARD_WORKERS DATASET_PATH VAL_DATASET_PATH
+
+exec bash "${BASE_DIR}/scripts/train_code/sft_rl/_run_grpo_apps.sh"

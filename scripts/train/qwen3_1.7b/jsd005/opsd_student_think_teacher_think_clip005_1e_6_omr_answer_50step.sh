@@ -10,14 +10,13 @@
 #SBATCH --time=3:00:00
 set -euo pipefail
 
-# Qwen3-1.7B OPSD on OpenMathReasoning integer-answer subset, aligned with the
-# GRPO run scripts/rl/qwen3_4b_think/grpo_think_4b_omr_int_8gpu_bs64_24k_6400.sh:
-# - dataset built from omr.integer_answer.think.le12k.grpo.parquet with row order
-#   preserved (no shuffle, no drops) → same data order/quantity under fixed seed
-# - teacher privilege = answer only (privilege_mode=correct, verified-answer template)
-# - global_batch=64 (micro=8 × gas=4 × 2gpu), max_steps=50 → 3200 samples
-# Same hyperparams as opsd_student_think_teacher_think_clip005_1e_6_openthoughts.sh:
-# jsd_token_clip=0.05, lr=1e-6, seed=42, prompt=1024, completion=1024.
+# Qwen3-1.7B OPSD st_tt on OMR answer-only privilege.
+# Train hyperparams match this model's other st_tt runs (e.g. openthoughts /
+# omr_solution_postthink): micro=8 × gas=4 × 2gpu → global_batch=64, lr=1e-6,
+# jsd_token_clip=0.05, max_steps=50 → 3200 samples.
+# Only privilege/data differ: answer-only on
+#   omr.correct.answer.sthink_tthink.maxprompt1032.grpo_order.parquet
+# (same GRPO row order as omr.integer_answer.think.le12k.grpo.parquet).
 
 MODE=${MODE:-correct}
 TEACHER_PRIVILEGE_FIELD=${TEACHER_PRIVILEGE_FIELD:-answer}

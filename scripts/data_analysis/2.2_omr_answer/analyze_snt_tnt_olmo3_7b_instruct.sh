@@ -12,7 +12,7 @@
 set -euo pipefail
 
 # OMR answer-only teacher_prefix (snt_tnt / olmo3_7b_instruct)
-# Same 2048 problems as OMR full-solution analysis; privilege=answer (GT).
+# Same 2048 problems (and order) as OMR full-solution analysis; privilege=answer (GT).
 # Seq ≤2048 (prompt+completion 1024); high batch for short answer teacher.
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}

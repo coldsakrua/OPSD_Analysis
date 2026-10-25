@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # OMR full-solution teacher_prefix (st_tt / deepseek_r1_1.5b)
-# Shared 2048 problems × 2 rollouts; privilege=solution (opsd).
+# Shared 2048 problems × 2 rollouts (same set/order as answer-only); privilege=solution (opsd).
 # Teacher prompt ≤2048, completion ≤1024 → seq ≤3072.
 # SCORE_BATCH/GEN_BATCH calibrated for 2k teacher prompts on A800 80GB.
 

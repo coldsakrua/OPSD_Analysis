@@ -7,17 +7,9 @@
 #SBATCH --cpus-per-task=14
 #SBATCH --gres=gpu:2
 #SBATCH --mem=220G
-#SBATCH --time=2:00:00
+#SBATCH --time=4:00:00
 set -euo pipefail
 
-# Qwen3-4B OPSD on OpenMathReasoning integer-answer subset, aligned with the
-# GRPO run scripts/rl/qwen3_4b_think/grpo_think_4b_omr_int_8gpu_bs64_24k_6400.sh:
-# - dataset built from omr.integer_answer.think.le12k.grpo.parquet with row order
-#   preserved (no shuffle, no drops) → same data order/quantity under fixed seed
-# - teacher privilege = answer only (privilege_mode=correct, verified-answer template)
-# - global_batch=64 (micro=4 × gas=8 × 2gpu; 4B memory-safe), max_steps=50 → 3200 samples
-# Same hyperparams as the 1.7B counterpart: jsd_token_clip=0.05, lr=1e-6,
-# seed=42, prompt=1024, completion=1024.
 
 MODE=${MODE:-correct}
 TEACHER_PRIVILEGE_FIELD=${TEACHER_PRIVILEGE_FIELD:-answer}

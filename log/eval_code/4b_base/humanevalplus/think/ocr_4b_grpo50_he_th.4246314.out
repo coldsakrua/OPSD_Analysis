@@ -1,0 +1,220 @@
+[evalplus] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[evalplus] checkpoint=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/st_tt_clip005_1e_6_opencodereasoning_4b_grpo50/4245799/checkpoint-100
+[evalplus] dataset=humanevalplus thinking=think (generate-only)
+[evalplus] generate_batch_size=6 (val-n=4)
+[evalplus] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.json
+[evalplus] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/anchor
+Mon Oct 19 00:39:33 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A800-SXM4-80GB          Off |   00000000:92:00.0 Off |                    0 |
+| N/A   34C    P0             58W /  400W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[evalplus] dataset=humaneval data=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/humanevalplus/HumanEvalPlus.jsonl n_problems=164
+[evalplus] model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/st_tt_clip005_1e_6_opencodereasoning_4b_grpo50/4245799/checkpoint-100
+[evalplus] thinking=True n=4 temp=0.6 top_p=0.95 top_k=20 max_new_tokens=38912
+INFO 10-19 00:39:58 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 10-19 00:40:04 [__init__.py:239] Automatically detected platform cuda.
+INFO 10-19 00:40:13 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 10-19 00:40:13 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 10-19 00:40:13 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 10-19 00:40:13 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 10-19 00:40:13 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+WARNING 10-19 00:40:16 [config.py:3102] User-specified max_model_len (40960) is greater than the derived max_model_len (max_position_embeddings=32768 or model_max_length=None in model's config.json). This may lead to incorrect model outputs or CUDA errors. Make sure the value is correct and within the model context size.
+INFO 10-19 00:40:24 [config.py:717] This model supports multiple tasks: {'reward', 'classify', 'embed', 'generate', 'score'}. Defaulting to 'generate'.
+WARNING 10-19 00:40:24 [arg_utils.py:1525] Chunked prefill is enabled by default for models with max_model_len > 32K. Chunked prefill might not work with some features or models. If you encounter any issues, please disable by launching with --enable-chunked-prefill=False.
+INFO 10-19 00:40:24 [config.py:2003] Chunked prefill is enabled with max_num_batched_tokens=2048.
+WARNING 10-19 00:40:24 [cuda.py:93] To see benefits of async output processing, enable CUDA graph. Since, enforce-eager is enabled, async output processor cannot be used
+INFO 10-19 00:40:24 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/st_tt_clip005_1e_6_opencodereasoning_4b_grpo50/4245799/checkpoint-100', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/st_tt_clip005_1e_6_opencodereasoning_4b_grpo50/4245799/checkpoint-100', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/st_tt_clip005_1e_6_opencodereasoning_4b_grpo50/4245799/checkpoint-100, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=True, use_async_output_proc=False, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[],"max_capture_size":0}, use_cached_outputs=False, 
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/uniproc_executor.py:29: UserWarning: Failed to get the IP address, using 0.0.0.0 by default.The value can be set by the environment variable VLLM_HOST_IP or HOST_IP.
+  get_ip(), get_open_port())
+INFO 10-19 00:40:25 [cuda.py:228] Using XFormers backend.
+INFO 10-19 00:40:26 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 10-19 00:40:26 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/st_tt_clip005_1e_6_opencodereasoning_4b_grpo50/4245799/checkpoint-100...
+Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards:  50% Completed | 1/2 [00:03<00:03,  3.71s/it]
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:09<00:00,  4.98s/it]
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:09<00:00,  4.79s/it]
+
+INFO 10-19 00:40:37 [loader.py:458] Loading weights took 9.71 seconds
+INFO 10-19 00:40:37 [model_runner.py:1140] Model loading took 7.5532 GiB and 10.221865 seconds
+INFO 10-19 00:40:38 [worker.py:287] Memory profiling takes 0.96 seconds
+INFO 10-19 00:40:38 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.95) = 75.29GiB
+INFO 10-19 00:40:38 [worker.py:287] model weights take 7.55GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.40GiB; the rest of the memory reserved for KV Cache is 66.25GiB.
+INFO 10-19 00:40:38 [executor_base.py:112] # cuda blocks: 30150, # CPU blocks: 1820
+INFO 10-19 00:40:38 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 11.78x
+INFO 10-19 00:40:40 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 2.86 seconds
+[evalplus] generate 0:6 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:27<02:16,  6.82s/it, est. speed input: 20.97 toks/s, output: 143.33 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:30<00:51,  3.24s/it, est. speed input: 37.61 toks/s, output: 285.42 toks/s]Processed prompts:  50%|█████     | 12/24 [01:35<01:50,  9.22s/it, est. speed input: 16.74 toks/s, output: 183.26 toks/s]Processed prompts:  67%|██████▋   | 16/24 [03:22<02:09, 16.17s/it, est. speed input: 10.03 toks/s, output: 170.88 toks/s]Processed prompts:  83%|████████▎ | 20/24 [03:31<00:44, 11.09s/it, est. speed input: 12.44 toks/s, output: 265.69 toks/s]Processed prompts: 100%|██████████| 24/24 [05:59<00:00, 19.95s/it, est. speed input: 8.85 toks/s, output: 280.94 toks/s] Processed prompts: 100%|██████████| 24/24 [05:59<00:00, 14.99s/it, est. speed input: 8.85 toks/s, output: 280.94 toks/s]
+[evalplus] checkpoint 6/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 6:12 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:31<02:39,  7.98s/it, est. speed input: 13.29 toks/s, output: 150.11 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:35<01:00,  3.79s/it, est. speed input: 25.22 toks/s, output: 250.52 toks/s]Processed prompts:  50%|█████     | 12/24 [00:55<00:52,  4.36s/it, est. speed input: 24.99 toks/s, output: 284.02 toks/s]Processed prompts:  67%|██████▋   | 16/24 [01:23<00:42,  5.37s/it, est. speed input: 23.24 toks/s, output: 261.44 toks/s]Processed prompts:  83%|████████▎ | 20/24 [02:15<00:32,  8.12s/it, est. speed input: 18.31 toks/s, output: 295.12 toks/s]Processed prompts: 100%|██████████| 24/24 [16:20<00:00, 77.24s/it, est. speed input: 3.20 toks/s, output: 171.66 toks/s] Processed prompts: 100%|██████████| 24/24 [16:20<00:00, 40.87s/it, est. speed input: 3.20 toks/s, output: 171.66 toks/s]
+[evalplus] checkpoint 12/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 12:18 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:22<01:52,  5.62s/it, est. speed input: 14.76 toks/s, output: 160.11 toks/s]Processed prompts:  33%|███▎      | 8/24 [01:13<02:36,  9.81s/it, est. speed input: 9.75 toks/s, output: 191.58 toks/s] Processed prompts:  50%|█████     | 12/24 [01:17<01:09,  5.79s/it, est. speed input: 14.00 toks/s, output: 298.17 toks/s]Processed prompts:  67%|██████▋   | 16/24 [01:29<00:37,  4.67s/it, est. speed input: 20.92 toks/s, output: 384.52 toks/s]Processed prompts:  83%|████████▎ | 20/24 [01:45<00:17,  4.49s/it, est. speed input: 21.18 toks/s, output: 416.06 toks/s]Processed prompts: 100%|██████████| 24/24 [13:31<00:00, 62.93s/it, est. speed input: 3.39 toks/s, output: 110.20 toks/s] Processed prompts: 100%|██████████| 24/24 [13:31<00:00, 33.81s/it, est. speed input: 3.39 toks/s, output: 110.20 toks/s]
+[evalplus] checkpoint 18/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 18:24 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:40<03:23, 10.19s/it, est. speed input: 12.66 toks/s, output: 163.94 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:53<01:36,  6.02s/it, est. speed input: 14.75 toks/s, output: 201.14 toks/s]Processed prompts:  50%|█████     | 12/24 [01:29<01:29,  7.43s/it, est. speed input: 13.75 toks/s, output: 266.82 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:37<01:29, 11.24s/it, est. speed input: 10.74 toks/s, output: 210.02 toks/s]Processed prompts:  83%|████████▎ | 20/24 [03:37<00:50, 12.51s/it, est. speed input: 10.56 toks/s, output: 223.53 toks/s]Processed prompts: 100%|██████████| 24/24 [04:17<00:00, 11.72s/it, est. speed input: 11.84 toks/s, output: 350.26 toks/s]Processed prompts: 100%|██████████| 24/24 [04:17<00:00, 10.74s/it, est. speed input: 11.84 toks/s, output: 350.26 toks/s]
+[evalplus] checkpoint 24/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 24:30 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:15<01:15,  3.78s/it, est. speed input: 21.45 toks/s, output: 133.47 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:25<00:49,  3.10s/it, est. speed input: 30.00 toks/s, output: 211.07 toks/s]Processed prompts:  50%|█████     | 12/24 [00:46<00:48,  4.08s/it, est. speed input: 22.66 toks/s, output: 193.61 toks/s]Processed prompts:  67%|██████▋   | 16/24 [01:34<00:57,  7.21s/it, est. speed input: 17.58 toks/s, output: 248.80 toks/s]Processed prompts:  83%|████████▎ | 20/24 [03:01<00:49, 12.40s/it, est. speed input: 11.57 toks/s, output: 213.65 toks/s]Processed prompts: 100%|██████████| 24/24 [03:12<00:00,  9.14s/it, est. speed input: 12.50 toks/s, output: 360.59 toks/s]Processed prompts: 100%|██████████| 24/24 [03:12<00:00,  8.01s/it, est. speed input: 12.50 toks/s, output: 360.59 toks/s]
+[evalplus] checkpoint 30/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 30:36 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:12<01:04,  3.20s/it, est. speed input: 44.33 toks/s, output: 155.87 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:52<01:54,  7.13s/it, est. speed input: 19.35 toks/s, output: 132.51 toks/s]Processed prompts:  50%|█████     | 12/24 [01:28<01:35,  7.98s/it, est. speed input: 19.34 toks/s, output: 240.26 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:42<01:36, 12.11s/it, est. speed input: 13.75 toks/s, output: 236.27 toks/s]Processed prompts:  83%|████████▎ | 20/24 [16:27<05:28, 82.16s/it, est. speed input: 3.41 toks/s, output: 144.56 toks/s] Processed prompts: 100%|██████████| 24/24 [16:27<00:00, 41.15s/it, est. speed input: 3.82 toks/s, output: 188.55 toks/s]
+[evalplus] checkpoint 36/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 36:42 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [01:22<06:53, 20.65s/it, est. speed input: 5.23 toks/s, output: 139.17 toks/s]Processed prompts:  50%|█████     | 12/24 [03:15<03:09, 15.80s/it, est. speed input: 7.74 toks/s, output: 248.71 toks/s]Processed prompts:  67%|██████▋   | 16/24 [04:51<02:28, 18.60s/it, est. speed input: 7.60 toks/s, output: 260.65 toks/s]Processed prompts:  83%|████████▎ | 20/24 [05:19<00:59, 14.81s/it, est. speed input: 9.21 toks/s, output: 353.42 toks/s]Processed prompts: 100%|██████████| 24/24 [16:56<00:00, 65.94s/it, est. speed input: 3.61 toks/s, output: 231.19 toks/s]Processed prompts: 100%|██████████| 24/24 [16:56<00:00, 42.34s/it, est. speed input: 3.61 toks/s, output: 231.19 toks/s]
+[evalplus] checkpoint 42/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 42:48 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:12<01:02,  3.11s/it, est. speed input: 44.00 toks/s, output: 157.86 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:14<00:26,  1.65s/it, est. speed input: 55.47 toks/s, output: 280.97 toks/s]Processed prompts:  50%|█████     | 12/24 [01:35<02:01, 10.14s/it, est. speed input: 13.67 toks/s, output: 163.26 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:07<01:14,  9.25s/it, est. speed input: 15.97 toks/s, output: 255.19 toks/s]Processed prompts:  83%|████████▎ | 20/24 [04:10<01:08, 17.01s/it, est. speed input: 11.25 toks/s, output: 257.79 toks/s]Processed prompts: 100%|██████████| 24/24 [05:22<00:00, 17.36s/it, est. speed input: 10.04 toks/s, output: 337.45 toks/s]Processed prompts: 100%|██████████| 24/24 [05:22<00:00, 13.45s/it, est. speed input: 10.04 toks/s, output: 337.45 toks/s]
+[evalplus] checkpoint 48/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 48:54 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:17<01:25,  4.30s/it, est. speed input: 25.14 toks/s, output: 152.25 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:38<01:17,  4.83s/it, est. speed input: 19.58 toks/s, output: 172.13 toks/s]Processed prompts:  50%|█████     | 12/24 [01:31<01:44,  8.73s/it, est. speed input: 13.16 toks/s, output: 226.03 toks/s]Processed prompts:  67%|██████▋   | 16/24 [01:44<00:52,  6.57s/it, est. speed input: 17.10 toks/s, output: 307.45 toks/s]Processed prompts:  83%|████████▎ | 20/24 [01:48<00:18,  4.51s/it, est. speed input: 21.74 toks/s, output: 443.10 toks/s]Processed prompts: 100%|██████████| 24/24 [01:53<00:00,  3.41s/it, est. speed input: 24.14 toks/s, output: 517.45 toks/s]Processed prompts: 100%|██████████| 24/24 [01:53<00:00,  4.71s/it, est. speed input: 24.14 toks/s, output: 517.45 toks/s]
+[evalplus] checkpoint 54/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 54:60 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:24<02:01,  6.10s/it, est. speed input: 24.10 toks/s, output: 143.32 toks/s]Processed prompts:  33%|███▎      | 8/24 [01:43<03:46, 14.17s/it, est. speed input: 10.15 toks/s, output: 127.22 toks/s]Processed prompts:  50%|█████     | 12/24 [02:12<02:11, 10.97s/it, est. speed input: 10.76 toks/s, output: 248.48 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:37<01:13,  9.17s/it, est. speed input: 11.02 toks/s, output: 334.71 toks/s]Processed prompts:  83%|████████▎ | 20/24 [14:29<04:40, 70.02s/it, est. speed input: 2.76 toks/s, output: 148.49 toks/s] Processed prompts: 100%|██████████| 24/24 [14:29<00:00, 36.24s/it, est. speed input: 3.28 toks/s, output: 203.74 toks/s]
+[evalplus] checkpoint 60/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 60:66 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:16<01:23,  4.19s/it, est. speed input: 30.53 toks/s, output: 167.28 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:33<01:06,  4.16s/it, est. speed input: 28.94 toks/s, output: 217.22 toks/s]Processed prompts:  50%|█████     | 12/24 [01:49<02:11, 10.93s/it, est. speed input: 13.73 toks/s, output: 197.66 toks/s]Processed prompts:  67%|██████▋   | 16/24 [03:14<01:59, 14.99s/it, est. speed input: 9.99 toks/s, output: 266.75 toks/s] Processed prompts:  83%|████████▎ | 20/24 [04:12<00:59, 14.82s/it, est. speed input: 10.45 toks/s, output: 298.22 toks/s]Processed prompts: 100%|██████████| 24/24 [04:37<00:00, 11.97s/it, est. speed input: 11.64 toks/s, output: 379.51 toks/s]Processed prompts: 100%|██████████| 24/24 [04:37<00:00, 11.58s/it, est. speed input: 11.64 toks/s, output: 379.51 toks/s]
+[evalplus] checkpoint 66/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 66:72 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:32<02:42,  8.11s/it, est. speed input: 17.75 toks/s, output: 116.59 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:59<01:56,  7.30s/it, est. speed input: 22.44 toks/s, output: 209.21 toks/s]Processed prompts:  50%|█████     | 12/24 [01:02<00:51,  4.30s/it, est. speed input: 43.18 toks/s, output: 351.83 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:12<01:16,  9.56s/it, est. speed input: 27.77 toks/s, output: 309.26 toks/s]Processed prompts:  83%|████████▎ | 20/24 [02:23<00:28,  7.10s/it, est. speed input: 29.78 toks/s, output: 417.73 toks/s]Processed prompts: 100%|██████████| 24/24 [13:16<00:00, 60.14s/it, est. speed input: 6.11 toks/s, output: 153.12 toks/s] Processed prompts: 100%|██████████| 24/24 [13:16<00:00, 33.17s/it, est. speed input: 6.11 toks/s, output: 153.12 toks/s]
+[evalplus] checkpoint 72/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 72:78 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:52<04:20, 13.02s/it, est. speed input: 16.67 toks/s, output: 143.96 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:52<01:26,  5.42s/it, est. speed input: 35.90 toks/s, output: 244.45 toks/s]Processed prompts:  33%|███▎      | 8/24 [01:09<01:26,  5.42s/it, est. speed input: 35.90 toks/s, output: 244.45 toks/s]Processed prompts:  50%|█████     | 12/24 [02:03<02:12, 11.02s/it, est. speed input: 21.16 toks/s, output: 251.80 toks/s]Processed prompts:  67%|██████▋   | 16/24 [05:04<03:16, 24.56s/it, est. speed input: 9.97 toks/s, output: 216.65 toks/s] Processed prompts:  83%|████████▎ | 20/24 [16:32<05:10, 77.73s/it, est. speed input: 3.73 toks/s, output: 172.56 toks/s]Processed prompts: 100%|██████████| 24/24 [16:32<00:00, 41.36s/it, est. speed input: 4.28 toks/s, output: 228.48 toks/s]
+[evalplus] checkpoint 78/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 78:84 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:28<02:24,  7.22s/it, est. speed input: 23.67 toks/s, output: 147.46 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:57<01:54,  7.15s/it, est. speed input: 22.06 toks/s, output: 234.80 toks/s]Processed prompts:  50%|█████     | 12/24 [01:21<01:19,  6.64s/it, est. speed input: 20.68 toks/s, output: 289.27 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:02<01:04,  8.07s/it, est. speed input: 15.98 toks/s, output: 337.42 toks/s]Processed prompts:  83%|████████▎ | 20/24 [14:25<04:48, 72.13s/it, est. speed input: 3.83 toks/s, output: 98.98 toks/s]  Processed prompts: 100%|██████████| 24/24 [14:25<00:00, 36.06s/it, est. speed input: 5.19 toks/s, output: 196.79 toks/s]
+[evalplus] checkpoint 84/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 84:90 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:26<02:12,  6.63s/it, est. speed input: 11.91 toks/s, output: 172.47 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:43<01:23,  5.21s/it, est. speed input: 28.21 toks/s, output: 241.04 toks/s]Processed prompts:  50%|█████     | 12/24 [01:15<01:17,  6.50s/it, est. speed input: 25.27 toks/s, output: 218.80 toks/s]Processed prompts:  67%|██████▋   | 16/24 [01:33<00:45,  5.74s/it, est. speed input: 26.04 toks/s, output: 331.81 toks/s]Processed prompts:  83%|████████▎ | 20/24 [02:08<00:27,  6.82s/it, est. speed input: 27.76 toks/s, output: 401.84 toks/s]Processed prompts: 100%|██████████| 24/24 [02:58<00:00,  8.69s/it, est. speed input: 23.54 toks/s, output: 462.47 toks/s]Processed prompts: 100%|██████████| 24/24 [02:58<00:00,  7.42s/it, est. speed input: 23.54 toks/s, output: 462.47 toks/s]
+[evalplus] checkpoint 90/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 90:96 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [02:02<10:12, 30.64s/it, est. speed input: 6.43 toks/s, output: 121.11 toks/s]Processed prompts:  33%|███▎      | 8/24 [02:26<04:17, 16.12s/it, est. speed input: 14.98 toks/s, output: 235.38 toks/s]Processed prompts:  50%|█████     | 12/24 [08:02<09:25, 47.14s/it, est. speed input: 5.64 toks/s, output: 159.28 toks/s]Processed prompts:  67%|██████▋   | 16/24 [18:40<12:11, 91.45s/it, est. speed input: 2.96 toks/s, output: 110.32 toks/s]Processed prompts: 100%|██████████| 24/24 [18:40<00:00, 46.67s/it, est. speed input: 4.00 toks/s, output: 244.74 toks/s]
+[evalplus] checkpoint 96/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 96:102 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:22<01:50,  5.50s/it, est. speed input: 24.89 toks/s, output: 157.59 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:33<01:03,  3.96s/it, est. speed input: 27.77 toks/s, output: 252.65 toks/s]Processed prompts:  50%|█████     | 12/24 [02:21<02:53, 14.45s/it, est. speed input: 11.66 toks/s, output: 178.01 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:30<01:17,  9.67s/it, est. speed input: 14.65 toks/s, output: 302.67 toks/s]Processed prompts:  83%|████████▎ | 20/24 [02:48<00:31,  7.81s/it, est. speed input: 16.78 toks/s, output: 398.26 toks/s]Processed prompts: 100%|██████████| 24/24 [14:06<00:00, 62.72s/it, est. speed input: 4.24 toks/s, output: 193.30 toks/s] Processed prompts: 100%|██████████| 24/24 [14:06<00:00, 35.25s/it, est. speed input: 4.24 toks/s, output: 193.30 toks/s]
+[evalplus] checkpoint 102/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 102:108 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:43<03:39, 10.96s/it, est. speed input: 27.66 toks/s, output: 145.38 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:44<01:13,  4.58s/it, est. speed input: 39.89 toks/s, output: 279.82 toks/s]Processed prompts:  50%|█████     | 12/24 [00:57<00:47,  3.95s/it, est. speed input: 47.61 toks/s, output: 362.81 toks/s]Processed prompts:  67%|██████▋   | 16/24 [01:05<00:25,  3.20s/it, est. speed input: 50.85 toks/s, output: 475.92 toks/s]Processed prompts:  83%|████████▎ | 20/24 [01:52<00:25,  6.27s/it, est. speed input: 33.98 toks/s, output: 412.54 toks/s]Processed prompts: 100%|██████████| 24/24 [13:06<00:00, 61.46s/it, est. speed input: 5.73 toks/s, output: 144.99 toks/s] Processed prompts: 100%|██████████| 24/24 [13:06<00:00, 32.77s/it, est. speed input: 5.73 toks/s, output: 144.99 toks/s]
+[evalplus] checkpoint 108/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 108:114 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:51<04:15, 12.79s/it, est. speed input: 14.54 toks/s, output: 112.45 toks/s]Processed prompts:  33%|███▎      | 8/24 [01:52<03:47, 14.21s/it, est. speed input: 12.89 toks/s, output: 141.08 toks/s]Processed prompts:  50%|█████     | 12/24 [04:58<05:48, 29.00s/it, est. speed input: 7.80 toks/s, output: 182.45 toks/s]Processed prompts:  67%|██████▋   | 16/24 [05:39<02:52, 21.61s/it, est. speed input: 10.66 toks/s, output: 292.86 toks/s]Processed prompts:  83%|████████▎ | 20/24 [06:19<01:09, 17.39s/it, est. speed input: 11.72 toks/s, output: 361.06 toks/s]Processed prompts: 100%|██████████| 24/24 [14:13<00:00, 51.80s/it, est. speed input: 5.92 toks/s, output: 226.05 toks/s] Processed prompts: 100%|██████████| 24/24 [14:13<00:00, 35.56s/it, est. speed input: 5.92 toks/s, output: 226.05 toks/s]
+[evalplus] checkpoint 114/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 114:120 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [02:45<13:46, 41.30s/it, est. speed input: 4.96 toks/s, output: 90.26 toks/s]Processed prompts:  33%|███▎      | 8/24 [03:36<06:33, 24.62s/it, est. speed input: 7.32 toks/s, output: 192.51 toks/s]Processed prompts:  50%|█████     | 12/24 [04:00<03:13, 16.10s/it, est. speed input: 8.45 toks/s, output: 262.52 toks/s]Processed prompts:  67%|██████▋   | 16/24 [04:10<01:25, 10.69s/it, est. speed input: 10.89 toks/s, output: 376.84 toks/s]Processed prompts:  83%|████████▎ | 20/24 [17:22<05:12, 78.23s/it, est. speed input: 3.96 toks/s, output: 142.20 toks/s] Processed prompts: 100%|██████████| 24/24 [17:22<00:00, 43.44s/it, est. speed input: 4.70 toks/s, output: 245.38 toks/s]
+[evalplus] checkpoint 120/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 120:126 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:33<02:49,  8.48s/it, est. speed input: 14.98 toks/s, output: 146.62 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:35<00:59,  3.71s/it, est. speed input: 32.54 toks/s, output: 304.54 toks/s]Processed prompts:  50%|█████     | 12/24 [01:47<02:02, 10.24s/it, est. speed input: 16.86 toks/s, output: 235.46 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:00<01:00,  7.53s/it, est. speed input: 23.14 toks/s, output: 325.37 toks/s]Processed prompts:  83%|████████▎ | 20/24 [02:25<00:28,  7.05s/it, est. speed input: 27.81 toks/s, output: 409.86 toks/s]Processed prompts: 100%|██████████| 24/24 [13:17<00:00, 60.03s/it, est. speed input: 6.37 toks/s, output: 142.15 toks/s] Processed prompts: 100%|██████████| 24/24 [13:17<00:00, 33.22s/it, est. speed input: 6.37 toks/s, output: 142.15 toks/s]
+[evalplus] checkpoint 126/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 126:132 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [01:17<06:28, 19.42s/it, est. speed input: 5.05 toks/s, output: 117.23 toks/s]Processed prompts:  33%|███▎      | 8/24 [04:08<08:50, 33.15s/it, est. speed input: 3.92 toks/s, output: 109.85 toks/s]Processed prompts:  50%|█████     | 12/24 [04:15<03:44, 18.73s/it, est. speed input: 8.19 toks/s, output: 189.32 toks/s]Processed prompts:  67%|██████▋   | 16/24 [05:29<02:29, 18.72s/it, est. speed input: 11.42 toks/s, output: 267.29 toks/s]Processed prompts:  83%|████████▎ | 20/24 [20:59<06:23, 95.82s/it, est. speed input: 3.86 toks/s, output: 169.32 toks/s] Processed prompts: 100%|██████████| 24/24 [21:00<00:00, 52.50s/it, est. speed input: 4.68 toks/s, output: 245.64 toks/s]
+[evalplus] checkpoint 132/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 132:138 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:34<02:54,  8.73s/it, est. speed input: 18.55 toks/s, output: 144.88 toks/s]Processed prompts:  33%|███▎      | 8/24 [01:21<02:46, 10.38s/it, est. speed input: 14.26 toks/s, output: 169.05 toks/s]Processed prompts:  50%|█████     | 12/24 [04:31<05:28, 27.34s/it, est. speed input: 6.99 toks/s, output: 161.55 toks/s]Processed prompts:  67%|██████▋   | 16/24 [20:30<14:50, 111.26s/it, est. speed input: 2.05 toks/s, output: 100.18 toks/s]Processed prompts: 100%|██████████| 24/24 [20:30<00:00, 51.28s/it, est. speed input: 3.11 toks/s, output: 240.54 toks/s] 
+[evalplus] checkpoint 138/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 138:144 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [01:14<06:10, 18.53s/it, est. speed input: 9.34 toks/s, output: 144.58 toks/s]Processed prompts:  33%|███▎      | 8/24 [01:56<03:41, 13.84s/it, est. speed input: 10.11 toks/s, output: 237.04 toks/s]Processed prompts:  50%|█████     | 12/24 [02:00<01:35,  7.95s/it, est. speed input: 13.15 toks/s, output: 344.15 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:17<00:51,  6.49s/it, est. speed input: 18.47 toks/s, output: 398.40 toks/s]Processed prompts:  83%|████████▎ | 20/24 [03:34<00:44, 11.12s/it, est. speed input: 14.24 toks/s, output: 403.13 toks/s]Processed prompts: 100%|██████████| 24/24 [13:19<00:00, 57.08s/it, est. speed input: 4.79 toks/s, output: 175.21 toks/s] Processed prompts: 100%|██████████| 24/24 [13:19<00:00, 33.32s/it, est. speed input: 4.79 toks/s, output: 175.21 toks/s]
+[evalplus] checkpoint 144/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 144:150 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [01:20<06:42, 20.14s/it, est. speed input: 7.60 toks/s, output: 144.49 toks/s]Processed prompts:  33%|███▎      | 8/24 [01:34<02:44, 10.28s/it, est. speed input: 15.47 toks/s, output: 258.80 toks/s]Processed prompts:  50%|█████     | 12/24 [01:51<01:31,  7.59s/it, est. speed input: 19.53 toks/s, output: 331.94 toks/s]Processed prompts:  67%|██████▋   | 16/24 [07:17<04:54, 36.78s/it, est. speed input: 6.73 toks/s, output: 206.37 toks/s] Processed prompts:  83%|████████▎ | 20/24 [15:58<04:41, 70.46s/it, est. speed input: 3.68 toks/s, output: 193.40 toks/s]Processed prompts: 100%|██████████| 24/24 [15:58<00:00, 39.94s/it, est. speed input: 4.66 toks/s, output: 246.91 toks/s]
+[evalplus] checkpoint 150/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 150:156 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [00:24<02:03,  6.19s/it, est. speed input: 14.86 toks/s, output: 167.30 toks/s]Processed prompts:  33%|███▎      | 8/24 [00:44<01:28,  5.50s/it, est. speed input: 18.37 toks/s, output: 235.52 toks/s]Processed prompts:  50%|█████     | 12/24 [02:13<02:37, 13.13s/it, est. speed input: 13.77 toks/s, output: 148.00 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:52<01:34, 11.83s/it, est. speed input: 17.60 toks/s, output: 238.10 toks/s]Processed prompts:  83%|████████▎ | 20/24 [02:56<00:31,  7.87s/it, est. speed input: 20.73 toks/s, output: 373.74 toks/s]Processed prompts: 100%|██████████| 24/24 [13:16<00:00, 57.94s/it, est. speed input: 5.41 toks/s, output: 154.32 toks/s] Processed prompts: 100%|██████████| 24/24 [13:16<00:00, 33.20s/it, est. speed input: 5.41 toks/s, output: 154.32 toks/s]
+[evalplus] checkpoint 156/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 156:162 / 164
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  17%|█▋        | 4/24 [01:16<06:24, 19.25s/it, est. speed input: 7.01 toks/s, output: 108.23 toks/s]Processed prompts:  33%|███▎      | 8/24 [01:22<02:19,  8.71s/it, est. speed input: 13.02 toks/s, output: 187.10 toks/s]Processed prompts:  50%|█████     | 12/24 [01:48<01:32,  7.73s/it, est. speed input: 15.17 toks/s, output: 302.13 toks/s]Processed prompts:  67%|██████▋   | 16/24 [02:33<01:12,  9.08s/it, est. speed input: 16.79 toks/s, output: 357.91 toks/s]Processed prompts:  83%|████████▎ | 20/24 [02:58<00:32,  8.05s/it, est. speed input: 21.49 toks/s, output: 437.65 toks/s]Processed prompts: 100%|██████████| 24/24 [03:06<00:00,  6.06s/it, est. speed input: 23.31 toks/s, output: 567.20 toks/s]Processed prompts: 100%|██████████| 24/24 [03:06<00:00,  7.79s/it, est. speed input: 23.31 toks/s, output: 567.20 toks/s]
+[evalplus] checkpoint 162/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] generate 162:164 / 164
+Processed prompts:   0%|          | 0/8 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts:  50%|█████     | 4/8 [00:50<00:50, 12.58s/it, est. speed input: 8.75 toks/s, output: 117.63 toks/s]Processed prompts: 100%|██████████| 8/8 [02:07<00:00, 16.49s/it, est. speed input: 7.55 toks/s, output: 179.34 toks/s]Processed prompts: 100%|██████████| 8/8 [02:07<00:00, 15.90s/it, est. speed input: 7.55 toks/s, output: 179.34 toks/s]
+[evalplus] checkpoint 164/164 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.jsonl
+[evalplus] wrote generations → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.json
+[evalplus] avg_output_tokens=6614.1 (n=656 median=3543.5 min=343 max=38912)
+[evalplus] wrote metrics → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.json
+[rank0]:[W1019 06:11:16.128398068 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[evalplus] submitting CPU judge: /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/scripts/eval_code/4b_base/humanevalplus_think_judge.sh
+[evalplus] generations=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_4b_grpo50_ckpt100/humanevalplus_4b_base_think.generations.json
+[evalplus] judge job-name=ocr_4b_grpo50_he_j
+sbatch: ╔════════════════════════════════════════════════════════════╗
+sbatch: ║ 装置四 - 参数检查脚本
+sbatch: ║ Device IV - Parameter Checking Script
+sbatch: ╠════════════════════════════════════════════════════════════╣
+sbatch: ║ 版本: v1.0.5
+sbatch: ║ 时间: 2026-10-19 06:11:18
+sbatch: ╚════════════════════════════════════════════════════════════╝
+sbatch: [提示] 您可在提交作业时通过-p/--partition参数指定分区，可用逗号分开，指定多个分区，如 -p GPUA800,GPUA800L,GPUA40S
+sbatch: [提示] 您可在提交作业时通过--mem(min_mem_per_node)或--mem-per-cpu(min_mem_per_cpu)或--mem-per-gpu(mem_per_tres)参数指定内存
+sbatch: [提示] 您可在提交作业时通过-c/--cpus-per-task(cpus_per_task)或者--cpus-per-gpu=(cpus_per_tres)参数指定CPU
+sbatch: [提示] 您可在提交作业时通过--gres或-G/--gpus或--gpus-per-node或--gpus-per-socket或--gpus-per-task或--tres-per-task参数指定GPU
+sbatch: [提示] 您可在提交作业时通过-n/--ntasks(num_tasks)或--ntasks-per-node或--ntasks-per-socket或--ntasks-per-core或--ntasks-per-gpu参数指定task
+sbatch: [提示] 您可在提交作业时通过-N/--nodes参数指定node
+sbatch: [提示] 您可在提交作业时通过-t/--time(任务最大运行时限time_limit)或--time-min(任务最少需要运行多久,任务可比最少运行时间提前结束)或参数指定任务时长
+sbatch: [装置四->参数检查->分区] partition: C64M512G
+sbatch: [装置四->参数检查->内存] min_mem_per_node: 未设置
+sbatch: [装置四->参数检查->内存] min_mem_per_cpu: 未设置
+sbatch: [装置四->参数检查->内存] mem_per_tres: nil MB
+sbatch: [装置四->参数检查->内存] 提醒：您未指定内存参数，将使用分区的默认值：DefMemPerCPU=7968 MB
+sbatch: [装置四->参数检查->CPU] min_cpus: 48
+sbatch: [装置四->参数检查->CPU] cpus_per_task: 48
+sbatch: [装置四->参数检查->CPU] max_cpus: NO_VAL
+sbatch: [装置四->参数检查->CPU] cpus_per_tres: 未设置
+sbatch: [装置四->参数检查->gres] gres: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_node: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_task: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_socket: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_job: 未设置
+sbatch: [装置四->参数检查->task] num_tasks: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_node: 1
+sbatch: [装置四->参数检查->task] ntasks_per_socket: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_core: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_gpu: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_tres: NO_VAL
+sbatch: [装置四->参数检查->task] tres_per_task: 未设置
+sbatch: [装置四->参数检查->node] min_nodes: 1
+sbatch: [装置四->参数检查->node] max_nodes: 1
+sbatch: [装置四->参数检查->time] time_limit: 720 Min
+sbatch: [装置四->参数检查->time] time_min: NO_VAL
+sbatch: [装置四->参数检查->合理性检查->说明]
+sbatch: [装置四->参数检查->合理性检查->说明] 为给大家提供更好的作业运行体验，我们对作业参数进行了合理性检查，方案如下：
+sbatch: [装置四->参数检查->合理性检查->说明] 1、任务最大运行时长参数强制要求为必填项(调度算法使用)
+sbatch: [装置四->参数检查->合理性检查->说明]    用户必须通过-t/--time参数指定任务最大运行时长，否则作业将被拒绝
+sbatch: [装置四->参数检查->合理性检查->说明]    用户可设置的任务最大运行时长，为任务提交到的分区所允许的最大时长
+sbatch: [装置四->参数检查->合理性检查->说明] 2、建议用户填写作业预估的最小运行时间(调度算法使用)--time-min，用户填写数量越多，任务调度效率越高
+sbatch: [装置四->参数检查->合理性检查->说明] 3、用户填写的参数或未填写的参数，如未特别说明，此拦截脚本不做任何更改，将由slurm默认分配
+sbatch: [装置四->参数检查->合理性检查->说明] 4、slurm将根据节点上CPU、内存、GPU等资源按比例分配或按固定数量分配给您提交的任务
+sbatch: [装置四->参数检查->合理性检查->说明]    您提交的值ReqTRES，不一定与slurm实际为您分配到的值AllocTRES相同
+sbatch: [装置四->参数检查->合理性检查->说明] 5、交互式任务的最大运行时间，已限制为不超过6小时，若在GPU分区运行，最大使用GPU卡数为2张
+sbatch: [装置四->参数检查->合理性检查->说明] 6、slurm已开启Slurm Priority Multifactor（官方多因子优先级调度算法），动态调整任务的优先级，以实现更好的作业运行体验
+sbatch: [装置四->参数检查->合理性检查->说明]    用户公平因子（Fairshare）：基于用户历史消耗资源 / 运行时长扣分（历史占资源越多，优先级越低）
+sbatch: [装置四->参数检查->合理性检查->说明]    资源大小因子（Size Factor）：小任务优先 / 大任务加权可调
+sbatch: [装置四->参数检查->合理性检查->说明]    任务等待时长（Age Factor）：排队越久加分，防饥饿
+sbatch: [装置四->参数检查->合理性检查->说明]    QOS / 锁定标记区分权重（QOS Factor）：给锁定用户单独 QOS，设置独立权重
+sbatch: [装置四->参数检查->合理性检查->说明] 如您执行遇到拦截脚本的问题，请及时反馈，我们会尽快修复！同时也谢谢大家提的宝贵意见
+sbatch: [装置四->参数检查->合理性检查->说明]
+sbatch: [装置四->参数检查->合理性检查->资源配比->CPU] 从cpus_per_task获取: 48
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] num_nodes: 1
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] num_cpus_per_node: 48
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] 检测到用户未指定内存数量，将由slurm自动分配
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] 检查通过，最终资源以slurm自动分配结果为准
+sbatch: ╔════════════════════════════════════════════════════════════╗
+sbatch: ║ 参数检查完成
+sbatch: ║ All Checks Passed
+sbatch: ╚════════════════════════════════════════════════════════════╝
+Submitted batch job 4250464

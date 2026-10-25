@@ -1,0 +1,445 @@
+[lcb] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[lcb] checkpoint=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/sft_think_4gpu_12k_ocr/3925962/checkpoint-5000
+[lcb] dataset=lcb_v6 thinking=think (generate-only)
+[lcb] generate_batch_size=6 (val-n=4)
+[lcb] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.json
+[lcb] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/anchor
+Fri Oct  9 14:03:01 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A800-SXM4-80GB          Off |   00000000:C9:00.0 Off |                    0 |
+| N/A   34C    P0             59W /  400W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[lcb] loaded 175 problems from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/livecodebench/test6.jsonl
+[lcb] model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/sft_think_4gpu_12k_ocr/3925962/checkpoint-5000
+[lcb] thinking=True n=4 temp=0.6 top_p=0.95 top_k=20 max_new_tokens=38912
+INFO 10-09 14:04:27 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 10-09 14:04:29 [__init__.py:239] Automatically detected platform cuda.
+INFO 10-09 14:04:40 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 10-09 14:04:40 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 10-09 14:04:40 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 10-09 14:04:40 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 10-09 14:04:40 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+WARNING 10-09 14:04:44 [config.py:3102] User-specified max_model_len (40960) is greater than the derived max_model_len (max_position_embeddings=32768 or model_max_length=None in model's config.json). This may lead to incorrect model outputs or CUDA errors. Make sure the value is correct and within the model context size.
+INFO 10-09 14:04:53 [config.py:717] This model supports multiple tasks: {'generate', 'classify', 'reward', 'score', 'embed'}. Defaulting to 'generate'.
+WARNING 10-09 14:04:53 [arg_utils.py:1525] Chunked prefill is enabled by default for models with max_model_len > 32K. Chunked prefill might not work with some features or models. If you encounter any issues, please disable by launching with --enable-chunked-prefill=False.
+INFO 10-09 14:04:53 [config.py:2003] Chunked prefill is enabled with max_num_batched_tokens=2048.
+WARNING 10-09 14:04:53 [cuda.py:93] To see benefits of async output processing, enable CUDA graph. Since, enforce-eager is enabled, async output processor cannot be used
+INFO 10-09 14:04:53 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/sft_think_4gpu_12k_ocr/3925962/checkpoint-5000', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/sft_think_4gpu_12k_ocr/3925962/checkpoint-5000', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/sft_think_4gpu_12k_ocr/3925962/checkpoint-5000, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=True, use_async_output_proc=False, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[],"max_capture_size":0}, use_cached_outputs=False, 
+INFO 10-09 14:04:54 [cuda.py:228] Using XFormers backend.
+INFO 10-09 14:05:21 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 10-09 14:05:21 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_base/sft_think_4gpu_12k_ocr/3925962/checkpoint-5000...
+
+Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+
+Loading safetensors checkpoint shards:  50% Completed | 1/2 [00:07<00:07,  7.89s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:20<00:00, 10.43s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:20<00:00, 10.05s/it]
+
+INFO 10-09 14:05:42 [loader.py:458] Loading weights took 20.23 seconds
+INFO 10-09 14:05:43 [model_runner.py:1140] Model loading took 7.5532 GiB and 21.061442 seconds
+INFO 10-09 14:05:44 [worker.py:287] Memory profiling takes 1.32 seconds
+INFO 10-09 14:05:44 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.95) = 75.29GiB
+INFO 10-09 14:05:44 [worker.py:287] model weights take 7.55GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.40GiB; the rest of the memory reserved for KV Cache is 66.25GiB.
+INFO 10-09 14:05:44 [executor_base.py:112] # cuda blocks: 30150, # CPU blocks: 1820
+INFO 10-09 14:05:44 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 11.78x
+INFO 10-09 14:05:46 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 3.60 seconds
+[lcb] generate 0:6 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [19:08<1:35:41, 287.07s/it, est. speed input: 2.02 toks/s, output: 59.94 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [44:46<1:31:51, 344.47s/it, est. speed input: 1.87 toks/s, output: 58.50 toks/s]
+Processed prompts:  50%|█████     | 12/24 [44:47<37:26, 187.20s/it, est. speed input: 2.74 toks/s, output: 100.25 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [44:47<15:06, 113.31s/it, est. speed input: 3.34 toks/s, output: 158.16 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [44:47<04:49, 72.46s/it, est. speed input: 4.03 toks/s, output: 208.13 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [44:47<00:00, 111.97s/it, est. speed input: 4.63 toks/s, output: 250.59 toks/s]
+[lcb] checkpoint 6/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 6:12 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:55<04:39, 13.99s/it, est. speed input: 51.04 toks/s, output: 151.42 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [01:12<02:10,  8.15s/it, est. speed input: 60.82 toks/s, output: 256.72 toks/s]
+Processed prompts:  50%|█████     | 12/24 [01:23<01:08,  5.71s/it, est. speed input: 76.37 toks/s, output: 331.25 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [20:01<15:10, 113.81s/it, est. speed input: 7.28 toks/s, output: 91.88 toks/s] 
+Processed prompts:  83%|████████▎ | 20/24 [20:01<04:51, 72.78s/it, est. speed input: 8.67 toks/s, output: 169.54 toks/s]
+Processed prompts: 100%|██████████| 24/24 [20:01<00:00, 50.07s/it, est. speed input: 10.34 toks/s, output: 229.60 toks/s]
+[lcb] checkpoint 12/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 12:18 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [37:22<3:06:50, 560.53s/it, est. speed input: 1.10 toks/s, output: 38.66 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [37:22<1:01:33, 230.84s/it, est. speed input: 2.34 toks/s, output: 97.67 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [37:22<11:29, 86.13s/it, est. speed input: 4.60 toks/s, output: 179.74 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [37:22<00:00, 93.44s/it, est. speed input: 6.05 toks/s, output: 249.94 toks/s]
+[lcb] checkpoint 18/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 18:24 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:28<02:22,  7.10s/it, est. speed input: 62.95 toks/s, output: 151.59 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [01:03<02:09,  8.07s/it, est. speed input: 52.39 toks/s, output: 203.67 toks/s]
+Processed prompts:  50%|█████     | 12/24 [14:47<19:41, 98.44s/it, est. speed input: 6.06 toks/s, output: 84.79 toks/s] 
+Processed prompts:  67%|██████▋   | 16/24 [27:10<17:43, 132.90s/it, est. speed input: 5.10 toks/s, output: 95.04 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [27:10<05:39, 84.99s/it, est. speed input: 6.91 toks/s, output: 174.41 toks/s]
+Processed prompts: 100%|██████████| 24/24 [27:10<00:00, 67.94s/it, est. speed input: 8.35 toks/s, output: 241.28 toks/s]
+[lcb] checkpoint 24/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 24:30 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:28<02:23,  7.18s/it, est. speed input: 41.34 toks/s, output: 162.55 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [00:36<01:06,  4.14s/it, est. speed input: 72.09 toks/s, output: 272.59 toks/s]
+Processed prompts:  50%|█████     | 12/24 [03:28<04:22, 21.90s/it, est. speed input: 21.86 toks/s, output: 164.19 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [05:13<03:08, 23.55s/it, est. speed input: 21.22 toks/s, output: 245.64 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [17:39<05:29, 82.33s/it, est. speed input: 8.74 toks/s, output: 129.66 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [17:39<00:00, 54.35s/it, est. speed input: 10.33 toks/s, output: 229.85 toks/s]
+Processed prompts: 100%|██████████| 24/24 [17:39<00:00, 44.15s/it, est. speed input: 10.33 toks/s, output: 229.85 toks/s]
+[lcb] checkpoint 30/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 30:36 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:54<04:31, 13.57s/it, est. speed input: 34.72 toks/s, output: 138.54 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [06:47<15:19, 57.50s/it, est. speed input: 10.24 toks/s, output: 100.14 toks/s]
+Processed prompts:  50%|█████     | 12/24 [07:03<06:36, 33.05s/it, est. speed input: 15.54 toks/s, output: 196.14 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [22:42<15:01, 112.68s/it, est. speed input: 6.38 toks/s, output: 130.19 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [27:24<06:30, 97.53s/it, est. speed input: 6.74 toks/s, output: 189.83 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [27:24<00:00, 64.38s/it, est. speed input: 8.31 toks/s, output: 247.84 toks/s]
+Processed prompts: 100%|██████████| 24/24 [27:24<00:00, 68.54s/it, est. speed input: 8.31 toks/s, output: 247.84 toks/s]
+[lcb] checkpoint 36/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 36:42 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:52<04:21, 13.07s/it, est. speed input: 40.54 toks/s, output: 135.24 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [02:00<04:06, 15.38s/it, est. speed input: 29.72 toks/s, output: 183.21 toks/s]
+Processed prompts:  50%|█████     | 12/24 [07:24<09:04, 45.39s/it, est. speed input: 11.82 toks/s, output: 129.09 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [26:25<18:40, 140.05s/it, est. speed input: 5.17 toks/s, output: 107.49 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [26:25<05:58, 89.56s/it, est. speed input: 6.54 toks/s, output: 191.99 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [26:25<00:00, 66.07s/it, est. speed input: 7.94 toks/s, output: 243.37 toks/s]
+[lcb] checkpoint 42/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 42:48 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:20<01:40,  5.00s/it, est. speed input: 83.99 toks/s, output: 156.48 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [10:17<23:58, 89.89s/it, est. speed input: 6.54 toks/s, output: 94.58 toks/s]  
+Processed prompts:  50%|█████     | 12/24 [37:23<46:54, 234.54s/it, est. speed input: 2.97 toks/s, output: 54.65 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [37:24<18:55, 141.97s/it, est. speed input: 4.02 toks/s, output: 113.90 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [37:24<06:03, 90.80s/it, est. speed input: 5.01 toks/s, output: 183.24 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [37:24<00:00, 93.52s/it, est. speed input: 6.09 toks/s, output: 235.23 toks/s]
+[lcb] checkpoint 48/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 48:54 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [03:05<15:25, 46.29s/it, est. speed input: 8.75 toks/s, output: 95.30 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [03:24<05:50, 21.92s/it, est. speed input: 18.20 toks/s, output: 194.65 toks/s]
+Processed prompts:  50%|█████     | 12/24 [06:19<06:22, 31.91s/it, est. speed input: 14.71 toks/s, output: 202.56 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [18:50<12:27, 93.40s/it, est. speed input: 6.45 toks/s, output: 124.40 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [18:50<00:00, 43.90s/it, est. speed input: 10.32 toks/s, output: 260.93 toks/s]
+Processed prompts: 100%|██████████| 24/24 [18:50<00:00, 47.11s/it, est. speed input: 10.32 toks/s, output: 260.93 toks/s]
+[lcb] checkpoint 54/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 54:60 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [05:32<27:44, 83.25s/it, est. speed input: 5.61 toks/s, output: 58.41 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [12:42<25:57, 97.37s/it, est. speed input: 4.83 toks/s, output: 104.90 toks/s]
+Processed prompts:  50%|█████     | 12/24 [25:07<27:36, 138.01s/it, est. speed input: 3.23 toks/s, output: 101.51 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [29:30<14:35, 109.48s/it, est. speed input: 4.31 toks/s, output: 170.80 toks/s]
+Processed prompts: 100%|██████████| 24/24 [29:30<00:00, 51.46s/it, est. speed input: 7.89 toks/s, output: 269.45 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [29:30<00:00, 73.78s/it, est. speed input: 7.89 toks/s, output: 269.45 toks/s]
+[lcb] checkpoint 60/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 60:66 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:14<01:10,  3.54s/it, est. speed input: 91.05 toks/s, output: 150.14 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [00:24<00:47,  2.97s/it, est. speed input: 114.03 toks/s, output: 220.94 toks/s]
+Processed prompts:  50%|█████     | 12/24 [00:26<00:22,  1.89s/it, est. speed input: 166.00 toks/s, output: 363.51 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [17:43<13:47, 103.45s/it, est. speed input: 5.89 toks/s, output: 45.21 toks/s]  
+Processed prompts:  83%|████████▎ | 20/24 [22:34<06:09, 92.36s/it, est. speed input: 6.28 toks/s, output: 99.73 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [22:34<00:00, 60.97s/it, est. speed input: 7.58 toks/s, output: 214.64 toks/s]
+Processed prompts: 100%|██████████| 24/24 [22:34<00:00, 56.43s/it, est. speed input: 7.58 toks/s, output: 214.64 toks/s]
+[lcb] checkpoint 66/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 66:72 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:09<00:49,  2.46s/it, est. speed input: 136.29 toks/s, output: 159.89 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [00:27<00:58,  3.67s/it, est. speed input: 127.06 toks/s, output: 197.51 toks/s]
+Processed prompts:  50%|█████     | 12/24 [31:48<43:20, 216.68s/it, est. speed input: 2.88 toks/s, output: 74.14 toks/s] 
+Processed prompts:  67%|██████▋   | 16/24 [31:48<17:29, 131.16s/it, est. speed input: 4.40 toks/s, output: 101.53 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [31:48<05:35, 83.88s/it, est. speed input: 5.82 toks/s, output: 183.05 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [31:49<00:00, 79.54s/it, est. speed input: 7.23 toks/s, output: 228.76 toks/s]
+[lcb] checkpoint 72/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 72:78 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:11<00:55,  2.79s/it, est. speed input: 120.96 toks/s, output: 154.88 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [01:16<02:53, 10.82s/it, est. speed input: 36.10 toks/s, output: 139.96 toks/s] 
+Processed prompts:  50%|█████     | 12/24 [12:38<16:43, 83.66s/it, est. speed input: 7.04 toks/s, output: 99.24 toks/s] 
+Processed prompts:  67%|██████▋   | 16/24 [14:28<08:12, 61.54s/it, est. speed input: 8.30 toks/s, output: 142.06 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [24:21<06:11, 92.76s/it, est. speed input: 8.17 toks/s, output: 158.58 toks/s]
+Processed prompts: 100%|██████████| 24/24 [24:21<00:00, 61.23s/it, est. speed input: 9.28 toks/s, output: 247.16 toks/s]
+Processed prompts: 100%|██████████| 24/24 [24:21<00:00, 60.89s/it, est. speed input: 9.28 toks/s, output: 247.16 toks/s]
+[lcb] checkpoint 78/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 78:84 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [01:03<05:19, 15.96s/it, est. speed input: 27.75 toks/s, output: 118.17 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [38:10<1:29:04, 334.05s/it, est. speed input: 2.93 toks/s, output: 62.42 toks/s]
+Processed prompts:  50%|█████     | 12/24 [38:10<36:18, 181.54s/it, est. speed input: 4.44 toks/s, output: 122.35 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [38:11<05:15, 78.78s/it, est. speed input: 6.55 toks/s, output: 186.76 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [38:11<00:00, 56.11s/it, est. speed input: 8.04 toks/s, output: 235.14 toks/s]
+Processed prompts: 100%|██████████| 24/24 [38:11<00:00, 95.47s/it, est. speed input: 8.04 toks/s, output: 235.14 toks/s]
+[lcb] checkpoint 84/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 84:90 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:21<01:45,  5.28s/it, est. speed input: 65.47 toks/s, output: 135.81 toks/s]WARNING 10-09 21:27:45 [scheduler.py:1768] Sequence group 89_parallel_sample_3 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=1
+
+Processed prompts:  33%|███▎      | 8/24 [42:25<1:39:34, 373.42s/it, est. speed input: 1.65 toks/s, output: 50.46 toks/s]
+Processed prompts:  50%|█████     | 12/24 [42:25<40:35, 202.94s/it, est. speed input: 2.70 toks/s, output: 111.59 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [42:26<16:22, 122.85s/it, est. speed input: 3.64 toks/s, output: 158.60 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [42:26<05:14, 78.57s/it, est. speed input: 4.67 toks/s, output: 177.32 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [42:35<00:00, 52.60s/it, est. speed input: 5.97 toks/s, output: 229.26 toks/s]
+Processed prompts: 100%|██████████| 24/24 [42:35<00:00, 106.46s/it, est. speed input: 5.97 toks/s, output: 229.26 toks/s]
+[lcb] checkpoint 90/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 90:96 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:33<02:46,  8.31s/it, est. speed input: 64.05 toks/s, output: 160.68 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [01:30<03:09, 11.84s/it, est. speed input: 40.94 toks/s, output: 138.44 toks/s]
+Processed prompts:  50%|█████     | 12/24 [03:11<03:35, 17.98s/it, est. speed input: 30.66 toks/s, output: 175.51 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [35:29<26:57, 202.13s/it, est. speed input: 4.09 toks/s, output: 88.89 toks/s] 
+Processed prompts:  83%|████████▎ | 20/24 [35:29<08:37, 129.26s/it, est. speed input: 6.25 toks/s, output: 161.97 toks/s]
+Processed prompts: 100%|██████████| 24/24 [35:29<00:00, 88.73s/it, est. speed input: 7.45 toks/s, output: 222.84 toks/s] 
+[lcb] checkpoint 96/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 96:102 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:59<04:56, 14.82s/it, est. speed input: 33.20 toks/s, output: 156.52 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [02:25<05:01, 18.84s/it, est. speed input: 24.19 toks/s, output: 172.09 toks/s]
+Processed prompts:  50%|█████     | 12/24 [05:30<06:16, 31.37s/it, est. speed input: 18.50 toks/s, output: 171.00 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [34:36<25:29, 191.23s/it, est. speed input: 4.01 toks/s, output: 102.23 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [34:36<08:09, 122.28s/it, est. speed input: 4.99 toks/s, output: 166.05 toks/s]
+Processed prompts: 100%|██████████| 24/24 [34:36<00:00, 80.72s/it, est. speed input: 6.12 toks/s, output: 228.67 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [34:36<00:00, 86.52s/it, est. speed input: 6.12 toks/s, output: 228.67 toks/s]
+[lcb] checkpoint 102/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 102:108 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:19<01:35,  4.79s/it, est. speed input: 82.46 toks/s, output: 159.28 toks/s]
+Processed prompts:  50%|█████     | 12/24 [01:23<01:26,  7.24s/it, est. speed input: 66.26 toks/s, output: 229.91 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [05:42<03:36, 27.09s/it, est. speed input: 24.31 toks/s, output: 176.87 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [22:55<06:54, 103.61s/it, est. speed input: 8.16 toks/s, output: 141.43 toks/s]
+Processed prompts: 100%|██████████| 24/24 [22:56<00:00, 70.37s/it, est. speed input: 10.02 toks/s, output: 217.56 toks/s]
+Processed prompts: 100%|██████████| 24/24 [22:56<00:00, 57.34s/it, est. speed input: 10.02 toks/s, output: 217.56 toks/s]
+[lcb] checkpoint 108/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 108:114 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:29<02:29,  7.49s/it, est. speed input: 65.18 toks/s, output: 145.23 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [08:41<20:05, 75.31s/it, est. speed input: 7.46 toks/s, output: 58.82 toks/s]  
+Processed prompts:  50%|█████     | 12/24 [40:46<52:08, 260.73s/it, est. speed input: 2.98 toks/s, output: 57.32 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [40:46<21:02, 157.81s/it, est. speed input: 4.05 toks/s, output: 120.93 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [40:46<06:43, 100.93s/it, est. speed input: 6.41 toks/s, output: 184.53 toks/s]
+Processed prompts: 100%|██████████| 24/24 [40:47<00:00, 66.62s/it, est. speed input: 7.68 toks/s, output: 221.79 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [40:47<00:00, 101.96s/it, est. speed input: 7.68 toks/s, output: 221.79 toks/s]
+[lcb] checkpoint 114/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 114:120 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:36<03:04,  9.20s/it, est. speed input: 60.52 toks/s, output: 138.51 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [00:37<01:03,  3.96s/it, est. speed input: 135.67 toks/s, output: 284.92 toks/s]
+Processed prompts:  50%|█████     | 12/24 [04:14<05:21, 26.82s/it, est. speed input: 36.07 toks/s, output: 162.74 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [07:01<04:22, 32.80s/it, est. speed input: 31.05 toks/s, output: 167.31 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [23:23<07:17, 109.44s/it, est. speed input: 12.01 toks/s, output: 146.39 toks/s]
+Processed prompts: 100%|██████████| 24/24 [23:23<00:00, 72.24s/it, est. speed input: 13.61 toks/s, output: 223.87 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [23:23<00:00, 58.47s/it, est. speed input: 13.61 toks/s, output: 223.87 toks/s]
+[lcb] checkpoint 120/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 120:126 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:22<01:52,  5.61s/it, est. speed input: 85.60 toks/s, output: 153.68 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [06:57<16:07, 60.47s/it, est. speed input: 10.46 toks/s, output: 80.07 toks/s] 
+Processed prompts:  50%|█████     | 12/24 [33:27<42:51, 214.26s/it, est. speed input: 3.95 toks/s, output: 57.21 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [33:27<17:17, 129.69s/it, est. speed input: 5.12 toks/s, output: 134.75 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [33:27<05:31, 82.94s/it, est. speed input: 6.60 toks/s, output: 201.37 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [33:27<00:00, 83.64s/it, est. speed input: 7.52 toks/s, output: 228.36 toks/s]
+[lcb] checkpoint 126/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 126:132 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [01:16<06:22, 19.13s/it, est. speed input: 25.09 toks/s, output: 118.10 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [02:39<05:20, 20.05s/it, est. speed input: 19.08 toks/s, output: 162.06 toks/s]
+Processed prompts:  50%|█████     | 12/24 [09:21<11:22, 56.85s/it, est. speed input: 8.56 toks/s, output: 126.10 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [26:16<17:56, 134.52s/it, est. speed input: 4.49 toks/s, output: 92.28 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [26:16<05:44, 86.03s/it, est. speed input: 6.00 toks/s, output: 159.11 toks/s]
+Processed prompts: 100%|██████████| 24/24 [26:16<00:00, 65.69s/it, est. speed input: 7.46 toks/s, output: 240.75 toks/s]
+[lcb] checkpoint 132/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 132:138 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:36<03:03,  9.17s/it, est. speed input: 44.95 toks/s, output: 107.35 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [02:06<04:31, 16.98s/it, est. speed input: 28.95 toks/s, output: 144.34 toks/s]
+Processed prompts:  50%|█████     | 12/24 [05:32<06:33, 32.79s/it, est. speed input: 20.42 toks/s, output: 133.58 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [05:53<02:55, 21.92s/it, est. speed input: 27.26 toks/s, output: 219.67 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [19:29<05:50, 87.51s/it, est. speed input: 11.24 toks/s, output: 144.87 toks/s]
+Processed prompts: 100%|██████████| 24/24 [19:29<00:00, 48.72s/it, est. speed input: 12.31 toks/s, output: 239.02 toks/s]
+[lcb] checkpoint 138/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 138:144 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [00:24<02:00,  6.01s/it, est. speed input: 56.20 toks/s, output: 144.61 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [03:11<07:14, 27.14s/it, est. speed input: 17.39 toks/s, output: 109.42 toks/s]
+Processed prompts:  50%|█████     | 12/24 [05:46<06:28, 32.35s/it, est. speed input: 14.84 toks/s, output: 120.44 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [28:18<20:24, 153.09s/it, est. speed input: 4.94 toks/s, output: 102.99 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [28:18<06:31, 97.90s/it, est. speed input: 6.24 toks/s, output: 186.75 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [28:18<00:00, 70.79s/it, est. speed input: 7.49 toks/s, output: 230.21 toks/s]
+[lcb] checkpoint 144/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 144:150 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [36:51<3:04:15, 552.79s/it, est. speed input: 1.98 toks/s, output: 32.19 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [49:08<1:29:36, 336.02s/it, est. speed input: 2.04 toks/s, output: 67.98 toks/s]
+Processed prompts:  50%|█████     | 12/24 [49:09<36:32, 182.68s/it, est. speed input: 3.85 toks/s, output: 111.73 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [49:09<14:44, 110.59s/it, est. speed input: 4.63 toks/s, output: 154.12 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [49:10<04:43, 70.85s/it, est. speed input: 5.90 toks/s, output: 191.07 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [49:17<00:00, 47.36s/it, est. speed input: 8.25 toks/s, output: 233.71 toks/s]
+Processed prompts: 100%|██████████| 24/24 [49:17<00:00, 123.25s/it, est. speed input: 8.25 toks/s, output: 233.71 toks/s]
+[lcb] checkpoint 150/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 150:156 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [10:00<50:02, 150.15s/it, est. speed input: 5.21 toks/s, output: 57.55 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [41:22<1:30:17, 338.58s/it, est. speed input: 2.77 toks/s, output: 52.33 toks/s]
+Processed prompts:  50%|█████     | 12/24 [41:22<36:47, 184.00s/it, est. speed input: 3.67 toks/s, output: 107.13 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [41:22<14:50, 111.37s/it, est. speed input: 4.64 toks/s, output: 150.26 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [41:23<04:44, 71.23s/it, est. speed input: 5.83 toks/s, output: 212.93 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [41:23<00:00, 103.46s/it, est. speed input: 7.34 toks/s, output: 241.99 toks/s]
+[lcb] checkpoint 156/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 156:162 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [52:55<4:24:38, 793.93s/it, est. speed input: 0.97 toks/s, output: 43.13 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [52:55<1:27:11, 326.95s/it, est. speed input: 1.78 toks/s, output: 79.48 toks/s]
+Processed prompts:  50%|█████     | 12/24 [52:56<35:32, 177.73s/it, est. speed input: 3.18 toks/s, output: 128.46 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [52:57<14:21, 107.64s/it, est. speed input: 4.31 toks/s, output: 172.43 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [54:48<05:15, 78.88s/it, est. speed input: 5.41 toks/s, output: 204.94 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [58:28<00:00, 70.74s/it, est. speed input: 5.86 toks/s, output: 221.35 toks/s]
+Processed prompts: 100%|██████████| 24/24 [58:28<00:00, 146.20s/it, est. speed input: 5.86 toks/s, output: 221.35 toks/s]
+[lcb] checkpoint 162/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 162:168 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [17:48<1:29:00, 267.05s/it, est. speed input: 1.94 toks/s, output: 44.93 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [43:24<1:29:33, 335.83s/it, est. speed input: 1.65 toks/s, output: 46.45 toks/s]
+Processed prompts:  50%|█████     | 12/24 [43:24<36:30, 182.54s/it, est. speed input: 3.08 toks/s, output: 99.06 toks/s] 
+Processed prompts:  67%|██████▋   | 16/24 [43:24<14:44, 110.51s/it, est. speed input: 3.91 toks/s, output: 139.61 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [43:25<04:42, 70.72s/it, est. speed input: 5.17 toks/s, output: 199.31 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [43:36<00:00, 47.62s/it, est. speed input: 6.18 toks/s, output: 244.84 toks/s]
+Processed prompts: 100%|██████████| 24/24 [43:36<00:00, 109.03s/it, est. speed input: 6.18 toks/s, output: 244.84 toks/s]
+[lcb] checkpoint 168/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 168:174 / 175
+
+Processed prompts:   0%|          | 0/24 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  17%|█▋        | 4/24 [51:58<4:19:50, 779.51s/it, est. speed input: 1.20 toks/s, output: 47.73 toks/s]
+Processed prompts:  33%|███▎      | 8/24 [51:58<1:25:36, 321.06s/it, est. speed input: 2.07 toks/s, output: 97.63 toks/s]
+Processed prompts:  50%|█████     | 12/24 [51:59<34:54, 174.53s/it, est. speed input: 3.29 toks/s, output: 147.51 toks/s]
+Processed prompts:  67%|██████▋   | 16/24 [1:00:53<21:06, 158.33s/it, est. speed input: 3.34 toks/s, output: 166.23 toks/s]
+Processed prompts:  83%|████████▎ | 20/24 [1:01:58<07:08, 107.09s/it, est. speed input: 4.41 toks/s, output: 196.42 toks/s]
+Processed prompts: 100%|██████████| 24/24 [1:05:39<00:00, 89.52s/it, est. speed input: 4.90 toks/s, output: 223.13 toks/s] 
+Processed prompts: 100%|██████████| 24/24 [1:05:39<00:00, 164.16s/it, est. speed input: 4.90 toks/s, output: 223.13 toks/s]
+[lcb] checkpoint 174/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] generate 174:175 / 175
+
+Processed prompts:   0%|          | 0/4 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts: 100%|██████████| 4/4 [17:45<00:00, 266.33s/it, est. speed input: 3.79 toks/s, output: 146.10 toks/s]
+Processed prompts: 100%|██████████| 4/4 [17:45<00:00, 266.33s/it, est. speed input: 3.79 toks/s, output: 146.10 toks/s]
+[lcb] checkpoint 175/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.jsonl
+[lcb] wrote generations → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.json
+[lcb] wrote metrics → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.json
+[rank0]:[W1010 06:32:56.498349095 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[lcb] submitting CPU judge: /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/scripts/eval_code/4b_base/lcb_v6_think_judge.sh
+[lcb] generations=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/sft_think_4gpu_12k_ocr_4b_ckpt5000/lcb_v6_4b_base_think.generations.json
+[lcb] judge job-name=sft_think_4gpu_12k_ocr_4b_ckpt5000_lcb_j
+sbatch: ╔════════════════════════════════════════════════════════════╗
+sbatch: ║ 装置四 - 参数检查脚本
+sbatch: ║ Device IV - Parameter Checking Script
+sbatch: ╠════════════════════════════════════════════════════════════╣
+sbatch: ║ 版本: v1.0.5
+sbatch: ║ 时间: 2026-10-10 06:32:59
+sbatch: ╚════════════════════════════════════════════════════════════╝
+sbatch: [提示] 您可在提交作业时通过-p/--partition参数指定分区，可用逗号分开，指定多个分区，如 -p GPUA800,GPUA800L,GPUA40S
+sbatch: [提示] 您可在提交作业时通过--mem(min_mem_per_node)或--mem-per-cpu(min_mem_per_cpu)或--mem-per-gpu(mem_per_tres)参数指定内存
+sbatch: [提示] 您可在提交作业时通过-c/--cpus-per-task(cpus_per_task)或者--cpus-per-gpu=(cpus_per_tres)参数指定CPU
+sbatch: [提示] 您可在提交作业时通过--gres或-G/--gpus或--gpus-per-node或--gpus-per-socket或--gpus-per-task或--tres-per-task参数指定GPU
+sbatch: [提示] 您可在提交作业时通过-n/--ntasks(num_tasks)或--ntasks-per-node或--ntasks-per-socket或--ntasks-per-core或--ntasks-per-gpu参数指定task
+sbatch: [提示] 您可在提交作业时通过-N/--nodes参数指定node
+sbatch: [提示] 您可在提交作业时通过-t/--time(任务最大运行时限time_limit)或--time-min(任务最少需要运行多久,任务可比最少运行时间提前结束)或参数指定任务时长
+sbatch: [装置四->参数检查->分区] partition: C64M512G
+sbatch: [装置四->参数检查->内存] min_mem_per_node: 未设置
+sbatch: [装置四->参数检查->内存] min_mem_per_cpu: 未设置
+sbatch: [装置四->参数检查->内存] mem_per_tres: nil MB
+sbatch: [装置四->参数检查->内存] 提醒：您未指定内存参数，将使用分区的默认值：DefMemPerCPU=7968 MB
+sbatch: [装置四->参数检查->CPU] min_cpus: 48
+sbatch: [装置四->参数检查->CPU] cpus_per_task: 48
+sbatch: [装置四->参数检查->CPU] max_cpus: NO_VAL
+sbatch: [装置四->参数检查->CPU] cpus_per_tres: 未设置
+sbatch: [装置四->参数检查->gres] gres: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_node: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_task: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_socket: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_job: 未设置
+sbatch: [装置四->参数检查->task] num_tasks: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_node: 1
+sbatch: [装置四->参数检查->task] ntasks_per_socket: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_core: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_gpu: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_tres: NO_VAL
+sbatch: [装置四->参数检查->task] tres_per_task: 未设置
+sbatch: [装置四->参数检查->node] min_nodes: 1
+sbatch: [装置四->参数检查->node] max_nodes: 1
+sbatch: [装置四->参数检查->time] time_limit: 720 Min
+sbatch: [装置四->参数检查->time] time_min: NO_VAL
+sbatch: [装置四->参数检查->合理性检查->说明]
+sbatch: [装置四->参数检查->合理性检查->说明] 为给大家提供更好的作业运行体验，我们对作业参数进行了合理性检查，方案如下：
+sbatch: [装置四->参数检查->合理性检查->说明] 1、任务最大运行时长参数强制要求为必填项(调度算法使用)
+sbatch: [装置四->参数检查->合理性检查->说明]    用户必须通过-t/--time参数指定任务最大运行时长，否则作业将被拒绝
+sbatch: [装置四->参数检查->合理性检查->说明]    用户可设置的任务最大运行时长，为任务提交到的分区所允许的最大时长
+sbatch: [装置四->参数检查->合理性检查->说明] 2、建议用户填写作业预估的最小运行时间(调度算法使用)--time-min，用户填写数量越多，任务调度效率越高
+sbatch: [装置四->参数检查->合理性检查->说明] 3、用户填写的参数或未填写的参数，如未特别说明，此拦截脚本不做任何更改，将由slurm默认分配
+sbatch: [装置四->参数检查->合理性检查->说明] 4、slurm将根据节点上CPU、内存、GPU等资源按比例分配或按固定数量分配给您提交的任务
+sbatch: [装置四->参数检查->合理性检查->说明]    您提交的值ReqTRES，不一定与slurm实际为您分配到的值AllocTRES相同
+sbatch: [装置四->参数检查->合理性检查->说明] 5、交互式任务的最大运行时间，已限制为不超过6小时，若在GPU分区运行，最大使用GPU卡数为2张
+sbatch: [装置四->参数检查->合理性检查->说明] 6、slurm已开启Slurm Priority Multifactor（官方多因子优先级调度算法），动态调整任务的优先级，以实现更好的作业运行体验
+sbatch: [装置四->参数检查->合理性检查->说明]    用户公平因子（Fairshare）：基于用户历史消耗资源 / 运行时长扣分（历史占资源越多，优先级越低）
+sbatch: [装置四->参数检查->合理性检查->说明]    资源大小因子（Size Factor）：小任务优先 / 大任务加权可调
+sbatch: [装置四->参数检查->合理性检查->说明]    任务等待时长（Age Factor）：排队越久加分，防饥饿
+sbatch: [装置四->参数检查->合理性检查->说明]    QOS / 锁定标记区分权重（QOS Factor）：给锁定用户单独 QOS，设置独立权重
+sbatch: [装置四->参数检查->合理性检查->说明] 如您执行遇到拦截脚本的问题，请及时反馈，我们会尽快修复！同时也谢谢大家提的宝贵意见
+sbatch: [装置四->参数检查->合理性检查->说明]
+sbatch: [装置四->参数检查->合理性检查->资源配比->CPU] 从cpus_per_task获取: 48
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] num_nodes: 1
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] num_cpus_per_node: 48
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] 检测到用户未指定内存数量，将由slurm自动分配
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] 检查通过，最终资源以slurm自动分配结果为准
+sbatch: ╔════════════════════════════════════════════════════════════╗
+sbatch: ║ 参数检查完成
+sbatch: ║ All Checks Passed
+sbatch: ╚════════════════════════════════════════════════════════════╝
+Submitted batch job 4050587
+[lcb] avg_output_tokens=17666.2 (n=700 median=15265.0 min=353 max=33568)

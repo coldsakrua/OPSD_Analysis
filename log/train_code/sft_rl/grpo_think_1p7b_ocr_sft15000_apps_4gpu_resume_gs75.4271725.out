@@ -1,0 +1,1353 @@
+[resume] from=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75
+[resume] output_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276 (same as failed jid 4245276)
+[resume] target_steps=100
+[grpo] nproc_limit=8192 OMP=1 ray_num_cpus=28 NOSET_CVD=1
+[launch] run=grpo_think_1p7b_ocr_sft15000_apps_4gpu_resume_gs75_4271725
+[launch] model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k_ocr/3925961/checkpoint-15000
+[launch] dataset=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/apps/preprocessed/apps.traintest.qwen3.think.maxprompt2048.maxtests10.parquet
+[launch] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276
+[launch] gpus=4 intended_split=rollout3+train1 (hybrid colocated)
+[launch] steps=100 save=25 n=4 resp=24576
+[launch] train_bs=96 mini=48 epochs=1 lr=5e-7
+[launch] vllm_util=0.90 free_cache_engine=true overlong_penalty=false len=8192 factor=0.4
+[launch] kl_loss=true kl_coef=0.01 kl_type=low_var_kl ref_param_offload=true
+[launch] actor_param_offload=true actor_optim_offload=true activation_offload=false
+[launch] reward=src/reward_code_apps.py via BatchRewardManager (parallel workers=24)
+[launch] note: hybrid_engine colocates actor+vLLM on ALL 4 GPUs; ROLLOUT/TRAIN only budgets util
+[launch] rollout_dump=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts max_per_step=32
+[launch] resume_mode=resume_path resume_from=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[opsd-grpo] rollout.stop_token_ids=[151643, 151645]
+[opsd-grpo] intended_split=rollout3+train1 n_gpus=4 vllm_util=0.9 hybrid=1 free_cache_engine=True overlong_penalty=0 kl_loss=1 kl_coef=0.01
+[opsd-grpo] weight sync: each generate_sequences enters FSDPVLLMShardingManager → state_dict/update_params into vLLM, then sleep+empty_cache on exit (policy update then next-step rollout sees new weights).
+[opsd-grpo] reward: custom=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/reward_code_apps.py (boxed-first + Answer: fallback; critic/acc from reward_extra_info).
+[opsd-grpo] rollout dump: dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts max_per_step=32
+2026-10-22 19:23:24,056	INFO worker.py:1888 -- Started a local Ray instance.
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+[33m(raylet)[0m   warnings.warn(
+[36m(pid=796068)[0m [opsd-grpo] nccl init_process_group timeout=10800s
+[36m(TaskRunner pid=796068)[0m TaskRunner hostname: gpua800n26, PID: 796068
+[36m(TaskRunner pid=796068)[0m {'actor_rollout_ref': {'actor': {'checkpoint': {'load_contents': ['model',
+[36m(TaskRunner pid=796068)[0m                                                                   'optimizer',
+[36m(TaskRunner pid=796068)[0m                                                                   'extra'],
+[36m(TaskRunner pid=796068)[0m                                                 'save_contents': ['model',
+[36m(TaskRunner pid=796068)[0m                                                                   'optimizer',
+[36m(TaskRunner pid=796068)[0m                                                                   'extra']},
+[36m(TaskRunner pid=796068)[0m                                  'clip_ratio': 0.2,
+[36m(TaskRunner pid=796068)[0m                                  'clip_ratio_c': 3.0,
+[36m(TaskRunner pid=796068)[0m                                  'clip_ratio_high': 0.28,
+[36m(TaskRunner pid=796068)[0m                                  'clip_ratio_low': 0.2,
+[36m(TaskRunner pid=796068)[0m                                  'entropy_checkpointing': False,
+[36m(TaskRunner pid=796068)[0m                                  'entropy_coeff': 0.0,
+[36m(TaskRunner pid=796068)[0m                                  'entropy_from_logits_with_chunking': False,
+[36m(TaskRunner pid=796068)[0m                                  'fsdp_config': {'forward_prefetch': False,
+[36m(TaskRunner pid=796068)[0m                                                  'fsdp_size': -1,
+[36m(TaskRunner pid=796068)[0m                                                  'offload_policy': False,
+[36m(TaskRunner pid=796068)[0m                                                  'optimizer_offload': True,
+[36m(TaskRunner pid=796068)[0m                                                  'param_offload': True,
+[36m(TaskRunner pid=796068)[0m                                                  'reshard_after_forward': True,
+[36m(TaskRunner pid=796068)[0m                                                  'wrap_policy': {'min_num_params': 0}},
+[36m(TaskRunner pid=796068)[0m                                  'grad_clip': 1.0,
+[36m(TaskRunner pid=796068)[0m                                  'kl_loss_coef': 0.01,
+[36m(TaskRunner pid=796068)[0m                                  'kl_loss_type': 'low_var_kl',
+[36m(TaskRunner pid=796068)[0m                                  'loss_agg_mode': 'token-mean',
+[36m(TaskRunner pid=796068)[0m                                  'optim': {'lr': 5e-07,
+[36m(TaskRunner pid=796068)[0m                                            'lr_warmup_steps': -1,
+[36m(TaskRunner pid=796068)[0m                                            'lr_warmup_steps_ratio': 0.0,
+[36m(TaskRunner pid=796068)[0m                                            'min_lr_ratio': 0.0,
+[36m(TaskRunner pid=796068)[0m                                            'num_cycles': 0.5,
+[36m(TaskRunner pid=796068)[0m                                            'total_training_steps': -1,
+[36m(TaskRunner pid=796068)[0m                                            'warmup_style': 'constant',
+[36m(TaskRunner pid=796068)[0m                                            'weight_decay': 0.01},
+[36m(TaskRunner pid=796068)[0m                                  'policy_loss': {'clip_cov_lb': 1.0,
+[36m(TaskRunner pid=796068)[0m                                                  'clip_cov_ratio': 0.0002,
+[36m(TaskRunner pid=796068)[0m                                                  'clip_cov_ub': 5.0,
+[36m(TaskRunner pid=796068)[0m                                                  'kl_cov_ratio': 0.0002,
+[36m(TaskRunner pid=796068)[0m                                                  'loss_mode': 'vanilla',
+[36m(TaskRunner pid=796068)[0m                                                  'ppo_kl_coef': 0.1},
+[36m(TaskRunner pid=796068)[0m                                  'ppo_epochs': 1,
+[36m(TaskRunner pid=796068)[0m                                  'ppo_max_token_len_per_gpu': 26624,
+[36m(TaskRunner pid=796068)[0m                                  'ppo_micro_batch_size': None,
+[36m(TaskRunner pid=796068)[0m                                  'ppo_micro_batch_size_per_gpu': 1,
+[36m(TaskRunner pid=796068)[0m                                  'ppo_mini_batch_size': 48,
+[36m(TaskRunner pid=796068)[0m                                  'profiler': {'all_ranks': False,
+[36m(TaskRunner pid=796068)[0m                                               'discrete': False,
+[36m(TaskRunner pid=796068)[0m                                               'ranks': None},
+[36m(TaskRunner pid=796068)[0m                                  'shuffle': False,
+[36m(TaskRunner pid=796068)[0m                                  'strategy': 'fsdp',
+[36m(TaskRunner pid=796068)[0m                                  'ulysses_sequence_parallel_size': 1,
+[36m(TaskRunner pid=796068)[0m                                  'use_dynamic_bsz': True,
+[36m(TaskRunner pid=796068)[0m                                  'use_kl_loss': True,
+[36m(TaskRunner pid=796068)[0m                                  'use_torch_compile': True},
+[36m(TaskRunner pid=796068)[0m                        'hybrid_engine': True,
+[36m(TaskRunner pid=796068)[0m                        'model': {'custom_chat_template': None,
+[36m(TaskRunner pid=796068)[0m                                  'enable_activation_offload': False,
+[36m(TaskRunner pid=796068)[0m                                  'enable_gradient_checkpointing': True,
+[36m(TaskRunner pid=796068)[0m                                  'external_lib': None,
+[36m(TaskRunner pid=796068)[0m                                  'fused_kernel_options': {'impl_backend': 'torch'},
+[36m(TaskRunner pid=796068)[0m                                  'lora_alpha': 16,
+[36m(TaskRunner pid=796068)[0m                                  'lora_rank': 0,
+[36m(TaskRunner pid=796068)[0m                                  'override_config': {},
+[36m(TaskRunner pid=796068)[0m                                  'path': '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k_ocr/3925961/checkpoint-15000',
+[36m(TaskRunner pid=796068)[0m                                  'target_modules': 'all-linear',
+[36m(TaskRunner pid=796068)[0m                                  'trust_remote_code': True,
+[36m(TaskRunner pid=796068)[0m                                  'use_fused_kernels': False,
+[36m(TaskRunner pid=796068)[0m                                  'use_liger': False,
+[36m(TaskRunner pid=796068)[0m                                  'use_remove_padding': True,
+[36m(TaskRunner pid=796068)[0m                                  'use_shm': False},
+[36m(TaskRunner pid=796068)[0m                        'ref': {'entropy_checkpointing': False,
+[36m(TaskRunner pid=796068)[0m                                'entropy_from_logits_with_chunking': False,
+[36m(TaskRunner pid=796068)[0m                                'fsdp_config': {'forward_prefetch': False,
+[36m(TaskRunner pid=796068)[0m                                                'param_offload': True,
+[36m(TaskRunner pid=796068)[0m                                                'reshard_after_forward': True,
+[36m(TaskRunner pid=796068)[0m                                                'wrap_policy': {'min_num_params': 0}},
+[36m(TaskRunner pid=796068)[0m                                'log_prob_max_token_len_per_gpu': 26624,
+[36m(TaskRunner pid=796068)[0m                                'log_prob_micro_batch_size': None,
+[36m(TaskRunner pid=796068)[0m                                'log_prob_micro_batch_size_per_gpu': 2,
+[36m(TaskRunner pid=796068)[0m                                'log_prob_use_dynamic_bsz': True,
+[36m(TaskRunner pid=796068)[0m                                'profiler': {'all_ranks': False,
+[36m(TaskRunner pid=796068)[0m                                             'discrete': False,
+[36m(TaskRunner pid=796068)[0m                                             'ranks': None},
+[36m(TaskRunner pid=796068)[0m                                'strategy': 'fsdp',
+[36m(TaskRunner pid=796068)[0m                                'ulysses_sequence_parallel_size': 1,
+[36m(TaskRunner pid=796068)[0m                                'use_torch_compile': True},
+[36m(TaskRunner pid=796068)[0m                        'rollout': {'calculate_log_probs': False,
+[36m(TaskRunner pid=796068)[0m                                    'disable_log_stats': True,
+[36m(TaskRunner pid=796068)[0m                                    'do_sample': True,
+[36m(TaskRunner pid=796068)[0m                                    'dtype': 'bfloat16',
+[36m(TaskRunner pid=796068)[0m                                    'enable_chunked_prefill': True,
+[36m(TaskRunner pid=796068)[0m                                    'enforce_eager': True,
+[36m(TaskRunner pid=796068)[0m                                    'engine_kwargs': {'sglang': {'attention_backend': None},
+[36m(TaskRunner pid=796068)[0m                                                      'vllm': {'disable_mm_preprocessor_cache': False,
+[36m(TaskRunner pid=796068)[0m                                                               'swap_space': None}},
+[36m(TaskRunner pid=796068)[0m                                    'free_cache_engine': True,
+[36m(TaskRunner pid=796068)[0m                                    'gpu_memory_utilization': 0.9,
+[36m(TaskRunner pid=796068)[0m                                    'ignore_eos': False,
+[36m(TaskRunner pid=796068)[0m                                    'layered_summon': False,
+[36m(TaskRunner pid=796068)[0m                                    'load_format': 'dummy_dtensor',
+[36m(TaskRunner pid=796068)[0m                                    'log_prob_max_token_len_per_gpu': 26624,
+[36m(TaskRunner pid=796068)[0m                                    'log_prob_micro_batch_size': None,
+[36m(TaskRunner pid=796068)[0m                                    'log_prob_micro_batch_size_per_gpu': 2,
+[36m(TaskRunner pid=796068)[0m                                    'log_prob_use_dynamic_bsz': True,
+[36m(TaskRunner pid=796068)[0m                                    'max_model_len': 26624,
+[36m(TaskRunner pid=796068)[0m                                    'max_num_batched_tokens': 106496,
+[36m(TaskRunner pid=796068)[0m                                    'max_num_seqs': 1024,
+[36m(TaskRunner pid=796068)[0m                                    'mode': 'sync',
+[36m(TaskRunner pid=796068)[0m                                    'multi_stage_wake_up': False,
+[36m(TaskRunner pid=796068)[0m                                    'multi_turn': {'completion_callback': None,
+[36m(TaskRunner pid=796068)[0m                                                   'enable': False,
+[36m(TaskRunner pid=796068)[0m                                                   'format': 'hermes',
+[36m(TaskRunner pid=796068)[0m                                                   'interaction_config_path': None,
+[36m(TaskRunner pid=796068)[0m                                                   'max_assistant_turns': None,
+[36m(TaskRunner pid=796068)[0m                                                   'max_user_turns': None,
+[36m(TaskRunner pid=796068)[0m                                                   'tokenization_sanity_check_mode': 'strict',
+[36m(TaskRunner pid=796068)[0m                                                   'tool_config_path': None,
+[36m(TaskRunner pid=796068)[0m                                                   'use_inference_chat_template': False},
+[36m(TaskRunner pid=796068)[0m                                    'n': 4,
+[36m(TaskRunner pid=796068)[0m                                    'name': 'vllm',
+[36m(TaskRunner pid=796068)[0m                                    'profiler': {'all_ranks': False,
+[36m(TaskRunner pid=796068)[0m                                                 'discrete': False,
+[36m(TaskRunner pid=796068)[0m                                                 'ranks': None},
+[36m(TaskRunner pid=796068)[0m                                    'prompt_length': 2048,
+[36m(TaskRunner pid=796068)[0m                                    'response_length': 24576,
+[36m(TaskRunner pid=796068)[0m                                    'stop_token_ids': [151643, 151645],
+[36m(TaskRunner pid=796068)[0m                                    'temperature': 0.6,
+[36m(TaskRunner pid=796068)[0m                                    'tensor_model_parallel_size': 1,
+[36m(TaskRunner pid=796068)[0m                                    'top_k': 20,
+[36m(TaskRunner pid=796068)[0m                                    'top_p': 0.95,
+[36m(TaskRunner pid=796068)[0m                                    'use_fire_sampling': False,
+[36m(TaskRunner pid=796068)[0m                                    'val_kwargs': {'do_sample': False,
+[36m(TaskRunner pid=796068)[0m                                                   'n': 1,
+[36m(TaskRunner pid=796068)[0m                                                   'temperature': 0,
+[36m(TaskRunner pid=796068)[0m                                                   'top_k': -1,
+[36m(TaskRunner pid=796068)[0m                                                   'top_p': 1.0}}},
+[36m(TaskRunner pid=796068)[0m  'algorithm': {'adv_estimator': 'grpo',
+[36m(TaskRunner pid=796068)[0m                'gamma': 1.0,
+[36m(TaskRunner pid=796068)[0m                'kl_ctrl': {'horizon': 10000,
+[36m(TaskRunner pid=796068)[0m                            'kl_coef': 0.001,
+[36m(TaskRunner pid=796068)[0m                            'target_kl': 0.1,
+[36m(TaskRunner pid=796068)[0m                            'type': 'fixed'},
+[36m(TaskRunner pid=796068)[0m                'kl_penalty': 'kl',
+[36m(TaskRunner pid=796068)[0m                'lam': 1.0,
+[36m(TaskRunner pid=796068)[0m                'norm_adv_by_std_in_grpo': True,
+[36m(TaskRunner pid=796068)[0m                'pf_ppo': {'reweight_method': 'pow', 'weight_pow': 2.0},
+[36m(TaskRunner pid=796068)[0m                'use_kl_in_reward': False,
+[36m(TaskRunner pid=796068)[0m                'use_pf_ppo': False},
+[36m(TaskRunner pid=796068)[0m  'critic': {'checkpoint': {'load_contents': ['model', 'optimizer', 'extra'],
+[36m(TaskRunner pid=796068)[0m                            'save_contents': ['model', 'optimizer', 'extra']},
+[36m(TaskRunner pid=796068)[0m             'cliprange_value': 0.5,
+[36m(TaskRunner pid=796068)[0m             'forward_max_token_len_per_gpu': 32768,
+[36m(TaskRunner pid=796068)[0m             'forward_micro_batch_size': None,
+[36m(TaskRunner pid=796068)[0m             'forward_micro_batch_size_per_gpu': None,
+[36m(TaskRunner pid=796068)[0m             'grad_clip': 1.0,
+[36m(TaskRunner pid=796068)[0m             'loss_agg_mode': 'token-mean',
+[36m(TaskRunner pid=796068)[0m             'model': {'enable_activation_offload': False,
+[36m(TaskRunner pid=796068)[0m                       'enable_gradient_checkpointing': True,
+[36m(TaskRunner pid=796068)[0m                       'external_lib': None,
+[36m(TaskRunner pid=796068)[0m                       'fsdp_config': {'forward_prefetch': False,
+[36m(TaskRunner pid=796068)[0m                                       'fsdp_size': -1,
+[36m(TaskRunner pid=796068)[0m                                       'offload_policy': False,
+[36m(TaskRunner pid=796068)[0m                                       'optimizer_offload': False,
+[36m(TaskRunner pid=796068)[0m                                       'param_offload': False,
+[36m(TaskRunner pid=796068)[0m                                       'reshard_after_forward': True,
+[36m(TaskRunner pid=796068)[0m                                       'wrap_policy': {'min_num_params': 0}},
+[36m(TaskRunner pid=796068)[0m                       'lora_alpha': 16,
+[36m(TaskRunner pid=796068)[0m                       'lora_rank': 0,
+[36m(TaskRunner pid=796068)[0m                       'override_config': {},
+[36m(TaskRunner pid=796068)[0m                       'path': '~/models/deepseek-llm-7b-chat',
+[36m(TaskRunner pid=796068)[0m                       'target_modules': 'all-linear',
+[36m(TaskRunner pid=796068)[0m                       'tokenizer_path': '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k_ocr/3925961/checkpoint-15000',
+[36m(TaskRunner pid=796068)[0m                       'trust_remote_code': True,
+[36m(TaskRunner pid=796068)[0m                       'use_remove_padding': False,
+[36m(TaskRunner pid=796068)[0m                       'use_shm': False},
+[36m(TaskRunner pid=796068)[0m             'optim': {'lr': 1e-05,
+[36m(TaskRunner pid=796068)[0m                       'lr_warmup_steps_ratio': 0.0,
+[36m(TaskRunner pid=796068)[0m                       'min_lr_ratio': None,
+[36m(TaskRunner pid=796068)[0m                       'total_training_steps': -1,
+[36m(TaskRunner pid=796068)[0m                       'warmup_style': 'constant',
+[36m(TaskRunner pid=796068)[0m                       'weight_decay': 0.01},
+[36m(TaskRunner pid=796068)[0m             'ppo_epochs': 1,
+[36m(TaskRunner pid=796068)[0m             'ppo_max_token_len_per_gpu': 32768,
+[36m(TaskRunner pid=796068)[0m             'ppo_micro_batch_size': None,
+[36m(TaskRunner pid=796068)[0m             'ppo_micro_batch_size_per_gpu': None,
+[36m(TaskRunner pid=796068)[0m             'ppo_mini_batch_size': 48,
+[36m(TaskRunner pid=796068)[0m             'profiler': {'all_ranks': False, 'discrete': False, 'ranks': None},
+[36m(TaskRunner pid=796068)[0m             'rollout_n': 4,
+[36m(TaskRunner pid=796068)[0m             'shuffle': False,
+[36m(TaskRunner pid=796068)[0m             'strategy': 'fsdp',
+[36m(TaskRunner pid=796068)[0m             'ulysses_sequence_parallel_size': 1,
+[36m(TaskRunner pid=796068)[0m             'use_dynamic_bsz': True},
+[36m(TaskRunner pid=796068)[0m  'custom_reward_function': {'name': 'compute_score',
+[36m(TaskRunner pid=796068)[0m                             'path': '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/reward_code_apps.py'},
+[36m(TaskRunner pid=796068)[0m  'data': {'apply_chat_template_kwargs': {'enable_thinking': True},
+[36m(TaskRunner pid=796068)[0m           'custom_cls': {'name': None, 'path': None},
+[36m(TaskRunner pid=796068)[0m           'filter_overlong_prompts': True,
+[36m(TaskRunner pid=796068)[0m           'filter_overlong_prompts_workers': 1,
+[36m(TaskRunner pid=796068)[0m           'image_key': 'images',
+[36m(TaskRunner pid=796068)[0m           'max_prompt_length': 2048,
+[36m(TaskRunner pid=796068)[0m           'max_response_length': 24576,
+[36m(TaskRunner pid=796068)[0m           'prompt_key': 'prompt',
+[36m(TaskRunner pid=796068)[0m           'return_full_prompt': False,
+[36m(TaskRunner pid=796068)[0m           'return_raw_chat': True,
+[36m(TaskRunner pid=796068)[0m           'return_raw_input_ids': False,
+[36m(TaskRunner pid=796068)[0m           'reward_fn_key': 'data_source',
+[36m(TaskRunner pid=796068)[0m           'shuffle': True,
+[36m(TaskRunner pid=796068)[0m           'tokenizer': None,
+[36m(TaskRunner pid=796068)[0m           'train_batch_size': 96,
+[36m(TaskRunner pid=796068)[0m           'train_files': '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/apps/preprocessed/apps.traintest.qwen3.think.maxprompt2048.maxtests10.parquet',
+[36m(TaskRunner pid=796068)[0m           'truncation': 'error',
+[36m(TaskRunner pid=796068)[0m           'trust_remote_code': False,
+[36m(TaskRunner pid=796068)[0m           'use_shm': False,
+[36m(TaskRunner pid=796068)[0m           'val_batch_size': None,
+[36m(TaskRunner pid=796068)[0m           'val_files': '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/apps/preprocessed/apps.traintest.qwen3.think.maxprompt2048.maxtests10.parquet',
+[36m(TaskRunner pid=796068)[0m           'validation_shuffle': False,
+[36m(TaskRunner pid=796068)[0m           'video_key': 'videos'},
+[36m(TaskRunner pid=796068)[0m  'opsd': {'chat_template_path': '/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b',
+[36m(TaskRunner pid=796068)[0m           'note': 'hybrid_engine colocates actor+vLLM on all n_gpus; '
+[36m(TaskRunner pid=796068)[0m                   'rollout_gpus/train_gpus budget gpu_memory_utilization only',
+[36m(TaskRunner pid=796068)[0m           'rollout_dump_n': 32,
+[36m(TaskRunner pid=796068)[0m           'rollout_gpus': 3,
+[36m(TaskRunner pid=796068)[0m           'train_gpus': 1},
+[36m(TaskRunner pid=796068)[0m  'ray_init': {'num_cpus': 28, 'timeline_json_file': None},
+[36m(TaskRunner pid=796068)[0m  'reward_model': {'enable': False,
+[36m(TaskRunner pid=796068)[0m                   'forward_max_token_len_per_gpu': 32768,
+[36m(TaskRunner pid=796068)[0m                   'launch_reward_fn_async': False,
+[36m(TaskRunner pid=796068)[0m                   'max_length': None,
+[36m(TaskRunner pid=796068)[0m                   'micro_batch_size': None,
+[36m(TaskRunner pid=796068)[0m                   'micro_batch_size_per_gpu': None,
+[36m(TaskRunner pid=796068)[0m                   'model': {'external_lib': None,
+[36m(TaskRunner pid=796068)[0m                             'fsdp_config': {'forward_prefetch': False,
+[36m(TaskRunner pid=796068)[0m                                             'fsdp_size': -1,
+[36m(TaskRunner pid=796068)[0m                                             'param_offload': False,
+[36m(TaskRunner pid=796068)[0m                                             'reshard_after_forward': True,
+[36m(TaskRunner pid=796068)[0m                                             'wrap_policy': {'min_num_params': 0}},
+[36m(TaskRunner pid=796068)[0m                             'input_tokenizer': '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/sft_think_4gpu_12k_ocr/3925961/checkpoint-15000',
+[36m(TaskRunner pid=796068)[0m                             'path': '~/models/FsfairX-LLaMA3-RM-v0.1',
+[36m(TaskRunner pid=796068)[0m                             'trust_remote_code': False,
+[36m(TaskRunner pid=796068)[0m                             'use_fused_kernels': False,
+[36m(TaskRunner pid=796068)[0m                             'use_remove_padding': False,
+[36m(TaskRunner pid=796068)[0m                             'use_shm': False},
+[36m(TaskRunner pid=796068)[0m                   'profiler': {'all_ranks': False,
+[36m(TaskRunner pid=796068)[0m                                'discrete': False,
+[36m(TaskRunner pid=796068)[0m                                'ranks': None},
+[36m(TaskRunner pid=796068)[0m                   'reward_kwargs': {'apps_reward_workers': 24,
+[36m(TaskRunner pid=796068)[0m                                     'max_resp_len': 24576,
+[36m(TaskRunner pid=796068)[0m                                     'overlong_buffer_cfg': {'enable': False,
+[36m(TaskRunner pid=796068)[0m                                                             'len': 4096,
+[36m(TaskRunner pid=796068)[0m                                                             'log': False,
+[36m(TaskRunner pid=796068)[0m                                                             'penalty_factor': 1.0},
+[36m(TaskRunner pid=796068)[0m                                     'timeout': 6},
+[36m(TaskRunner pid=796068)[0m                   'reward_manager': 'batch',
+[36m(TaskRunner pid=796068)[0m                   'sandbox_fusion': {'max_concurrent': 64,
+[36m(TaskRunner pid=796068)[0m                                      'memory_limit_mb': 1024,
+[36m(TaskRunner pid=796068)[0m                                      'url': None},
+[36m(TaskRunner pid=796068)[0m                   'strategy': 'fsdp',
+[36m(TaskRunner pid=796068)[0m                   'ulysses_sequence_parallel_size': 1,
+[36m(TaskRunner pid=796068)[0m                   'use_dynamic_bsz': True},
+[36m(TaskRunner pid=796068)[0m  'trainer': {'balance_batch': True,
+[36m(TaskRunner pid=796068)[0m              'controller_nsight_options': {'cuda-graph-trace': 'graph',
+[36m(TaskRunner pid=796068)[0m                                            'cuda-memory-usage': 'true',
+[36m(TaskRunner pid=796068)[0m                                            'trace': 'cuda,nvtx,cublas,ucx'},
+[36m(TaskRunner pid=796068)[0m              'critic_warmup': 0,
+[36m(TaskRunner pid=796068)[0m              'default_hdfs_dir': None,
+[36m(TaskRunner pid=796068)[0m              'default_local_dir': '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276',
+[36m(TaskRunner pid=796068)[0m              'del_local_ckpt_after_load': False,
+[36m(TaskRunner pid=796068)[0m              'device': 'cuda',
+[36m(TaskRunner pid=796068)[0m              'experiment_name': 'grpo_think_1p7b_ocr_sft15000_apps_4gpu_resume_gs75_4271725',
+[36m(TaskRunner pid=796068)[0m              'log_val_generations': 0,
+[36m(TaskRunner pid=796068)[0m              'logger': ['console', 'wandb'],
+[36m(TaskRunner pid=796068)[0m              'max_actor_ckpt_to_keep': None,
+[36m(TaskRunner pid=796068)[0m              'max_critic_ckpt_to_keep': None,
+[36m(TaskRunner pid=796068)[0m              'n_gpus_per_node': 4,
+[36m(TaskRunner pid=796068)[0m              'nnodes': 1,
+[36m(TaskRunner pid=796068)[0m              'profile_steps': None,
+[36m(TaskRunner pid=796068)[0m              'project_name': 'SFT_RL_GRPO_APPS',
+[36m(TaskRunner pid=796068)[0m              'ray_wait_register_center_timeout': 300,
+[36m(TaskRunner pid=796068)[0m              'resume_from_path': '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75',
+[36m(TaskRunner pid=796068)[0m              'resume_mode': 'resume_path',
+[36m(TaskRunner pid=796068)[0m              'rollout_data_dir': '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts',
+[36m(TaskRunner pid=796068)[0m              'save_freq': 25,
+[36m(TaskRunner pid=796068)[0m              'test_freq': -1,
+[36m(TaskRunner pid=796068)[0m              'total_epochs': 30,
+[36m(TaskRunner pid=796068)[0m              'total_training_steps': 100,
+[36m(TaskRunner pid=796068)[0m              'val_before_train': False,
+[36m(TaskRunner pid=796068)[0m              'val_only': False,
+[36m(TaskRunner pid=796068)[0m              'validation_data_dir': None,
+[36m(TaskRunner pid=796068)[0m              'worker_nsight_options': {'capture-range': 'cudaProfilerApi',
+[36m(TaskRunner pid=796068)[0m                                        'capture-range-end': None,
+[36m(TaskRunner pid=796068)[0m                                        'cuda-graph-trace': 'graph',
+[36m(TaskRunner pid=796068)[0m                                        'cuda-memory-usage': 'true',
+[36m(TaskRunner pid=796068)[0m                                        'kill': 'none',
+[36m(TaskRunner pid=796068)[0m                                        'trace': 'cuda,nvtx,cublas,ucx'}}}
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] overlay chat_template from /gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-1.7b
+[36m(TaskRunner pid=796068)[0m [CAST worker bootstrap] internal teacher env: LOGPROB=None SNAPSHOT=None BASE_UNTIL=None INTERVAL=None PROMPT_MODE=None OFFICIAL=None TEACHER_THINK=None patched=['verl.workers.fsdp_workers.ActorRolloutRefWorker']
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+[33m(raylet)[0m   warnings.warn(
+[36m(TaskRunner pid=796068)[0m [CAST] merge-LoRA sync patch applied (enabled=False)
+[36m(TaskRunner pid=796068)[0m [CAST worker bootstrap] internal teacher + merge-LoRA sync patches applied
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] RefPolicy enabled on global_pool (use_kl_loss=True, use_kl_in_reward=False)
+[36m(TaskRunner pid=796068)[0m using customized reward function 'compute_score' from '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/reward_code_apps.py'
+[36m(TaskRunner pid=796068)[0m using customized reward function 'compute_score' from '/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/src/reward_code_apps.py'
+[36m(TaskRunner pid=796068)[0m Using dataset class: RLHFDataset
+[36m(TaskRunner pid=796068)[0m dataset len: 9444
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1):   0%|          | 0/9444 [00:00<?, ? examples/s]
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1):  11%|█         | 1000/9444 [00:01<00:13, 605.06 examples/s]
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1):  21%|██        | 2000/9444 [00:02<00:10, 714.53 examples/s]
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1):  32%|███▏      | 3000/9444 [00:03<00:07, 863.86 examples/s]
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1):  42%|████▏     | 4000/9444 [00:04<00:05, 976.77 examples/s]
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1):  53%|█████▎    | 5000/9444 [00:05<00:04, 971.69 examples/s]
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1):  64%|██████▎   | 6000/9444 [00:06<00:03, 877.91 examples/s]
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1):  74%|███████▍  | 7000/9444 [00:08<00:03, 781.48 examples/s]
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1):  85%|████████▍ | 8000/9444 [00:09<00:01, 772.25 examples/s]
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1):  95%|█████████▌| 9000/9444 [00:11<00:00, 742.19 examples/s]
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1): 100%|██████████| 9444/9444 [00:11<00:00, 767.84 examples/s]
+[36m(TaskRunner pid=796068)[0m filter dataset len: 9444
+[36m(TaskRunner pid=796068)[0m Using dataset class: RLHFDataset
+[36m(TaskRunner pid=796068)[0m dataset len: 9444
+[36m(TaskRunner pid=796068)[0m Filtering prompts longer than 2048 tokens (num_proc=1): 100%|██████████| 9444/9444 [00:11<00:00, 794.48 examples/s]
+[36m(TaskRunner pid=796068)[0m filter dataset len: 9444
+[36m(TaskRunner pid=796068)[0m [validate_config] All configuration checks passed successfully!
+[36m(TaskRunner pid=796068)[0m Size of train dataloader: 98, Size of val dataloader: 1
+[36m(TaskRunner pid=796068)[0m Total training steps: 100
+[36m(TaskRunner pid=796068)[0m colocated worker base class <class 'verl.single_controller.base.worker.Worker'>
+[36m(TaskRunner pid=796068)[0m DeprecationWarning: `ray.state.available_resources_per_node` is a private attribute and access will be removed in a future Ray version.
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+[33m(raylet)[0m   warnings.warn(
+[36m(pid=796572)[0m [opsd-grpo] nccl init_process_group timeout=10800s
+[36m(TaskRunner pid=796068)[0m WARNING:2026-10-22 19:24:37,023:Waiting for register center actor A8oI8S_register_center to be ready. Elapsed time: 0 seconds out of 300 seconds.
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+[33m(raylet)[0m   warnings.warn(
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+[33m(raylet)[0m   warnings.warn(
+[36m(pid=796722)[0m [opsd-grpo] nccl init_process_group timeout=10800s
+[36m(pid=796722)[0m [CAST worker bootstrap] internal teacher env: LOGPROB=None SNAPSHOT=None BASE_UNTIL=None INTERVAL=None PROMPT_MODE=None OFFICIAL=None TEACHER_THINK=None patched=['verl.workers.fsdp_workers.ActorRolloutRefWorker']
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+[33m(raylet)[0m   warnings.warn(
+[36m(pid=796722)[0m [CAST] merge-LoRA sync patch applied (enabled=False)
+[36m(pid=796722)[0m [CAST worker bootstrap] internal teacher + merge-LoRA sync patches applied
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+[33m(raylet)[0m   warnings.warn(
+[36m(pid=797001)[0m [opsd-grpo] nccl init_process_group timeout=10800s
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version![32m [repeated 4x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/user-guides/configure-logging.html#log-deduplication for more options.)[0m
+[33m(raylet)[0m   warnings.warn([32m [repeated 4x across cluster][0m
+[36m(pid=797229)[0m [opsd-grpo] nccl init_process_group timeout=10800s
+[36m(pid=797227)[0m [opsd-grpo] nccl init_process_group timeout=10800s
+[36m(pid=797229)[0m [CAST worker bootstrap] internal teacher env: LOGPROB=None SNAPSHOT=None BASE_UNTIL=None INTERVAL=None PROMPT_MODE=None OFFICIAL=None TEACHER_THINK=None patched=['verl.workers.fsdp_workers.ActorRolloutRefWorker']
+[33m(raylet)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version![32m [repeated 3x across cluster][0m
+[33m(raylet)[0m   warnings.warn([32m [repeated 3x across cluster][0m
+[36m(pid=797229)[0m [CAST] merge-LoRA sync patch applied (enabled=False)
+[36m(pid=797229)[0m [CAST worker bootstrap] internal teacher + merge-LoRA sync patches applied
+[36m(WorkerDict pid=796722)[0m Model config after override: Qwen3Config {
+[36m(WorkerDict pid=796722)[0m   "architectures": [
+[36m(WorkerDict pid=796722)[0m     "Qwen3ForCausalLM"
+[36m(WorkerDict pid=796722)[0m   ],
+[36m(WorkerDict pid=796722)[0m   "attention_bias": false,
+[36m(WorkerDict pid=796722)[0m   "attention_dropout": 0.0,
+[36m(WorkerDict pid=796722)[0m   "dtype": "bfloat16",
+[36m(WorkerDict pid=796722)[0m   "eos_token_id": 151643,
+[36m(WorkerDict pid=796722)[0m   "head_dim": 128,
+[36m(WorkerDict pid=796722)[0m   "hidden_act": "silu",
+[36m(WorkerDict pid=796722)[0m   "hidden_size": 2048,
+[36m(WorkerDict pid=796722)[0m   "initializer_range": 0.02,
+[36m(WorkerDict pid=796722)[0m   "intermediate_size": 6144,
+[36m(WorkerDict pid=796722)[0m   "layer_types": [
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention"
+[36m(WorkerDict pid=796722)[0m   ],
+[36m(WorkerDict pid=796722)[0m   "max_position_embeddings": 32768,
+[36m(WorkerDict pid=796722)[0m   "max_window_layers": 28,
+[36m(WorkerDict pid=796722)[0m   "model_type": "qwen3",
+[36m(WorkerDict pid=796722)[0m   "num_attention_heads": 16,
+[36m(WorkerDict pid=796722)[0m   "num_hidden_layers": 28,
+[36m(WorkerDict pid=796722)[0m   "num_key_value_heads": 8,
+[36m(WorkerDict pid=796722)[0m   "pad_token_id": 151643,
+[36m(WorkerDict pid=796722)[0m   "rms_norm_eps": 1e-06,
+[36m(WorkerDict pid=796722)[0m   "rope_scaling": null,
+[36m(WorkerDict pid=796722)[0m   "rope_theta": 1000000,
+[36m(WorkerDict pid=796722)[0m   "sliding_window": null,
+[36m(WorkerDict pid=796722)[0m   "tie_word_embeddings": true,
+[36m(WorkerDict pid=796722)[0m   "transformers_version": "4.57.1",
+[36m(WorkerDict pid=796722)[0m   "use_cache": false,
+[36m(WorkerDict pid=796722)[0m   "use_sliding_window": false,
+[36m(WorkerDict pid=796722)[0m   "vocab_size": 151936
+[36m(WorkerDict pid=796722)[0m }
+[36m(WorkerDict pid=796722)[0m 
+[36m(pid=797228)[0m [opsd-grpo] nccl init_process_group timeout=10800s
+[36m(WorkerDict pid=796722)[0m `torch_dtype` is deprecated! Use `dtype` instead!
+[36m(WorkerDict pid=796722)[0m Monkey patch state_dict in AutoModelForCausalLMWithValueHead. 
+[36m(WorkerDict pid=796722)[0m Monkey patch _flash_attention_forward in transformers.integrations.flash_attention
+[36m(WorkerDict pid=796722)[0m Skipping monkey patch for Qwen3ForCausalLM as use_fused_kernels is False or fused_kernels_backend is torch
+[36m(pid=797228)[0m [CAST] merge-LoRA sync patch applied (enabled=False)[32m [repeated 2x across cluster][0m
+[36m(pid=797228)[0m [CAST worker bootstrap] internal teacher + merge-LoRA sync patches applied[32m [repeated 2x across cluster][0m
+[36m(WorkerDict pid=796722)[0m Qwen3ForCausalLM contains 1.72B parameters
+[36m(WorkerDict pid=796722)[0m wrap_policy: functools.partial(<function _or_policy at 0x7fb4e8bd1510>, policies=[functools.partial(<function transformer_auto_wrap_policy at 0x7fb4e8bd13f0>, transformer_layer_cls={<class 'transformers.models.qwen3.modeling_qwen3.Qwen3DecoderLayer'>})])
+[36m(WorkerDict pid=796722)[0m NCCL version 2.21.5+cuda12.4
+[36m(WorkerDict pid=796722)[0m Actor use_remove_padding=True
+[36m(WorkerDict pid=796722)[0m Actor use_fused_kernels=False
+[36m(WorkerDict pid=797228)[0m Monkey patch state_dict in AutoModelForCausalLMWithValueHead. [32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=797228)[0m Monkey patch _flash_attention_forward in transformers.integrations.flash_attention[32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=797228)[0m Skipping monkey patch for Qwen3ForCausalLM as use_fused_kernels is False or fused_kernels_backend is torch[32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=796722)[0m Model config after override: Qwen3Config {
+[36m(WorkerDict pid=796722)[0m   "architectures": [
+[36m(WorkerDict pid=796722)[0m     "Qwen3ForCausalLM"
+[36m(WorkerDict pid=796722)[0m   ],
+[36m(WorkerDict pid=796722)[0m   "attention_bias": false,
+[36m(WorkerDict pid=796722)[0m   "attention_dropout": 0.0,
+[36m(WorkerDict pid=796722)[0m   "dtype": "bfloat16",
+[36m(WorkerDict pid=796722)[0m   "eos_token_id": 151643,
+[36m(WorkerDict pid=796722)[0m   "head_dim": 128,
+[36m(WorkerDict pid=796722)[0m   "hidden_act": "silu",
+[36m(WorkerDict pid=796722)[0m   "hidden_size": 2048,
+[36m(WorkerDict pid=796722)[0m   "initializer_range": 0.02,
+[36m(WorkerDict pid=796722)[0m   "intermediate_size": 6144,
+[36m(WorkerDict pid=796722)[0m   "layer_types": [
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention",
+[36m(WorkerDict pid=796722)[0m     "full_attention"
+[36m(WorkerDict pid=796722)[0m   ],
+[36m(WorkerDict pid=796722)[0m   "max_position_embeddings": 32768,
+[36m(WorkerDict pid=796722)[0m   "max_window_layers": 28,
+[36m(WorkerDict pid=796722)[0m   "model_type": "qwen3",
+[36m(WorkerDict pid=796722)[0m   "num_attention_heads": 16,
+[36m(WorkerDict pid=796722)[0m   "num_hidden_layers": 28,
+[36m(WorkerDict pid=796722)[0m   "num_key_value_heads": 8,
+[36m(WorkerDict pid=796722)[0m   "pad_token_id": 151643,
+[36m(WorkerDict pid=796722)[0m   "rms_norm_eps": 1e-06,
+[36m(WorkerDict pid=796722)[0m   "rope_scaling": null,
+[36m(WorkerDict pid=796722)[0m   "rope_theta": 1000000,
+[36m(WorkerDict pid=796722)[0m   "sliding_window": null,
+[36m(WorkerDict pid=796722)[0m   "tie_word_embeddings": true,
+[36m(WorkerDict pid=796722)[0m   "transformers_version": "4.57.1",
+[36m(WorkerDict pid=796722)[0m   "use_cache": false,
+[36m(WorkerDict pid=796722)[0m   "use_sliding_window": false,
+[36m(WorkerDict pid=796722)[0m   "vocab_size": 151936
+[36m(WorkerDict pid=796722)[0m }
+[36m(WorkerDict pid=796722)[0m 
+[36m(WorkerDict pid=796722)[0m Flash Attention 2 only supports torch.float16 and torch.bfloat16 dtypes, but the current dype in Qwen3ForCausalLM is torch.float32. You should run training or inference using Automatic Mixed-Precision via the `with torch.autocast(device_type='torch_device'):` decorator, or load the model with the `dtype` argument. Example: `model = AutoModel.from_pretrained("openai/whisper-tiny", attn_implementation="flash_attention_2", dtype=torch.float16)`
+[36m(WorkerDict pid=796722)[0m Flash Attention 2 only supports torch.float16 and torch.bfloat16 dtypes, but the current dype in Qwen3Model is torch.float32. You should run training or inference using Automatic Mixed-Precision via the `with torch.autocast(device_type='torch_device'):` decorator, or load the model with the `dtype` argument. Example: `model = AutoModel.from_pretrained("openai/whisper-tiny", attn_implementation="flash_attention_2", dtype=torch.float16)`
+[36m(pid=797227)[0m [CAST worker bootstrap] internal teacher env: LOGPROB=None SNAPSHOT=None BASE_UNTIL=None INTERVAL=None PROMPT_MODE=None OFFICIAL=None TEACHER_THINK=None patched=['verl.workers.fsdp_workers.ActorRolloutRefWorker'][32m [repeated 2x across cluster][0m
+[36m(WorkerDict pid=797227)[0m `torch_dtype` is deprecated! Use `dtype` instead![32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=796722)[0m Qwen3ForCausalLM contains 1.72B parameters
+[36m(WorkerDict pid=796722)[0m wrap_policy: functools.partial(<function _or_policy at 0x7fb4e8bd1510>, policies=[functools.partial(<function transformer_auto_wrap_policy at 0x7fb4e8bd13f0>, transformer_layer_cls={<class 'transformers.models.qwen3.modeling_qwen3.Qwen3DecoderLayer'>})])
+[36m(WorkerDict pid=796722)[0m Monkey patch state_dict in AutoModelForCausalLMWithValueHead. [32m [repeated 4x across cluster][0m
+[36m(WorkerDict pid=796722)[0m Monkey patch _flash_attention_forward in transformers.integrations.flash_attention[32m [repeated 4x across cluster][0m
+[36m(WorkerDict pid=796722)[0m Skipping monkey patch for Qwen3ForCausalLM as use_fused_kernels is False or fused_kernels_backend is torch[32m [repeated 4x across cluster][0m
+[36m(WorkerDict pid=796722)[0m Total steps: 100, num_warmup_steps: 0
+[36m(WorkerDict pid=796722)[0m Actor use_remove_padding=True
+[36m(WorkerDict pid=796722)[0m Actor use_fused_kernels=False
+[36m(WorkerDict pid=797227)[0m Flash Attention 2 only supports torch.float16 and torch.bfloat16 dtypes, but the current dype in Qwen3Model is torch.float32. You should run training or inference using Automatic Mixed-Precision via the `with torch.autocast(device_type='torch_device'):` decorator, or load the model with the `dtype` argument. Example: `model = AutoModel.from_pretrained("openai/whisper-tiny", attn_implementation="flash_attention_2", dtype=torch.float16)`[32m [repeated 6x across cluster][0m
+[36m(WorkerDict pid=796722)[0m `torch_dtype` is deprecated! Use `dtype` instead!
+[36m(WorkerDict pid=797229)[0m `torch_dtype` is deprecated! Use `dtype` instead!
+[36m(WorkerDict pid=796722)[0m kwargs: {'n': 4, 'logprobs': 0, 'max_tokens': 24576, 'detokenize': False, 'temperature': 0.6, 'top_k': 20, 'top_p': 0.95, 'ignore_eos': False, 'stop_token_ids': [151643, 151645]}
+[36m(WorkerDict pid=796722)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/fsdp/fully_sharded_data_parallel.py:690: FutureWarning: FSDP.state_dict_type() and FSDP.set_state_dict_type() are being deprecated. Please use APIs, get_state_dict() and set_state_dict(), which can support different parallelisms, FSDP1, FSDP2, DDP. API doc: https://pytorch.org/docs/stable/distributed.checkpoint.html#torch.distributed.checkpoint.state_dict.get_state_dict .Tutorial: https://pytorch.org/tutorials/recipes/distributed_checkpoint_recipe.html .
+[36m(WorkerDict pid=796722)[0m   warnings.warn(
+[36m(WorkerDict pid=797227)[0m `torch_dtype` is deprecated! Use `dtype` instead![32m [repeated 2x across cluster][0m
+[36m(TaskRunner pid=796068)[0m wandb: Tracking run with wandb version 0.26.1
+[36m(TaskRunner pid=796068)[0m wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+[36m(TaskRunner pid=796068)[0m wandb: Run data is saved locally in /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/wandb/wandb/offline-run-20261022_192554-j8wkxaga
+[36m(WorkerDict pid=797227)[0m /gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/torch/distributed/fsdp/fully_sharded_data_parallel.py:690: FutureWarning: FSDP.state_dict_type() and FSDP.set_state_dict_type() are being deprecated. Please use APIs, get_state_dict() and set_state_dict(), which can support different parallelisms, FSDP1, FSDP2, DDP. API doc: https://pytorch.org/docs/stable/distributed.checkpoint.html#torch.distributed.checkpoint.state_dict.get_state_dict .Tutorial: https://pytorch.org/tutorials/recipes/distributed_checkpoint_recipe.html .[32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=797227)[0m   warnings.warn([32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m Found checkpoint: %s /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75
+[36m(TaskRunner pid=796068)[0m Load from checkpoint folder: /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75
+[36m(TaskRunner pid=796068)[0m Setting global step to 75
+[36m(TaskRunner pid=796068)[0m Resuming from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75
+[36m(WorkerDict pid=797227)[0m kwargs: {'n': 4, 'logprobs': 0, 'max_tokens': 24576, 'detokenize': False, 'temperature': 0.6, 'top_k': 20, 'top_p': 0.95, 'ignore_eos': False, 'stop_token_ids': [151643, 151645]}[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m wandb: Detected [openai] in use.
+[36m(TaskRunner pid=796068)[0m wandb: Use W&B Weave for improved LLM call tracing. Weave is installed but not imported. Add `import weave` to the top of your script.
+[36m(TaskRunner pid=796068)[0m wandb: For more information, check out the docs at: https://weave-docs.wandb.ai
+[36m(WorkerDict pid=796722)[0m INFO:2026-10-22 19:26:08,435:[Rank 0] Loaded model from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75/actor/model_world_size_4_rank_0.pt
+[36m(WorkerDict pid=796722)[0m INFO:2026-10-22 19:26:12,121:[Rank 0] Loaded optimizer from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75/actor/optim_world_size_4_rank_0.pt
+[36m(WorkerDict pid=796722)[0m INFO:2026-10-22 19:26:12,188:[Rank 0] Loaded rng from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75/actor/extra_state_world_size_4_rank_0.pt
+[36m(WorkerDict pid=796722)[0m INFO:2026-10-22 19:26:12,189:[Rank 0] Loaded lr_scheduler from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75/actor/extra_state_world_size_4_rank_0.pt
+[36m(TaskRunner pid=796068)[0m Training Progress:  75%|███████▌  | 75/100 [00:00<?, ?it/s]
+[36m(WorkerDict pid=797227)[0m INFO:2026-10-22 19:26:08,436:[Rank 1] Loaded model from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75/actor/model_world_size_4_rank_1.pt[32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m FINE
+[36m(TaskRunner pid=796068)[0m Hello
+[36m(TaskRunner pid=796068)[0m I'm
+[36m(TaskRunner pid=796068)[0m THERE
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m Two
+[36m(TaskRunner pid=796068)[0m Three
+[36m(TaskRunner pid=796068)[0m NaR
+[36m(TaskRunner pid=796068)[0m NaR
+[36m(TaskRunner pid=796068)[0m NaR
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m Beautiful is better than ugly.
+[36m(TaskRunner pid=796068)[0m Tiger Earth
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/76.jsonl
+[36m(TaskRunner pid=796068)[0m step:76 - global_seqlen/min:863521.000 - global_seqlen/max:1341097.000 - global_seqlen/minmax_diff:477576.000 - global_seqlen/balanced_min:1121710.000 - global_seqlen/balanced_max:1121711.000 - global_seqlen/mean:1121710.500 - actor/entropy:0.260 - actor/kl_loss:0.007 - actor/kl_coef:0.010 - actor/pg_loss:0.036 - actor/pg_clipfrac:0.002 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.072 - perf/mfu/actor:0.517 - perf/max_memory_allocated_gb:107.115 - perf/max_memory_reserved_gb:113.551 - perf/cpu_memory_used_gb:97.215 - actor/lr:0.000 - training/global_step:76.000 - training/epoch:0.000 - critic/score/mean:-0.495 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.495 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.041 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.041 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11137.891 - response_length/max:24576.000 - response_length/min:258.000 - response_length/clip_ratio:0.115 - prompt_length/mean:546.594 - prompt_length/max:1171.000 - prompt_length/min:159.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.253 - training/acc:0.253 - timing_s/generate_sequences:1086.604 - timing_s/reshard:0.934 - timing_s/gen:1415.089 - timing_s/reward:24.606 - timing_s/old_log_prob:58.048 - timing_s/ref:41.545 - timing_s/adv:0.030 - timing_s/update_actor:168.744 - timing_s/dump_rollout_generations:1.323 - timing_s/step:1709.685 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.038 - timing_per_token_ms/gen:0.331 - perf/total_num_tokens:4486842.000 - perf/time_per_step:1709.685 - perf/throughput:656.092
+[36m(TaskRunner pid=796068)[0m Training Progress:  76%|███████▌  | 76/100 [28:30<11:24:06, 1710.27s/it]
+[36m(WorkerDict pid=797229)[0m INFO:2026-10-22 19:26:12,307:[Rank 3] Loaded optimizer from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75/actor/optim_world_size_4_rank_3.pt[32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=797228)[0m INFO:2026-10-22 19:26:12,269:[Rank 2] Loaded rng from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75/actor/extra_state_world_size_4_rank_2.pt[32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=797228)[0m INFO:2026-10-22 19:26:12,269:[Rank 2] Loaded lr_scheduler from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_75/actor/extra_state_world_size_4_rank_2.pt[32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m 9
+[36m(TaskRunner pid=796068)[0m 7
+[36m(TaskRunner pid=796068)[0m 16
+[36m(TaskRunner pid=796068)[0m 9
+[36m(TaskRunner pid=796068)[0m 25
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m [8, 64]
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 7
+[36m(TaskRunner pid=796068)[0m 12
+[36m(TaskRunner pid=796068)[0m 17
+[36m(TaskRunner pid=796068)[0m 11
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m 21
+[36m(TaskRunner pid=796068)[0m 11
+[36m(TaskRunner pid=796068)[0m 11
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m 6
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 65
+[36m(TaskRunner pid=796068)[0m 65
+[36m(TaskRunner pid=796068)[0m 65
+[36m(TaskRunner pid=796068)[0m 130
+[36m(TaskRunner pid=796068)[0m 130
+[36m(TaskRunner pid=796068)[0m 130
+[36m(TaskRunner pid=796068)[0m 1300000000000000
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/77.jsonl
+[36m(TaskRunner pid=796068)[0m step:77 - global_seqlen/min:914091.000 - global_seqlen/max:1290971.000 - global_seqlen/minmax_diff:376880.000 - global_seqlen/balanced_min:1136421.000 - global_seqlen/balanced_max:1136422.000 - global_seqlen/mean:1136421.250 - actor/entropy:0.278 - actor/kl_loss:0.006 - actor/kl_coef:0.010 - actor/pg_loss:0.085 - actor/pg_clipfrac:0.001 - actor/ppo_kl:-0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.080 - perf/mfu/actor:0.496 - perf/max_memory_allocated_gb:107.115 - perf/max_memory_reserved_gb:142.377 - perf/cpu_memory_used_gb:97.937 - actor/lr:0.000 - training/global_step:77.000 - training/epoch:0.000 - critic/score/mean:-0.552 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.552 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.032 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.032 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11275.930 - response_length/max:24576.000 - response_length/min:365.000 - response_length/clip_ratio:0.089 - prompt_length/mean:561.792 - prompt_length/max:1424.000 - prompt_length/min:147.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.224 - training/acc:0.224 - timing_s/generate_sequences:1096.413 - timing_s/reshard:1.098 - timing_s/gen:1237.355 - timing_s/reward:21.396 - timing_s/old_log_prob:41.923 - timing_s/ref:40.593 - timing_s/adv:0.036 - timing_s/update_actor:175.472 - timing_s/dump_rollout_generations:1.308 - timing_s/step:1518.199 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.039 - timing_per_token_ms/gen:0.286 - perf/total_num_tokens:4545685.000 - perf/time_per_step:1518.199 - perf/throughput:748.532
+[36m(TaskRunner pid=796068)[0m Training Progress:  77%|███████▋  | 77/100 [53:48<10:12:19, 1597.36s/it]
+[36m(WorkerDict pid=797227)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 887
+[36m(TaskRunner pid=796068)[0m 1201
+[36m(TaskRunner pid=796068)[0m 8887
+[36m(TaskRunner pid=796068)[0m 487
+[36m(TaskRunner pid=796068)[0m 487
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m 34
+[36m(TaskRunner pid=796068)[0m [1, 2]
+[36m(TaskRunner pid=796068)[0m [24, 41]
+[36m(TaskRunner pid=796068)[0m [24, 13]
+[36m(TaskRunner pid=796068)[0m [9, 7]
+[36m(TaskRunner pid=796068)[0m [24, 25]
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m 887
+[36m(TaskRunner pid=796068)[0m 1201
+[36m(TaskRunner pid=796068)[0m 8887
+[36m(TaskRunner pid=796068)[0m 487
+[36m(TaskRunner pid=796068)[0m 467
+[36m(TaskRunner pid=796068)[0m a
+[36m(TaskRunner pid=796068)[0m aaa
+[36m(TaskRunner pid=796068)[0m aba
+[36m(TaskRunner pid=796068)[0m cddcd
+[36m(TaskRunner pid=796068)[0m accacca
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/78.jsonl
+[36m(TaskRunner pid=796068)[0m step:78 - global_seqlen/min:1065546.000 - global_seqlen/max:1302957.000 - global_seqlen/minmax_diff:237411.000 - global_seqlen/balanced_min:1149559.000 - global_seqlen/balanced_max:1149559.000 - global_seqlen/mean:1149559.000 - actor/entropy:0.272 - actor/kl_loss:0.005 - actor/kl_coef:0.010 - actor/pg_loss:0.038 - actor/pg_clipfrac:0.002 - actor/ppo_kl:-0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.089 - perf/mfu/actor:0.506 - perf/max_memory_allocated_gb:107.115 - perf/max_memory_reserved_gb:142.377 - perf/cpu_memory_used_gb:100.584 - actor/lr:0.000 - training/global_step:78.000 - training/epoch:0.000 - critic/score/mean:-0.417 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.417 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.013 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.013 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11405.771 - response_length/max:24576.000 - response_length/min:482.000 - response_length/clip_ratio:0.109 - prompt_length/mean:568.802 - prompt_length/max:1492.000 - prompt_length/min:185.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.292 - training/acc:0.292 - timing_s/generate_sequences:1113.252 - timing_s/reshard:1.064 - timing_s/gen:1303.626 - timing_s/reward:23.996 - timing_s/old_log_prob:43.011 - timing_s/ref:41.653 - timing_s/adv:0.041 - timing_s/update_actor:177.590 - timing_s/dump_rollout_generations:1.371 - timing_s/step:1591.403 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.039 - timing_per_token_ms/gen:0.298 - perf/total_num_tokens:4598236.000 - perf/time_per_step:1591.403 - perf/throughput:722.356
+[36m(TaskRunner pid=796068)[0m Training Progress:  78%|███████▊  | 78/100 [1:20:20<9:44:43, 1594.70s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 11
+[36m(TaskRunner pid=796068)[0m 2
+[36m(WorkerDict pid=797227)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+[36m(TaskRunner pid=796068)[0m c
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m cab
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m abacbabacb
+[36m(TaskRunner pid=796068)[0m ^ ^( )wOO
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m [[9, 2, 7], [4, 5, 6], [3, 8, 1]]
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 1000000004
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 999999947
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/79.jsonl
+[36m(TaskRunner pid=796068)[0m step:79 - global_seqlen/min:892915.000 - global_seqlen/max:1275263.000 - global_seqlen/minmax_diff:382348.000 - global_seqlen/balanced_min:1132939.000 - global_seqlen/balanced_max:1132940.000 - global_seqlen/mean:1132939.250 - actor/entropy:0.270 - actor/kl_loss:0.001 - actor/kl_coef:0.010 - actor/pg_loss:0.010 - actor/pg_clipfrac:0.002 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.086 - perf/mfu/actor:0.484 - perf/max_memory_allocated_gb:107.115 - perf/max_memory_reserved_gb:142.377 - perf/cpu_memory_used_gb:106.716 - actor/lr:0.000 - training/global_step:79.000 - training/epoch:0.000 - critic/score/mean:-0.521 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.521 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.027 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.027 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11226.950 - response_length/max:24576.000 - response_length/min:551.000 - response_length/clip_ratio:0.102 - prompt_length/mean:574.500 - prompt_length/max:1250.000 - prompt_length/min:168.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.240 - training/acc:0.240 - timing_s/generate_sequences:1109.657 - timing_s/reshard:1.038 - timing_s/gen:1310.024 - timing_s/reward:19.197 - timing_s/old_log_prob:42.240 - timing_s/ref:40.870 - timing_s/adv:0.038 - timing_s/update_actor:182.646 - timing_s/dump_rollout_generations:1.300 - timing_s/step:1596.427 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.040 - timing_per_token_ms/gen:0.304 - perf/total_num_tokens:4531757.000 - perf/time_per_step:1596.427 - perf/throughput:709.672
+[36m(TaskRunner pid=796068)[0m Training Progress:  79%|███████▉  | 79/100 [1:46:56<9:18:23, 1595.42s/it]
+[36m(WorkerDict pid=797229)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 2
+[36m(WorkerDict pid=797227)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m cbafed
+[36m(TaskRunner pid=796068)[0m cbafedihg321
+[36m(TaskRunner pid=796068)[0m cbafed43hgff434ire_55321343
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 1304550
+[36m(TaskRunner pid=796068)[0m 100101
+[36m(TaskRunner pid=796068)[0m 323
+[36m(TaskRunner pid=796068)[0m [[], [2], [1], [1, 2]]
+[36m(TaskRunner pid=796068)[0m [[], [3], [2], [2, 3], [1], [1, 3], [1, 2], [1, 2, 3]]
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/80.jsonl
+[36m(TaskRunner pid=796068)[0m step:80 - global_seqlen/min:1031260.000 - global_seqlen/max:1282121.000 - global_seqlen/minmax_diff:250861.000 - global_seqlen/balanced_min:1167280.000 - global_seqlen/balanced_max:1167281.000 - global_seqlen/mean:1167280.750 - actor/entropy:0.271 - actor/kl_loss:0.006 - actor/kl_coef:0.010 - actor/pg_loss:0.065 - actor/pg_clipfrac:0.002 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.080 - perf/mfu/actor:0.504 - perf/max_memory_allocated_gb:107.115 - perf/max_memory_reserved_gb:143.814 - perf/cpu_memory_used_gb:104.729 - actor/lr:0.000 - training/global_step:80.000 - training/epoch:0.000 - critic/score/mean:-0.427 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.427 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.059 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.059 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11617.341 - response_length/max:24576.000 - response_length/min:332.000 - response_length/clip_ratio:0.094 - prompt_length/mean:541.833 - prompt_length/max:1168.000 - prompt_length/min:135.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.286 - training/acc:0.286 - timing_s/generate_sequences:1152.693 - timing_s/reshard:1.047 - timing_s/gen:1293.777 - timing_s/reward:26.091 - timing_s/old_log_prob:41.679 - timing_s/ref:40.378 - timing_s/adv:0.040 - timing_s/update_actor:179.601 - timing_s/dump_rollout_generations:1.369 - timing_s/step:1583.045 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.038 - timing_per_token_ms/gen:0.290 - perf/total_num_tokens:4669123.000 - perf/time_per_step:1583.045 - perf/throughput:737.364
+[36m(TaskRunner pid=796068)[0m Training Progress:  80%|████████  | 80/100 [2:13:19<8:50:19, 1591.00s/it]
+[36m(WorkerDict pid=797227)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/81.jsonl
+[36m(TaskRunner pid=796068)[0m step:81 - global_seqlen/min:966391.000 - global_seqlen/max:1324104.000 - global_seqlen/minmax_diff:357713.000 - global_seqlen/balanced_min:1096312.000 - global_seqlen/balanced_max:1096314.000 - global_seqlen/mean:1096313.250 - actor/entropy:0.278 - actor/kl_loss:0.005 - actor/kl_coef:0.010 - actor/pg_loss:0.024 - actor/pg_clipfrac:0.001 - actor/ppo_kl:-0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.092 - perf/mfu/actor:0.467 - perf/max_memory_allocated_gb:107.115 - perf/max_memory_reserved_gb:143.814 - perf/cpu_memory_used_gb:103.748 - actor/lr:0.000 - training/global_step:81.000 - training/epoch:0.000 - critic/score/mean:-0.443 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.443 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.027 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.027 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:10822.763 - response_length/max:24576.000 - response_length/min:471.000 - response_length/clip_ratio:0.083 - prompt_length/mean:597.167 - prompt_length/max:1666.000 - prompt_length/min:164.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.279 - training/acc:0.279 - timing_s/generate_sequences:1044.038 - timing_s/reshard:1.067 - timing_s/gen:1364.438 - timing_s/reward:26.581 - timing_s/old_log_prob:39.681 - timing_s/ref:38.386 - timing_s/adv:0.034 - timing_s/update_actor:178.307 - timing_s/dump_rollout_generations:1.253 - timing_s/step:1648.801 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.041 - timing_per_token_ms/gen:0.328 - perf/total_num_tokens:4385253.000 - perf/time_per_step:1648.801 - perf/throughput:664.915
+[36m(TaskRunner pid=796068)[0m Training Progress:  81%|████████  | 81/100 [2:40:48<8:30:03, 1610.69s/it]
+[36m(WorkerDict pid=797227)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 26
+[36m(TaskRunner pid=796068)[0m 44
+[36m(TaskRunner pid=796068)[0m 26
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m ateilb
+[36m(TaskRunner pid=796068)[0m boo
+[36m(TaskRunner pid=796068)[0m mmmmmm
+[36m(TaskRunner pid=796068)[0m (0, [])
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/82.jsonl
+[36m(TaskRunner pid=796068)[0m step:82 - global_seqlen/min:984220.000 - global_seqlen/max:1404674.000 - global_seqlen/minmax_diff:420454.000 - global_seqlen/balanced_min:1171402.000 - global_seqlen/balanced_max:1171403.000 - global_seqlen/mean:1171402.750 - actor/entropy:0.261 - actor/kl_loss:0.006 - actor/kl_coef:0.010 - actor/pg_loss:0.066 - actor/pg_clipfrac:0.001 - actor/ppo_kl:-0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.091 - perf/mfu/actor:0.501 - perf/max_memory_allocated_gb:107.115 - perf/max_memory_reserved_gb:143.814 - perf/cpu_memory_used_gb:108.217 - actor/lr:0.000 - training/global_step:82.000 - training/epoch:0.000 - critic/score/mean:-0.505 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.505 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.036 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.036 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11638.914 - response_length/max:24576.000 - response_length/min:391.000 - response_length/clip_ratio:0.112 - prompt_length/mean:563.198 - prompt_length/max:1136.000 - prompt_length/min:161.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.247 - training/acc:0.247 - timing_s/generate_sequences:1202.617 - timing_s/reshard:1.152 - timing_s/gen:1565.201 - timing_s/reward:19.164 - timing_s/old_log_prob:43.379 - timing_s/ref:41.969 - timing_s/adv:0.034 - timing_s/update_actor:184.204 - timing_s/dump_rollout_generations:1.249 - timing_s/step:1855.312 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.039 - timing_per_token_ms/gen:0.350 - perf/total_num_tokens:4685611.000 - perf/time_per_step:1855.312 - perf/throughput:631.378
+[36m(TaskRunner pid=796068)[0m Training Progress:  82%|████████▏ | 82/100 [3:11:44<8:27:12, 1690.69s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 21
+[36m(TaskRunner pid=796068)[0m 531
+[36m(TaskRunner pid=796068)[0m 2071
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m -1
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m 21
+[36m(TaskRunner pid=796068)[0m 531
+[36m(TaskRunner pid=796068)[0m 2071
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m 4132
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m 21
+[36m(TaskRunner pid=796068)[0m 531
+[36m(TaskRunner pid=796068)[0m 2071
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/83.jsonl
+[36m(TaskRunner pid=796068)[0m step:83 - global_seqlen/min:1083153.000 - global_seqlen/max:1203901.000 - global_seqlen/minmax_diff:120748.000 - global_seqlen/balanced_min:1138279.000 - global_seqlen/balanced_max:1138280.000 - global_seqlen/mean:1138279.750 - actor/entropy:0.279 - actor/kl_loss:0.007 - actor/kl_coef:0.010 - actor/pg_loss:0.040 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.073 - perf/mfu/actor:0.479 - perf/max_memory_allocated_gb:107.115 - perf/max_memory_reserved_gb:143.814 - perf/cpu_memory_used_gb:111.670 - actor/lr:0.000 - training/global_step:83.000 - training/epoch:0.000 - critic/score/mean:-0.526 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.526 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.037 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.037 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11270.956 - response_length/max:24576.000 - response_length/min:378.000 - response_length/clip_ratio:0.078 - prompt_length/mean:586.125 - prompt_length/max:1461.000 - prompt_length/min:146.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.237 - training/acc:0.237 - timing_s/generate_sequences:1054.047 - timing_s/reshard:1.181 - timing_s/gen:1144.241 - timing_s/reward:25.666 - timing_s/old_log_prob:41.668 - timing_s/ref:40.280 - timing_s/adv:0.037 - timing_s/update_actor:181.836 - timing_s/dump_rollout_generations:1.281 - timing_s/step:1435.122 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.040 - timing_per_token_ms/gen:0.264 - perf/total_num_tokens:4553119.000 - perf/time_per_step:1435.122 - perf/throughput:793.159
+[36m(TaskRunner pid=796068)[0m Training Progress:  83%|████████▎ | 83/100 [3:35:39<7:35:59, 1609.36s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m -1
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m ['192.168.1.0', '192.168.1.1']
+[36m(TaskRunner pid=796068)[0m None
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m  _
+[36m(TaskRunner pid=796068)[0m [-1, 0, 2, 3, 4]
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m 9457
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m ___
+[36m(TaskRunner pid=796068)[0m | 
+[36m(TaskRunner pid=796068)[0m ___
+[36m(TaskRunner pid=796068)[0m | 
+[36m(TaskRunner pid=796068)[0m  ___
+[36m(TaskRunner pid=796068)[0m  /\
+[36m(TaskRunner pid=796068)[0m  /\
+[36m(TaskRunner pid=796068)[0m  /\
+[36m(TaskRunner pid=796068)[0m  /\
+[36m(TaskRunner pid=796068)[0m  | | 
+[36m(TaskRunner pid=796068)[0m ___
+[36m(TaskRunner pid=796068)[0m | 
+[36m(TaskRunner pid=796068)[0m  ___
+[36m(TaskRunner pid=796068)[0m  /\
+[36m(TaskRunner pid=796068)[0m  /\
+[36m(TaskRunner pid=796068)[0m  /\
+[36m(TaskRunner pid=796068)[0m  /\
+[36m(TaskRunner pid=796068)[0m  | | 
+[36m(TaskRunner pid=796068)[0m   ___
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   /\
+[36m(TaskRunner pid=796068)[0m   | | | 
+[36m(TaskRunner pid=796068)[0m ___
+[36m(TaskRunner pid=796068)[0m | 
+[36m(TaskRunner pid=796068)[0m 10001
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m ---- ----
+[36m(TaskRunner pid=796068)[0m ----x----
+[36m(TaskRunner pid=796068)[0m ----x----
+[36m(TaskRunner pid=796068)[0m ----------
+[36m(TaskRunner pid=796068)[0m ----x----
+[36m(TaskRunner pid=796068)[0m ---- ----
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m 1.05242
+[36m(TaskRunner pid=796068)[0m 7
+[36m(TaskRunner pid=796068)[0m [10, 7, 5, [-3, -2, 3, 4, 5], 3]
+[36m(TaskRunner pid=796068)[0m [14, 8, 4, [-3, 0, 1, 3], 3]
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/84.jsonl
+[36m(TaskRunner pid=796068)[0m step:84 - global_seqlen/min:1035015.000 - global_seqlen/max:1216384.000 - global_seqlen/minmax_diff:181369.000 - global_seqlen/balanced_min:1150397.000 - global_seqlen/balanced_max:1150398.000 - global_seqlen/mean:1150397.250 - actor/entropy:0.267 - actor/kl_loss:0.007 - actor/kl_coef:0.010 - actor/pg_loss:0.041 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.085 - perf/mfu/actor:0.483 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:143.814 - perf/cpu_memory_used_gb:107.812 - actor/lr:0.000 - training/global_step:84.000 - training/epoch:0.000 - critic/score/mean:-0.562 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.562 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.027 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.027 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11440.763 - response_length/max:24576.000 - response_length/min:391.000 - response_length/clip_ratio:0.107 - prompt_length/mean:542.542 - prompt_length/max:1266.000 - prompt_length/min:186.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.219 - training/acc:0.219 - timing_s/generate_sequences:1101.812 - timing_s/reshard:1.183 - timing_s/gen:1152.917 - timing_s/reward:22.902 - timing_s/old_log_prob:42.599 - timing_s/ref:41.137 - timing_s/adv:0.038 - timing_s/update_actor:183.821 - timing_s/dump_rollout_generations:1.343 - timing_s/step:1444.882 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.040 - timing_per_token_ms/gen:0.262 - perf/total_num_tokens:4601589.000 - perf/time_per_step:1444.882 - perf/throughput:796.188
+[36m(TaskRunner pid=796068)[0m Training Progress:  84%|████████▍ | 84/100 [3:59:44<6:55:27, 1557.97s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 5
+[36m(WorkerDict pid=797229)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 11
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m 6
+[36m(TaskRunner pid=796068)[0m  
+[36m(TaskRunner pid=796068)[0m  
+[36m(TaskRunner pid=796068)[0m  
+[36m(TaskRunner pid=796068)[0m  
+[36m(TaskRunner pid=796068)[0m  
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/85.jsonl
+[36m(TaskRunner pid=796068)[0m step:85 - global_seqlen/min:1065326.000 - global_seqlen/max:1170976.000 - global_seqlen/minmax_diff:105650.000 - global_seqlen/balanced_min:1111154.000 - global_seqlen/balanced_max:1111155.000 - global_seqlen/mean:1111154.750 - actor/entropy:0.284 - actor/kl_loss:0.008 - actor/kl_coef:0.010 - actor/pg_loss:-0.014 - actor/pg_clipfrac:0.001 - actor/ppo_kl:-0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.089 - perf/mfu/actor:0.485 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:143.814 - perf/cpu_memory_used_gb:110.224 - actor/lr:0.000 - training/global_step:85.000 - training/epoch:0.000 - critic/score/mean:-0.526 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.526 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.034 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.034 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:10941.102 - response_length/max:24576.000 - response_length/min:479.000 - response_length/clip_ratio:0.091 - prompt_length/mean:633.427 - prompt_length/max:2027.000 - prompt_length/min:137.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.237 - training/acc:0.237 - timing_s/generate_sequences:1049.596 - timing_s/reshard:1.028 - timing_s/gen:1146.087 - timing_s/reward:34.224 - timing_s/old_log_prob:40.820 - timing_s/ref:39.373 - timing_s/adv:0.035 - timing_s/update_actor:175.472 - timing_s/dump_rollout_generations:1.293 - timing_s/step:1437.418 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.039 - timing_per_token_ms/gen:0.273 - perf/total_num_tokens:4444619.000 - perf/time_per_step:1437.418 - perf/throughput:773.021
+[36m(TaskRunner pid=796068)[0m Training Progress:  85%|████████▌ | 85/100 [4:23:41<6:20:12, 1520.80s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m [2, 1, 0]
+[36m(TaskRunner pid=796068)[0m [2, 1, 0]
+[36m(TaskRunner pid=796068)[0m [3, 1, 1]
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 333
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 333
+[36m(TaskRunner pid=796068)[0m 55555
+[36m(TaskRunner pid=796068)[0m ........
+[36m(TaskRunner pid=796068)[0m ...B....
+[36m(TaskRunner pid=796068)[0m ...BW...
+[36m(TaskRunner pid=796068)[0m ...BWB..
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 6
+[36m(TaskRunner pid=796068)[0m 10
+[36m(TaskRunner pid=796068)[0m 1999999984
+[36m(TaskRunner pid=796068)[0m lllooHe wrd
+[36m(TaskRunner pid=796068)[0m lllHeo He wordwrd
+[36m(TaskRunner pid=796068)[0m <string>:67: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+[36m(TaskRunner pid=796068)[0m <string>:67: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m 33
+[36m(TaskRunner pid=796068)[0m 333
+[36m(TaskRunner pid=796068)[0m 6.00
+[36m(TaskRunner pid=796068)[0m 4 1.1a1c4e1h2i2n4s4t
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m 35
+[36m(TaskRunner pid=796068)[0m 9
+[36m(TaskRunner pid=796068)[0m 99999
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m 7
+[36m(TaskRunner pid=796068)[0m 42
+[36m(TaskRunner pid=796068)[0m 204226
+[36m(TaskRunner pid=796068)[0m 15796476
+[36m(TaskRunner pid=796068)[0m 190569292
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 8
+[36m(TaskRunner pid=796068)[0m 16
+[36m(TaskRunner pid=796068)[0m 512
+[36m(TaskRunner pid=796068)[0m 562949953421312
+[36m(TaskRunner pid=796068)[0m 604462909807314587353088
+[36m(TaskRunner pid=796068)[0m 633825300114114700748351602688
+[36m(TaskRunner pid=796068)[0m loHe wrd
+[36m(TaskRunner pid=796068)[0m lHeo wrd
+[36m(TaskRunner pid=796068)[0m 1 1
+[36m(TaskRunner pid=796068)[0m 1 2 2 1
+[36m(TaskRunner pid=796068)[0m 1 2 3 3 2 1
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/86.jsonl
+[36m(TaskRunner pid=796068)[0m step:86 - global_seqlen/min:977873.000 - global_seqlen/max:1422076.000 - global_seqlen/minmax_diff:444203.000 - global_seqlen/balanced_min:1217558.000 - global_seqlen/balanced_max:1217559.000 - global_seqlen/mean:1217558.250 - actor/entropy:0.267 - actor/kl_loss:0.006 - actor/kl_coef:0.010 - actor/pg_loss:0.009 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.069 - perf/mfu/actor:0.501 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:143.814 - perf/cpu_memory_used_gb:117.688 - actor/lr:0.000 - training/global_step:86.000 - training/epoch:0.000 - critic/score/mean:-0.594 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.594 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.022 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.022 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:12087.450 - response_length/max:24576.000 - response_length/min:564.000 - response_length/clip_ratio:0.120 - prompt_length/mean:595.448 - prompt_length/max:1697.000 - prompt_length/min:162.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.203 - training/acc:0.203 - timing_s/generate_sequences:1243.721 - timing_s/reshard:1.082 - timing_s/gen:1585.933 - timing_s/reward:23.715 - timing_s/old_log_prob:44.734 - timing_s/ref:43.297 - timing_s/adv:0.034 - timing_s/update_actor:192.891 - timing_s/dump_rollout_generations:1.356 - timing_s/step:1892.079 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.040 - timing_per_token_ms/gen:0.342 - perf/total_num_tokens:4870233.000 - perf/time_per_step:1892.079 - perf/throughput:643.503
+[36m(TaskRunner pid=796068)[0m Training Progress:  86%|████████▌ | 86/100 [4:55:14<6:21:22, 1634.47s/it]
+[36m(WorkerDict pid=797229)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 35
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m 17
+[36m(TaskRunner pid=796068)[0m [15, 7, 2]
+[36m(TaskRunner pid=796068)[0m 28
+[36m(TaskRunner pid=796068)[0m \_X\_\_X\_
+[36m(TaskRunner pid=796068)[0m \_X\_\_X\_
+[36m(TaskRunner pid=796068)[0m \_X\_\_X\_
+[36m(TaskRunner pid=796068)[0m \_
+[36m(TaskRunner pid=796068)[0m [0, 0]
+[36m(TaskRunner pid=796068)[0m [0, 0]
+[36m(TaskRunner pid=796068)[0m [0, 0]
+[36m(TaskRunner pid=796068)[0m [0, 0, 0, 0]
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m [8, 3, 2]
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/87.jsonl
+[36m(TaskRunner pid=796068)[0m step:87 - global_seqlen/min:1176903.000 - global_seqlen/max:1333152.000 - global_seqlen/minmax_diff:156249.000 - global_seqlen/balanced_min:1264322.000 - global_seqlen/balanced_max:1264323.000 - global_seqlen/mean:1264322.250 - actor/entropy:0.260 - actor/kl_loss:0.006 - actor/kl_coef:0.010 - actor/pg_loss:0.061 - actor/pg_clipfrac:0.001 - actor/ppo_kl:-0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.068 - perf/mfu/actor:0.510 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:143.814 - perf/cpu_memory_used_gb:125.247 - actor/lr:0.000 - training/global_step:87.000 - training/epoch:0.000 - critic/score/mean:-0.651 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.651 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.030 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.030 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:12592.430 - response_length/max:24576.000 - response_length/min:563.000 - response_length/clip_ratio:0.138 - prompt_length/mean:577.594 - prompt_length/max:1317.000 - prompt_length/min:157.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.174 - training/acc:0.174 - timing_s/generate_sequences:1240.970 - timing_s/reshard:1.059 - timing_s/gen:1319.946 - timing_s/reward:25.528 - timing_s/old_log_prob:47.356 - timing_s/ref:45.751 - timing_s/adv:0.032 - timing_s/update_actor:196.047 - timing_s/dump_rollout_generations:1.296 - timing_s/step:1636.060 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.039 - timing_per_token_ms/gen:0.273 - perf/total_num_tokens:5057289.000 - perf/time_per_step:1636.060 - perf/throughput:772.785
+[36m(TaskRunner pid=796068)[0m Training Progress:  87%|████████▋ | 87/100 [5:22:30<5:54:14, 1634.98s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 6
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m [1, 2, 3]
+[36m(TaskRunner pid=796068)[0m [1, 2]
+[36m(TaskRunner pid=796068)[0m 257
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/88.jsonl
+[36m(TaskRunner pid=796068)[0m step:88 - global_seqlen/min:1059742.000 - global_seqlen/max:1231193.000 - global_seqlen/minmax_diff:171451.000 - global_seqlen/balanced_min:1147540.000 - global_seqlen/balanced_max:1147542.000 - global_seqlen/mean:1147540.750 - actor/entropy:0.282 - actor/kl_loss:0.006 - actor/kl_coef:0.010 - actor/pg_loss:0.039 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.054 - perf/mfu/actor:0.518 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:143.814 - perf/cpu_memory_used_gb:124.569 - actor/lr:0.000 - training/global_step:88.000 - training/epoch:0.000 - critic/score/mean:-0.547 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.547 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.018 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.018 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11404.706 - response_length/max:24576.000 - response_length/min:274.000 - response_length/clip_ratio:0.091 - prompt_length/mean:548.844 - prompt_length/max:1111.000 - prompt_length/min:152.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.227 - training/acc:0.227 - timing_s/generate_sequences:1115.763 - timing_s/reshard:1.100 - timing_s/gen:1295.791 - timing_s/reward:20.620 - timing_s/old_log_prob:42.758 - timing_s/ref:41.422 - timing_s/adv:0.033 - timing_s/update_actor:174.718 - timing_s/dump_rollout_generations:1.284 - timing_s/step:1576.721 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.038 - timing_per_token_ms/gen:0.296 - perf/total_num_tokens:4590163.000 - perf/time_per_step:1576.721 - perf/throughput:727.802
+[36m(TaskRunner pid=796068)[0m Training Progress:  88%|████████▊ | 88/100 [5:48:47<5:23:28, 1617.36s/it]
+[36m(WorkerDict pid=797227)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m []
+[36m(WorkerDict pid=797229)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m [2, 3, 4, 6]
+[36m(TaskRunner pid=796068)[0m [5]
+[36m(TaskRunner pid=796068)[0m 13 is prime
+[36m(TaskRunner pid=796068)[0m [11]
+[36m(TaskRunner pid=796068)[0m ['!eil', 'tonnac', 'I', 'dna', 'sttub', 'gib', 'ekil', 'I']
+[36m(TaskRunner pid=796068)[0m ['a', 'p', 'l', 'e']
+[36m(TaskRunner pid=796068)[0m ['a', 'p', 'P', 'l', 'e']
+[36m(TaskRunner pid=796068)[0m ['p', 'i']
+[36m(TaskRunner pid=796068)[0m ['P', 'i', 'p']
+[36m(TaskRunner pid=796068)[0m [11]
+[36m(TaskRunner pid=796068)[0m ['!eil', 'tonnac', 'I', 'dna', 'sttub', 'gib', 'ekil', 'I']
+[36m(TaskRunner pid=796068)[0m ['p']
+[36m(TaskRunner pid=796068)[0m []
+[36m(TaskRunner pid=796068)[0m ['p', 'p', 'i']
+[36m(TaskRunner pid=796068)[0m ['p', 'i']
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 111111111111
+[36m(TaskRunner pid=796068)[0m [0, 0, 0, []]
+[36m(TaskRunner pid=796068)[0m 1111111111111111111
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/89.jsonl
+[36m(TaskRunner pid=796068)[0m step:89 - global_seqlen/min:1071781.000 - global_seqlen/max:1159556.000 - global_seqlen/minmax_diff:87775.000 - global_seqlen/balanced_min:1128697.000 - global_seqlen/balanced_max:1128698.000 - global_seqlen/mean:1128697.250 - actor/entropy:0.289 - actor/kl_loss:0.007 - actor/kl_coef:0.010 - actor/pg_loss:-0.012 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.079 - perf/mfu/actor:0.512 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:114.754 - actor/lr:0.000 - training/global_step:89.000 - training/epoch:0.000 - critic/score/mean:-0.432 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.432 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.043 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.043 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11171.138 - response_length/max:24576.000 - response_length/min:460.000 - response_length/clip_ratio:0.070 - prompt_length/mean:586.125 - prompt_length/max:1993.000 - prompt_length/min:211.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.284 - training/acc:0.284 - timing_s/generate_sequences:1047.853 - timing_s/reshard:1.129 - timing_s/gen:1104.249 - timing_s/reward:25.291 - timing_s/old_log_prob:40.629 - timing_s/ref:39.169 - timing_s/adv:0.031 - timing_s/update_actor:168.568 - timing_s/dump_rollout_generations:1.293 - timing_s/step:1379.329 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.037 - timing_per_token_ms/gen:0.257 - perf/total_num_tokens:4514789.000 - perf/time_per_step:1379.329 - perf/throughput:818.294
+[36m(TaskRunner pid=796068)[0m Training Progress:  89%|████████▉ | 89/100 [6:11:46<4:43:20, 1545.49s/it]
+[36m(WorkerDict pid=797227)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m ■■■■■
+[36m(TaskRunner pid=796068)[0m □□■■■■■□□
+[36m(TaskRunner pid=796068)[0m ■■■■■
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon phi chi psi omega
+[36m(TaskRunner pid=796068)[0m 243
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m ■□□■
+[36m(TaskRunner pid=796068)[0m □■□□□□
+[36m(TaskRunner pid=796068)[0m ■□□■
+[36m(TaskRunner pid=796068)[0m ■□□■
+[36m(TaskRunner pid=796068)[0m □■□□□□
+[36m(TaskRunner pid=796068)[0m ■□□■
+[36m(TaskRunner pid=796068)[0m ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi', 'omicron', 'pi', 'rho', 'sigma', 'tau', 'upsilon', 'phi', 'chi', 'psi', 'omega']
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m 6
+[36m(TaskRunner pid=796068)[0m 6
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m ■■■
+[36m(TaskRunner pid=796068)[0m □□
+[36m(TaskRunner pid=796068)[0m ■■■
+[36m(TaskRunner pid=796068)[0m ■■■
+[36m(TaskRunner pid=796068)[0m □□
+[36m(TaskRunner pid=796068)[0m ■■■
+[36m(TaskRunner pid=796068)[0m ■■■
+[36m(TaskRunner pid=796068)[0m □□
+[36m(TaskRunner pid=796068)[0m ■■■
+[36m(TaskRunner pid=796068)[0m □□
+[36m(TaskRunner pid=796068)[0m ■■■
+[36m(TaskRunner pid=796068)[0m □□
+[36m(TaskRunner pid=796068)[0m □□
+[36m(TaskRunner pid=796068)[0m ■■■
+[36m(TaskRunner pid=796068)[0m □□
+[36m(TaskRunner pid=796068)[0m □□
+[36m(TaskRunner pid=796068)[0m ■■■
+[36m(TaskRunner pid=796068)[0m □□
+[36m(TaskRunner pid=796068)[0m ■□□□■
+[36m(TaskRunner pid=796068)[0m ■□□□□□□□■
+[36m(TaskRunner pid=796068)[0m ■□□■
+[36m(TaskRunner pid=796068)[0m ■□□□□■
+[36m(TaskRunner pid=796068)[0m ■■
+[36m(TaskRunner pid=796068)[0m ■□□□■
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/90.jsonl
+[36m(TaskRunner pid=796068)[0m step:90 - global_seqlen/min:989349.000 - global_seqlen/max:1245188.000 - global_seqlen/minmax_diff:255839.000 - global_seqlen/balanced_min:1104005.000 - global_seqlen/balanced_max:1104006.000 - global_seqlen/mean:1104005.750 - actor/entropy:0.283 - actor/kl_loss:0.007 - actor/kl_coef:0.010 - actor/pg_loss:0.006 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.055 - perf/mfu/actor:0.502 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:117.570 - actor/lr:0.000 - training/global_step:90.000 - training/epoch:0.000 - critic/score/mean:-0.552 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.552 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.029 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.029 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:10926.894 - response_length/max:24576.000 - response_length/min:481.000 - response_length/clip_ratio:0.081 - prompt_length/mean:573.167 - prompt_length/max:1421.000 - prompt_length/min:245.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.224 - training/acc:0.224 - timing_s/generate_sequences:1054.263 - timing_s/reshard:1.136 - timing_s/gen:1295.854 - timing_s/reward:28.534 - timing_s/old_log_prob:40.609 - timing_s/ref:39.258 - timing_s/adv:0.036 - timing_s/update_actor:169.683 - timing_s/dump_rollout_generations:1.292 - timing_s/step:1575.371 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.038 - timing_per_token_ms/gen:0.309 - perf/total_num_tokens:4416023.000 - perf/time_per_step:1575.371 - perf/throughput:700.791
+[36m(TaskRunner pid=796068)[0m Training Progress:  90%|█████████ | 90/100 [6:38:01<4:19:05, 1554.53s/it]
+[36m(WorkerDict pid=797229)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 2
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/91.jsonl
+[36m(TaskRunner pid=796068)[0m step:91 - global_seqlen/min:1136227.000 - global_seqlen/max:1276236.000 - global_seqlen/minmax_diff:140009.000 - global_seqlen/balanced_min:1205304.000 - global_seqlen/balanced_max:1205305.000 - global_seqlen/mean:1205304.750 - actor/entropy:0.275 - actor/kl_loss:0.006 - actor/kl_coef:0.010 - actor/pg_loss:0.091 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.088 - perf/mfu/actor:0.502 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:122.058 - actor/lr:0.000 - training/global_step:91.000 - training/epoch:0.000 - critic/score/mean:-0.500 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.500 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.043 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.043 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11974.081 - response_length/max:24576.000 - response_length/min:243.000 - response_length/clip_ratio:0.102 - prompt_length/mean:581.177 - prompt_length/max:1749.000 - prompt_length/min:132.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.250 - training/acc:0.250 - timing_s/generate_sequences:1150.333 - timing_s/reshard:1.073 - timing_s/gen:1262.881 - timing_s/reward:25.259 - timing_s/old_log_prob:43.814 - timing_s/ref:42.323 - timing_s/adv:0.038 - timing_s/update_actor:187.672 - timing_s/dump_rollout_generations:1.291 - timing_s/step:1563.407 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.039 - timing_per_token_ms/gen:0.275 - perf/total_num_tokens:4821219.000 - perf/time_per_step:1563.407 - perf/throughput:770.947
+[36m(TaskRunner pid=796068)[0m Training Progress:  91%|█████████ | 91/100 [7:04:05<3:53:35, 1557.23s/it]
+[36m(WorkerDict pid=797229)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 16
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m 16
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/92.jsonl
+[36m(TaskRunner pid=796068)[0m step:92 - global_seqlen/min:1006016.000 - global_seqlen/max:1340564.000 - global_seqlen/minmax_diff:334548.000 - global_seqlen/balanced_min:1202649.000 - global_seqlen/balanced_max:1202650.000 - global_seqlen/mean:1202649.750 - actor/entropy:0.279 - actor/kl_loss:0.007 - actor/kl_coef:0.010 - actor/pg_loss:0.062 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.060 - perf/mfu/actor:0.514 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:118.575 - actor/lr:0.000 - training/global_step:92.000 - training/epoch:0.000 - critic/score/mean:-0.484 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.484 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.027 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.027 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11893.800 - response_length/max:24576.000 - response_length/min:270.000 - response_length/clip_ratio:0.109 - prompt_length/mean:633.802 - prompt_length/max:1592.000 - prompt_length/min:153.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.258 - training/acc:0.258 - timing_s/generate_sequences:1165.958 - timing_s/reshard:1.077 - timing_s/gen:1399.813 - timing_s/reward:23.686 - timing_s/old_log_prob:44.237 - timing_s/ref:42.787 - timing_s/adv:0.035 - timing_s/update_actor:183.509 - timing_s/dump_rollout_generations:1.335 - timing_s/step:1695.519 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.038 - timing_per_token_ms/gen:0.306 - perf/total_num_tokens:4810599.000 - perf/time_per_step:1695.519 - perf/throughput:709.311
+[36m(TaskRunner pid=796068)[0m Training Progress:  92%|█████████▏| 92/100 [7:32:21<3:33:10, 1598.85s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 3
+[36m(WorkerDict pid=797227)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m 44
+[36m(TaskRunner pid=796068)[0m 19
+[36m(TaskRunner pid=796068)[0m [1.0]
+[36m(TaskRunner pid=796068)[0m {'chickens': 5, 'rabbits': 3, 'cows': 3}
+[36m(TaskRunner pid=796068)[0m {'chickens': 32, 'rabbits': 5, 'cows': 5}
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m 7
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/93.jsonl
+[36m(TaskRunner pid=796068)[0m step:93 - global_seqlen/min:1141424.000 - global_seqlen/max:1287117.000 - global_seqlen/minmax_diff:145693.000 - global_seqlen/balanced_min:1195303.000 - global_seqlen/balanced_max:1195304.000 - global_seqlen/mean:1195303.750 - actor/entropy:0.279 - actor/kl_loss:0.006 - actor/kl_coef:0.010 - actor/pg_loss:0.013 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.073 - perf/mfu/actor:0.493 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:121.247 - actor/lr:0.000 - training/global_step:93.000 - training/epoch:0.000 - critic/score/mean:-0.542 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.542 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.029 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.029 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11863.310 - response_length/max:24576.000 - response_length/min:416.000 - response_length/clip_ratio:0.086 - prompt_length/mean:587.771 - prompt_length/max:1532.000 - prompt_length/min:163.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.229 - training/acc:0.229 - timing_s/generate_sequences:1131.640 - timing_s/reshard:1.104 - timing_s/gen:1296.142 - timing_s/reward:24.915 - timing_s/old_log_prob:43.367 - timing_s/ref:41.948 - timing_s/adv:0.036 - timing_s/update_actor:187.566 - timing_s/dump_rollout_generations:1.284 - timing_s/step:1595.380 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.039 - timing_per_token_ms/gen:0.285 - perf/total_num_tokens:4781215.000 - perf/time_per_step:1595.380 - perf/throughput:749.228
+[36m(TaskRunner pid=796068)[0m Training Progress:  93%|█████████▎| 93/100 [7:58:56<3:06:24, 1597.84s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 98:31
+[36m(TaskRunner pid=796068)[0m 95:21
+[36m(WorkerDict pid=797229)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m [10]
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 52
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 52
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/94.jsonl
+[36m(TaskRunner pid=796068)[0m step:94 - global_seqlen/min:973377.000 - global_seqlen/max:1195766.000 - global_seqlen/minmax_diff:222389.000 - global_seqlen/balanced_min:1081170.000 - global_seqlen/balanced_max:1081171.000 - global_seqlen/mean:1081170.250 - actor/entropy:0.282 - actor/kl_loss:0.007 - actor/kl_coef:0.010 - actor/pg_loss:-0.020 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.079 - perf/mfu/actor:0.511 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:122.834 - actor/lr:0.000 - training/global_step:94.000 - training/epoch:0.000 - critic/score/mean:-0.458 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.458 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.020 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.020 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:10704.347 - response_length/max:24576.000 - response_length/min:406.000 - response_length/clip_ratio:0.073 - prompt_length/mean:557.844 - prompt_length/max:1429.000 - prompt_length/min:160.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.271 - training/acc:0.271 - timing_s/generate_sequences:1019.750 - timing_s/reshard:1.016 - timing_s/gen:1184.381 - timing_s/reward:25.712 - timing_s/old_log_prob:40.168 - timing_s/ref:38.728 - timing_s/adv:0.031 - timing_s/update_actor:163.646 - timing_s/dump_rollout_generations:1.334 - timing_s/step:1454.110 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.038 - timing_per_token_ms/gen:0.288 - perf/total_num_tokens:4324681.000 - perf/time_per_step:1454.110 - perf/throughput:743.527
+[36m(TaskRunner pid=796068)[0m Training Progress:  94%|█████████▍| 94/100 [8:23:10<2:35:28, 1554.71s/it]
+[36m(WorkerDict pid=797229)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m body p
+[36m(TaskRunner pid=796068)[0m #id
+[36m(TaskRunner pid=796068)[0m .small
+[36m(TaskRunner pid=796068)[0m .big
+[36m(TaskRunner pid=796068)[0m #john
+[36m(TaskRunner pid=796068)[0m .big
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/95.jsonl
+[36m(TaskRunner pid=796068)[0m step:95 - global_seqlen/min:1126770.000 - global_seqlen/max:1275276.000 - global_seqlen/minmax_diff:148506.000 - global_seqlen/balanced_min:1222683.000 - global_seqlen/balanced_max:1222684.000 - global_seqlen/mean:1222683.750 - actor/entropy:0.270 - actor/kl_loss:0.012 - actor/kl_coef:0.010 - actor/pg_loss:0.016 - actor/pg_clipfrac:0.001 - actor/ppo_kl:-0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.064 - perf/mfu/actor:0.517 - perf/max_memory_allocated_gb:108.088 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:127.072 - actor/lr:0.000 - training/global_step:95.000 - training/epoch:0.000 - critic/score/mean:-0.552 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.552 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.027 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.027 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:12142.841 - response_length/max:24576.000 - response_length/min:385.000 - response_length/clip_ratio:0.138 - prompt_length/mean:593.448 - prompt_length/max:1596.000 - prompt_length/min:192.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.224 - training/acc:0.224 - timing_s/generate_sequences:1181.436 - timing_s/reshard:1.060 - timing_s/gen:1328.953 - timing_s/reward:27.958 - timing_s/old_log_prob:45.616 - timing_s/ref:44.110 - timing_s/adv:0.045 - timing_s/update_actor:185.965 - timing_s/dump_rollout_generations:1.283 - timing_s/step:1634.056 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.038 - timing_per_token_ms/gen:0.285 - perf/total_num_tokens:4890735.000 - perf/time_per_step:1634.056 - perf/throughput:748.251
+[36m(TaskRunner pid=796068)[0m Training Progress:  95%|█████████▌| 95/100 [8:50:25<2:11:32, 1578.56s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m 0
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m 1111111111111
+[36m(TaskRunner pid=796068)[0m 111111111111
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m [5, 50]
+[36m(TaskRunner pid=796068)[0m [179, 179]
+[36m(TaskRunner pid=796068)[0m []
+[36m(TaskRunner pid=796068)[0m []
+[36m(TaskRunner pid=796068)[0m []
+[36m(TaskRunner pid=796068)[0m []
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m 23
+[36m(TaskRunner pid=796068)[0m 78
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/96.jsonl
+[36m(TaskRunner pid=796068)[0m step:96 - global_seqlen/min:1122031.000 - global_seqlen/max:1363906.000 - global_seqlen/minmax_diff:241875.000 - global_seqlen/balanced_min:1259411.000 - global_seqlen/balanced_max:1259412.000 - global_seqlen/mean:1259411.500 - actor/entropy:0.270 - actor/kl_loss:0.007 - actor/kl_coef:0.010 - actor/pg_loss:0.081 - actor/pg_clipfrac:0.001 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.064 - perf/mfu/actor:0.504 - perf/max_memory_allocated_gb:109.896 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:123.075 - actor/lr:0.000 - training/global_step:96.000 - training/epoch:0.000 - critic/score/mean:-0.578 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.578 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.032 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.032 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:12509.672 - response_length/max:24576.000 - response_length/min:497.000 - response_length/clip_ratio:0.107 - prompt_length/mean:609.198 - prompt_length/max:1719.000 - prompt_length/min:191.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.211 - training/acc:0.211 - timing_s/generate_sequences:1236.065 - timing_s/reshard:1.133 - timing_s/gen:1415.681 - timing_s/reward:27.878 - timing_s/old_log_prob:45.685 - timing_s/ref:44.188 - timing_s/adv:0.034 - timing_s/update_actor:196.340 - timing_s/dump_rollout_generations:1.303 - timing_s/step:1731.214 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.039 - timing_per_token_ms/gen:0.295 - perf/total_num_tokens:5037646.000 - perf/time_per_step:1731.214 - perf/throughput:727.473
+[36m(TaskRunner pid=796068)[0m Training Progress:  96%|█████████▌| 96/100 [9:19:16<1:48:17, 1624.41s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m 1A2B1A1A2B1A2B1A1A2B1A2B
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m [3, -1, 2, 4]
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m (1, 0)
+[36m(TaskRunner pid=796068)[0m 3528
+[36m(TaskRunner pid=796068)[0m 2303
+[36m(TaskRunner pid=796068)[0m 1021796125028
+[36m(TaskRunner pid=796068)[0m [-1, -1, -1, -1, -1]
+[36m(TaskRunner pid=796068)[0m 168
+[36m(TaskRunner pid=796068)[0m 112
+[36m(TaskRunner pid=796068)[0m 126
+[36m(TaskRunner pid=796068)[0m 168
+[36m(TaskRunner pid=796068)[0m 217
+[36m(TaskRunner pid=796068)[0m 87517521
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/97.jsonl
+[36m(TaskRunner pid=796068)[0m step:97 - global_seqlen/min:1023564.000 - global_seqlen/max:1353892.000 - global_seqlen/minmax_diff:330328.000 - global_seqlen/balanced_min:1147000.000 - global_seqlen/balanced_max:1147000.000 - global_seqlen/mean:1147000.000 - actor/entropy:0.282 - actor/kl_loss:0.007 - actor/kl_coef:0.010 - actor/pg_loss:0.040 - actor/pg_clipfrac:0.002 - actor/ppo_kl:0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.064 - perf/mfu/actor:0.511 - perf/max_memory_allocated_gb:109.896 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:124.971 - actor/lr:0.000 - training/global_step:97.000 - training/epoch:0.000 - critic/score/mean:-0.479 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.479 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.038 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.038 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11358.271 - response_length/max:24576.000 - response_length/min:280.000 - response_length/clip_ratio:0.094 - prompt_length/mean:589.646 - prompt_length/max:1614.000 - prompt_length/min:146.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.260 - training/acc:0.260 - timing_s/generate_sequences:1090.084 - timing_s/reshard:0.928 - timing_s/gen:1366.325 - timing_s/reward:23.954 - timing_s/old_log_prob:41.844 - timing_s/ref:40.526 - timing_s/adv:0.033 - timing_s/update_actor:175.737 - timing_s/dump_rollout_generations:1.263 - timing_s/step:1649.812 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.038 - timing_per_token_ms/gen:0.313 - perf/total_num_tokens:4588000.000 - perf/time_per_step:1649.812 - perf/throughput:695.231
+[36m(TaskRunner pid=796068)[0m Training Progress:  97%|█████████▋| 97/100 [9:46:46<1:21:36, 1632.07s/it]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m None
+[36m(TaskRunner pid=796068)[0m VAMPIRE
+[36m(TaskRunner pid=796068)[0m PALMED
+[36m(WorkerDict pid=797227)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m -1
+[36m(TaskRunner pid=796068)[0m [None, [1, 2, 3], [4, 4], [5, 5, 5]]
+[36m(TaskRunner pid=796068)[0m [None, [2, 2, 4, 4, 6, 6], [9, 9, 9, 9]]
+[36m(TaskRunner pid=796068)[0m 21
+[36m(TaskRunner pid=796068)[0m 12
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m -4
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m 9
+[36m(TaskRunner pid=796068)[0m 12
+[36m(TaskRunner pid=796068)[0m 12
+[36m(TaskRunner pid=796068)[0m 21
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m 15
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 5
+[36m(TaskRunner pid=796068)[0m [[1, 2, 3], [4], [5]]
+[36m(TaskRunner pid=796068)[0m [[], [2, 4, 6], [], [9]]
+[36m(TaskRunner pid=796068)[0m [[2], [], [], [3]]
+[36m(TaskRunner pid=796068)[0m [[], [], [], [], [5]]
+[36m(TaskRunner pid=796068)[0m [[77, 3], [], [40]]
+[36m(TaskRunner pid=796068)[0m [[16, 7, 5, 3, 6, 23]]
+[36m(TaskRunner pid=796068)[0m AAABBBCCD
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/98.jsonl
+[36m(TaskRunner pid=796068)[0m step:98 - global_seqlen/min:1080462.000 - global_seqlen/max:1248573.000 - global_seqlen/minmax_diff:168111.000 - global_seqlen/balanced_min:1144933.000 - global_seqlen/balanced_max:1144933.000 - global_seqlen/mean:1144933.000 - actor/entropy:0.286 - actor/kl_loss:0.008 - actor/kl_coef:0.010 - actor/pg_loss:-0.003 - actor/pg_clipfrac:0.001 - actor/ppo_kl:-0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.085 - perf/mfu/actor:0.512 - perf/max_memory_allocated_gb:109.896 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:125.688 - actor/lr:0.000 - training/global_step:98.000 - training/epoch:0.000 - critic/score/mean:-0.474 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.474 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.041 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.041 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11335.417 - response_length/max:24576.000 - response_length/min:442.000 - response_length/clip_ratio:0.086 - prompt_length/mean:590.969 - prompt_length/max:1197.000 - prompt_length/min:207.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.263 - training/acc:0.263 - timing_s/generate_sequences:1074.531 - timing_s/reshard:1.110 - timing_s/gen:1244.741 - timing_s/reward:25.494 - timing_s/old_log_prob:41.766 - timing_s/ref:40.456 - timing_s/adv:0.031 - timing_s/update_actor:172.249 - timing_s/dump_rollout_generations:1.273 - timing_s/step:1526.121 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.038 - timing_per_token_ms/gen:0.286 - perf/total_num_tokens:4579732.000 - perf/time_per_step:1526.121 - perf/throughput:750.224
+[36m(TaskRunner pid=796068)[0m Training Progress:  98%|█████████▊| 98/100 [10:12:12<53:20, 1600.30s/it] 
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m a
+[36m(TaskRunner pid=796068)[0m aaa
+[36m(TaskRunner pid=796068)[0m aba
+[36m(TaskRunner pid=796068)[0m cddcd
+[36m(TaskRunner pid=796068)[0m accacca
+[36m(WorkerDict pid=797228)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m    *
+[36m(TaskRunner pid=796068)[0m   ***
+[36m(TaskRunner pid=796068)[0m  *****
+[36m(TaskRunner pid=796068)[0m *******
+[36m(TaskRunner pid=796068)[0m *********
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m a
+[36m(TaskRunner pid=796068)[0m aaa
+[36m(TaskRunner pid=796068)[0m aba
+[36m(TaskRunner pid=796068)[0m cddcd
+[36m(TaskRunner pid=796068)[0m accacca
+[36m(TaskRunner pid=796068)[0m odds win
+[36m(TaskRunner pid=796068)[0m odds win
+[36m(TaskRunner pid=796068)[0m odds win
+[36m(TaskRunner pid=796068)[0m     *
+[36m(TaskRunner pid=796068)[0m    ***
+[36m(TaskRunner pid=796068)[0m   *****
+[36m(TaskRunner pid=796068)[0m  *******
+[36m(TaskRunner pid=796068)[0m *********
+[36m(TaskRunner pid=796068)[0m     *
+[36m(TaskRunner pid=796068)[0m    ***
+[36m(TaskRunner pid=796068)[0m   *****
+[36m(TaskRunner pid=796068)[0m  *******
+[36m(TaskRunner pid=796068)[0m *********
+[36m(TaskRunner pid=796068)[0m Gml0gmd
+[36m(TaskRunner pid=796068)[0m KCaCO
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 4
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m   /\  
+[36m(TaskRunner pid=796068)[0m    /\  
+[36m(TaskRunner pid=796068)[0m     /\  
+[36m(TaskRunner pid=796068)[0m [6, 3, 2, 1, 5, 4, 9, 8, 7, 10]
+[36m(TaskRunner pid=796068)[0m [6, 2, 1, 2, 5, 7]
+[36m(TaskRunner pid=796068)[0m [6, 3, 2, 1, 5, 4, 9, 8, 7, 10]
+[36m(TaskRunner pid=796068)[0m [6, 2, 1, 2, 5, 7]
+[36m(TaskRunner pid=796068)[0m Gml0gmd
+[36m(TaskRunner pid=796068)[0m KCaCO
+[36m(TaskRunner pid=796068)[0m eu
+[36m(TaskRunner pid=796068)[0m eeeut
+[36m(TaskRunner pid=796068)[0m bpcfvbqr
+[36m(TaskRunner pid=796068)[0m bbs
+[36m(TaskRunner pid=796068)[0m babcsvuvwxy
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m False
+[36m(TaskRunner pid=796068)[0m True
+[36m(TaskRunner pid=796068)[0m     *
+[36m(TaskRunner pid=796068)[0m *********
+[36m(TaskRunner pid=796068)[0m   ***
+[36m(TaskRunner pid=796068)[0m *****
+[36m(TaskRunner pid=796068)[0m *****
+[36m(TaskRunner pid=796068)[0m     *
+[36m(TaskRunner pid=796068)[0m *******
+[36m(TaskRunner pid=796068)[0m         
+[36m(TaskRunner pid=796068)[0m *********
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/99.jsonl
+[36m(TaskRunner pid=796068)[0m step:99 - global_seqlen/min:1106624.000 - global_seqlen/max:1270059.000 - global_seqlen/minmax_diff:163435.000 - global_seqlen/balanced_min:1204289.000 - global_seqlen/balanced_max:1204290.000 - global_seqlen/mean:1204289.500 - actor/entropy:0.278 - actor/kl_loss:0.006 - actor/kl_coef:0.010 - actor/pg_loss:0.016 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.064 - perf/mfu/actor:0.506 - perf/max_memory_allocated_gb:109.896 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:129.063 - actor/lr:0.000 - training/global_step:99.000 - training/epoch:1.000 - critic/score/mean:-0.589 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.589 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.027 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.027 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:11945.589 - response_length/max:24576.000 - response_length/min:443.000 - response_length/clip_ratio:0.109 - prompt_length/mean:599.094 - prompt_length/max:1416.000 - prompt_length/min:151.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.206 - training/acc:0.206 - timing_s/generate_sequences:1129.422 - timing_s/reshard:0.911 - timing_s/gen:1216.612 - timing_s/reward:27.133 - timing_s/old_log_prob:44.694 - timing_s/ref:43.145 - timing_s/adv:0.037 - timing_s/update_actor:185.586 - timing_s/dump_rollout_generations:1.303 - timing_s/step:1518.668 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.039 - timing_per_token_ms/gen:0.265 - perf/total_num_tokens:4817158.000 - perf/time_per_step:1518.668 - perf/throughput:792.991
+[36m(TaskRunner pid=796068)[0m Training Progress:  99%|█████████▉| 99/100 [10:37:31<26:16, 1576.03s/it]
+[36m(WorkerDict pid=797227)[0m [CAST] vLLM dense load_weights done: loaded_params=226
+[36m(TaskRunner pid=796068)[0m [7, 3, 2]
+[36m(TaskRunner pid=796068)[0m [7, 3, 2]
+[36m(WorkerDict pid=796722)[0m [CAST] vLLM dense load_weights done: loaded_params=226[32m [repeated 3x across cluster][0m
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m  21
+[36m(TaskRunner pid=796068)[0m   2321
+[36m(TaskRunner pid=796068)[0m    234321
+[36m(TaskRunner pid=796068)[0m     23454321
+[36m(TaskRunner pid=796068)[0m      2345654321
+[36m(TaskRunner pid=796068)[0m       234567654321
+[36m(TaskRunner pid=796068)[0m CDEWARS
+[36m(TaskRunner pid=796068)[0m  *
+[36m(TaskRunner pid=796068)[0m ***
+[36m(TaskRunner pid=796068)[0m *****
+[36m(TaskRunner pid=796068)[0m 
+[36m(TaskRunner pid=796068)[0m  1 
+[36m(TaskRunner pid=796068)[0m   1 2 1  
+[36m(TaskRunner pid=796068)[0m    1 2 3 2 1   
+[36m(TaskRunner pid=796068)[0m     1 2 3 4 3 2 1    
+[36m(TaskRunner pid=796068)[0m      1 2 3 4 5 4 3 2 1     
+[36m(TaskRunner pid=796068)[0m       1 2 3 4 5 6 5 4 3 2 1      
+[36m(TaskRunner pid=796068)[0m 28
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 3
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m 8
+[36m(TaskRunner pid=796068)[0m 7
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m   *
+[36m(TaskRunner pid=796068)[0m  ***
+[36m(TaskRunner pid=796068)[0m *****
+[36m(TaskRunner pid=796068)[0m *****
+[36m(TaskRunner pid=796068)[0m  ***
+[36m(TaskRunner pid=796068)[0m   *
+[36m(TaskRunner pid=796068)[0m   *
+[36m(TaskRunner pid=796068)[0m  ***
+[36m(TaskRunner pid=796068)[0m ***
+[36m(TaskRunner pid=796068)[0m (6, -126)
+[36m(TaskRunner pid=796068)[0m [5]
+[36m(TaskRunner pid=796068)[0m abcc
+[36m(TaskRunner pid=796068)[0m 8
+[36m(TaskRunner pid=796068)[0m 7
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 1
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m 2
+[36m(TaskRunner pid=796068)[0m None
+[36m(TaskRunner pid=796068)[0m 0
+[36m(TaskRunner pid=796068)[0m (-126, 168)
+[36m(TaskRunner pid=796068)[0m timeout occured: alarm went off
+[36m(TaskRunner pid=796068)[0m _StringKeys(dict_keys(['prompts', 'input_ids', 'responses', 'attention_mask', 'position_ids', 'response_mask', 'acc', 'old_log_probs', 'ref_log_prob', 'token_level_scores', 'token_level_rewards', 'advantages', 'returns']))
+[36m(TaskRunner pid=796068)[0m [opsd-grpo] rollout dump subsample 384 -> 32 (max_n=32)
+[36m(TaskRunner pid=796068)[0m Dumped generations to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/rollouts/100.jsonl
+[36m(TaskRunner pid=796068)[0m local_global_step_folder: /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_100
+[36m(WorkerDict pid=797229)[0m INFO:2026-10-23 06:28:10,372:[Rank 3] Saved model to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_100/actor/model_world_size_4_rank_3.pt
+[36m(WorkerDict pid=796722)[0m INFO:2026-10-23 06:28:12,385:[Rank 0] Saved optim to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_100/actor/optim_world_size_4_rank_0.pt
+[36m(WorkerDict pid=796722)[0m INFO:2026-10-23 06:28:12,416:[Rank 0] Saved extra_state to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_100/actor/extra_state_world_size_4_rank_0.pt
+[36m(WorkerDict pid=796722)[0m INFO:2026-10-23 06:28:12,642:[Rank 0] Saved model config and tokenizer class to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_100/actor/huggingface
+[36m(TaskRunner pid=796068)[0m step:100 - global_seqlen/min:951467.000 - global_seqlen/max:1214821.000 - global_seqlen/minmax_diff:263354.000 - global_seqlen/balanced_min:1078194.000 - global_seqlen/balanced_max:1078195.000 - global_seqlen/mean:1078194.750 - actor/entropy:0.287 - actor/kl_loss:0.008 - actor/kl_coef:0.010 - actor/pg_loss:0.014 - actor/pg_clipfrac:0.003 - actor/ppo_kl:-0.000 - actor/pg_clipfrac_lower:0.000 - actor/grad_norm:0.087 - perf/mfu/actor:0.503 - perf/max_memory_allocated_gb:109.896 - perf/max_memory_reserved_gb:144.115 - perf/cpu_memory_used_gb:125.286 - actor/lr:0.000 - training/global_step:100.000 - training/epoch:1.000 - critic/score/mean:-0.422 - critic/score/max:1.000 - critic/score/min:-1.000 - critic/rewards/mean:-0.422 - critic/rewards/max:1.000 - critic/rewards/min:-1.000 - critic/advantages/mean:-0.034 - critic/advantages/max:1.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.034 - critic/returns/max:1.500 - critic/returns/min:-1.500 - response_length/mean:10665.758 - response_length/max:24576.000 - response_length/min:269.000 - response_length/clip_ratio:0.068 - prompt_length/mean:565.438 - prompt_length/max:1945.000 - prompt_length/min:156.000 - prompt_length/clip_ratio:0.000 - critic/acc/mean:0.289 - training/acc:0.289 - timing_s/generate_sequences:1024.510 - timing_s/reshard:1.078 - timing_s/gen:1186.613 - timing_s/reward:30.695 - timing_s/old_log_prob:39.896 - timing_s/ref:38.617 - timing_s/adv:0.034 - timing_s/update_actor:165.407 - timing_s/dump_rollout_generations:1.235 - timing_s/save_checkpoint:4.337 - timing_s/step:1466.945 - timing_per_token_ms/adv:0.000 - timing_per_token_ms/ref:0.009 - timing_per_token_ms/update_actor:0.038 - timing_per_token_ms/gen:0.290 - perf/total_num_tokens:4312779.000 - perf/time_per_step:1466.945 - perf/throughput:734.993
+[36m(TaskRunner pid=796068)[0m 'Final validation metrics: None'
+[36m(TaskRunner pid=796068)[0m Training Progress: 100%|██████████| 100/100 [11:01:58<00:00, 1543.33s/it]Training Progress: 100%|██████████| 100/100 [11:01:58<00:00, 1588.76s/it]
+[36m(WorkerDict pid=797228)[0m INFO:2026-10-23 06:28:10,931:[Rank 2] Saved model to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_100/actor/model_world_size_4_rank_2.pt[32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=797228)[0m INFO:2026-10-23 06:28:12,677:[Rank 2] Saved optim to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_100/actor/optim_world_size_4_rank_2.pt[32m [repeated 3x across cluster][0m
+[36m(WorkerDict pid=797228)[0m INFO:2026-10-23 06:28:12,679:[Rank 2] Saved extra_state to /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_1.7b_base/grpo_think_1p7b_ocr_sft15000_apps_4gpu/4245276/global_step_100/actor/extra_state_world_size_4_rank_2.pt[32m [repeated 3x across cluster][0m

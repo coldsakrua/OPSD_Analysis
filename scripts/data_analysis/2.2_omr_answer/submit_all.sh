@@ -1,6 +1,7 @@
 #!/bin/bash
-# Submit all 10 OMR answer-only teacher_prefix jobs.
+# Submit all OMR answer-only teacher_prefix jobs (incl. qwen3_8b).
 # Requires shared parquet from scripts/data/prepare_omr_answer_shared2048.sh
+# (same 2048 problems/order as OMR full-solution shared2048).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "${ROOT}"

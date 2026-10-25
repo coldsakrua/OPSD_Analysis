@@ -1,0 +1,72 @@
+{
+  "dataset": "lcb_v6",
+  "backend": "sglang",
+  "attention_backend": "triton",
+  "data_jsonl": "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/livecodebench/test6.jsonl",
+  "model_path": "/gpfs/share/home/2501210611/labShare/2501210611/model/olmo-3-7b-think",
+  "num_problems": 175,
+  "val_n": 4,
+  "pass_at_k_list": [
+    1,
+    4
+  ],
+  "enable_thinking": true,
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": -1,
+  "min_p": 0.0,
+  "max_new_tokens": 32768,
+  "seed": 42,
+  "generate_batch_size": 4,
+  "mem_fraction_static": 0.8,
+  "context_length": 40960,
+  "generations_json": "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/olmo-3-7b-think/lcb_v6_olmo3_7b_think_sgl_think.generations.json",
+  "judge": {
+    "timeout": 6,
+    "num_process_evaluate": 48,
+    "extract": "relaxed_from_output_list"
+  },
+  "lcb_pass_at_k": {
+    "pass@1": 0.4742857142857143,
+    "pass@4": 0.6057142857142858
+  },
+  "pass_at_k": {
+    "1": {
+      "n_solved": 82,
+      "n_total": 175,
+      "rate": 0.4685714285714286,
+      "rate_pct": 46.857142857142854
+    },
+    "4": {
+      "n_solved": 106,
+      "n_total": 175,
+      "rate": 0.6057142857142858,
+      "rate_pct": 60.57142857142857
+    }
+  },
+  "avg_at_k": {
+    "1": {
+      "n_correct": 82,
+      "n_total": 175,
+      "rate": 0.4685714285714286,
+      "rate_pct": 46.85714285714286
+    },
+    "4": {
+      "n_correct": 332,
+      "n_total": 700,
+      "rate": 0.4742857142857143,
+      "rate_pct": 47.42857142857143
+    }
+  },
+  "avg1_pct": 46.85714285714286,
+  "avg4_pct": 47.42857142857143,
+  "results_json": "/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/olmo-3-7b-think/lcb_v6_olmo3_7b_think_sgl_think.results.json",
+  "avg_output_tokens_mean": 17552.37,
+  "output_length": {
+    "n_samples": 700,
+    "avg_tokens": 17552.37,
+    "median_tokens": 17542.5,
+    "min_tokens": 490,
+    "max_tokens": 32770
+  }
+}

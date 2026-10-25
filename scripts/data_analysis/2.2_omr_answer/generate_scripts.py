@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate SLURM scripts for OMR answer-only teacher-prefix analysis (10 models)."""
+"""Generate SLURM scripts for OMR answer-only teacher-prefix analysis (11 models)."""
 
 from __future__ import annotations
 
@@ -13,8 +13,8 @@ from common.model_registry import get_model_config, model_launch_overrides  # no
 
 # Answer-only at max_prompt=1024 (seq≤2048): push score batch higher.
 #   small ≤1.7B → B=48; medium 4B → B=24; large 7B → B=12
-SCORE_BATCH = {"small": 48, "medium": 24, "large": 12}
-GEN_BATCH = {"small": 256, "medium": 256, "large": 128}
+SCORE_BATCH = {"small": 48, "medium": 24, "large": 12, "xlarge": 8}
+GEN_BATCH = {"small": 256, "medium": 256, "large": 128, "xlarge": 64}
 TIER = {
     "qwen3_06b": "small",
     "deepseek_r1_1.5b": "small",
@@ -26,6 +26,7 @@ TIER = {
     "olmo3_7b_think": "large",
     "falcon_h1r_7b": "large",
     "mimo_7b_rl": "large",
+    "qwen3_8b": "xlarge",
 }
 
 MODELS: list[tuple[str, str, str]] = [
@@ -34,6 +35,7 @@ MODELS: list[tuple[str, str, str]] = [
     ("qwen3_4b", "st_tt", "4b"),
     ("qwen3_4b_instruct", "snt_tnt", "4bi"),
     ("qwen3_4b_thinking", "st_tt", "4bt"),
+    ("qwen3_8b", "st_tt", "8b"),
     ("mimo_7b_rl", "st_tt", "mimo7b"),
     ("deepseek_r1_1.5b", "st_tt", "ds1p5b"),
     ("falcon_h1r_7b", "st_tt", "falcon7b"),
@@ -141,6 +143,7 @@ def render(model_key: str, combo: str, short: str) -> str:
         if reasoning_parser:
             extra += f'\nEXTRA_ARGS+=(--reasoning-parser "{reasoning_parser}")'
 
+    wall = "6:00:00" if model_key == "qwen3_8b" else "3:00:00"
     return f"""#!/bin/bash
 {exclude}#SBATCH --job-name={job_name}
 #SBATCH --output=log/data_analysis/22_omr_answer/%x.%j.out
@@ -150,11 +153,11 @@ def render(model_key: str, combo: str, short: str) -> str:
 #SBATCH --cpus-per-task=7
 #SBATCH --gres=gpu:1
 #SBATCH --mem=80G
-#SBATCH --time=3:00:00
+#SBATCH --time={wall}
 set -euo pipefail
 
 # OMR answer-only teacher_prefix ({combo} / {model_key})
-# Same 2048 problems as OMR full-solution analysis; privilege=answer (GT).
+# Same 2048 problems (and order) as OMR full-solution analysis; privilege=answer (GT).
 # Seq ≤2048 (prompt+completion 1024); high batch for short answer teacher.
 
 BASE_DIR=${{BASE_DIR:-${{SLURM_SUBMIT_DIR:-$(cd "$(dirname "${{BASH_SOURCE[0]}}")/../../.." && pwd)}}}}
@@ -253,8 +256,9 @@ def main() -> None:
     submit = OUT_DIR / "submit_all.sh"
     submit.write_text(
         """#!/bin/bash
-# Submit all 10 OMR answer-only teacher_prefix jobs.
+# Submit all OMR answer-only teacher_prefix jobs (incl. qwen3_8b).
 # Requires shared parquet from scripts/data/prepare_omr_answer_shared2048.sh
+# (same 2048 problems/order as OMR full-solution shared2048).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "${ROOT}"

@@ -195,6 +195,13 @@ def parse_args() -> argparse.Namespace:
         default=True,
         help="Pass enable_thinking to Qwen3 chat template (default: True).",
     )
+    parser.add_argument(
+        "--add-math-instruction",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Append math boxed instruction to the user turn (default: True). "
+        "Disable for code SFT parquets that already include a code instruction.",
+    )
     parser.add_argument("--max-steps", type=int, default=1000)
     parser.add_argument("--save-steps", type=int, default=100)
     parser.add_argument("--logging-steps", type=int, default=10)
@@ -271,7 +278,8 @@ def main() -> None:
     print(f"[sft] dataset={args.dataset_path}")
     print(f"[sft] output={output_dir}")
     print(
-        f"[sft] think={args.enable_thinking} max_length={args.max_length} "
+        f"[sft] think={args.enable_thinking} add_math_instruction={args.add_math_instruction} "
+        f"max_length={args.max_length} "
         f"max_steps={args.max_steps} save_steps={args.save_steps}"
     )
     print(
@@ -292,6 +300,7 @@ def main() -> None:
     train_dataset = load_sft_dataset(
         args.dataset_path,
         enable_thinking=args.enable_thinking,
+        add_math_instruction=args.add_math_instruction,
         num_proc=args.num_proc,
     )
     print(f"[sft] train_examples={len(train_dataset)}")

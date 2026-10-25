@@ -1,0 +1,473 @@
+[lcb] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[lcb] checkpoint=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_opencodereasoning_4b/3908496/checkpoint-100
+[lcb] dataset=lcb_v6 thinking=1
+[lcb] generate_batch_size=4 (val-n=4 → ~16 seqs @12k)
+[lcb] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_qwen3_4b_ckpt100/lcb_v6_4b_think.json
+[lcb] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/anchor
+Sat Oct  3 21:34:56 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A800-SXM4-80GB          Off |   00000000:8D:00.0 Off |                    0 |
+| N/A   30C    P0             54W /  400W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[lcb] loaded 175 problems from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/livecodebench/test6.jsonl
+[lcb] model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_opencodereasoning_4b/3908496/checkpoint-100
+[lcb] thinking=True n=4 temp=0.6 top_p=0.95 top_k=20 max_new_tokens=38912
+INFO 10-03 21:35:08 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 10-03 21:35:10 [__init__.py:239] Automatically detected platform cuda.
+INFO 10-03 21:35:11 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 10-03 21:35:11 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 10-03 21:35:11 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 10-03 21:35:11 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 10-03 21:35:11 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO 10-03 21:35:19 [config.py:717] This model supports multiple tasks: {'generate', 'classify', 'score', 'embed', 'reward'}. Defaulting to 'generate'.
+WARNING 10-03 21:35:19 [arg_utils.py:1525] Chunked prefill is enabled by default for models with max_model_len > 32K. Chunked prefill might not work with some features or models. If you encounter any issues, please disable by launching with --enable-chunked-prefill=False.
+INFO 10-03 21:35:19 [config.py:2003] Chunked prefill is enabled with max_num_batched_tokens=2048.
+WARNING 10-03 21:35:19 [cuda.py:93] To see benefits of async output processing, enable CUDA graph. Since, enforce-eager is enabled, async output processor cannot be used
+INFO 10-03 21:35:19 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_opencodereasoning_4b/3908496/checkpoint-100', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_opencodereasoning_4b/3908496/checkpoint-100', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=40960, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_opencodereasoning_4b/3908496/checkpoint-100, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=True, use_async_output_proc=False, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[],"max_capture_size":0}, use_cached_outputs=False, 
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/uniproc_executor.py:29: UserWarning: Failed to get the IP address, using 0.0.0.0 by default.The value can be set by the environment variable VLLM_HOST_IP or HOST_IP.
+  get_ip(), get_open_port())
+INFO 10-03 21:35:19 [cuda.py:228] Using XFormers backend.
+INFO 10-03 21:35:26 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 10-03 21:35:26 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b/st_tt_clip005_1e_6_opencodereasoning_4b/3908496/checkpoint-100...
+
+Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+
+Loading safetensors checkpoint shards:  50% Completed | 1/2 [00:03<00:03,  3.56s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:09<00:00,  4.86s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:09<00:00,  4.67s/it]
+
+INFO 10-03 21:35:35 [loader.py:458] Loading weights took 9.45 seconds
+INFO 10-03 21:35:36 [model_runner.py:1140] Model loading took 7.5552 GiB and 9.561860 seconds
+INFO 10-03 21:35:36 [worker.py:287] Memory profiling takes 0.55 seconds
+INFO 10-03 21:35:36 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.95) = 75.29GiB
+INFO 10-03 21:35:36 [worker.py:287] model weights take 7.56GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.40GiB; the rest of the memory reserved for KV Cache is 66.25GiB.
+INFO 10-03 21:35:37 [executor_base.py:112] # cuda blocks: 30149, # CPU blocks: 1820
+INFO 10-03 21:35:37 [executor_base.py:117] Maximum concurrency for 40960 tokens per request: 11.78x
+INFO 10-03 21:35:38 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 2.55 seconds
+[lcb] generate 0:4 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [21:21<1:04:05, 320.48s/it, est. speed input: 1.82 toks/s, output: 75.31 toks/s]
+Processed prompts:  50%|█████     | 8/16 [21:55<18:15, 136.91s/it, est. speed input: 2.99 toks/s, output: 149.46 toks/s] 
+Processed prompts:  75%|███████▌  | 12/16 [25:07<06:25, 96.36s/it, est. speed input: 4.41 toks/s, output: 199.33 toks/s]
+Processed prompts: 100%|██████████| 16/16 [26:38<00:00, 67.22s/it, est. speed input: 5.61 toks/s, output: 266.14 toks/s]
+Processed prompts: 100%|██████████| 16/16 [26:38<00:00, 99.89s/it, est. speed input: 5.61 toks/s, output: 266.14 toks/s]
+[lcb] generate 4:8 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:57<02:52, 14.37s/it, est. speed input: 34.45 toks/s, output: 151.42 toks/s]
+Processed prompts:  50%|█████     | 8/16 [24:18<28:15, 211.94s/it, est. speed input: 2.64 toks/s, output: 96.21 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [24:18<00:00, 91.16s/it, est. speed input: 5.38 toks/s, output: 240.96 toks/s]
+[lcb] generate 8:12 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [01:45<05:17, 26.46s/it, est. speed input: 14.51 toks/s, output: 160.63 toks/s]
+Processed prompts:  50%|█████     | 8/16 [02:01<01:45, 13.22s/it, est. speed input: 36.10 toks/s, output: 285.37 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [03:24<01:06, 16.61s/it, est. speed input: 29.70 toks/s, output: 328.97 toks/s]
+Processed prompts: 100%|██████████| 16/16 [05:26<00:00, 22.16s/it, est. speed input: 24.69 toks/s, output: 374.73 toks/s]
+Processed prompts: 100%|██████████| 16/16 [05:26<00:00, 20.43s/it, est. speed input: 24.69 toks/s, output: 374.73 toks/s]
+[lcb] generate 12:16 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [04:27<13:22, 66.85s/it, est. speed input: 12.76 toks/s, output: 129.32 toks/s]
+Processed prompts:  50%|█████     | 8/16 [16:37<17:59, 134.94s/it, est. speed input: 5.89 toks/s, output: 126.88 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [22:48<07:42, 115.68s/it, est. speed input: 6.33 toks/s, output: 167.48 toks/s]
+Processed prompts: 100%|██████████| 16/16 [22:48<00:00, 70.02s/it, est. speed input: 7.54 toks/s, output: 260.27 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [22:48<00:00, 85.56s/it, est. speed input: 7.54 toks/s, output: 260.27 toks/s]
+[lcb] generate 16:20 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:47<02:22, 11.86s/it, est. speed input: 37.68 toks/s, output: 163.50 toks/s]
+Processed prompts:  50%|█████     | 8/16 [01:54<01:58, 14.82s/it, est. speed input: 28.38 toks/s, output: 245.52 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [06:36<02:40, 40.21s/it, est. speed input: 12.72 toks/s, output: 215.47 toks/s]
+Processed prompts: 100%|██████████| 16/16 [17:15<00:00, 87.34s/it, est. speed input: 7.71 toks/s, output: 220.58 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [17:15<00:00, 64.69s/it, est. speed input: 7.71 toks/s, output: 220.58 toks/s]
+[lcb] generate 20:24 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [02:34<07:44, 38.73s/it, est. speed input: 9.89 toks/s, output: 127.07 toks/s]
+Processed prompts:  50%|█████     | 8/16 [24:10<27:31, 206.45s/it, est. speed input: 2.67 toks/s, output: 108.12 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [24:21<07:33, 113.46s/it, est. speed input: 4.67 toks/s, output: 167.85 toks/s]
+Processed prompts: 100%|██████████| 16/16 [24:21<00:00, 91.35s/it, est. speed input: 6.08 toks/s, output: 244.69 toks/s] 
+[lcb] generate 24:28 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:41<02:03, 10.27s/it, est. speed input: 28.93 toks/s, output: 152.58 toks/s]
+Processed prompts:  50%|█████     | 8/16 [05:01<05:39, 42.46s/it, est. speed input: 10.31 toks/s, output: 148.02 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [05:43<01:51, 27.89s/it, est. speed input: 15.10 toks/s, output: 250.97 toks/s]
+Processed prompts: 100%|██████████| 16/16 [07:41<00:00, 28.57s/it, est. speed input: 16.88 toks/s, output: 332.49 toks/s]
+Processed prompts: 100%|██████████| 16/16 [07:41<00:00, 28.86s/it, est. speed input: 16.88 toks/s, output: 332.49 toks/s]
+[lcb] generate 28:32 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [01:44<05:14, 26.19s/it, est. speed input: 13.98 toks/s, output: 123.53 toks/s]
+Processed prompts:  50%|█████     | 8/16 [21:37<24:49, 186.24s/it, est. speed input: 2.43 toks/s, output: 89.30 toks/s] 
+Processed prompts:  75%|███████▌  | 12/16 [21:37<06:44, 101.21s/it, est. speed input: 4.27 toks/s, output: 179.93 toks/s]
+Processed prompts: 100%|██████████| 16/16 [21:38<00:00, 81.13s/it, est. speed input: 6.26 toks/s, output: 245.09 toks/s] 
+[lcb] generate 32:36 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [06:07<18:21, 91.78s/it, est. speed input: 5.77 toks/s, output: 106.44 toks/s]
+Processed prompts:  50%|█████     | 8/16 [06:50<05:53, 44.19s/it, est. speed input: 10.73 toks/s, output: 200.51 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [10:21<03:12, 48.14s/it, est. speed input: 10.12 toks/s, output: 216.38 toks/s]
+Processed prompts: 100%|██████████| 16/16 [16:34<00:00, 65.88s/it, est. speed input: 8.75 toks/s, output: 252.90 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [16:34<00:00, 62.14s/it, est. speed input: 8.75 toks/s, output: 252.90 toks/s]
+[lcb] generate 36:40 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:54<02:44, 13.69s/it, est. speed input: 38.71 toks/s, output: 181.41 toks/s]
+Processed prompts:  50%|█████     | 8/16 [11:19<13:00, 97.55s/it, est. speed input: 6.30 toks/s, output: 112.03 toks/s] 
+Processed prompts:  75%|███████▌  | 12/16 [13:05<04:20, 65.12s/it, est. speed input: 7.59 toks/s, output: 191.56 toks/s]
+Processed prompts: 100%|██████████| 16/16 [16:20<00:00, 58.61s/it, est. speed input: 9.09 toks/s, output: 273.43 toks/s]
+Processed prompts: 100%|██████████| 16/16 [16:20<00:00, 61.28s/it, est. speed input: 9.09 toks/s, output: 273.43 toks/s]
+[lcb] generate 40:44 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:28<01:25,  7.13s/it, est. speed input: 58.87 toks/s, output: 163.30 toks/s]
+Processed prompts:  50%|█████     | 8/16 [02:29<02:46, 20.76s/it, est. speed input: 20.94 toks/s, output: 187.24 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [14:07<06:03, 90.88s/it, est. speed input: 6.79 toks/s, output: 130.87 toks/s]
+Processed prompts: 100%|██████████| 16/16 [14:14<00:00, 55.78s/it, est. speed input: 9.33 toks/s, output: 247.18 toks/s]
+Processed prompts: 100%|██████████| 16/16 [14:14<00:00, 53.43s/it, est. speed input: 9.33 toks/s, output: 247.18 toks/s]
+[lcb] generate 44:48 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [27:27<1:22:22, 411.89s/it, est. speed input: 1.36 toks/s, output: 80.22 toks/s]
+Processed prompts:  50%|█████     | 8/16 [28:47<24:11, 181.42s/it, est. speed input: 2.70 toks/s, output: 144.51 toks/s] 
+Processed prompts:  75%|███████▌  | 12/16 [30:28<07:20, 110.07s/it, est. speed input: 3.84 toks/s, output: 197.42 toks/s]
+Processed prompts: 100%|██████████| 16/16 [30:28<00:00, 114.29s/it, est. speed input: 5.13 toks/s, output: 255.40 toks/s]
+[lcb] generate 48:52 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [03:45<11:15, 56.31s/it, est. speed input: 9.34 toks/s, output: 120.99 toks/s]
+Processed prompts:  50%|█████     | 8/16 [13:59<15:08, 113.56s/it, est. speed input: 4.54 toks/s, output: 96.83 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [15:38<04:51, 72.98s/it, est. speed input: 6.05 toks/s, output: 188.19 toks/s]
+Processed prompts: 100%|██████████| 16/16 [20:18<00:00, 71.81s/it, est. speed input: 6.51 toks/s, output: 255.59 toks/s]
+Processed prompts: 100%|██████████| 16/16 [20:18<00:00, 76.16s/it, est. speed input: 6.51 toks/s, output: 255.59 toks/s]
+[lcb] generate 52:56 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [03:44<11:14, 56.24s/it, est. speed input: 7.20 toks/s, output: 135.91 toks/s]
+Processed prompts:  50%|█████     | 8/16 [12:57<13:55, 104.44s/it, est. speed input: 4.81 toks/s, output: 141.33 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [15:48<05:05, 76.26s/it, est. speed input: 7.73 toks/s, output: 202.12 toks/s]
+Processed prompts: 100%|██████████| 16/16 [21:37<00:00, 80.56s/it, est. speed input: 7.78 toks/s, output: 259.65 toks/s]
+Processed prompts: 100%|██████████| 16/16 [21:37<00:00, 81.07s/it, est. speed input: 7.78 toks/s, output: 259.65 toks/s]
+[lcb] generate 56:60 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [02:47<08:23, 41.97s/it, est. speed input: 11.13 toks/s, output: 142.81 toks/s]
+Processed prompts:  50%|█████     | 8/16 [05:06<05:01, 37.65s/it, est. speed input: 12.02 toks/s, output: 175.67 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [12:28<04:43, 70.95s/it, est. speed input: 6.51 toks/s, output: 184.03 toks/s]
+Processed prompts: 100%|██████████| 16/16 [14:46<00:00, 56.52s/it, est. speed input: 8.58 toks/s, output: 268.19 toks/s]
+Processed prompts: 100%|██████████| 16/16 [14:46<00:00, 55.40s/it, est. speed input: 8.58 toks/s, output: 268.19 toks/s]
+[lcb] generate 60:64 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:27<01:23,  7.00s/it, est. speed input: 46.01 toks/s, output: 145.36 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:28<00:23,  3.00s/it, est. speed input: 96.88 toks/s, output: 322.74 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:51<00:17,  4.28s/it, est. speed input: 85.65 toks/s, output: 340.01 toks/s]
+Processed prompts: 100%|██████████| 16/16 [10:08<00:00, 57.50s/it, est. speed input: 11.01 toks/s, output: 181.78 toks/s]
+Processed prompts: 100%|██████████| 16/16 [10:08<00:00, 38.02s/it, est. speed input: 11.01 toks/s, output: 181.78 toks/s]
+[lcb] generate 64:68 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:14<00:44,  3.70s/it, est. speed input: 90.53 toks/s, output: 167.47 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:53<00:58,  7.25s/it, est. speed input: 58.62 toks/s, output: 218.65 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [20:15<09:06, 136.59s/it, est. speed input: 4.03 toks/s, output: 99.62 toks/s]
+Processed prompts: 100%|██████████| 16/16 [20:15<00:00, 75.99s/it, est. speed input: 5.64 toks/s, output: 212.13 toks/s]
+[lcb] generate 68:72 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:41<02:03, 10.30s/it, est. speed input: 53.48 toks/s, output: 162.57 toks/s]
+Processed prompts:  50%|█████     | 8/16 [05:22<06:05, 45.63s/it, est. speed input: 15.21 toks/s, output: 150.63 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [08:21<03:00, 45.23s/it, est. speed input: 15.57 toks/s, output: 172.41 toks/s]
+Processed prompts: 100%|██████████| 16/16 [18:38<00:00, 88.28s/it, est. speed input: 9.40 toks/s, output: 216.44 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [18:38<00:00, 69.92s/it, est. speed input: 9.40 toks/s, output: 216.44 toks/s]
+[lcb] generate 72:76 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:16<00:49,  4.16s/it, est. speed input: 80.96 toks/s, output: 158.19 toks/s]
+Processed prompts:  50%|█████     | 8/16 [01:28<01:38, 12.31s/it, est. speed input: 31.29 toks/s, output: 178.31 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [11:55<05:13, 78.27s/it, est. speed input: 7.46 toks/s, output: 139.80 toks/s]
+Processed prompts: 100%|██████████| 16/16 [16:47<00:00, 76.16s/it, est. speed input: 10.00 toks/s, output: 216.26 toks/s]
+Processed prompts: 100%|██████████| 16/16 [16:47<00:00, 62.96s/it, est. speed input: 10.00 toks/s, output: 216.26 toks/s]
+[lcb] generate 76:80 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [15:53<47:39, 238.26s/it, est. speed input: 1.70 toks/s, output: 76.55 toks/s]
+Processed prompts:  50%|█████     | 8/16 [22:07<20:25, 153.14s/it, est. speed input: 4.95 toks/s, output: 123.72 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [30:40<09:27, 141.84s/it, est. speed input: 4.58 toks/s, output: 165.86 toks/s]
+Processed prompts: 100%|██████████| 16/16 [30:41<00:00, 85.87s/it, est. speed input: 6.45 toks/s, output: 250.38 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [30:41<00:00, 115.07s/it, est. speed input: 6.45 toks/s, output: 250.38 toks/s]
+[lcb] generate 80:84 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [01:43<05:11, 25.92s/it, est. speed input: 17.09 toks/s, output: 143.88 toks/s]
+Processed prompts:  50%|█████     | 8/16 [03:17<03:15, 24.50s/it, est. speed input: 18.17 toks/s, output: 186.87 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [17:47<07:30, 112.55s/it, est. speed input: 6.19 toks/s, output: 113.57 toks/s]
+Processed prompts: 100%|██████████| 16/16 [20:51<00:00, 86.34s/it, est. speed input: 8.01 toks/s, output: 221.17 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [20:51<00:00, 78.23s/it, est. speed input: 8.01 toks/s, output: 221.17 toks/s]
+[lcb] generate 84:88 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:15<00:47,  3.93s/it, est. speed input: 87.93 toks/s, output: 168.36 toks/s]
+Processed prompts:  50%|█████     | 8/16 [30:25<35:42, 267.82s/it, est. speed input: 2.30 toks/s, output: 65.57 toks/s] 
+Processed prompts:  75%|███████▌  | 12/16 [30:26<09:42, 145.55s/it, est. speed input: 3.77 toks/s, output: 144.35 toks/s]
+Processed prompts: 100%|██████████| 16/16 [30:26<00:00, 114.13s/it, est. speed input: 5.08 toks/s, output: 228.02 toks/s]
+[lcb] generate 88:92 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [02:34<07:43, 38.61s/it, est. speed input: 17.02 toks/s, output: 151.11 toks/s]
+Processed prompts:  50%|█████     | 8/16 [33:46<38:49, 291.21s/it, est. speed input: 2.95 toks/s, output: 83.79 toks/s] 
+Processed prompts:  75%|███████▌  | 12/16 [33:46<10:33, 158.25s/it, est. speed input: 4.35 toks/s, output: 150.21 toks/s]
+Processed prompts: 100%|██████████| 16/16 [33:46<00:00, 95.79s/it, est. speed input: 6.62 toks/s, output: 226.99 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [33:46<00:00, 126.68s/it, est. speed input: 6.62 toks/s, output: 226.99 toks/s]
+[lcb] generate 92:96 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:32<01:38,  8.20s/it, est. speed input: 48.07 toks/s, output: 172.78 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:44<00:40,  5.03s/it, est. speed input: 84.08 toks/s, output: 284.99 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [02:50<01:08, 17.12s/it, est. speed input: 34.55 toks/s, output: 221.48 toks/s]
+Processed prompts: 100%|██████████| 16/16 [15:47<00:00, 87.13s/it, est. speed input: 8.90 toks/s, output: 186.16 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [15:47<00:00, 59.24s/it, est. speed input: 8.90 toks/s, output: 186.16 toks/s]
+[lcb] generate 96:100 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [03:02<09:07, 45.64s/it, est. speed input: 10.78 toks/s, output: 97.54 toks/s]
+Processed prompts:  50%|█████     | 8/16 [04:07<03:46, 28.32s/it, est. speed input: 18.45 toks/s, output: 213.52 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [23:51<10:02, 150.60s/it, est. speed input: 4.73 toks/s, output: 145.60 toks/s]
+Processed prompts: 100%|██████████| 16/16 [23:51<00:00, 89.49s/it, est. speed input: 6.15 toks/s, output: 230.62 toks/s] 
+[lcb] generate 100:104 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [01:57<05:53, 29.43s/it, est. speed input: 13.25 toks/s, output: 147.57 toks/s]
+Processed prompts:  50%|█████     | 8/16 [05:26<05:42, 42.77s/it, est. speed input: 11.98 toks/s, output: 166.54 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [09:41<03:29, 52.39s/it, est. speed input: 11.47 toks/s, output: 214.23 toks/s]
+Processed prompts: 100%|██████████| 16/16 [12:18<00:00, 47.21s/it, est. speed input: 12.97 toks/s, output: 303.82 toks/s]
+Processed prompts: 100%|██████████| 16/16 [12:18<00:00, 46.16s/it, est. speed input: 12.97 toks/s, output: 303.82 toks/s]
+[lcb] generate 104:108 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:22<01:07,  5.59s/it, est. speed input: 64.95 toks/s, output: 163.54 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:37<00:36,  4.58s/it, est. speed input: 80.10 toks/s, output: 246.69 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [06:32<02:51, 42.95s/it, est. speed input: 14.18 toks/s, output: 151.06 toks/s]
+Processed prompts: 100%|██████████| 16/16 [07:19<00:00, 30.65s/it, est. speed input: 18.47 toks/s, output: 252.51 toks/s]
+Processed prompts: 100%|██████████| 16/16 [07:19<00:00, 27.47s/it, est. speed input: 18.47 toks/s, output: 252.51 toks/s]
+[lcb] generate 108:112 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:48<02:24, 12.03s/it, est. speed input: 40.58 toks/s, output: 114.24 toks/s]
+Processed prompts:  50%|█████     | 8/16 [27:24<31:57, 239.71s/it, est. speed input: 3.26 toks/s, output: 77.45 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [27:24<00:00, 89.44s/it, est. speed input: 8.36 toks/s, output: 230.07 toks/s]
+Processed prompts: 100%|██████████| 16/16 [27:24<00:00, 102.79s/it, est. speed input: 8.36 toks/s, output: 230.07 toks/s]
+[lcb] generate 112:116 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [03:40<11:00, 55.08s/it, est. speed input: 14.07 toks/s, output: 132.31 toks/s]
+Processed prompts:  50%|█████     | 8/16 [05:39<05:21, 40.17s/it, est. speed input: 20.97 toks/s, output: 220.25 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [07:26<02:16, 34.04s/it, est. speed input: 20.28 toks/s, output: 248.06 toks/s]
+Processed prompts: 100%|██████████| 16/16 [11:00<00:00, 41.77s/it, est. speed input: 19.38 toks/s, output: 277.34 toks/s]
+Processed prompts: 100%|██████████| 16/16 [11:00<00:00, 41.30s/it, est. speed input: 19.38 toks/s, output: 277.34 toks/s]
+[lcb] generate 116:120 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [01:30<04:32, 22.70s/it, est. speed input: 32.21 toks/s, output: 143.66 toks/s]
+Processed prompts:  50%|█████     | 8/16 [02:55<02:53, 21.73s/it, est. speed input: 39.20 toks/s, output: 227.73 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [04:25<01:28, 22.16s/it, est. speed input: 34.28 toks/s, output: 325.02 toks/s]
+Processed prompts: 100%|██████████| 16/16 [12:51<00:00, 63.35s/it, est. speed input: 14.69 toks/s, output: 171.88 toks/s]
+Processed prompts: 100%|██████████| 16/16 [12:51<00:00, 48.23s/it, est. speed input: 14.69 toks/s, output: 171.88 toks/s]
+[lcb] generate 120:124 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:21<01:04,  5.35s/it, est. speed input: 89.79 toks/s, output: 176.67 toks/s]
+Processed prompts:  50%|█████     | 8/16 [08:52<10:18, 77.37s/it, est. speed input: 10.29 toks/s, output: 127.86 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [22:53<09:12, 138.08s/it, est. speed input: 5.69 toks/s, output: 162.85 toks/s]
+Processed prompts: 100%|██████████| 16/16 [22:53<00:00, 85.87s/it, est. speed input: 7.86 toks/s, output: 232.41 toks/s] 
+[lcb] generate 124:128 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [03:27<10:23, 51.93s/it, est. speed input: 11.80 toks/s, output: 124.95 toks/s]
+Processed prompts:  50%|█████     | 8/16 [13:00<14:04, 105.55s/it, est. speed input: 5.51 toks/s, output: 133.11 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [19:47<06:55, 103.89s/it, est. speed input: 5.11 toks/s, output: 146.46 toks/s]
+Processed prompts: 100%|██████████| 16/16 [19:47<00:00, 74.23s/it, est. speed input: 7.02 toks/s, output: 245.60 toks/s] 
+[lcb] generate 128:132 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [02:11<06:35, 32.94s/it, est. speed input: 14.57 toks/s, output: 132.19 toks/s]
+Processed prompts:  50%|█████     | 8/16 [03:10<02:58, 22.26s/it, est. speed input: 15.93 toks/s, output: 216.55 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [23:00<09:51, 147.90s/it, est. speed input: 3.93 toks/s, output: 111.51 toks/s]
+Processed prompts: 100%|██████████| 16/16 [23:00<00:00, 89.53s/it, est. speed input: 5.60 toks/s, output: 224.23 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [23:00<00:00, 86.29s/it, est. speed input: 5.60 toks/s, output: 224.23 toks/s]
+[lcb] generate 132:136 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [01:45<05:17, 26.49s/it, est. speed input: 18.99 toks/s, output: 161.94 toks/s]
+Processed prompts:  50%|█████     | 8/16 [07:52<08:38, 64.82s/it, est. speed input: 6.91 toks/s, output: 154.23 toks/s] 
+Processed prompts:  75%|███████▌  | 12/16 [11:06<03:49, 57.37s/it, est. speed input: 9.18 toks/s, output: 223.51 toks/s]
+Processed prompts: 100%|██████████| 16/16 [16:12<00:00, 64.94s/it, est. speed input: 9.87 toks/s, output: 246.69 toks/s]
+Processed prompts: 100%|██████████| 16/16 [16:12<00:00, 60.79s/it, est. speed input: 9.87 toks/s, output: 246.69 toks/s]
+[lcb] generate 136:140 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:31<01:34,  7.87s/it, est. speed input: 52.35 toks/s, output: 149.69 toks/s]
+Processed prompts:  50%|█████     | 8/16 [02:18<02:31, 18.91s/it, est. speed input: 26.31 toks/s, output: 190.52 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [06:37<02:39, 39.86s/it, est. speed input: 17.04 toks/s, output: 143.88 toks/s]
+Processed prompts: 100%|██████████| 16/16 [14:35<00:00, 71.32s/it, est. speed input: 11.46 toks/s, output: 199.32 toks/s]
+Processed prompts: 100%|██████████| 16/16 [14:35<00:00, 54.71s/it, est. speed input: 11.46 toks/s, output: 199.32 toks/s]
+[lcb] generate 140:144 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:26<01:19,  6.59s/it, est. speed input: 51.27 toks/s, output: 161.43 toks/s]
+Processed prompts:  50%|█████     | 8/16 [02:39<02:58, 22.26s/it, est. speed input: 19.79 toks/s, output: 165.98 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [06:44<02:40, 40.04s/it, est. speed input: 13.03 toks/s, output: 204.69 toks/s]
+Processed prompts: 100%|██████████| 16/16 [16:52<00:00, 84.24s/it, est. speed input: 7.38 toks/s, output: 218.18 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [16:52<00:00, 63.26s/it, est. speed input: 7.38 toks/s, output: 218.18 toks/s]
+[lcb] generate 144:148 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [31:16<1:33:50, 469.19s/it, est. speed input: 0.88 toks/s, output: 44.41 toks/s]
+Processed prompts:  50%|█████     | 8/16 [31:16<25:45, 193.23s/it, est. speed input: 3.72 toks/s, output: 120.40 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [31:17<00:00, 72.09s/it, est. speed input: 7.27 toks/s, output: 242.30 toks/s]
+Processed prompts: 100%|██████████| 16/16 [31:17<00:00, 117.32s/it, est. speed input: 7.27 toks/s, output: 242.30 toks/s]
+[lcb] generate 148:152 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [21:49<1:05:28, 327.39s/it, est. speed input: 5.35 toks/s, output: 72.74 toks/s]
+Processed prompts:  50%|█████     | 8/16 [37:33<36:28, 273.61s/it, est. speed input: 4.77 toks/s, output: 111.35 toks/s] 
+Processed prompts:  75%|███████▌  | 12/16 [37:33<09:54, 148.71s/it, est. speed input: 6.44 toks/s, output: 167.36 toks/s]
+Processed prompts: 100%|██████████| 16/16 [37:33<00:00, 140.86s/it, est. speed input: 7.42 toks/s, output: 231.33 toks/s]
+[lcb] generate 152:156 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [10:26<31:20, 156.68s/it, est. speed input: 4.72 toks/s, output: 90.07 toks/s]
+Processed prompts:  50%|█████     | 8/16 [26:10<27:06, 203.35s/it, est. speed input: 3.42 toks/s, output: 95.22 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [26:11<07:22, 110.52s/it, est. speed input: 5.81 toks/s, output: 187.14 toks/s]
+Processed prompts: 100%|██████████| 16/16 [26:11<00:00, 98.19s/it, est. speed input: 7.80 toks/s, output: 239.97 toks/s] 
+[lcb] generate 156:160 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]WARNING 10-04 11:12:46 [scheduler.py:1768] Sequence group 159_parallel_sample_3 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=1
+
+Processed prompts:  25%|██▌       | 4/16 [44:36<2:13:50, 669.22s/it, est. speed input: 1.15 toks/s, output: 58.15 toks/s]
+Processed prompts:  50%|█████     | 8/16 [44:37<36:44, 275.58s/it, est. speed input: 2.11 toks/s, output: 112.12 toks/s] 
+Processed prompts:  75%|███████▌  | 12/16 [44:37<09:59, 149.77s/it, est. speed input: 3.78 toks/s, output: 161.89 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [44:53<09:59, 149.77s/it, est. speed input: 3.78 toks/s, output: 161.89 toks/s]
+Processed prompts: 100%|██████████| 16/16 [44:59<00:00, 92.87s/it, est. speed input: 5.07 toks/s, output: 218.19 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [44:59<00:00, 168.74s/it, est. speed input: 5.07 toks/s, output: 218.19 toks/s]
+[lcb] generate 160:164 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [40:41<2:02:03, 610.33s/it, est. speed input: 1.67 toks/s, output: 63.76 toks/s]
+Processed prompts:  50%|█████     | 8/16 [40:41<33:30, 251.34s/it, est. speed input: 2.81 toks/s, output: 125.66 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [40:41<00:00, 93.77s/it, est. speed input: 5.25 toks/s, output: 217.42 toks/s]
+Processed prompts: 100%|██████████| 16/16 [40:41<00:00, 152.60s/it, est. speed input: 5.25 toks/s, output: 217.42 toks/s]
+[lcb] generate 164:168 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [15:11<45:33, 227.82s/it, est. speed input: 2.28 toks/s, output: 79.40 toks/s]
+Processed prompts:  50%|█████     | 8/16 [19:04<17:04, 128.03s/it, est. speed input: 4.19 toks/s, output: 133.16 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [31:00<10:05, 151.39s/it, est. speed input: 3.74 toks/s, output: 158.52 toks/s]
+Processed prompts: 100%|██████████| 16/16 [31:00<00:00, 116.30s/it, est. speed input: 5.50 toks/s, output: 238.21 toks/s]
+[lcb] generate 168:172 / 175
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [39:55<1:59:45, 598.83s/it, est. speed input: 1.56 toks/s, output: 55.91 toks/s]
+Processed prompts:  50%|█████     | 8/16 [39:55<32:52, 246.60s/it, est. speed input: 2.70 toks/s, output: 113.92 toks/s] 
+Processed prompts:  75%|███████▌  | 12/16 [39:55<08:56, 134.03s/it, est. speed input: 4.28 toks/s, output: 178.87 toks/s]
+Processed prompts: 100%|██████████| 16/16 [39:55<00:00, 149.73s/it, est. speed input: 5.09 toks/s, output: 227.22 toks/s]
+[lcb] generate 172:175 / 175
+
+Processed prompts:   0%|          | 0/12 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  33%|███▎      | 4/12 [37:02<1:14:05, 555.68s/it, est. speed input: 1.89 toks/s, output: 70.03 toks/s]
+Processed prompts:  67%|██████▋   | 8/12 [37:02<15:15, 228.83s/it, est. speed input: 3.21 toks/s, output: 137.63 toks/s] 
+Processed prompts: 100%|██████████| 12/12 [37:02<00:00, 185.25s/it, est. speed input: 5.02 toks/s, output: 203.94 toks/s]
+[lcb] wrote generations → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_qwen3_4b_ckpt100/lcb_v6_4b_think.generations.json
+[lcb] wrote metrics → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_qwen3_4b_ckpt100/lcb_v6_4b_think.json
+[rank0]:[W1004 13:54:28.769476603 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[lcb] submitting CPU judge: /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/scripts/eval_code/4b/lcb_v6_think_judge.sh
+[lcb] generations=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_qwen3_4b_ckpt100/lcb_v6_4b_think.generations.json
+sbatch: ╔════════════════════════════════════════════════════════════╗
+sbatch: ║ 装置四 - 参数检查脚本
+sbatch: ║ Device IV - Parameter Checking Script
+sbatch: ╠════════════════════════════════════════════════════════════╣
+sbatch: ║ 版本: v1.0.5
+sbatch: ║ 时间: 2026-10-04 13:54:32
+sbatch: ╚════════════════════════════════════════════════════════════╝
+sbatch: [提示] 您可在提交作业时通过-p/--partition参数指定分区，可用逗号分开，指定多个分区，如 -p GPUA800,GPUA800L,GPUA40S
+sbatch: [提示] 您可在提交作业时通过--mem(min_mem_per_node)或--mem-per-cpu(min_mem_per_cpu)或--mem-per-gpu(mem_per_tres)参数指定内存
+sbatch: [提示] 您可在提交作业时通过-c/--cpus-per-task(cpus_per_task)或者--cpus-per-gpu=(cpus_per_tres)参数指定CPU
+sbatch: [提示] 您可在提交作业时通过--gres或-G/--gpus或--gpus-per-node或--gpus-per-socket或--gpus-per-task或--tres-per-task参数指定GPU
+sbatch: [提示] 您可在提交作业时通过-n/--ntasks(num_tasks)或--ntasks-per-node或--ntasks-per-socket或--ntasks-per-core或--ntasks-per-gpu参数指定task
+sbatch: [提示] 您可在提交作业时通过-N/--nodes参数指定node
+sbatch: [提示] 您可在提交作业时通过-t/--time(任务最大运行时限time_limit)或--time-min(任务最少需要运行多久,任务可比最少运行时间提前结束)或参数指定任务时长
+sbatch: [装置四->参数检查->分区] partition: C64M512G
+sbatch: [装置四->参数检查->内存] min_mem_per_node: 未设置
+sbatch: [装置四->参数检查->内存] min_mem_per_cpu: 未设置
+sbatch: [装置四->参数检查->内存] mem_per_tres: nil MB
+sbatch: [装置四->参数检查->内存] 提醒：您未指定内存参数，将使用分区的默认值：DefMemPerCPU=7968 MB
+sbatch: [装置四->参数检查->CPU] min_cpus: 48
+sbatch: [装置四->参数检查->CPU] cpus_per_task: 48
+sbatch: [装置四->参数检查->CPU] max_cpus: NO_VAL
+sbatch: [装置四->参数检查->CPU] cpus_per_tres: 未设置
+sbatch: [装置四->参数检查->gres] gres: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_node: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_task: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_socket: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_job: 未设置
+sbatch: [装置四->参数检查->task] num_tasks: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_node: 1
+sbatch: [装置四->参数检查->task] ntasks_per_socket: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_core: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_gpu: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_tres: NO_VAL
+sbatch: [装置四->参数检查->task] tres_per_task: 未设置
+sbatch: [装置四->参数检查->node] min_nodes: 1
+sbatch: [装置四->参数检查->node] max_nodes: 1
+sbatch: [装置四->参数检查->time] time_limit: 720 Min
+sbatch: [装置四->参数检查->time] time_min: NO_VAL
+sbatch: [装置四->参数检查->合理性检查->说明]
+sbatch: [装置四->参数检查->合理性检查->说明] 为给大家提供更好的作业运行体验，我们对作业参数进行了合理性检查，方案如下：
+sbatch: [装置四->参数检查->合理性检查->说明] 1、任务最大运行时长参数强制要求为必填项(调度算法使用)
+sbatch: [装置四->参数检查->合理性检查->说明]    用户必须通过-t/--time参数指定任务最大运行时长，否则作业将被拒绝
+sbatch: [装置四->参数检查->合理性检查->说明]    用户可设置的任务最大运行时长，为任务提交到的分区所允许的最大时长
+sbatch: [装置四->参数检查->合理性检查->说明] 2、建议用户填写作业预估的最小运行时间(调度算法使用)--time-min，用户填写数量越多，任务调度效率越高
+sbatch: [装置四->参数检查->合理性检查->说明] 3、用户填写的参数或未填写的参数，如未特别说明，此拦截脚本不做任何更改，将由slurm默认分配
+sbatch: [装置四->参数检查->合理性检查->说明] 4、slurm将根据节点上CPU、内存、GPU等资源按比例分配或按固定数量分配给您提交的任务
+sbatch: [装置四->参数检查->合理性检查->说明]    您提交的值ReqTRES，不一定与slurm实际为您分配到的值AllocTRES相同
+sbatch: [装置四->参数检查->合理性检查->说明] 5、交互式任务的最大运行时间，已限制为不超过6小时，若在GPU分区运行，最大使用GPU卡数为2张
+sbatch: [装置四->参数检查->合理性检查->说明] 6、slurm已开启Slurm Priority Multifactor（官方多因子优先级调度算法），动态调整任务的优先级，以实现更好的作业运行体验
+sbatch: [装置四->参数检查->合理性检查->说明]    用户公平因子（Fairshare）：基于用户历史消耗资源 / 运行时长扣分（历史占资源越多，优先级越低）
+sbatch: [装置四->参数检查->合理性检查->说明]    资源大小因子（Size Factor）：小任务优先 / 大任务加权可调
+sbatch: [装置四->参数检查->合理性检查->说明]    任务等待时长（Age Factor）：排队越久加分，防饥饿
+sbatch: [装置四->参数检查->合理性检查->说明]    QOS / 锁定标记区分权重（QOS Factor）：给锁定用户单独 QOS，设置独立权重
+sbatch: [装置四->参数检查->合理性检查->说明] 如您执行遇到拦截脚本的问题，请及时反馈，我们会尽快修复！同时也谢谢大家提的宝贵意见
+sbatch: [装置四->参数检查->合理性检查->说明]
+sbatch: [装置四->参数检查->合理性检查->资源配比->CPU] 从cpus_per_task获取: 48
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] num_nodes: 1
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] num_cpus_per_node: 48
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] 检测到用户未指定内存数量，将由slurm自动分配
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] 检查通过，最终资源以slurm自动分配结果为准
+sbatch: ╔════════════════════════════════════════════════════════════╗
+sbatch: ║ 参数检查完成
+sbatch: ║ All Checks Passed
+sbatch: ╚════════════════════════════════════════════════════════════╝
+Submitted batch job 3919812
+[lcb] avg_output_tokens=19779.3 (n=700 median=18822.5 min=495 max=38912)

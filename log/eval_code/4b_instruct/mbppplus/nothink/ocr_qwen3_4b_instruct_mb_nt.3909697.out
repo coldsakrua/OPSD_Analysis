@@ -1,0 +1,881 @@
+[evalplus] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[evalplus] checkpoint=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_instruct/snt_tnt_clip005_1e_6_opencodereasoning_instruct/3908498/checkpoint-100
+[evalplus] dataset=mbppplus thinking=nothink (generate-only)
+[evalplus] generate_batch_size=4 (val-n=4)
+[evalplus] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_qwen3_4b_instruct_ckpt100/mbppplus_4b_instruct_nothink.json
+[evalplus] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/anchor
+Sat Oct  3 21:52:28 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A800-SXM4-80GB          Off |   00000000:53:00.0 Off |                    0 |
+| N/A   37C    P0             64W /  400W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[evalplus] dataset=mbpp data=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/mbppplus/MbppPlus.jsonl n_problems=378
+[evalplus] model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_instruct/snt_tnt_clip005_1e_6_opencodereasoning_instruct/3908498/checkpoint-100
+[evalplus] thinking=False n=4 temp=0.7 top_p=0.8 top_k=20 max_new_tokens=32768
+INFO 10-03 21:52:34 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 10-03 21:52:36 [__init__.py:239] Automatically detected platform cuda.
+INFO 10-03 21:52:38 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 10-03 21:52:38 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 10-03 21:52:38 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 10-03 21:52:38 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 10-03 21:52:38 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO 10-03 21:52:46 [config.py:717] This model supports multiple tasks: {'classify', 'reward', 'embed', 'generate', 'score'}. Defaulting to 'generate'.
+WARNING 10-03 21:52:46 [cuda.py:93] To see benefits of async output processing, enable CUDA graph. Since, enforce-eager is enabled, async output processor cannot be used
+INFO 10-03 21:52:46 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_instruct/snt_tnt_clip005_1e_6_opencodereasoning_instruct/3908498/checkpoint-100', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_instruct/snt_tnt_clip005_1e_6_opencodereasoning_instruct/3908498/checkpoint-100', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=32768, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_instruct/snt_tnt_clip005_1e_6_opencodereasoning_instruct/3908498/checkpoint-100, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=False, use_async_output_proc=False, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[],"max_capture_size":0}, use_cached_outputs=False, 
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/uniproc_executor.py:29: UserWarning: Failed to get the IP address, using 0.0.0.0 by default.The value can be set by the environment variable VLLM_HOST_IP or HOST_IP.
+  get_ip(), get_open_port())
+INFO 10-03 21:52:47 [cuda.py:228] Using XFormers backend.
+INFO 10-03 21:52:48 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 10-03 21:52:48 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/qwen3_4b_instruct/snt_tnt_clip005_1e_6_opencodereasoning_instruct/3908498/checkpoint-100...
+
+Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+
+Loading safetensors checkpoint shards:  50% Completed | 1/2 [00:03<00:03,  3.80s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:09<00:00,  5.11s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:09<00:00,  4.92s/it]
+
+INFO 10-03 21:52:58 [loader.py:458] Loading weights took 9.95 seconds
+INFO 10-03 21:52:58 [model_runner.py:1140] Model loading took 7.6065 GiB and 10.067099 seconds
+INFO 10-03 21:53:00 [worker.py:287] Memory profiling takes 1.61 seconds
+INFO 10-03 21:53:00 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.95) = 75.29GiB
+INFO 10-03 21:53:00 [worker.py:287] model weights take 7.61GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 2.41GiB; the rest of the memory reserved for KV Cache is 65.18GiB.
+INFO 10-03 21:53:00 [executor_base.py:112] # cuda blocks: 29661, # CPU blocks: 1820
+INFO 10-03 21:53:00 [executor_base.py:117] Maximum concurrency for 32768 tokens per request: 14.48x
+INFO 10-03 21:53:02 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 3.55 seconds
+[evalplus] generate 0:4 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:14,  1.19s/it, est. speed input: 88.44 toks/s, output: 155.82 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.57it/s, est. speed input: 124.84 toks/s, output: 284.35 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:01,  2.47it/s, est. speed input: 171.54 toks/s, output: 418.65 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  2.14it/s, est. speed input: 187.54 toks/s, output: 437.55 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  1.88it/s, est. speed input: 187.54 toks/s, output: 437.55 toks/s]
+[evalplus] generate 4:8 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:10,  1.14it/s, est. speed input: 159.10 toks/s, output: 176.27 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.32it/s, est. speed input: 239.57 toks/s, output: 323.62 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.32it/s, est. speed input: 227.02 toks/s, output: 386.25 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:14<00:00,  1.09s/it, est. speed input: 117.80 toks/s, output: 286.60 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:14<00:00,  1.14it/s, est. speed input: 117.80 toks/s, output: 286.60 toks/s]
+[evalplus] generate 8:12 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:06,  1.81it/s, est. speed input: 148.55 toks/s, output: 167.57 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.37it/s, est. speed input: 189.05 toks/s, output: 279.89 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:02,  1.98it/s, est. speed input: 200.51 toks/s, output: 314.05 toks/s]
+Processed prompts: 100%|██████████| 16/16 [11:40<00:00, 68.84s/it, est. speed input: 2.23 toks/s, output: 50.32 toks/s]   
+Processed prompts: 100%|██████████| 16/16 [11:40<00:00, 43.77s/it, est. speed input: 2.23 toks/s, output: 50.32 toks/s]
+[evalplus] generate 12:16 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.05it/s, est. speed input: 91.37 toks/s, output: 173.56 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.21it/s, est. speed input: 167.79 toks/s, output: 332.27 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.02it/s, est. speed input: 208.69 toks/s, output: 449.60 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:57<00:00,  5.38s/it, est. speed input: 23.66 toks/s, output: 142.75 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [00:57<00:00,  3.59s/it, est. speed input: 23.66 toks/s, output: 142.75 toks/s]
+[evalplus] generate 16:20 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:08,  1.37it/s, est. speed input: 105.24 toks/s, output: 165.37 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.00it/s, est. speed input: 150.58 toks/s, output: 273.80 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.25it/s, est. speed input: 219.37 toks/s, output: 435.48 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.61it/s, est. speed input: 248.72 toks/s, output: 538.95 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  2.90it/s, est. speed input: 248.72 toks/s, output: 538.95 toks/s]
+[evalplus] generate 20:24 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.21it/s, est. speed input: 111.14 toks/s, output: 173.66 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.47it/s, est. speed input: 243.66 toks/s, output: 330.76 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  5.61it/s, est. speed input: 412.33 toks/s, output: 617.02 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.91it/s, est. speed input: 412.33 toks/s, output: 617.02 toks/s]
+[evalplus] generate 24:28 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:10,  1.15it/s, est. speed input: 97.39 toks/s, output: 148.38 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:07<00:07,  1.03it/s, est. speed input: 92.24 toks/s, output: 217.37 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:08<00:02,  1.65it/s, est. speed input: 127.77 toks/s, output: 369.63 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:14<00:00,  1.04it/s, est. speed input: 96.32 toks/s, output: 352.54 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [00:14<00:00,  1.12it/s, est. speed input: 96.32 toks/s, output: 352.54 toks/s]
+[evalplus] generate 28:32 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:06<00:19,  1.63s/it, est. speed input: 61.36 toks/s, output: 127.02 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:08<00:07,  1.11it/s, est. speed input: 92.29 toks/s, output: 240.39 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:09<00:02,  1.67it/s, est. speed input: 123.42 toks/s, output: 357.10 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  1.76it/s, est. speed input: 169.49 toks/s, output: 501.44 toks/s]
+[evalplus] generate 32:36 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:12,  1.05s/it, est. speed input: 117.88 toks/s, output: 177.30 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.21it/s, est. speed input: 187.25 toks/s, output: 335.77 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:01,  2.26it/s, est. speed input: 187.64 toks/s, output: 336.95 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.62it/s, est. speed input: 203.97 toks/s, output: 451.86 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.22it/s, est. speed input: 203.97 toks/s, output: 451.86 toks/s]
+[evalplus] generate 36:40 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.32it/s, est. speed input: 139.70 toks/s, output: 176.93 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  3.02it/s, est. speed input: 264.22 toks/s, output: 339.12 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.33it/s, est. speed input: 215.91 toks/s, output: 351.14 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.43it/s, est. speed input: 214.53 toks/s, output: 438.37 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.33it/s, est. speed input: 214.53 toks/s, output: 438.37 toks/s]
+[evalplus] generate 40:44 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.32it/s, est. speed input: 102.74 toks/s, output: 172.54 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  2.80it/s, est. speed input: 191.66 toks/s, output: 323.12 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.09it/s, est. speed input: 279.00 toks/s, output: 416.49 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.34it/s, est. speed input: 277.55 toks/s, output: 441.69 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.35it/s, est. speed input: 277.55 toks/s, output: 441.69 toks/s]
+[evalplus] generate 44:48 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.31it/s, est. speed input: 108.75 toks/s, output: 143.79 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.34it/s, est. speed input: 204.89 toks/s, output: 284.34 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  2.79it/s, est. speed input: 238.48 toks/s, output: 354.47 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:11<00:00,  1.21it/s, est. speed input: 136.65 toks/s, output: 305.92 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:11<00:00,  1.44it/s, est. speed input: 136.65 toks/s, output: 305.92 toks/s]
+[evalplus] generate 48:52 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:10,  1.12it/s, est. speed input: 97.13 toks/s, output: 151.84 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.45it/s, est. speed input: 206.00 toks/s, output: 317.32 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  2.98it/s, est. speed input: 302.92 toks/s, output: 428.58 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  4.68it/s, est. speed input: 361.13 toks/s, output: 597.64 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.23it/s, est. speed input: 361.13 toks/s, output: 597.64 toks/s]
+[evalplus] generate 52:56 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.08it/s, est. speed input: 93.67 toks/s, output: 175.76 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.20it/s, est. speed input: 169.14 toks/s, output: 311.44 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  5.62it/s, est. speed input: 330.00 toks/s, output: 641.92 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.71it/s, est. speed input: 330.00 toks/s, output: 641.92 toks/s]
+[evalplus] generate 56:60 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:08,  1.38it/s, est. speed input: 141.65 toks/s, output: 171.22 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  2.81it/s, est. speed input: 220.84 toks/s, output: 316.70 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.54it/s, est. speed input: 237.87 toks/s, output: 350.46 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:10<00:00,  1.22it/s, est. speed input: 139.96 toks/s, output: 336.06 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:10<00:00,  1.47it/s, est. speed input: 139.96 toks/s, output: 336.06 toks/s]
+[evalplus] generate 60:64 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:05<00:15,  1.30s/it, est. speed input: 113.08 toks/s, output: 171.93 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:06<00:05,  1.41it/s, est. speed input: 226.83 toks/s, output: 310.48 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:01,  2.19it/s, est. speed input: 250.32 toks/s, output: 439.19 toks/s]
+Processed prompts: 100%|██████████| 16/16 [02:10<00:00, 12.51s/it, est. speed input: 16.37 toks/s, output: 118.32 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [02:10<00:00,  8.19s/it, est. speed input: 16.37 toks/s, output: 118.32 toks/s]
+[evalplus] generate 64:68 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:07,  1.57it/s, est. speed input: 133.40 toks/s, output: 174.21 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.16it/s, est. speed input: 173.75 toks/s, output: 245.29 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.66it/s, est. speed input: 269.89 toks/s, output: 405.81 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.00it/s, est. speed input: 116.43 toks/s, output: 298.26 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.28it/s, est. speed input: 116.43 toks/s, output: 298.26 toks/s]
+[evalplus] generate 68:72 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:05<00:15,  1.26s/it, est. speed input: 84.82 toks/s, output: 159.34 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:04,  1.81it/s, est. speed input: 145.11 toks/s, output: 329.53 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:11<00:03,  1.02it/s, est. speed input: 98.41 toks/s, output: 314.38 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:17<00:00,  7.18s/it, est. speed input: 19.55 toks/s, output: 102.12 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:17<00:00,  4.87s/it, est. speed input: 19.55 toks/s, output: 102.12 toks/s]
+[evalplus] generate 72:76 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:06,  1.89it/s, est. speed input: 143.51 toks/s, output: 171.83 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.12it/s, est. speed input: 175.16 toks/s, output: 273.17 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.32it/s, est. speed input: 213.07 toks/s, output: 376.59 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.09it/s, est. speed input: 137.79 toks/s, output: 345.55 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.33it/s, est. speed input: 137.79 toks/s, output: 345.55 toks/s]
+[evalplus] generate 76:80 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.29it/s, est. speed input: 129.37 toks/s, output: 167.20 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.98it/s, est. speed input: 195.29 toks/s, output: 278.26 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.40it/s, est. speed input: 257.65 toks/s, output: 409.19 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.30it/s, est. speed input: 212.48 toks/s, output: 420.34 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.24it/s, est. speed input: 212.48 toks/s, output: 420.34 toks/s]
+[evalplus] generate 80:84 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:08,  1.38it/s, est. speed input: 147.21 toks/s, output: 166.47 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.43it/s, est. speed input: 245.41 toks/s, output: 302.12 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:01,  2.00it/s, est. speed input: 238.82 toks/s, output: 331.58 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:48<00:00,  4.50s/it, est. speed input: 37.68 toks/s, output: 109.65 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [00:48<00:00,  3.04s/it, est. speed input: 37.68 toks/s, output: 109.65 toks/s]
+[evalplus] generate 84:88 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:12,  1.02s/it, est. speed input: 88.86 toks/s, output: 163.31 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.47it/s, est. speed input: 150.01 toks/s, output: 270.39 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:09<00:03,  1.29it/s, est. speed input: 139.32 toks/s, output: 344.58 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  2.04it/s, est. speed input: 178.19 toks/s, output: 512.65 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  1.66it/s, est. speed input: 178.19 toks/s, output: 512.65 toks/s]
+[evalplus] generate 88:92 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:05<00:15,  1.27s/it, est. speed input: 107.02 toks/s, output: 176.47 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:07<00:06,  1.19it/s, est. speed input: 137.23 toks/s, output: 275.43 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:07<00:01,  2.02it/s, est. speed input: 183.19 toks/s, output: 383.15 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.30it/s, est. speed input: 143.73 toks/s, output: 389.90 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.29it/s, est. speed input: 143.73 toks/s, output: 389.90 toks/s]
+[evalplus] generate 92:96 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:08,  1.35it/s, est. speed input: 116.03 toks/s, output: 174.72 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.30it/s, est. speed input: 179.74 toks/s, output: 291.94 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  2.95it/s, est. speed input: 245.29 toks/s, output: 411.55 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  1.58it/s, est. speed input: 165.71 toks/s, output: 344.83 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  1.76it/s, est. speed input: 165.71 toks/s, output: 344.83 toks/s]
+[evalplus] generate 96:100 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.06it/s, est. speed input: 97.84 toks/s, output: 165.37 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.85it/s, est. speed input: 151.32 toks/s, output: 290.38 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.94it/s, est. speed input: 214.08 toks/s, output: 416.45 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.04it/s, est. speed input: 129.53 toks/s, output: 300.98 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.24it/s, est. speed input: 129.53 toks/s, output: 300.98 toks/s]
+[evalplus] generate 100:104 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:07,  1.56it/s, est. speed input: 146.25 toks/s, output: 164.14 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  2.82it/s, est. speed input: 217.16 toks/s, output: 267.99 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.37it/s, est. speed input: 249.84 toks/s, output: 368.42 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  5.09it/s, est. speed input: 372.23 toks/s, output: 535.61 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.75it/s, est. speed input: 372.23 toks/s, output: 535.61 toks/s]
+[evalplus] generate 104:108 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:06,  1.96it/s, est. speed input: 152.55 toks/s, output: 176.01 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.02it/s, est. speed input: 191.96 toks/s, output: 266.83 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:02,  1.89it/s, est. speed input: 215.63 toks/s, output: 312.91 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:16<00:00,  1.29s/it, est. speed input: 104.74 toks/s, output: 238.23 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:16<00:00,  1.00s/it, est. speed input: 104.74 toks/s, output: 238.23 toks/s]
+[evalplus] generate 108:112 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:01<00:05,  2.14it/s, est. speed input: 168.86 toks/s, output: 169.92 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.75it/s, est. speed input: 196.29 toks/s, output: 251.21 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:02,  1.70it/s, est. speed input: 175.99 toks/s, output: 304.92 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:11<00:00,  1.30it/s, est. speed input: 152.94 toks/s, output: 341.76 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:11<00:00,  1.45it/s, est. speed input: 152.94 toks/s, output: 341.76 toks/s]
+[evalplus] generate 112:116 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.26it/s, est. speed input: 163.11 toks/s, output: 174.48 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.99it/s, est. speed input: 195.78 toks/s, output: 291.38 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:09<00:03,  1.21it/s, est. speed input: 131.41 toks/s, output: 313.45 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:30<00:00,  2.56s/it, est. speed input: 58.38 toks/s, output: 187.70 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [00:30<00:00,  1.88s/it, est. speed input: 58.38 toks/s, output: 187.70 toks/s]
+[evalplus] generate 116:120 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.24it/s, est. speed input: 109.34 toks/s, output: 163.08 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  2.81it/s, est. speed input: 239.61 toks/s, output: 322.53 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  2.93it/s, est. speed input: 273.55 toks/s, output: 384.68 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.61it/s, est. speed input: 297.91 toks/s, output: 500.03 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  2.96it/s, est. speed input: 297.91 toks/s, output: 500.03 toks/s]
+[evalplus] generate 120:124 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.29it/s, est. speed input: 120.09 toks/s, output: 164.64 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.35it/s, est. speed input: 123.82 toks/s, output: 257.34 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:08<00:02,  1.48it/s, est. speed input: 156.30 toks/s, output: 337.34 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:47<00:00, 10.15s/it, est. speed input: 15.32 toks/s, output: 135.82 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [01:47<00:00,  6.69s/it, est. speed input: 15.32 toks/s, output: 135.82 toks/s]
+[evalplus] generate 124:128 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:06<00:18,  1.54s/it, est. speed input: 92.62 toks/s, output: 152.70 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:07<00:01,  2.02it/s, est. speed input: 218.08 toks/s, output: 432.70 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:19<00:00,  1.35s/it, est. speed input: 106.58 toks/s, output: 274.03 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:19<00:00,  1.19s/it, est. speed input: 106.58 toks/s, output: 274.03 toks/s]
+[evalplus] generate 128:132 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:06,  1.89it/s, est. speed input: 142.02 toks/s, output: 176.11 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  2.72it/s, est. speed input: 211.82 toks/s, output: 294.12 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.29it/s, est. speed input: 246.04 toks/s, output: 402.16 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.50it/s, est. speed input: 257.78 toks/s, output: 455.25 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.15it/s, est. speed input: 257.78 toks/s, output: 455.25 toks/s]
+[evalplus] generate 132:136 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:10,  1.18it/s, est. speed input: 116.92 toks/s, output: 169.77 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.20it/s, est. speed input: 311.51 toks/s, output: 426.73 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.84it/s, est. speed input: 353.24 toks/s, output: 546.33 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.18it/s, est. speed input: 353.24 toks/s, output: 546.33 toks/s]
+[evalplus] generate 136:140 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.26it/s, est. speed input: 144.98 toks/s, output: 170.82 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.27it/s, est. speed input: 220.21 toks/s, output: 291.24 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.57it/s, est. speed input: 354.20 toks/s, output: 442.75 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.05it/s, est. speed input: 250.86 toks/s, output: 416.01 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.13it/s, est. speed input: 250.86 toks/s, output: 416.01 toks/s]
+[evalplus] generate 140:144 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.29it/s, est. speed input: 109.23 toks/s, output: 155.17 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  2.70it/s, est. speed input: 188.65 toks/s, output: 300.92 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.40it/s, est. speed input: 236.32 toks/s, output: 406.99 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  5.09it/s, est. speed input: 354.03 toks/s, output: 562.94 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.59it/s, est. speed input: 354.03 toks/s, output: 562.94 toks/s]
+[evalplus] generate 144:148 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:12,  1.04s/it, est. speed input: 95.44 toks/s, output: 133.04 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.43it/s, est. speed input: 125.53 toks/s, output: 261.90 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:18<00:07,  1.83s/it, est. speed input: 60.30 toks/s, output: 200.72 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:08<00:00,  5.99s/it, est. speed input: 23.23 toks/s, output: 168.53 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:08<00:00,  4.26s/it, est. speed input: 23.23 toks/s, output: 168.53 toks/s]
+[evalplus] generate 148:152 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:12,  1.07s/it, est. speed input: 82.54 toks/s, output: 156.88 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:01,  2.14it/s, est. speed input: 169.53 toks/s, output: 362.15 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.65it/s, est. speed input: 217.82 toks/s, output: 465.09 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.23it/s, est. speed input: 217.82 toks/s, output: 465.09 toks/s]
+[evalplus] generate 152:156 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:13,  1.16s/it, est. speed input: 79.03 toks/s, output: 171.59 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:04,  1.64it/s, est. speed input: 194.50 toks/s, output: 321.57 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:01,  2.17it/s, est. speed input: 235.85 toks/s, output: 439.00 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:11<00:00,  1.29it/s, est. speed input: 164.38 toks/s, output: 430.38 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:11<00:00,  1.37it/s, est. speed input: 164.38 toks/s, output: 430.38 toks/s]
+[evalplus] generate 156:160 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:14,  1.21s/it, est. speed input: 72.93 toks/s, output: 144.20 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.55it/s, est. speed input: 126.27 toks/s, output: 291.99 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:07<00:02,  1.99it/s, est. speed input: 164.03 toks/s, output: 391.93 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:29<00:00,  2.53s/it, est. speed input: 58.04 toks/s, output: 225.54 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [00:29<00:00,  1.86s/it, est. speed input: 58.04 toks/s, output: 225.54 toks/s]
+[evalplus] generate 160:164 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:06,  1.79it/s, est. speed input: 141.38 toks/s, output: 175.38 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.84it/s, est. speed input: 167.47 toks/s, output: 231.07 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.48it/s, est. speed input: 235.59 toks/s, output: 366.56 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:21<00:00,  7.80s/it, est. speed input: 19.24 toks/s, output: 122.41 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [01:21<00:00,  5.12s/it, est. speed input: 19.24 toks/s, output: 122.41 toks/s]
+[evalplus] generate 164:168 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.06it/s, est. speed input: 113.57 toks/s, output: 175.13 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.33it/s, est. speed input: 209.55 toks/s, output: 328.66 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.46it/s, est. speed input: 266.27 toks/s, output: 452.97 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.53it/s, est. speed input: 270.59 toks/s, output: 539.94 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  2.84it/s, est. speed input: 270.59 toks/s, output: 539.94 toks/s]
+[evalplus] generate 168:172 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:12,  1.05s/it, est. speed input: 86.35 toks/s, output: 147.31 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:06<00:06,  1.29it/s, est. speed input: 107.35 toks/s, output: 249.06 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:01,  2.19it/s, est. speed input: 168.99 toks/s, output: 390.45 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  2.39it/s, est. speed input: 233.25 toks/s, output: 495.60 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  1.93it/s, est. speed input: 233.25 toks/s, output: 495.60 toks/s]
+[evalplus] generate 172:176 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:06,  1.83it/s, est. speed input: 140.74 toks/s, output: 175.47 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:02<00:02,  3.14it/s, est. speed input: 260.76 toks/s, output: 312.13 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:03<00:00,  4.02it/s, est. speed input: 306.54 toks/s, output: 409.29 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  4.54it/s, est. speed input: 338.02 toks/s, output: 502.25 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.82it/s, est. speed input: 338.02 toks/s, output: 502.25 toks/s]
+[evalplus] generate 176:180 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:14,  1.22s/it, est. speed input: 75.20 toks/s, output: 172.67 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:04,  1.90it/s, est. speed input: 155.53 toks/s, output: 328.11 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.65it/s, est. speed input: 189.47 toks/s, output: 383.89 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  3.51it/s, est. speed input: 223.10 toks/s, output: 484.98 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.49it/s, est. speed input: 223.10 toks/s, output: 484.98 toks/s]
+[evalplus] generate 180:184 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:13,  1.13s/it, est. speed input: 84.28 toks/s, output: 161.25 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.60it/s, est. speed input: 174.80 toks/s, output: 278.08 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.66it/s, est. speed input: 230.83 toks/s, output: 413.23 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:10<00:00,  1.43it/s, est. speed input: 164.36 toks/s, output: 383.92 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:10<00:00,  1.49it/s, est. speed input: 164.36 toks/s, output: 383.92 toks/s]
+[evalplus] generate 184:188 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:12,  1.08s/it, est. speed input: 75.88 toks/s, output: 160.55 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:04,  1.83it/s, est. speed input: 140.52 toks/s, output: 263.48 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  3.19it/s, est. speed input: 203.17 toks/s, output: 417.98 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  5.00it/s, est. speed input: 310.14 toks/s, output: 586.06 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.04it/s, est. speed input: 310.14 toks/s, output: 586.06 toks/s]
+[evalplus] generate 188:192 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:08,  1.49it/s, est. speed input: 144.80 toks/s, output: 173.16 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.52it/s, est. speed input: 233.24 toks/s, output: 309.27 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:03<00:01,  3.87it/s, est. speed input: 314.55 toks/s, output: 450.67 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  4.07it/s, est. speed input: 345.63 toks/s, output: 511.12 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.35it/s, est. speed input: 345.63 toks/s, output: 511.12 toks/s]
+[evalplus] generate 192:196 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:05<00:16,  1.37s/it, est. speed input: 81.28 toks/s, output: 159.26 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:07<00:06,  1.26it/s, est. speed input: 144.84 toks/s, output: 303.51 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:17<00:06,  1.64s/it, est. speed input: 77.81 toks/s, output: 215.67 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:10<00:00,  6.20s/it, est. speed input: 24.34 toks/s, output: 162.65 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:10<00:00,  4.40s/it, est. speed input: 24.34 toks/s, output: 162.65 toks/s]
+[evalplus] generate 196:200 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.25it/s, est. speed input: 93.38 toks/s, output: 167.46 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  2.81it/s, est. speed input: 184.48 toks/s, output: 338.80 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.66it/s, est. speed input: 237.01 toks/s, output: 407.90 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.79it/s, est. speed input: 224.39 toks/s, output: 389.38 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.65it/s, est. speed input: 224.39 toks/s, output: 389.38 toks/s]
+[evalplus] generate 200:204 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:08,  1.35it/s, est. speed input: 109.16 toks/s, output: 155.65 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  2.71it/s, est. speed input: 203.62 toks/s, output: 303.96 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:07<00:02,  1.48it/s, est. speed input: 173.08 toks/s, output: 300.65 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.07it/s, est. speed input: 131.01 toks/s, output: 337.83 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.24it/s, est. speed input: 131.01 toks/s, output: 337.83 toks/s]
+[evalplus] generate 204:208 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:10,  1.14it/s, est. speed input: 117.91 toks/s, output: 176.58 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.62it/s, est. speed input: 273.10 toks/s, output: 342.75 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.53it/s, est. speed input: 323.19 toks/s, output: 445.55 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.01it/s, est. speed input: 224.19 toks/s, output: 432.46 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.11it/s, est. speed input: 224.19 toks/s, output: 432.46 toks/s]
+[evalplus] generate 208:212 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:13,  1.13s/it, est. speed input: 73.60 toks/s, output: 167.38 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.88it/s, est. speed input: 133.04 toks/s, output: 323.32 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.70it/s, est. speed input: 174.09 toks/s, output: 377.61 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  3.78it/s, est. speed input: 212.77 toks/s, output: 506.31 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.63it/s, est. speed input: 212.77 toks/s, output: 506.31 toks/s]
+[evalplus] generate 212:216 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:07,  1.67it/s, est. speed input: 131.56 toks/s, output: 176.53 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:02<00:02,  3.39it/s, est. speed input: 256.51 toks/s, output: 331.62 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.17it/s, est. speed input: 282.02 toks/s, output: 361.82 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  4.73it/s, est. speed input: 348.29 toks/s, output: 523.84 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.72it/s, est. speed input: 348.29 toks/s, output: 523.84 toks/s]
+[evalplus] generate 216:220 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:12,  1.02s/it, est. speed input: 104.30 toks/s, output: 144.64 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:04,  1.63it/s, est. speed input: 156.14 toks/s, output: 268.04 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:07<00:02,  1.84it/s, est. speed input: 172.26 toks/s, output: 362.53 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  2.43it/s, est. speed input: 245.33 toks/s, output: 483.35 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  1.98it/s, est. speed input: 245.33 toks/s, output: 483.35 toks/s]
+[evalplus] generate 220:224 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:08,  1.34it/s, est. speed input: 139.28 toks/s, output: 175.44 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.61it/s, est. speed input: 240.71 toks/s, output: 326.26 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.07it/s, est. speed input: 202.57 toks/s, output: 367.71 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  1.60it/s, est. speed input: 175.36 toks/s, output: 369.73 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  1.73it/s, est. speed input: 175.36 toks/s, output: 369.73 toks/s]
+[evalplus] generate 224:228 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.30it/s, est. speed input: 101.30 toks/s, output: 164.61 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  3.00it/s, est. speed input: 207.00 toks/s, output: 329.63 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:03<00:00,  4.71it/s, est. speed input: 317.54 toks/s, output: 470.82 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.46it/s, est. speed input: 269.10 toks/s, output: 439.68 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.55it/s, est. speed input: 269.10 toks/s, output: 439.68 toks/s]
+[evalplus] generate 228:232 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:01<00:05,  2.09it/s, est. speed input: 163.02 toks/s, output: 175.03 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:02<00:02,  3.55it/s, est. speed input: 252.04 toks/s, output: 301.40 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:02<00:00,  5.87it/s, est. speed input: 380.16 toks/s, output: 464.60 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.50it/s, est. speed input: 295.63 toks/s, output: 425.63 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.56it/s, est. speed input: 295.63 toks/s, output: 425.63 toks/s]
+[evalplus] generate 232:236 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:08,  1.34it/s, est. speed input: 105.61 toks/s, output: 175.12 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.86it/s, est. speed input: 150.91 toks/s, output: 290.19 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.13it/s, est. speed input: 221.23 toks/s, output: 456.45 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  4.06it/s, est. speed input: 261.95 toks/s, output: 586.56 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.00it/s, est. speed input: 261.95 toks/s, output: 586.56 toks/s]
+[evalplus] generate 236:240 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:10,  1.15it/s, est. speed input: 104.58 toks/s, output: 160.89 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.08it/s, est. speed input: 198.12 toks/s, output: 304.59 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.44it/s, est. speed input: 264.93 toks/s, output: 459.68 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  4.39it/s, est. speed input: 321.69 toks/s, output: 591.60 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.14it/s, est. speed input: 321.69 toks/s, output: 591.60 toks/s]
+[evalplus] generate 240:244 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:06,  1.92it/s, est. speed input: 161.63 toks/s, output: 173.17 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.58it/s, est. speed input: 202.32 toks/s, output: 266.39 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.26it/s, est. speed input: 258.18 toks/s, output: 392.62 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:10<00:00,  1.25it/s, est. speed input: 139.47 toks/s, output: 284.18 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:10<00:00,  1.55it/s, est. speed input: 139.47 toks/s, output: 284.18 toks/s]
+[evalplus] generate 244:248 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:06,  1.72it/s, est. speed input: 135.67 toks/s, output: 176.88 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.79it/s, est. speed input: 176.44 toks/s, output: 244.17 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.58it/s, est. speed input: 241.66 toks/s, output: 359.24 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.55it/s, est. speed input: 242.81 toks/s, output: 390.75 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.35it/s, est. speed input: 242.81 toks/s, output: 390.75 toks/s]
+[evalplus] generate 248:252 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:06<00:18,  1.54s/it, est. speed input: 54.52 toks/s, output: 153.02 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:09<00:02,  1.34it/s, est. speed input: 116.10 toks/s, output: 368.42 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:10<00:00,  1.88it/s, est. speed input: 196.76 toks/s, output: 491.60 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:10<00:00,  1.54it/s, est. speed input: 196.76 toks/s, output: 491.60 toks/s]
+[evalplus] generate 252:256 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:13,  1.13s/it, est. speed input: 116.30 toks/s, output: 176.87 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:06<00:06,  1.26it/s, est. speed input: 145.27 toks/s, output: 277.93 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:07<00:01,  2.05it/s, est. speed input: 178.44 toks/s, output: 420.26 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  2.50it/s, est. speed input: 198.15 toks/s, output: 518.09 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  1.92it/s, est. speed input: 198.15 toks/s, output: 518.09 toks/s]
+[evalplus] generate 256:260 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:07,  1.51it/s, est. speed input: 162.64 toks/s, output: 174.69 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:02,  2.82it/s, est. speed input: 244.05 toks/s, output: 312.23 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.31it/s, est. speed input: 217.31 toks/s, output: 357.54 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.16it/s, est. speed input: 277.62 toks/s, output: 482.08 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  2.73it/s, est. speed input: 277.62 toks/s, output: 482.08 toks/s]
+[evalplus] generate 260:264 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:14,  1.19s/it, est. speed input: 105.09 toks/s, output: 171.71 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:04,  1.84it/s, est. speed input: 184.31 toks/s, output: 338.93 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.95it/s, est. speed input: 244.33 toks/s, output: 487.02 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:14<00:00,  1.08s/it, est. speed input: 116.81 toks/s, output: 329.27 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:14<00:00,  1.11it/s, est. speed input: 116.81 toks/s, output: 329.27 toks/s]
+[evalplus] generate 264:268 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:14,  1.25s/it, est. speed input: 77.77 toks/s, output: 172.38 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.99it/s, est. speed input: 226.13 toks/s, output: 521.50 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.15it/s, est. speed input: 125.46 toks/s, output: 374.87 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:12<00:00,  1.26it/s, est. speed input: 125.46 toks/s, output: 374.87 toks/s]
+[evalplus] generate 268:272 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:01<00:05,  2.03it/s, est. speed input: 160.32 toks/s, output: 178.58 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.77it/s, est. speed input: 146.98 toks/s, output: 259.47 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.57it/s, est. speed input: 190.21 toks/s, output: 399.06 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:45<00:00,  4.24s/it, est. speed input: 29.94 toks/s, output: 141.08 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [00:45<00:00,  2.86s/it, est. speed input: 29.94 toks/s, output: 141.08 toks/s]
+[evalplus] generate 272:276 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:06,  1.79it/s, est. speed input: 161.41 toks/s, output: 179.35 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.61it/s, est. speed input: 207.82 toks/s, output: 292.78 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:03<00:00,  4.14it/s, est. speed input: 316.37 toks/s, output: 449.87 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  4.49it/s, est. speed input: 330.85 toks/s, output: 540.96 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.69it/s, est. speed input: 330.85 toks/s, output: 540.96 toks/s]
+[evalplus] generate 276:280 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:05<00:16,  1.41s/it, est. speed input: 98.38 toks/s, output: 179.25 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.58it/s, est. speed input: 175.59 toks/s, output: 342.16 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:01,  2.37it/s, est. speed input: 227.41 toks/s, output: 469.19 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  1.85it/s, est. speed input: 189.57 toks/s, output: 495.85 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  1.67it/s, est. speed input: 189.57 toks/s, output: 495.85 toks/s]
+[evalplus] generate 280:284 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.06it/s, est. speed input: 112.27 toks/s, output: 152.25 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.02it/s, est. speed input: 195.65 toks/s, output: 276.36 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  4.94it/s, est. speed input: 406.14 toks/s, output: 613.23 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:04<00:00,  3.38it/s, est. speed input: 406.14 toks/s, output: 613.23 toks/s]
+[evalplus] generate 284:288 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.00it/s, est. speed input: 144.08 toks/s, output: 178.35 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.20it/s, est. speed input: 237.46 toks/s, output: 334.77 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:09<00:03,  1.14it/s, est. speed input: 152.88 toks/s, output: 303.61 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:31<00:00,  2.70s/it, est. speed input: 60.51 toks/s, output: 207.65 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [00:31<00:00,  1.99s/it, est. speed input: 60.51 toks/s, output: 207.65 toks/s]
+[evalplus] generate 288:292 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:01<00:05,  2.18it/s, est. speed input: 163.27 toks/s, output: 175.79 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:02<00:02,  3.74it/s, est. speed input: 291.79 toks/s, output: 310.77 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  2.51it/s, est. speed input: 226.97 toks/s, output: 283.28 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.06it/s, est. speed input: 256.86 toks/s, output: 418.13 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  2.94it/s, est. speed input: 256.86 toks/s, output: 418.13 toks/s]
+[evalplus] generate 292:296 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.00it/s, est. speed input: 95.42 toks/s, output: 173.51 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:04,  1.77it/s, est. speed input: 155.08 toks/s, output: 308.96 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.49it/s, est. speed input: 224.71 toks/s, output: 484.73 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.14it/s, est. speed input: 224.71 toks/s, output: 484.73 toks/s]
+[evalplus] generate 296:300 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:10,  1.14it/s, est. speed input: 128.41 toks/s, output: 166.76 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.79it/s, est. speed input: 167.07 toks/s, output: 292.37 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:09<00:03,  1.21it/s, est. speed input: 126.95 toks/s, output: 308.59 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  1.95it/s, est. speed input: 177.90 toks/s, output: 485.58 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:09<00:00,  1.67it/s, est. speed input: 177.90 toks/s, output: 485.58 toks/s]
+[evalplus] generate 300:304 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.03it/s, est. speed input: 81.67 toks/s, output: 160.23 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.29it/s, est. speed input: 210.48 toks/s, output: 313.78 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.53it/s, est. speed input: 238.69 toks/s, output: 403.91 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:35<00:00,  3.21s/it, est. speed input: 47.09 toks/s, output: 141.74 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [00:35<00:00,  2.22s/it, est. speed input: 47.09 toks/s, output: 141.74 toks/s]
+[evalplus] generate 304:308 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.06it/s, est. speed input: 99.55 toks/s, output: 173.42 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.54it/s, est. speed input: 205.15 toks/s, output: 291.89 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.60it/s, est. speed input: 286.77 toks/s, output: 419.69 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:19<00:00,  1.54s/it, est. speed input: 125.17 toks/s, output: 287.52 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:19<00:00,  1.19s/it, est. speed input: 125.17 toks/s, output: 287.52 toks/s]
+[evalplus] generate 308:312 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.06it/s, est. speed input: 110.32 toks/s, output: 168.66 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.12it/s, est. speed input: 224.40 toks/s, output: 324.14 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  3.01it/s, est. speed input: 329.71 toks/s, output: 486.52 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.53it/s, est. speed input: 329.71 toks/s, output: 486.52 toks/s]
+[evalplus] generate 312:316 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.32it/s, est. speed input: 122.53 toks/s, output: 172.92 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.82it/s, est. speed input: 170.06 toks/s, output: 287.95 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.75it/s, est. speed input: 240.49 toks/s, output: 437.51 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.62it/s, est. speed input: 281.26 toks/s, output: 547.50 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  2.76it/s, est. speed input: 281.26 toks/s, output: 547.50 toks/s]
+[evalplus] generate 316:320 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.24it/s, est. speed input: 97.77 toks/s, output: 178.83 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:08<00:09,  1.14s/it, est. speed input: 77.29 toks/s, output: 200.69 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:16<00:06,  1.50s/it, est. speed input: 60.58 toks/s, output: 253.64 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:19<00:00,  7.15s/it, est. speed input: 16.77 toks/s, output: 111.98 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:19<00:00,  4.98s/it, est. speed input: 16.77 toks/s, output: 111.98 toks/s]
+[evalplus] generate 320:324 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:12,  1.05s/it, est. speed input: 77.02 toks/s, output: 162.36 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.50it/s, est. speed input: 136.81 toks/s, output: 277.59 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.61it/s, est. speed input: 199.55 toks/s, output: 441.79 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  2.23it/s, est. speed input: 214.30 toks/s, output: 455.38 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  1.96it/s, est. speed input: 214.30 toks/s, output: 455.38 toks/s]
+[evalplus] generate 324:328 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:06,  1.88it/s, est. speed input: 171.35 toks/s, output: 177.00 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:06<00:06,  1.26it/s, est. speed input: 153.51 toks/s, output: 186.57 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:01,  2.03it/s, est. speed input: 223.11 toks/s, output: 354.93 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.57it/s, est. speed input: 239.15 toks/s, output: 458.01 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:07<00:00,  2.13it/s, est. speed input: 239.15 toks/s, output: 458.01 toks/s]
+[evalplus] generate 328:332 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.06it/s, est. speed input: 109.14 toks/s, output: 179.34 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:06<00:06,  1.24it/s, est. speed input: 142.62 toks/s, output: 253.82 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:07<00:02,  1.70it/s, est. speed input: 190.13 toks/s, output: 356.67 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:11<00:00,  1.39it/s, est. speed input: 162.93 toks/s, output: 376.35 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:11<00:00,  1.38it/s, est. speed input: 162.93 toks/s, output: 376.35 toks/s]
+[evalplus] generate 332:336 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:14,  1.19s/it, est. speed input: 144.83 toks/s, output: 178.93 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.57it/s, est. speed input: 183.76 toks/s, output: 305.40 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:07<00:02,  1.76it/s, est. speed input: 236.23 toks/s, output: 376.85 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:16<00:00,  1.25s/it, est. speed input: 130.71 toks/s, output: 266.40 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:16<00:00,  1.06s/it, est. speed input: 130.71 toks/s, output: 266.40 toks/s]
+[evalplus] generate 336:340 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:14,  1.25s/it, est. speed input: 79.40 toks/s, output: 167.02 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:06<00:01,  2.08it/s, est. speed input: 167.35 toks/s, output: 387.15 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:46<00:00,  3.80s/it, est. speed input: 31.27 toks/s, output: 186.86 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [00:46<00:00,  2.93s/it, est. speed input: 31.27 toks/s, output: 186.86 toks/s]
+[evalplus] generate 340:344 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:07,  1.67it/s, est. speed input: 135.00 toks/s, output: 175.42 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:05<00:05,  1.38it/s, est. speed input: 153.26 toks/s, output: 223.14 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:07<00:02,  1.74it/s, est. speed input: 177.48 toks/s, output: 306.16 toks/s]
+Processed prompts: 100%|██████████| 16/16 [01:50<00:00, 10.53s/it, est. speed input: 14.74 toks/s, output: 113.82 toks/s] 
+Processed prompts: 100%|██████████| 16/16 [01:50<00:00,  6.90s/it, est. speed input: 14.74 toks/s, output: 113.82 toks/s]
+[evalplus] generate 344:348 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:10,  1.14it/s, est. speed input: 95.59 toks/s, output: 180.38 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.62it/s, est. speed input: 196.75 toks/s, output: 402.56 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.84it/s, est. speed input: 239.52 toks/s, output: 469.76 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.51it/s, est. speed input: 239.52 toks/s, output: 469.76 toks/s]
+[evalplus] generate 348:352 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:11,  1.05it/s, est. speed input: 102.05 toks/s, output: 179.90 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:06<00:06,  1.25it/s, est. speed input: 120.87 toks/s, output: 268.32 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:08<00:02,  1.55it/s, est. speed input: 175.75 toks/s, output: 365.39 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  2.36it/s, est. speed input: 212.18 toks/s, output: 453.33 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  1.83it/s, est. speed input: 212.18 toks/s, output: 453.33 toks/s]
+[evalplus] generate 352:356 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:06<00:18,  1.50s/it, est. speed input: 63.17 toks/s, output: 157.10 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:06<00:05,  1.52it/s, est. speed input: 110.02 toks/s, output: 308.11 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:13<00:04,  1.17s/it, est. speed input: 77.16 toks/s, output: 258.38 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:20<00:00,  1.41s/it, est. speed input: 78.80 toks/s, output: 268.11 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:20<00:00,  1.28s/it, est. speed input: 78.80 toks/s, output: 268.11 toks/s]
+[evalplus] generate 356:360 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:02<00:07,  1.52it/s, est. speed input: 138.27 toks/s, output: 175.50 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:04,  1.98it/s, est. speed input: 169.34 toks/s, output: 285.93 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:07<00:02,  1.63it/s, est. speed input: 148.29 toks/s, output: 325.61 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:11<00:00,  1.26it/s, est. speed input: 120.71 toks/s, output: 344.33 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:11<00:00,  1.40it/s, est. speed input: 120.71 toks/s, output: 344.33 toks/s]
+[evalplus] generate 360:364 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:10,  1.17it/s, est. speed input: 127.83 toks/s, output: 166.54 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.62it/s, est. speed input: 231.97 toks/s, output: 331.38 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  2.13it/s, est. speed input: 200.33 toks/s, output: 386.44 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  2.69it/s, est. speed input: 256.08 toks/s, output: 534.66 toks/s]
+[evalplus] generate 364:368 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:01<00:05,  2.01it/s, est. speed input: 165.21 toks/s, output: 173.26 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:02<00:02,  3.79it/s, est. speed input: 303.01 toks/s, output: 322.26 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  2.54it/s, est. speed input: 234.12 toks/s, output: 343.97 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  1.54it/s, est. speed input: 161.79 toks/s, output: 285.64 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:08<00:00,  1.83it/s, est. speed input: 161.79 toks/s, output: 285.64 toks/s]
+[evalplus] generate 368:372 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:04<00:13,  1.11s/it, est. speed input: 71.12 toks/s, output: 151.23 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:04<00:03,  2.11it/s, est. speed input: 140.66 toks/s, output: 321.31 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:05<00:01,  3.07it/s, est. speed input: 190.17 toks/s, output: 425.35 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  3.31it/s, est. speed input: 218.21 toks/s, output: 528.30 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:06<00:00,  2.57it/s, est. speed input: 218.21 toks/s, output: 528.30 toks/s]
+[evalplus] generate 372:376 / 378
+
+Processed prompts:   0%|          | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  25%|██▌       | 4/16 [00:03<00:09,  1.26it/s, est. speed input: 106.73 toks/s, output: 148.16 toks/s]
+Processed prompts:  50%|█████     | 8/16 [00:03<00:03,  2.23it/s, est. speed input: 174.08 toks/s, output: 284.12 toks/s]
+Processed prompts:  75%|███████▌  | 12/16 [00:04<00:01,  3.92it/s, est. speed input: 288.76 toks/s, output: 454.84 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  3.24it/s, est. speed input: 267.80 toks/s, output: 453.11 toks/s]
+Processed prompts: 100%|██████████| 16/16 [00:05<00:00,  2.83it/s, est. speed input: 267.80 toks/s, output: 453.11 toks/s]
+[evalplus] generate 376:378 / 378
+
+Processed prompts:   0%|          | 0/8 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  50%|█████     | 4/8 [00:02<00:02,  1.72it/s, est. speed input: 161.76 toks/s, output: 183.70 toks/s]
+Processed prompts: 100%|██████████| 8/8 [00:07<00:00,  1.06it/s, est. speed input: 109.30 toks/s, output: 204.03 toks/s]
+Processed prompts: 100%|██████████| 8/8 [00:07<00:00,  1.12it/s, est. speed input: 109.30 toks/s, output: 204.03 toks/s]
+[evalplus] wrote generations → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_qwen3_4b_instruct_ckpt100/mbppplus_4b_instruct_nothink.generations.json
+[evalplus] wrote samples → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_qwen3_4b_instruct_ckpt100/mbppplus_4b_instruct_nothink.samples.jsonl
+[evalplus] wrote metrics → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_qwen3_4b_instruct_ckpt100/mbppplus_4b_instruct_nothink.json
+[rank0]:[W1003 22:33:58.796449751 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[evalplus] submitting CPU judge: /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/scripts/eval_code/4b_instruct/mbppplus_nothink_judge.sh
+[evalplus] generations=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_qwen3_4b_instruct_ckpt100/mbppplus_4b_instruct_nothink.generations.json
+sbatch: ╔════════════════════════════════════════════════════════════╗
+sbatch: ║ 装置四 - 参数检查脚本
+sbatch: ║ Device IV - Parameter Checking Script
+sbatch: ╠════════════════════════════════════════════════════════════╣
+sbatch: ║ 版本: v1.0.5
+sbatch: ║ 时间: 2026-10-03 22:34:00
+sbatch: ╚════════════════════════════════════════════════════════════╝
+sbatch: [提示] 您可在提交作业时通过-p/--partition参数指定分区，可用逗号分开，指定多个分区，如 -p GPUA800,GPUA800L,GPUA40S
+sbatch: [提示] 您可在提交作业时通过--mem(min_mem_per_node)或--mem-per-cpu(min_mem_per_cpu)或--mem-per-gpu(mem_per_tres)参数指定内存
+sbatch: [提示] 您可在提交作业时通过-c/--cpus-per-task(cpus_per_task)或者--cpus-per-gpu=(cpus_per_tres)参数指定CPU
+sbatch: [提示] 您可在提交作业时通过--gres或-G/--gpus或--gpus-per-node或--gpus-per-socket或--gpus-per-task或--tres-per-task参数指定GPU
+sbatch: [提示] 您可在提交作业时通过-n/--ntasks(num_tasks)或--ntasks-per-node或--ntasks-per-socket或--ntasks-per-core或--ntasks-per-gpu参数指定task
+sbatch: [提示] 您可在提交作业时通过-N/--nodes参数指定node
+sbatch: [提示] 您可在提交作业时通过-t/--time(任务最大运行时限time_limit)或--time-min(任务最少需要运行多久,任务可比最少运行时间提前结束)或参数指定任务时长
+sbatch: [装置四->参数检查->分区] partition: C64M512G
+sbatch: [装置四->参数检查->内存] min_mem_per_node: 未设置
+sbatch: [装置四->参数检查->内存] min_mem_per_cpu: 未设置
+sbatch: [装置四->参数检查->内存] mem_per_tres: nil MB
+sbatch: [装置四->参数检查->内存] 提醒：您未指定内存参数，将使用分区的默认值：DefMemPerCPU=7968 MB
+sbatch: [装置四->参数检查->CPU] min_cpus: 48
+sbatch: [装置四->参数检查->CPU] cpus_per_task: 48
+sbatch: [装置四->参数检查->CPU] max_cpus: NO_VAL
+sbatch: [装置四->参数检查->CPU] cpus_per_tres: 未设置
+sbatch: [装置四->参数检查->gres] gres: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_node: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_task: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_socket: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_job: 未设置
+sbatch: [装置四->参数检查->task] num_tasks: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_node: 1
+sbatch: [装置四->参数检查->task] ntasks_per_socket: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_core: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_gpu: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_tres: NO_VAL
+sbatch: [装置四->参数检查->task] tres_per_task: 未设置
+sbatch: [装置四->参数检查->node] min_nodes: 1
+sbatch: [装置四->参数检查->node] max_nodes: 1
+sbatch: [装置四->参数检查->time] time_limit: 720 Min
+sbatch: [装置四->参数检查->time] time_min: NO_VAL
+sbatch: [装置四->参数检查->合理性检查->说明]
+sbatch: [装置四->参数检查->合理性检查->说明] 为给大家提供更好的作业运行体验，我们对作业参数进行了合理性检查，方案如下：
+sbatch: [装置四->参数检查->合理性检查->说明] 1、任务最大运行时长参数强制要求为必填项(调度算法使用)
+sbatch: [装置四->参数检查->合理性检查->说明]    用户必须通过-t/--time参数指定任务最大运行时长，否则作业将被拒绝
+sbatch: [装置四->参数检查->合理性检查->说明]    用户可设置的任务最大运行时长，为任务提交到的分区所允许的最大时长
+sbatch: [装置四->参数检查->合理性检查->说明] 2、建议用户填写作业预估的最小运行时间(调度算法使用)--time-min，用户填写数量越多，任务调度效率越高
+sbatch: [装置四->参数检查->合理性检查->说明] 3、用户填写的参数或未填写的参数，如未特别说明，此拦截脚本不做任何更改，将由slurm默认分配
+sbatch: [装置四->参数检查->合理性检查->说明] 4、slurm将根据节点上CPU、内存、GPU等资源按比例分配或按固定数量分配给您提交的任务
+sbatch: [装置四->参数检查->合理性检查->说明]    您提交的值ReqTRES，不一定与slurm实际为您分配到的值AllocTRES相同
+sbatch: [装置四->参数检查->合理性检查->说明] 5、交互式任务的最大运行时间，已限制为不超过6小时，若在GPU分区运行，最大使用GPU卡数为2张
+sbatch: [装置四->参数检查->合理性检查->说明] 6、slurm已开启Slurm Priority Multifactor（官方多因子优先级调度算法），动态调整任务的优先级，以实现更好的作业运行体验
+sbatch: [装置四->参数检查->合理性检查->说明]    用户公平因子（Fairshare）：基于用户历史消耗资源 / 运行时长扣分（历史占资源越多，优先级越低）
+sbatch: [装置四->参数检查->合理性检查->说明]    资源大小因子（Size Factor）：小任务优先 / 大任务加权可调
+sbatch: [装置四->参数检查->合理性检查->说明]    任务等待时长（Age Factor）：排队越久加分，防饥饿
+sbatch: [装置四->参数检查->合理性检查->说明]    QOS / 锁定标记区分权重（QOS Factor）：给锁定用户单独 QOS，设置独立权重
+sbatch: [装置四->参数检查->合理性检查->说明] 如您执行遇到拦截脚本的问题，请及时反馈，我们会尽快修复！同时也谢谢大家提的宝贵意见
+sbatch: [装置四->参数检查->合理性检查->说明]
+sbatch: [装置四->参数检查->合理性检查->资源配比->CPU] 从cpus_per_task获取: 48
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] num_nodes: 1
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] num_cpus_per_node: 48
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] 检测到用户未指定内存数量，将由slurm自动分配
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] 检查通过，最终资源以slurm自动分配结果为准
+sbatch: ╔════════════════════════════════════════════════════════════╗
+sbatch: ║ 参数检查完成
+sbatch: ║ All Checks Passed
+sbatch: ╚════════════════════════════════════════════════════════════╝
+Submitted batch job 3909917
+[evalplus] avg_output_tokens=296.9 (n=1512 median=196.0 min=77 max=32677)

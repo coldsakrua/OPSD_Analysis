@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate SLURM scripts for OMR full-solution teacher-prefix analysis (10 models)."""
+"""Generate SLURM scripts for OMR full-solution teacher-prefix analysis (11 models)."""
 
 from __future__ import annotations
 
@@ -14,8 +14,8 @@ from common.model_registry import get_model_config, model_launch_overrides  # no
 # Teacher prompt ≤2k (trimmed full solution); seq ≤3072.
 # Full [B,S,V] fp32 logits dominate VRAM; keep score batch conservative.
 #   small ≤1.7B (~3.5GB w) → B=8; medium 4B (~8GB) → B=4; large 7B (~14GB) → B=2
-SCORE_BATCH = {"small": 8, "medium": 4, "large": 2}
-GEN_BATCH = {"small": 256, "medium": 256, "large": 128}
+SCORE_BATCH = {"small": 8, "medium": 4, "large": 2, "xlarge": 1}
+GEN_BATCH = {"small": 256, "medium": 256, "large": 128, "xlarge": 64}
 TIER = {
     "qwen3_06b": "small",
     "deepseek_r1_1.5b": "small",
@@ -27,6 +27,7 @@ TIER = {
     "olmo3_7b_think": "large",
     "falcon_h1r_7b": "large",
     "mimo_7b_rl": "large",
+    "qwen3_8b": "xlarge",
 }
 
 MODELS: list[tuple[str, str, str]] = [
@@ -35,6 +36,7 @@ MODELS: list[tuple[str, str, str]] = [
     ("qwen3_4b", "st_tt", "4b"),
     ("qwen3_4b_instruct", "snt_tnt", "4bi"),
     ("qwen3_4b_thinking", "st_tt", "4bt"),
+    ("qwen3_8b", "st_tt", "8b"),
     ("mimo_7b_rl", "st_tt", "mimo7b"),
     ("deepseek_r1_1.5b", "st_tt", "ds1p5b"),
     ("falcon_h1r_7b", "st_tt", "falcon7b"),
@@ -142,6 +144,7 @@ def render(model_key: str, combo: str, short: str) -> str:
         if reasoning_parser:
             extra += f'\nEXTRA_ARGS+=(--reasoning-parser "{reasoning_parser}")'
 
+    wall = "12:00:00" if model_key == "qwen3_8b" else "3:00:00"
     return f"""#!/bin/bash
 {exclude}#SBATCH --job-name={job_name}
 #SBATCH --output=log/data_analysis/22_omr/%x.%j.out
@@ -151,11 +154,11 @@ def render(model_key: str, combo: str, short: str) -> str:
 #SBATCH --cpus-per-task=7
 #SBATCH --gres=gpu:1
 #SBATCH --mem=80G
-#SBATCH --time=3:00:00
+#SBATCH --time={wall}
 set -euo pipefail
 
 # OMR full-solution teacher_prefix ({combo} / {model_key})
-# Shared 2048 problems × 2 rollouts; privilege=solution (opsd).
+# Shared 2048 problems × 2 rollouts (same set/order as answer-only); privilege=solution (opsd).
 # Teacher prompt ≤2048, completion ≤1024 → seq ≤3072.
 # SCORE_BATCH/GEN_BATCH calibrated for 2k teacher prompts on A800 80GB.
 
@@ -255,12 +258,13 @@ def main() -> None:
     submit = OUT_DIR / "submit_all.sh"
     submit.write_text(
         """#!/bin/bash
-# Submit all 10 OMR full-solution teacher_prefix jobs.
+# Submit all OMR full-solution teacher_prefix jobs (incl. qwen3_8b).
 # Requires shared parquet from scripts/data/prepare_omr_solution_shared2048.sh
+# (same 2048 problems/order as OMR answer-only shared2048).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "${ROOT}"
-DS="${ROOT}/data/openmathreasoning/preprocessed/omr.opsd.solution.postthink.shared2048.seed42.maxprompt4096.parquet"
+DS="${ROOT}/data/openmathreasoning/preprocessed/omr.opsd.solution.postthink.shared2048.seed42.maxprompt2048.parquet"
 if [[ ! -f "${DS}" ]]; then
   echo "[error] missing ${DS}" >&2
   echo "[error] run prepare first: sbatch scripts/data/prepare_omr_solution_shared2048.sh" >&2

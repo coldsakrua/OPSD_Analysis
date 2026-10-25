@@ -154,6 +154,7 @@ def load_sft_dataset(
     dataset_path: str,
     *,
     enable_thinking: bool = True,
+    add_math_instruction: bool = True,
     num_proc: int | None = None,
 ) -> Dataset:
     """Load parquet / HF disk dataset for SFTTrainer.
@@ -208,7 +209,14 @@ def load_sft_dataset(
     def _map(batch: dict[str, list[Any]]) -> dict[str, list[Any]]:
         n = len(next(iter(batch.values())))
         rows = [{k: batch[k][i] for k in batch} for i in range(n)]
-        normalized = [normalize_sft_row(r, enable_thinking=enable_thinking) for r in rows]
+        normalized = [
+            normalize_sft_row(
+                r,
+                enable_thinking=enable_thinking,
+                add_math_instruction=add_math_instruction,
+            )
+            for r in rows
+        ]
         keys = set().union(*(r.keys() for r in normalized))
         return {k: [r.get(k) for r in normalized] for k in keys}
 

@@ -1,10 +1,11 @@
 #!/bin/bash
-# Submit all 10 OMR full-solution teacher_prefix jobs.
+# Submit all OMR full-solution teacher_prefix jobs (incl. qwen3_8b).
 # Requires shared parquet from scripts/data/prepare_omr_solution_shared2048.sh
+# (same 2048 problems/order as OMR answer-only shared2048).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "${ROOT}"
-DS="${ROOT}/data/openmathreasoning/preprocessed/omr.opsd.solution.postthink.shared2048.seed42.maxprompt4096.parquet"
+DS="${ROOT}/data/openmathreasoning/preprocessed/omr.opsd.solution.postthink.shared2048.seed42.maxprompt2048.parquet"
 if [[ ! -f "${DS}" ]]; then
   echo "[error] missing ${DS}" >&2
   echo "[error] run prepare first: sbatch scripts/data/prepare_omr_solution_shared2048.sh" >&2

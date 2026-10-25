@@ -7,9 +7,24 @@ checkpoint-*/
 *.safetensors
 *.ckpt
 
-# Eval outputs (large per-sample dumps; keep metrics)
+# Eval outputs — large per-sample dumps only; keep summaries
+# Math: ignore bulky .results.json; keep *.metrics.json (summary)
 eval_outputs/**/*.results.json
 *.results.json
+!eval_outputs/**/*.metrics.json
+
+# Code: ignore full model replies (generations); keep bare *.json summaries
+# (scoped by benchmark name so math dumps are never matched)
+eval_outputs/**/*humaneval*.generations.json
+eval_outputs/**/*humaneval*.generations.jsonl
+eval_outputs/**/*mbpp*.generations.json
+eval_outputs/**/*mbpp*.generations.jsonl
+eval_outputs/**/*lcb*.generations.json
+eval_outputs/**/*lcb*.generations.jsonl
+eval_outputs/**/*apps*.generations.json
+eval_outputs/**/*apps*.generations.jsonl
+eval_outputs/**/*livecodebench*.generations.json
+eval_outputs/**/*livecodebench*.generations.jsonl
 
 # Logs
 # log/

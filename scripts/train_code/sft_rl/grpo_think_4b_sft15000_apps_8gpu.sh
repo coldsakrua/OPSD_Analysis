@@ -1,0 +1,51 @@
+#!/bin/bash
+#SBATCH --job-name=grpo_4b_apps
+#SBATCH --output=log/train_code/sft_rl/grpo_think_4b_ocr_sft15000_apps_8gpu.%j.out
+#SBATCH --partition=GPUA800,GPUA800S,GPUA800L
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=56
+#SBATCH --gres=gpu:8
+#SBATCH --mem=800G
+#SBATCH --time=160:00:00
+set -euo pipefail
+
+# Qwen3-4B-Base OCR SFT@15000 → GRPO on APPS (eval_code reward).
+# OCR ckpt: sft_think_4gpu_12k_ocr/3925962 (≠ OMR outputs/.../checkpoint-15000)
+
+BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
+export NUM_GPUS=${NUM_GPUS:-8}
+export ROLLOUT_GPUS=${ROLLOUT_GPUS:-3}
+export TRAIN_GPUS=${TRAIN_GPUS:-5}
+
+MODEL_PATH=${MODEL_PATH:-${BASE_DIR}/outputs/qwen3_4b_base/sft_think_4gpu_12k_ocr/3925962/checkpoint-15000}
+CHAT_TEMPLATE_PATH=${CHAT_TEMPLATE_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/qwen3-4b}
+MODEL_TAG=${MODEL_TAG:-qwen3_4b_base}
+RUN_NAME=${RUN_NAME:-grpo_think_4b_ocr_sft15000_apps_8gpu}
+
+MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-2048}
+MAX_STEPS=${MAX_STEPS:-200}
+SAVE_STEPS=${SAVE_STEPS:-25}
+OVERLONG_PENALTY_ENABLE=${OVERLONG_PENALTY_ENABLE:-false}
+
+TRAIN_BATCH_SIZE=${TRAIN_BATCH_SIZE:-16}
+PPO_MINI_BATCH_SIZE=${PPO_MINI_BATCH_SIZE:-8}
+PPO_MICRO_BATCH_SIZE_PER_GPU=${PPO_MICRO_BATCH_SIZE_PER_GPU:-1}
+LOG_PROB_MICRO_BATCH_SIZE_PER_GPU=${LOG_PROB_MICRO_BATCH_SIZE_PER_GPU:-1}
+PPO_MAX_TOKEN_LEN_PER_GPU=${PPO_MAX_TOKEN_LEN_PER_GPU:-24576}
+MAX_NUM_BATCHED_TOKENS=${MAX_NUM_BATCHED_TOKENS:-24576}
+VLLM_GPU_MEM_UTIL=${VLLM_GPU_MEM_UTIL:-0.75}
+
+DATASET_PATH=${DATASET_PATH:-${BASE_DIR}/data/apps/preprocessed/apps.traintest.qwen3.think.maxprompt${MAX_PROMPT_LENGTH}.maxtests10.parquet}
+VAL_DATASET_PATH=${VAL_DATASET_PATH:-${BASE_DIR}/data/apps/preprocessed/apps.test.qwen3.think.maxprompt${MAX_PROMPT_LENGTH}.maxtests10.parquet}
+
+export WANDB_PROJECT=${WANDB_PROJECT:-SFT_RL_GRPO_APPS}
+export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-qwen3_4b_ocr_sft15000_grpo_apps}
+
+export BASE_DIR MODEL_PATH CHAT_TEMPLATE_PATH MODEL_TAG RUN_NAME
+export MAX_PROMPT_LENGTH MAX_STEPS SAVE_STEPS OVERLONG_PENALTY_ENABLE
+export TRAIN_BATCH_SIZE PPO_MINI_BATCH_SIZE PPO_MICRO_BATCH_SIZE_PER_GPU
+export LOG_PROB_MICRO_BATCH_SIZE_PER_GPU PPO_MAX_TOKEN_LEN_PER_GPU MAX_NUM_BATCHED_TOKENS
+export VLLM_GPU_MEM_UTIL DATASET_PATH VAL_DATASET_PATH
+
+exec bash "${BASE_DIR}/scripts/train_code/sft_rl/_run_grpo_apps.sh"

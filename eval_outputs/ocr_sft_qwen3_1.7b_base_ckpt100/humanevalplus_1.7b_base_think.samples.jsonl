@@ -1,0 +1,656 @@
+{"task_id": "HumanEval/0", "solution": ""}
+{"task_id": "HumanEval/0", "solution": ""}
+{"task_id": "HumanEval/0", "solution": "def has_close_elements(numbers, threshold):\n    numbers.sort()\n    for i in range(len(numbers)):\n        for j in range(i + 1, len(numbers)):\n            if numbers[j] - numbers[i] < threshold:\n                return True\n    return False"}
+{"task_id": "HumanEval/0", "solution": "def has_close_elements(numbers, threshold):\n    numbers.sort()\n    for i in range(len(numbers) - 1):\n        if numbers[i+1] - numbers[i] < threshold:\n            return True\n    return False"}
+{"task_id": "HumanEval/1", "solution": ""}
+{"task_id": "HumanEval/1", "solution": ""}
+{"task_id": "HumanEval/1", "solution": ""}
+{"task_id": "HumanEval/1", "solution": ""}
+{"task_id": "HumanEval/2", "solution": "import math\ndef truncate_number(number):\n    return number - math.floor(number)"}
+{"task_id": "HumanEval/2", "solution": ""}
+{"task_id": "HumanEval/2", "solution": ""}
+{"task_id": "HumanEval/2", "solution": ""}
+{"task_id": "HumanEval/3", "solution": ""}
+{"task_id": "HumanEval/3", "solution": ""}
+{"task_id": "HumanEval/3", "solution": "from typing import List\ndef below_zero(operations: List[int]) -> bool:\n    balance = 0\n    for op in operations:\n        balance += op\n        if balance < 0:\n            return True\n    return False"}
+{"task_id": "HumanEval/3", "solution": "def below_zero(operations):\n    balance = 0\n    for op in operations:\n        balance += op\n        if balance < 0:\n            return True\n    return False"}
+{"task_id": "HumanEval/4", "solution": "from typing import List\ndef mean_absolute_deviation(numbers: List[float]) -> float:\n    mean = sum(numbers) / len(numbers)\n    sum_abs = sum(abs(x - mean) for x in numbers)\n    return sum_abs / len(numbers)"}
+{"task_id": "HumanEval/4", "solution": "from typing import List\ndef mean_absolute_deviation(numbers: List[float]) -> float:\n    if not numbers:\n        return 0.0\n    n = len(numbers)\n    mean = sum(numbers) / n\n    total = sum(abs(num - mean) for num in numbers)\n    return total / n"}
+{"task_id": "HumanEval/4", "solution": "from typing import List\ndef mean_absolute_deviation(numbers: List[float]) -> float:\n    n = len(numbers)\n    mean = sum(numbers) / n\n    total = sum(abs(x - mean) for x in numbers)\n    return total / n"}
+{"task_id": "HumanEval/4", "solution": "from typing import List\ndef mean_absolute_deviation(numbers: List[float]) -> float:\n    n = len(numbers)\n    mean = sum(numbers) / n\n    mad = sum(abs(x - mean) for x in numbers) / n\n    return mad"}
+{"task_id": "HumanEval/5", "solution": "from typing import List\ndef intersperse(numbers: List[int], delimeter: int) -> List[int]:\n    if not numbers:\n        return []\n    result = []\n    for i in range(len(numbers) - 1):\n        result.append(numbers[i])\n        result.append(delimeter)\n    result.append(numbers[-1])\n    return result"}
+{"task_id": "HumanEval/5", "solution": ""}
+{"task_id": "HumanEval/5", "solution": ""}
+{"task_id": "HumanEval/5", "solution": ""}
+{"task_id": "HumanEval/6", "solution": ""}
+{"task_id": "HumanEval/6", "solution": "def parse_nested_parens(paren_string):\n    groups = paren_string.split()\n    result = []\n    for group in groups:\n        stack = []\n        current_depth = 0\n        max_depth = 0\n        for char in group:\n            if char == '(':\n                stack.append(current_depth + 1)\n                current_depth += 1\n            else:\n                popped = stack.pop()\n                if popped > max_depth:\n                    max_depth = popped\n                current_depth -= 1\n        result.append(max_depth)\n    return result"}
+{"task_id": "HumanEval/6", "solution": ""}
+{"task_id": "HumanEval/6", "solution": ""}
+{"task_id": "HumanEval/7", "solution": ""}
+{"task_id": "HumanEval/7", "solution": ""}
+{"task_id": "HumanEval/7", "solution": "def filter_by_substring(strings: List[str], substring: str) -> List[str]:\n    return [s for s in strings if substring in s]"}
+{"task_id": "HumanEval/7", "solution": ""}
+{"task_id": "HumanEval/8", "solution": "from typing import List, Tuple\ndef sum_product(numbers: List[int]) -> Tuple[int, int]:\n    if not numbers:\n        return (0, 1)\n    total_sum = sum(numbers)\n    total_product = 1\n    for num in numbers:\n        total_product *= num\n    return (total_sum, total_product)"}
+{"task_id": "HumanEval/8", "solution": "def sum_product(numbers):\n    if not numbers:\n        return (0, 1)\n    total_sum = sum(numbers)\n    total_product = 1\n    for num in numbers:\n        total_product *= num\n    return (total_sum, total_product)"}
+{"task_id": "HumanEval/8", "solution": "def sum_product(numbers):\n    sum_total = sum(numbers) if numbers else 0\n    product_total = reduce(lambda x, y: x * y, numbers, 1) if numbers else 1\n    return (sum_total, product_total)"}
+{"task_id": "HumanEval/8", "solution": ""}
+{"task_id": "HumanEval/9", "solution": ""}
+{"task_id": "HumanEval/9", "solution": "def rolling_max(numbers):\n    if not numbers:\n        return []\n    current_max = numbers[0]\n    result = [current_max]\n    for num in numbers[1:]:\n        if num > current_max:\n            current_max = num\n        result.append(current_max)\n    return result"}
+{"task_id": "HumanEval/9", "solution": "def rolling_max(numbers):\n    result = []\n    current_max = -float('inf')\n    for num in numbers:\n        current_max = max(current_max, num)\n        result.append(current_max)\n    return result"}
+{"task_id": "HumanEval/9", "solution": "def rolling_max(numbers):\n    if not numbers:\n        return []\n    max_so_far = -float('inf')\n    result = []\n    for num in numbers:\n        if num > max_so_far:\n            max_so_far = num\n        result.append(max_so_far)\n    return result"}
+{"task_id": "HumanEval/10", "solution": ""}
+{"task_id": "HumanEval/10", "solution": ""}
+{"task_id": "HumanEval/10", "solution": "def is_palindrome(s):\n    return s == s[::-1]\ndef make_palindrome(s):\n    n = len(s)\n    s_rev = s[::-1]\n    for l in range(n, 0, -1):\n        if is_palindrome(s_rev[:l]):\n            return s + s_rev[l:][::-1]\n    return s + s_rev[::-1]"}
+{"task_id": "HumanEval/10", "solution": ""}
+{"task_id": "HumanEval/11", "solution": ""}
+{"task_id": "HumanEval/11", "solution": ""}
+{"task_id": "HumanEval/11", "solution": "from typing import List\ndef string_xor(a: str, b: str) -> str:\n    max_len = max(len(a), len(b))\n    a_list = list(a)\n    b_list = list(b)\n    \n    while len(a_list) < max_len:\n        a_list.append('0')\n    while len(b_list) < max_len:\n        b_list.append('0')\n    \n    result = []\n    for i in range(max_len):\n        a_char = a_list[i]\n        b_char = b_list[i]\n        xor = int(a_char) ^ int(b_char)\n        result.append(str(xor))\n    return ''.join(result)"}
+{"task_id": "HumanEval/11", "solution": ""}
+{"task_id": "HumanEval/12", "solution": "def longest(strings):\n    if not strings:\n        return None\n    max_len = -1\n    res = None\n    for s in strings:\n        current_len = len(s)\n        if current_len > max_len:\n            max_len = current_len\n            res = s\n        elif current_len == max_len:\n            # Since we want the first occurrence of the maximum length, no action needed\n            pass\n    return res"}
+{"task_id": "HumanEval/12", "solution": "def longest(strings):\n    if not strings:\n        return None\n    max_length = None\n    max_string = None\n    for s in strings:\n        current_length = len(s)\n        if current_length > max_length:\n            max_length = current_length\n            max_string = s\n    return max_string"}
+{"task_id": "HumanEval/12", "solution": "def longest(strings):\n    if not strings:\n        return None\n    max_len = max(len(s) for s in strings)\n    candidates = [s for s in strings if len(s) == max_len]\n    return candidates[0]"}
+{"task_id": "HumanEval/12", "solution": "from typing import List, Optional\ndef longest(strings: List[str]) -> Optional[str]:\n    max_len = -1\n    max_str = None\n    for s in strings:\n        current_len = len(s)\n        if current_len > max_len:\n            max_len = current_len\n            max_str = s\n        elif current_len == max_len:\n            if max_str is None:\n                max_str = s\n    return max_str if max_str is not None else None"}
+{"task_id": "HumanEval/13", "solution": ""}
+{"task_id": "HumanEval/13", "solution": "def greatest_common_divisor(a: int, b: int) -> int:\n    while b != 0:\n        remainder = a % b\n        a, b = b, remainder\n    return a"}
+{"task_id": "HumanEval/13", "solution": ""}
+{"task_id": "HumanEval/13", "solution": "def greatest_common_divisor(a: int, b: int) -> int:\n    a, b = abs(a), abs(b)\n    while b != 0:\n        a, b = b, a % b\n    return a"}
+{"task_id": "HumanEval/14", "solution": "from typing import List\ndef all_prefixes(s: str) -> List[str]:\n    return [s[:i+1] for i in range(len(s))]"}
+{"task_id": "HumanEval/14", "solution": "def all_prefixes(s):\n    return [s[:i] for i in range(1, len(s) + 1)]"}
+{"task_id": "HumanEval/14", "solution": "def all_prefixes(string):\n    return [string[:i] for i in range(1, len(string) + 1)]"}
+{"task_id": "HumanEval/14", "solution": ""}
+{"task_id": "HumanEval/15", "solution": "def string_sequence(n):\n    return ' '.join(map(str, range(n + 1)))"}
+{"task_id": "HumanEval/15", "solution": ""}
+{"task_id": "HumanEval/15", "solution": "def string_sequence(n):\n    return ' '.join(map(str, range(n + 1)))"}
+{"task_id": "HumanEval/15", "solution": "def string_sequence(n):\n    return ' '.join(map(str, range(n + 1)))"}
+{"task_id": "HumanEval/16", "solution": "def count_distinct_characters(s):\n    return len(set(s.lower()))"}
+{"task_id": "HumanEval/16", "solution": "def count_distinct_characters(s):\n    s_lower = s.lower()\n    seen = set()\n    for char in s_lower:\n        if char not in seen:\n            seen.add(char)\n    return len(seen)"}
+{"task_id": "HumanEval/16", "solution": "def count_distinct_characters(string: str) -> int:\n    lower_case = string.lower()\n    unique_chars = set(lower_case)\n    return len(unique_chars)"}
+{"task_id": "HumanEval/16", "solution": "def count_distinct_characters(s):\n    return len(set(s.lower()))"}
+{"task_id": "HumanEval/17", "solution": ""}
+{"task_id": "HumanEval/17", "solution": ""}
+{"task_id": "HumanEval/17", "solution": ""}
+{"task_id": "HumanEval/17", "solution": ""}
+{"task_id": "HumanEval/18", "solution": "def how_many_times(s, sub):\n    count = 0\n    sub_len = len(sub)\n    if sub_len == 0:\n        return 0\n    s_len = len(s)\n    if sub_len > s_len:\n        return 0\n    for i in range(s_len - sub_len + 1):\n        if s[i:i+sub_len] == sub:\n            count += 1\n    return count"}
+{"task_id": "HumanEval/18", "solution": "def how_many_times(string: str, substring: str) -> int:\n    count = 0\n    sub_len = len(substring)\n    if sub_len == 0 or len(string) < sub_len:\n        return count\n    for i in range(len(string) - sub_len + 1):\n        if string[i:i+sub_len] == substring:\n            count += 1\n    return count"}
+{"task_id": "HumanEval/18", "solution": "def how_many_times(s, t):\n    count = 0\n    len_t = len(t)\n    len_s = len(s)\n    if len_t == 0:\n        return count\n    for i in range(len_s - len_t + 1):\n        if s[i:i+len_t] == t:\n            count += 1\n    return count"}
+{"task_id": "HumanEval/18", "solution": ""}
+{"task_id": "HumanEval/19", "solution": "from typing import List\ndef sort_numbers(numbers: str) -> str:\n    number_words = {\n        'zero': 0,\n        'one': 1,\n        'two': 2,\n        'three': 3,\n        'four': 4,\n        'five': 5,\n        'six': 6,\n        'seven': 7,\n        'eight': 8,\n        'nine': 9\n    }\n    words = numbers.split()\n    numbers_sorted = sorted([number_words[word] for word in words])\n    words_back = [number_words[num] for num in numbers_sorted]\n    return ' '.join(words_back)"}
+{"task_id": "HumanEval/19", "solution": "from typing import List\ndef sort_numbers(numbers: str) -> str:\n    number_map = {\n        'zero': 0,\n        'one': 1,\n        'two': 2,\n        'three': 3,\n        'four': 4,\n        'five': 5,\n        'six': 6,\n        'seven': 7,\n        'eight': 8,\n        'nine': 9\n    }\n    words = numbers.split()\n    nums = [number_map[word] for word in words]\n    nums_sorted = sorted(nums)\n    sorted_words = [number_map[num] for num in nums_sorted]\n    return ' '.join(sorted_words)"}
+{"task_id": "HumanEval/19", "solution": ""}
+{"task_id": "HumanEval/19", "solution": ""}
+{"task_id": "HumanEval/20", "solution": ""}
+{"task_id": "HumanEval/20", "solution": ""}
+{"task_id": "HumanEval/20", "solution": ""}
+{"task_id": "HumanEval/20", "solution": ""}
+{"task_id": "HumanEval/21", "solution": ""}
+{"task_id": "HumanEval/21", "solution": ""}
+{"task_id": "HumanEval/21", "solution": "from typing import List\ndef rescale_to_unit(numbers: List[float]) -> List[float]:\n    min_val = min(numbers)\n    max_val = max(numbers)\n    if min_val == max_val:\n        return [1.0] * len(numbers)\n    else:\n        return [(x - min_val) / (max_val - min_val) for x in numbers]"}
+{"task_id": "HumanEval/21", "solution": "from typing import List\ndef rescale_to_unit(numbers: List[float]) -> List[float]:\n    min_val = min(numbers)\n    max_val = max(numbers)\n    if min_val == max_val:\n        return numbers.copy()\n    else:\n        scaled = [(x - min_val) / (max_val - min_val) for x in numbers]\n        return scaled"}
+{"task_id": "HumanEval/22", "solution": "def filter_integers(values: List[Any]) -> List[int]:\n    return [x for x in values if isinstance(x, int)]"}
+{"task_id": "HumanEval/22", "solution": ""}
+{"task_id": "HumanEval/22", "solution": ""}
+{"task_id": "HumanEval/22", "solution": ""}
+{"task_id": "HumanEval/23", "solution": ""}
+{"task_id": "HumanEval/23", "solution": "def strlen(s):\n    return len(s)"}
+{"task_id": "HumanEval/23", "solution": "def strlen(string: str) -> int:\n    \"\"\"Return the length of the given string.\"\"\"\n    return len(string)"}
+{"task_id": "HumanEval/23", "solution": "def strlen(string: str) -> int:\n    return len(string)"}
+{"task_id": "HumanEval/24", "solution": ""}
+{"task_id": "HumanEval/24", "solution": "def largest_divisor(n):\n    if n == 1:\n        return 0\n    if n % 2 == 0:\n        return n // 2\n    max_div = 1\n    for i in range(3, int(n**0.5) + 1, 2):\n        if n % i == 0:\n            return n // i\n    return 1"}
+{"task_id": "HumanEval/24", "solution": "def largest_divisor(n):\n    if n == 1:\n        return 0\n    spf = None\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            spf = i\n            break\n    if spf is None:\n        spf = n\n    return n // spf"}
+{"task_id": "HumanEval/24", "solution": ""}
+{"task_id": "HumanEval/25", "solution": "def factorize(n: int) -> List[int]:\n    factors = []\n    # Handle even factors of 2\n    while n % 2 == 0:\n        factors.append(2)\n        n = n // 2\n    # Check odd factors starting from 3\n    divisor = 3\n    while divisor * divisor <= n:\n        while n % divisor == 0:\n            factors.append(divisor)\n            n = n // divisor\n        divisor += 2\n    # If remaining n is a prime greater than 2\n    if n > 1:\n        factors.append(n)\n    return factors"}
+{"task_id": "HumanEval/25", "solution": ""}
+{"task_id": "HumanEval/25", "solution": ""}
+{"task_id": "HumanEval/25", "solution": ""}
+{"task_id": "HumanEval/26", "solution": "def remove_duplicates(numbers):\n    seen = set()\n    result = []\n    for num in numbers:\n        if num not in seen:\n            seen.add(num)\n            result.append(num)\n    return result"}
+{"task_id": "HumanEval/26", "solution": ""}
+{"task_id": "HumanEval/26", "solution": ""}
+{"task_id": "HumanEval/26", "solution": "from typing import List\ndef remove_duplicates(numbers: List[int]) -> List[int]:\n    seen = set()\n    result = []\n    for num in numbers:\n        if num not in seen:\n            seen.add(num)\n            result.append(num)\n    return result"}
+{"task_id": "HumanEval/27", "solution": ""}
+{"task_id": "HumanEval/27", "solution": "def flip_case(string):\n    return string.swapcase()"}
+{"task_id": "HumanEval/27", "solution": "def flip_case(string):\n    return string.swapcase()"}
+{"task_id": "HumanEval/27", "solution": "def flip_case(string: str) -> str:\n    return string.swapcase()"}
+{"task_id": "HumanEval/28", "solution": "def concatenate(strings):\n    return ''.join(strings)"}
+{"task_id": "HumanEval/28", "solution": "from typing import List\ndef concatenate(strings: List[str]) -> str:\n    return ''.join(strings)"}
+{"task_id": "HumanEval/28", "solution": "from typing import List\ndef concatenate(strings: List[str]) -> str:\n    return ''.join(strings)"}
+{"task_id": "HumanEval/28", "solution": "from typing import List\ndef concatenate(strings: List[str]) -> str:\n    return ''.join(strings)"}
+{"task_id": "HumanEval/29", "solution": "from typing import List\ndef filter_by_prefix(strings: List[str], prefix: str) -> List[str]:\n    \"\"\"Filter strings starting with the given prefix.\"\"\"\n    return [s for s in strings if s.startswith(prefix)]"}
+{"task_id": "HumanEval/29", "solution": "from typing import List\ndef filter_by_prefix(strings: List[str], prefix: str) -> List[str]:\n    return [s for s in strings if s.startswith(prefix)]"}
+{"task_id": "HumanEval/29", "solution": "from typing import List\ndef filter_by_prefix(strings: List[str], prefix: str) -> List[str]:\n    return [s for s in strings if s.startswith(prefix)]"}
+{"task_id": "HumanEval/29", "solution": "def filter_by_prefix(strings: List[str], prefix: str) -> List[str]:\n    return [s for s in strings if s.startswith(prefix)]"}
+{"task_id": "HumanEval/30", "solution": "def get_positive(l):\n    return [x for x in l if x > 0]"}
+{"task_id": "HumanEval/30", "solution": "def get_positive(l):\n    \"\"\"Return only positive numbers in the list.\"\"\"\n    return [x for x in l if x > 0]"}
+{"task_id": "HumanEval/30", "solution": "def get_positive(l):\n    return [num for num in l if num > 0]"}
+{"task_id": "HumanEval/30", "solution": "def get_positive(l):\n    return [x for x in l if x > 0]"}
+{"task_id": "HumanEval/31", "solution": "import math\ndef is_prime(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    max_divisor = math.isqrt(n) + 1\n    for d in range(3, max_divisor, 2):\n        if n % d == 0:\n            return False\n    return True"}
+{"task_id": "HumanEval/31", "solution": "def is_prime(n):\n    \"\"\"Return true if a given number is prime, and false otherwise.\n    >>> is_prime(6)\n    False\n    >>> is_prime(101)\n    True\n    >>> is_prime(11)\n    True\n    >>> is_prime(13441)\n    True\n    >>> is_prime(61)\n    True\n    >>> is_prime(4)\n    False\n    >>> is_prime(1)\n    False\n    \"\"\"\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    max_divisor = int(n**0.5) + 1\n    for i in range(3, max_divisor, 2):\n        if n % i == 0:\n            return False\n    return True"}
+{"task_id": "HumanEval/31", "solution": ""}
+{"task_id": "HumanEval/31", "solution": "import math\ndef is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(math.sqrt(n)) + 1):\n        if n % i == 0:\n            return False\n    return True"}
+{"task_id": "HumanEval/32", "solution": ""}
+{"task_id": "HumanEval/32", "solution": ""}
+{"task_id": "HumanEval/32", "solution": ""}
+{"task_id": "HumanEval/32", "solution": ""}
+{"task_id": "HumanEval/33", "solution": ""}
+{"task_id": "HumanEval/33", "solution": ""}
+{"task_id": "HumanEval/33", "solution": ""}
+{"task_id": "HumanEval/33", "solution": ""}
+{"task_id": "HumanEval/34", "solution": "def unique(l):\n    seen = set()\n    unique_list = []\n    for num in l:\n        if num not in seen:\n            seen.add(num)\n            unique_list.append(num)\n    return sorted(unique_list)"}
+{"task_id": "HumanEval/34", "solution": ""}
+{"task_id": "HumanEval/34", "solution": "def unique(l: list):\n    \"\"\"Return sorted unique elements in a list\n    >>> unique([5, 3, 5, 2, 3, 3, 9, 0, 123])\n    [0, 2, 3, 5, 9, 123]\n    \"\"\"\n    return sorted(set(l))"}
+{"task_id": "HumanEval/34", "solution": "def unique(l: list) -> list:\n    seen = set()\n    for num in l:\n        if num not in seen:\n            seen.add(num)\n    return sorted(seen)"}
+{"task_id": "HumanEval/35", "solution": "def max_element(l):\n    \"\"\"Return the maximum element in the list.\"\"\"\n    return max(l)"}
+{"task_id": "HumanEval/35", "solution": "def max_element(l: list):\n    \"\"\"Return maximum element in the list.\"\"\"\n    return max(l)"}
+{"task_id": "HumanEval/35", "solution": "def max_element(l):\n    return max(l)"}
+{"task_id": "HumanEval/35", "solution": "def max_element(l: list) -> int:\n    return max(l)"}
+{"task_id": "HumanEval/36", "solution": ""}
+{"task_id": "HumanEval/36", "solution": ""}
+{"task_id": "HumanEval/36", "solution": ""}
+{"task_id": "HumanEval/36", "solution": "def fizz_buzz(n):\n    count = 0\n    for num in range(1, n):\n        if num % 11 == 0 or num % 13 == 0:\n            s = str(num)\n            count += s.count('7')\n    return count"}
+{"task_id": "HumanEval/37", "solution": ""}
+{"task_id": "HumanEval/37", "solution": ""}
+{"task_id": "HumanEval/37", "solution": ""}
+{"task_id": "HumanEval/37", "solution": ""}
+{"task_id": "HumanEval/38", "solution": ""}
+{"task_id": "HumanEval/38", "solution": ""}
+{"task_id": "HumanEval/38", "solution": "def decode_cyclic(s: str):\n    groups = [s[(3 * i):min(3 * i + 3, len(s))] for i in range((len(s) + 2) // 3)]\n    groups = [(group[0] + group[1:]) if len(group) == 3 else group for group in groups]\n    return \"\".join(groups)"}
+{"task_id": "HumanEval/38", "solution": ""}
+{"task_id": "HumanEval/39", "solution": ""}
+{"task_id": "HumanEval/39", "solution": ""}
+{"task_id": "HumanEval/39", "solution": ""}
+{"task_id": "HumanEval/39", "solution": "def is_prime(num):\n    if num < 2:\n        return False\n    if num == 2:\n        return True\n    if num % 2 == 0:\n        return False\n    for i in range(3, int(num**0.5) + 1, 2):\n        if num % i == 0:\n            return False\n    return True\ndef prime_fib(n):\n    a, b = 0, 1\n    count = 0\n    while True:\n        next_num = a + b\n        if next_num > 1e18:\n            return None\n        if is_prime(next_num):\n            count += 1\n            if count == n:\n                return next_num\n        a, b = b, next_num"}
+{"task_id": "HumanEval/40", "solution": "def triples_sum_to_zero(l):\n    l.sort()\n    n = len(l)\n    for i in range(n):\n        seen = set()\n        for j in range(i + 1, n):\n            target = -l[i] - l[j]\n            if target in seen:\n                return True\n            seen.add(l[j])\n    return False"}
+{"task_id": "HumanEval/40", "solution": ""}
+{"task_id": "HumanEval/40", "solution": "def triples_sum_to_zero(l: list):\n    l.sort()\n    n = len(l)\n    for i in range(n - 2):\n        left = i + 1\n        right = n - 1\n        while left < right:\n            current_sum = l[i] + l[left] + l[right]\n            if current_sum == 0:\n                return True\n            elif current_sum < 0:\n                left += 1\n            else:\n                right -= 1\n    return False"}
+{"task_id": "HumanEval/40", "solution": ""}
+{"task_id": "HumanEval/41", "solution": ""}
+{"task_id": "HumanEval/41", "solution": ""}
+{"task_id": "HumanEval/41", "solution": ""}
+{"task_id": "HumanEval/41", "solution": ""}
+{"task_id": "HumanEval/42", "solution": ""}
+{"task_id": "HumanEval/42", "solution": "def incr_list(l):\n    \"\"\"Return list with elements incremented by 1.\"\"\"\n    return [x + 1 for x in l]"}
+{"task_id": "HumanEval/42", "solution": "def incr_list(l):\n    return [x + 1 for x in l]"}
+{"task_id": "HumanEval/42", "solution": "def incr_list(l: list) -> list:\n    return [x + 1 for x in l]"}
+{"task_id": "HumanEval/43", "solution": ""}
+{"task_id": "HumanEval/43", "solution": ""}
+{"task_id": "HumanEval/43", "solution": ""}
+{"task_id": "HumanEval/43", "solution": ""}
+{"task_id": "HumanEval/44", "solution": ""}
+{"task_id": "HumanEval/44", "solution": "def change_base(x: int, base: int):\n    if base < 2 or base > 10:\n        raise ValueError(\"Base must be between 2 and 10 inclusive\")\n    digits = []\n    while x > 0:\n        rem = x % base\n        digits.append(rem)\n        x = x // base\n    digits.reverse()\n    return ''.join(str(d) if d < base else chr(ord('A') + d - 10) for d in digits)"}
+{"task_id": "HumanEval/44", "solution": ""}
+{"task_id": "HumanEval/44", "solution": "def change_base(x: int, base: int) -> str:\n    if base < 2 or x < 0:\n        return '0'\n    digits = []\n    while x > 0:\n        digits.append(x % base)\n        x = x // base\n    digits = digits[::-1]\n    return ''.join(str(d) if d < 10 else chr(ord('A') + d - 10) for d in digits)"}
+{"task_id": "HumanEval/45", "solution": "def triangle_area(a, h):\n    return (a * h) / 2"}
+{"task_id": "HumanEval/45", "solution": "def triangle_area(a, h):\n    \"\"\"Calculates the area of a triangle given a side length and its corresponding height.\"\"\"\n    return (a * h) / 2.0"}
+{"task_id": "HumanEval/45", "solution": ""}
+{"task_id": "HumanEval/45", "solution": "def triangle_area(a, h):\n    \"\"\"Calculates the area of a triangle given the length of a side and its corresponding height.\"\"\"\n    return (a * h) / 2"}
+{"task_id": "HumanEval/46", "solution": ""}
+{"task_id": "HumanEval/46", "solution": "def fib4(n):\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 0\n    elif n == 2:\n        return 2\n    elif n == 3:\n        return 0\n    else:\n        a, b, c, d = 0, 0, 2, 0\n        for i in range(4, n + 1):\n            current = a + b + c + d\n            a, b, c, d = b, c, d, current\n        return current"}
+{"task_id": "HumanEval/46", "solution": "def fib4(n):\n    if n < 0:\n        return 0\n    if n == 0:\n        return 0\n    if n == 1:\n        return 0\n    if n == 2:\n        return 2\n    if n == 3:\n        return 0\n    dp = [0] * (n + 1)\n    dp[0] = 0\n    dp[1] = 0\n    dp[2] = 2\n    dp[3] = 0\n    for i in range(4, n + 1):\n        dp[i] = dp[i-1] + dp[i-2] + dp[i-3] + dp[i-4]\n    return dp[n]"}
+{"task_id": "HumanEval/46", "solution": ""}
+{"task_id": "HumanEval/47", "solution": ""}
+{"task_id": "HumanEval/47", "solution": ""}
+{"task_id": "HumanEval/47", "solution": ""}
+{"task_id": "HumanEval/47", "solution": ""}
+{"task_id": "HumanEval/48", "solution": ""}
+{"task_id": "HumanEval/48", "solution": "def is_palindrome(text: str) -> bool:\n    return text == text[::-1]"}
+{"task_id": "HumanEval/48", "solution": "def is_palindrome(text: str) -> bool:\n    if not text:\n        return True\n    reversed_text = text[::-1]\n    return reversed_text == text"}
+{"task_id": "HumanEval/48", "solution": ""}
+{"task_id": "HumanEval/49", "solution": "def modp(n, p):\n    return pow(2, n, p)"}
+{"task_id": "HumanEval/49", "solution": "def modp(n, p):\n    return pow(2, n, p)"}
+{"task_id": "HumanEval/49", "solution": "def modp(n, p):\n    return pow(2, n, p)"}
+{"task_id": "HumanEval/49", "solution": ""}
+{"task_id": "HumanEval/50", "solution": "def decode_shift(s):\n    return ''.join([chr(((ord(ch) - ord('a') - 5) % 26) + ord('a')) for ch in s])"}
+{"task_id": "HumanEval/50", "solution": ""}
+{"task_id": "HumanEval/50", "solution": "def decode_shift(s):\n    return ''.join([chr((( (ord(ch) - ord('a') + 5) % 26 - 5 ) % 26 ) + ord('a')) for ch in s])"}
+{"task_id": "HumanEval/50", "solution": ""}
+{"task_id": "HumanEval/51", "solution": "def remove_vowels(text):\n    vowels = {'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'}\n    return ''.join([c for c in text if c.lower() not in vowels])"}
+{"task_id": "HumanEval/51", "solution": ""}
+{"task_id": "HumanEval/51", "solution": "def remove_vowels(text):\n    vowels = {'a', 'e', 'i', 'o', 'u'}\n    result = []\n    for char in text:\n        lower_char = char.lower()\n        if lower_char not in vowels:\n            result.append(char)\n    return ''.join(result)"}
+{"task_id": "HumanEval/51", "solution": "def remove_vowels(text):\n    vowels = {'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'}\n    return ''.join([c for c in text if c not in vowels])"}
+{"task_id": "HumanEval/52", "solution": "def below_threshold(l, t):\n    return all(x < t for x in l)"}
+{"task_id": "HumanEval/52", "solution": ""}
+{"task_id": "HumanEval/52", "solution": "def below_threshold(l, t):\n    return all(num < t for num in l)"}
+{"task_id": "HumanEval/52", "solution": "def below_threshold(l, t):\n    return all(x < t for x in l)"}
+{"task_id": "HumanEval/53", "solution": ""}
+{"task_id": "HumanEval/53", "solution": "def add(x, y):\n    return x + y"}
+{"task_id": "HumanEval/53", "solution": ""}
+{"task_id": "HumanEval/53", "solution": ""}
+{"task_id": "HumanEval/54", "solution": ""}
+{"task_id": "HumanEval/54", "solution": "def same_chars(s0, s1):\n    return set(s0) == set(s1)"}
+{"task_id": "HumanEval/54", "solution": ""}
+{"task_id": "HumanEval/54", "solution": ""}
+{"task_id": "HumanEval/55", "solution": ""}
+{"task_id": "HumanEval/55", "solution": "def fib(n):\n    if n == 1 or n == 2:\n        return 1\n    a, b = 1, 1\n    for _ in range(3, n + 1):\n        c = a + b\n        a, b = b, c\n    return b"}
+{"task_id": "HumanEval/55", "solution": "def fib(n):\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        a, b = 0, 1\n        for _ in range(2, n + 1):\n            a, b = b, a + b\n        return b"}
+{"task_id": "HumanEval/55", "solution": "def fib(n: int):\n    \"\"\"Return n-th Fibonacci number where fib(1) = fib(2) = 1, fib(3) = 2, etc.\"\"\"\n    if n == 1 or n == 2:\n        return 1\n    a, b = 1, 1\n    for _ in range(3, n + 1):\n        a, b = b, a + b\n    return b"}
+{"task_id": "HumanEval/56", "solution": "def correct_bracketing(brackets):\n    stack = []\n    for c in brackets:\n        if c == '<':\n            stack.append(c)\n        else:\n            if stack and stack[-1] == '<':\n                stack.pop()\n            else:\n                return False\n    return len(stack) == 0"}
+{"task_id": "HumanEval/56", "solution": ""}
+{"task_id": "HumanEval/56", "solution": ""}
+{"task_id": "HumanEval/56", "solution": ""}
+{"task_id": "HumanEval/57", "solution": ""}
+{"task_id": "HumanEval/57", "solution": ""}
+{"task_id": "HumanEval/57", "solution": ""}
+{"task_id": "HumanEval/57", "solution": ""}
+{"task_id": "HumanEval/58", "solution": "def common(l1, l2):\n    set1 = set(l1)\n    set2 = set(l2)\n    common_elements = set1 & set2\n    return sorted(common_elements)"}
+{"task_id": "HumanEval/58", "solution": "def common(l1, l2):\n    set1 = set(l1)\n    set2 = set(l2)\n    common_elements = set1 & set2\n    return sorted(common_elements)"}
+{"task_id": "HumanEval/58", "solution": "def common(l1, l2):\n    return sorted(set(l1) & set(l2))"}
+{"task_id": "HumanEval/58", "solution": ""}
+{"task_id": "HumanEval/59", "solution": "def largest_prime_factor(n):\n    max_factor = 1\n    if n % 2 == 0:\n        max_factor = 2\n        while n % 2 == 0:\n            n = n // 2\n    i = 3\n    while i * i <= n:\n        if n % i == 0:\n            max_factor = i\n            while n % i == 0:\n                n = n // i\n        i += 2\n    if n > max_factor:\n        max_factor = n\n    return max_factor"}
+{"task_id": "HumanEval/59", "solution": "def largest_prime_factor(n):\n    max_prime = None\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            while n % i == 0:\n                n = n // i\n            if max_prime is None or i > max_prime:\n                max_prime = i\n    if n > 1:\n        if max_prime is None or n > max_prime:\n            max_prime = n\n    return max_prime"}
+{"task_id": "HumanEval/59", "solution": ""}
+{"task_id": "HumanEval/59", "solution": "def largest_prime_factor(n):\n    max_factor = -1\n    # Handle even factors\n    while n % 2 == 0:\n        max_factor = 2\n        n = n // 2\n    # Check odd factors from 3 to sqrt(n)\n    i = 3\n    while i * i <= n:\n        while n % i == 0:\n            max_factor = max(max_factor, i)\n            n = n // i\n        i += 2\n    # If remaining n is a prime\n    if n > 1:\n        max_factor = max(max_factor, n)\n    return max_factor"}
+{"task_id": "HumanEval/60", "solution": "def sum_to_n(n):\n    return n * (n + 1) // 2"}
+{"task_id": "HumanEval/60", "solution": ""}
+{"task_id": "HumanEval/60", "solution": "def sum_to_n(n):\n    return n * (n + 1) // 2"}
+{"task_id": "HumanEval/60", "solution": "def sum_to_n(n):\n    return n * (n + 1) // 2"}
+{"task_id": "HumanEval/61", "solution": "def correct_bracketing(brackets):\n    stack = []\n    for c in brackets:\n        if c == '(':\n            stack.append(c)\n        elif c == ')':\n            if not stack:\n                return False\n            stack.pop()\n    return len(stack) == 0"}
+{"task_id": "HumanEval/61", "solution": ""}
+{"task_id": "HumanEval/61", "solution": "def correct_bracketing(brackets):\n    stack = []\n    for char in brackets:\n        if char == '(':\n            stack.append(char)\n        elif char == ')':\n            if not stack:\n                return False\n            stack.pop()\n    return len(stack) == 0"}
+{"task_id": "HumanEval/61", "solution": ""}
+{"task_id": "HumanEval/62", "solution": ""}
+{"task_id": "HumanEval/62", "solution": ""}
+{"task_id": "HumanEval/62", "solution": ""}
+{"task_id": "HumanEval/62", "solution": ""}
+{"task_id": "HumanEval/63", "solution": ""}
+{"task_id": "HumanEval/63", "solution": "def fibfib(n):\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 0\n    elif n == 2:\n        return 1\n    a, b, c = 0, 0, 1\n    for i in range(3, n + 1):\n        current = a + b + c\n        a, b, c = b, c, current\n    return c"}
+{"task_id": "HumanEval/63", "solution": "def fibfib(n):\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 0\n    elif n == 2:\n        return 1\n    else:\n        x, y, z = 0, 0, 1\n        for i in range(3, n + 1):\n            s = x + y + z\n            x, y, z = y, z, s\n        return z"}
+{"task_id": "HumanEval/63", "solution": ""}
+{"task_id": "HumanEval/64", "solution": ""}
+{"task_id": "HumanEval/64", "solution": ""}
+{"task_id": "HumanEval/64", "solution": ""}
+{"task_id": "HumanEval/64", "solution": "def vowels_count(s):\n    vowels = {'a', 'e', 'i', 'o', 'u'}\n    count = 0\n    for c in s:\n        if c in vowels or (c == 'y' and len(s) > 0 and s[-1] == 'y'):\n            count += 1\n    return count"}
+{"task_id": "HumanEval/65", "solution": ""}
+{"task_id": "HumanEval/65", "solution": ""}
+{"task_id": "HumanEval/65", "solution": ""}
+{"task_id": "HumanEval/65", "solution": ""}
+{"task_id": "HumanEval/66", "solution": ""}
+{"task_id": "HumanEval/66", "solution": "def digitSum(s):\n    total = 0\n    for c in s:\n        if c.isupper():\n            total += ord(c)\n    return total"}
+{"task_id": "HumanEval/66", "solution": "def digitSum(s):\n    total = 0\n    for c in s:\n        if c.isupper():\n            total += ord(c)\n    return total"}
+{"task_id": "HumanEval/66", "solution": "def digitSum(s):\n    total = 0\n    for c in s:\n        if c.isupper():\n            total += ord(c)\n    return total"}
+{"task_id": "HumanEval/67", "solution": ""}
+{"task_id": "HumanEval/67", "solution": ""}
+{"task_id": "HumanEval/67", "solution": ""}
+{"task_id": "HumanEval/67", "solution": "import re"}
+{"task_id": "HumanEval/68", "solution": "def pluck(arr):\n    if not arr:\n        return []\n    min_even = float('inf')\n    min_index = -1\n    for index, value in enumerate(arr):\n        if value % 2 == 0:\n            if value < min_even:\n                min_even = value\n                min_index = index\n            elif value == min_even:\n                if index < min_index:\n                    min_index = index\n    return [min_even, min_index] if min_even != float('inf') else []"}
+{"task_id": "HumanEval/68", "solution": ""}
+{"task_id": "HumanEval/68", "solution": "def pluck(arr):\n    if not arr:\n        return []\n    min_val = float('inf')\n    min_index = -1\n    for i in range(len(arr)):\n        val = arr[i]\n        if val % 2 == 0:\n            if val < min_val:\n                min_val = val\n                min_index = i\n            elif val == min_val:\n                if i < min_index:\n                    min_index = i\n    return [min_val, min_index] if min_val != float('inf') else []"}
+{"task_id": "HumanEval/68", "solution": ""}
+{"task_id": "HumanEval/69", "solution": ""}
+{"task_id": "HumanEval/69", "solution": ""}
+{"task_id": "HumanEval/69", "solution": "from collections import defaultdict\ndef search(lst):\n    freq = defaultdict(int)\n    for num in lst:\n        freq[num] += 1\n    if not freq:\n        return -1\n    max_num = max(freq.keys())\n    for x in sorted(freq.keys(), reverse=True):\n        if freq[x] >= x:\n            return x\n    return -1"}
+{"task_id": "HumanEval/69", "solution": "from collections import Counter\ndef search(lst):\n    count = Counter(lst)\n    candidates = [num for num in count if count[num] >= num]\n    return max(candidates) if candidates else -1"}
+{"task_id": "HumanEval/70", "solution": ""}
+{"task_id": "HumanEval/70", "solution": ""}
+{"task_id": "HumanEval/70", "solution": "def strange_sort_list(lst):\n    if not lst:\n        return []\n    result = []\n    while True:\n        if not lst:\n            break\n        if len(lst) % 2 == 0:\n            next_val = min(lst)\n        else:\n            next_val = max(lst)\n        result.append(next_val)\n        lst.remove(next_val)\n    return result"}
+{"task_id": "HumanEval/70", "solution": "def strange_sort_list(lst):\n    if not lst:\n        return []\n    result = []\n    while lst:\n        min_val = min(lst)\n        result.append(min_val)\n        lst.remove(min_val)\n        if lst:\n            max_val = max(lst)\n            result.append(max_val)\n            lst.remove(max_val)\n    return result"}
+{"task_id": "HumanEval/71", "solution": "def triangle_area(a, b, c):\n    if a <= 0 or b <= 0 or c <= 0:\n        return -1\n    if (a + b > c) and (a + c > b) and (b + c > a):\n        s = (a + b + c) / 2\n        area = (s * (s - a) * (s - b) * (s - c)) ** 0.5\n        return round(area, 2)\n    else:\n        return -1"}
+{"task_id": "HumanEval/71", "solution": "import math\ndef triangle_area(a, b, c):\n    # Check if the sides form a valid triangle\n    if (a + b <= c) or (a + c <= b) or (b + c <= a):\n        return -1\n    \n    # Calculate semi-perimeter\n    s = (a + b + c) / 2\n    \n    # Heron's formula for area\n    area = math.sqrt(s * (s - a) * (s - b) * (s - c))\n    \n    # Round to two decimal places\n    return round(area, 2)"}
+{"task_id": "HumanEval/71", "solution": "import math\ndef triangle_area(a, b, c):\n    # Check if the sides form a valid triangle\n    if (a + b <= c) or (a + c <= b) or (b + c <= a):\n        return -1\n    # Calculate semi-perimeter\n    s = (a + b + c) / 2\n    # Calculate area using Heron's formula\n    area_sq = s * (s - a) * (s - b) * (s - c)\n    area = math.sqrt(area_sq)\n    # Format to two decimal places\n    return \"{0:.2f}\".format(area)"}
+{"task_id": "HumanEval/71", "solution": ""}
+{"task_id": "HumanEval/72", "solution": "def will_it_fly(q, w):\n    # Check if q is a palindrome\n    is_balanced = True\n    n = len(q)\n    for i in range(n // 2):\n        if q[i] != q[n - 1 - i]:\n            is_balanced = False\n            break\n    if not is_balanced:\n        return False\n    # Check sum of elements <= w\n    return sum(q) <= w"}
+{"task_id": "HumanEval/72", "solution": ""}
+{"task_id": "HumanEval/72", "solution": ""}
+{"task_id": "HumanEval/72", "solution": "def will_it_fly(q, w):\n    return q == q[::-1] and sum(q) <= w"}
+{"task_id": "HumanEval/73", "solution": ""}
+{"task_id": "HumanEval/73", "solution": "def smallest_change(arr):\n    count = 0\n    n = len(arr)\n    for i in range(n // 2):\n        j = n - 1 - i\n        if arr[i] != arr[j]:\n            count += 1\n    return count"}
+{"task_id": "HumanEval/73", "solution": ""}
+{"task_id": "HumanEval/73", "solution": "def smallest_change(arr):\n    count = 0\n    n = len(arr)\n    for i in range(n // 2):\n        j = n - 1 - i\n        if arr[i] != arr[j]:\n            count += 1\n    return count"}
+{"task_id": "HumanEval/74", "solution": ""}
+{"task_id": "HumanEval/74", "solution": ""}
+{"task_id": "HumanEval/74", "solution": "def total_match(lst1, lst2):\n    sum1 = sum(len(s) for s in lst1)\n    sum2 = sum(len(s) for s in lst2)\n    if sum1 < sum2:\n        return lst1\n    elif sum2 < sum1:\n        return lst2\n    else:\n        return lst1"}
+{"task_id": "HumanEval/74", "solution": "def total_match(lst1, lst2):\n    sum1 = sum(len(s) for s in lst1)\n    sum2 = sum(len(s) for s in lst2)\n    if sum1 == sum2:\n        return lst1\n    elif sum1 < sum2:\n        return lst1\n    else:\n        return lst2"}
+{"task_id": "HumanEval/75", "solution": "def is_prime(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    for i in range(3, int(n**0.5) + 1, 2):\n        if n % i == 0:\n            return False\n    return True\ndef sieve(n):\n    if n < 2:\n        return []\n    sieve_list = [True] * (n + 1)\n    sieve_list[0] = sieve_list[1] = False\n    for i in range(2, int(n**0.5) + 1):\n        if sieve_list[i]:\n            sieve_list[i*i : n+1 : i] = [False] * len(sieve_list[i*i : n+1 : i])\n    return [i for i, is_prime in enumerate(sieve_list) if is_prime]\ndef is_multiply_prime(a):\n    if a < 2:\n        return False\n    primes = sieve(a)\n    for p in primes:\n        if a % p != 0:\n            continue\n        m = a // p\n        found = False\n        for q in primes:\n            if q > m:\n                break\n            if m % q == 0:\n                if is_prime(m // q):\n                    found = True\n                    break\n        if found:\n            return True\n    return False"}
+{"task_id": "HumanEval/75", "solution": "import math\ndef is_multiply_prime(a):\n    if a < 2:\n        return False\n\n    primes = []\n    sqrt_a = math.isqrt(a)\n    for p in range(2, sqrt_a + 1):\n        if a % p == 0:\n            primes.append(p)\n    if sqrt_a >= 2 and sqrt_a not in primes:\n        primes.append(sqrt_a)\n\n    def can_be_product_of_two_primes(x):\n        if x < 2:\n            return False\n        if x == 2:\n            return False\n        factors = {}\n        temp = x\n        i = 2\n        while i * i <= temp:\n            while temp % i == 0:\n                factors[i] = factors.get(i, 0) + 1\n                temp //= i\n            i += 1\n        if temp >= 2:\n            factors[temp] = factors.get(temp, 0) + 1\n        if len(factors) == 1:\n            return False\n        return sum(factors.values()) == 2\n\n    for p in primes:\n        if a % p != 0:\n            continue\n        x = a // p\n        if x < 2:\n            continue\n        if can_be_product_of_two_primes(x):\n            return True\n    return False"}
+{"task_id": "HumanEval/75", "solution": ""}
+{"task_id": "HumanEval/75", "solution": ""}
+{"task_id": "HumanEval/76", "solution": ""}
+{"task_id": "HumanEval/76", "solution": ""}
+{"task_id": "HumanEval/76", "solution": ""}
+{"task_id": "HumanEval/76", "solution": ""}
+{"task_id": "HumanEval/77", "solution": "def iscube(a):\n    if a == 0:\n        return True\n    sign = 1 if a > 0 else -1\n    abs_a = abs(a)\n    low = 0\n    high = abs_a\n    while low <= high:\n        mid = (low + high) // 2\n        cube = mid ** 3\n        if cube == abs_a:\n            return (cube * sign) == a\n        elif cube < abs_a:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return False"}
+{"task_id": "HumanEval/77", "solution": ""}
+{"task_id": "HumanEval/77", "solution": ""}
+{"task_id": "HumanEval/77", "solution": ""}
+{"task_id": "HumanEval/78", "solution": "def hex_key(hex_str):\n    hex_map = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15}\n    allowed = {2, 3, 5, 7, 11, 13}\n    count = 0\n    for c in hex_str:\n        val = hex_map[c]\n        if val in allowed:\n            count += 1\n    return count"}
+{"task_id": "HumanEval/78", "solution": ""}
+{"task_id": "HumanEval/78", "solution": ""}
+{"task_id": "HumanEval/78", "solution": ""}
+{"task_id": "HumanEval/79", "solution": "def decimal_to_binary(decimal):\n    return 'db' + bin(decimal)[2:] + 'db'"}
+{"task_id": "HumanEval/79", "solution": "def decimal_to_binary(decimal):\n    binary_str = bin(decimal)[2:]\n    return 'db' + binary_str + 'db'"}
+{"task_id": "HumanEval/79", "solution": "def decimal_to_binary(decimal):\n    binary_str = bin(decimal)[2:]\n    return 'db' + binary_str + 'db'"}
+{"task_id": "HumanEval/79", "solution": "def decimal_to_binary(decimal):\n    binary = bin(decimal)[2:]\n    return 'db' + binary + 'db'"}
+{"task_id": "HumanEval/80", "solution": "def is_happy(s):\n    if len(s) < 3:\n        return False\n    for i in range(len(s) - 2):\n        if s[i] == s[i+1] or s[i] == s[i+2] or s[i+1] == s[i+2]:\n            return False\n    return True"}
+{"task_id": "HumanEval/80", "solution": "def is_happy(s):\n    if len(s) < 3:\n        return False\n    for i in range(len(s) - 2):\n        if s[i] == s[i+1] or s[i+1] == s[i+2] or s[i] == s[i+2]:\n            return False\n    return True"}
+{"task_id": "HumanEval/80", "solution": "def is_happy(s):\n    if len(s) < 3:\n        return False\n    for i in range(len(s) - 2):\n        if s[i] == s[i+1] or s[i] == s[i+2] or s[i+1] == s[i+2]:\n            return False\n    return True"}
+{"task_id": "HumanEval/80", "solution": ""}
+{"task_id": "HumanEval/81", "solution": ""}
+{"task_id": "HumanEval/81", "solution": ""}
+{"task_id": "HumanEval/81", "solution": ""}
+{"task_id": "HumanEval/81", "solution": ""}
+{"task_id": "HumanEval/82", "solution": "def prime_length(string):\n    n = len(string)\n    if n <= 1:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True"}
+{"task_id": "HumanEval/82", "solution": "def prime_length(s):\n    length = len(s)\n    if length <= 1:\n        return False\n    if length == 2:\n        return True\n    if length % 2 == 0:\n        return False\n    for i in range(3, int(length**0.5) + 1, 2):\n        if length % i == 0:\n            return False\n    return True"}
+{"task_id": "HumanEval/82", "solution": "def prime_length(s):\n    n = len(s)\n    if n <= 1:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True"}
+{"task_id": "HumanEval/82", "solution": "import math\ndef is_prime(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    max_divisor = int(math.sqrt(n)) + 1\n    for i in range(3, max_divisor, 2):\n        if n % i == 0:\n            return False\n    return True\ndef prime_length(string):\n    return is_prime(len(string))"}
+{"task_id": "HumanEval/83", "solution": "def starts_one_ends(n):\n    if n == 1:\n        return 1\n    else:\n        start = 10 ** (n - 1)\n        end = 9 * (10 ** (n - 2))\n        overlap = 9 * (10 ** (n - 2))\n        return start + end - overlap"}
+{"task_id": "HumanEval/83", "solution": ""}
+{"task_id": "HumanEval/83", "solution": "def starts_one_ends(n):\n    if n == 1:\n        return 1\n    else:\n        start = 10 ** (n - 1)\n        end = 10 ** (n - 1)\n        both = 10 ** max(n - 2, 0)\n        return start + end - both\nn = int(input())"}
+{"task_id": "HumanEval/83", "solution": ""}
+{"task_id": "HumanEval/84", "solution": ""}
+{"task_id": "HumanEval/84", "solution": "def solve(N):\n    total = sum(int(digit) for digit in str(N))\n    return bin(total)[2:]"}
+{"task_id": "HumanEval/84", "solution": "def solve(N):\n    total = sum(int(digit) for digit in str(N))\n    return bin(total)[2:]"}
+{"task_id": "HumanEval/84", "solution": ""}
+{"task_id": "HumanEval/85", "solution": "def add(lst):\n    total = 0\n    for i in range(len(lst)):\n        if i % 2 == 1 and lst[i] % 2 == 0:\n            total += lst[i]\n    return total"}
+{"task_id": "HumanEval/85", "solution": "def add(lst):\n    total = 0\n    for index, value in enumerate(lst, start=1):\n        if index % 2 == 0 and value % 2 == 0:\n            total += value\n    return total"}
+{"task_id": "HumanEval/85", "solution": ""}
+{"task_id": "HumanEval/85", "solution": "def add(lst):\n    total = 0\n    for i in range(len(lst)):\n        if i % 2 == 1:  # Check if index is odd\n            if lst[i] % 2 == 0:  # Check if element is even\n                total += lst[i]\n    return total"}
+{"task_id": "HumanEval/86", "solution": ""}
+{"task_id": "HumanEval/86", "solution": ""}
+{"task_id": "HumanEval/86", "solution": ""}
+{"task_id": "HumanEval/86", "solution": ""}
+{"task_id": "HumanEval/87", "solution": ""}
+{"task_id": "HumanEval/87", "solution": "def get_row(lst, x):\n    coordinates = []\n    for row_idx, row in enumerate(lst):\n        for col_idx, value in enumerate(row):\n            if value == x:\n                coordinates.append((row_idx, col_idx))\n    coordinates.sort(key=lambda t: (t[0], -t[1]))\n    return coordinates"}
+{"task_id": "HumanEval/87", "solution": ""}
+{"task_id": "HumanEval/87", "solution": ""}
+{"task_id": "HumanEval/88", "solution": "def sort_array(arr):\n    if not arr:\n        return arr\n    first = arr[0]\n    last = arr[-1]\n    sum_val = first + last\n    if sum_val % 2 == 1:\n        return sorted(arr)\n    else:\n        return sorted(arr, reverse=True)"}
+{"task_id": "HumanEval/88", "solution": "def sort_array(array):\n    if not array:\n        return array\n    new_arr = array.copy()\n    first = new_arr[0]\n    last = new_arr[-1]\n    total = first + last\n    if total % 2 == 1:\n        new_arr.sort()\n    else:\n        new_arr.sort(reverse=True)\n    return new_arr"}
+{"task_id": "HumanEval/88", "solution": "def sort_array(array):\n    if not array:\n        return array\n    if len(array) == 1:\n        return array\n    first = array[0]\n    last = array[-1]\n    total = first + last\n    if total % 2 == 1:\n        return sorted(array)\n    else:\n        return sorted(array, reverse=True)"}
+{"task_id": "HumanEval/88", "solution": "def sort_array(array):\n    if not array:\n        return []\n    copied = array.copy()\n    sum_first_last = copied[0] + copied[-1]\n    if sum_first_last % 2 == 1:\n        return sorted(copied)\n    else:\n        return sorted(copied, reverse=True)"}
+{"task_id": "HumanEval/89", "solution": "def encrypt(s):\n    res = []\n    for c in s:\n        original = ord(c)\n        pos = original - ord('a')\n        new_pos = (pos + 4) % 26\n        res.append(chr(new_pos + ord('a')))\n    return ''.join(res)"}
+{"task_id": "HumanEval/89", "solution": ""}
+{"task_id": "HumanEval/89", "solution": "def encrypt(s):\n    encrypted = []\n    for char in s:\n        shifted = (ord(char) - ord('a') + 4) % 26\n        encrypted.append(chr(shifted + ord('a')))\n    return ''.join(encrypted)"}
+{"task_id": "HumanEval/89", "solution": "def encrypt(s):\n    return ''.join([chr((ord(c) - ord('a') + 4) % 26 + ord('a')) for c in s])"}
+{"task_id": "HumanEval/90", "solution": ""}
+{"task_id": "HumanEval/90", "solution": ""}
+{"task_id": "HumanEval/90", "solution": ""}
+{"task_id": "HumanEval/90", "solution": "def next_smallest(lst):\n    if len(lst) < 2:\n        return None\n    sorted_lst = sorted(lst)\n    # Check if all elements are the same\n    if all(x == sorted_lst[0] for x in sorted_lst):\n        return None\n    else:\n        return sorted_lst[1]"}
+{"task_id": "HumanEval/91", "solution": ""}
+{"task_id": "HumanEval/91", "solution": "def is_bored(S):\n    count = 0\n    current_sentence = ''\n    for c in S:\n        if c in {'.', '?', '!'}:\n            if current_sentence.startswith('I') and current_sentence:\n                count += 1\n            current_sentence = ''\n        else:\n            current_sentence += c\n    if current_sentence.startswith('I') and current_sentence:\n        count += 1\n    return count"}
+{"task_id": "HumanEval/91", "solution": ""}
+{"task_id": "HumanEval/91", "solution": "import re\ndef is_bored(S):\n    sentences = re.split('[.,!?]', S)\n    count = 0\n    for part in sentences:\n        if part and part.startswith('I'):\n            count += 1\n    return count"}
+{"task_id": "HumanEval/92", "solution": ""}
+{"task_id": "HumanEval/92", "solution": "def any_int(x, y, z):\n    def is_int(n):\n        return n.is_integer()\n    \n    if not (is_int(x) and is_int(y) and is_int(z)):\n        return False\n    \n    if (x == y + z) or (y == x + z) or (z == x + y):\n        return True\n    return False"}
+{"task_id": "HumanEval/92", "solution": ""}
+{"task_id": "HumanEval/92", "solution": ""}
+{"task_id": "HumanEval/93", "solution": ""}
+{"task_id": "HumanEval/93", "solution": ""}
+{"task_id": "HumanEval/93", "solution": ""}
+{"task_id": "HumanEval/93", "solution": ""}
+{"task_id": "HumanEval/94", "solution": "def skjkasdkd(lst):\n    def is_prime(n):\n        if n <= 1:\n            return False\n        if n == 2:\n            return True\n        if n % 2 == 0:\n            return False\n        for i in range(3, int(n**0.5) + 1, 2):\n            if n % i == 0:\n                return False\n        return True\n    max_prime = -1\n    for num in lst:\n        if num <= 1:\n            continue\n        if is_prime(num):\n            if num > max_prime:\n                max_prime = num\n    return 0 if max_prime == -1 else sum(int(d) for d in str(max_prime))"}
+{"task_id": "HumanEval/94", "solution": ""}
+{"task_id": "HumanEval/94", "solution": "def is_prime(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    for i in range(3, int(n**0.5) + 1, 2):\n        if n % i == 0:\n            return False\n    return True\ndef skjkasdkd(lst):\n    primes = []\n    for num in lst:\n        if num > 1 and is_prime(num):\n            primes.append(num)\n    max_p = max(primes) if primes else 0\n    return sum(int(d) for d in str(max_p))"}
+{"task_id": "HumanEval/94", "solution": ""}
+{"task_id": "HumanEval/95", "solution": ""}
+{"task_id": "HumanEval/95", "solution": ""}
+{"task_id": "HumanEval/95", "solution": ""}
+{"task_id": "HumanEval/95", "solution": ""}
+{"task_id": "HumanEval/96", "solution": ""}
+{"task_id": "HumanEval/96", "solution": "def is_prime(num):\n    if num <= 1:\n        return False\n    if num == 2:\n        return True\n    if num % 2 == 0:\n        return False\n    for i in range(3, int(num**0.5) + 1, 2):\n        if num % i == 0:\n            return False\n    return True\ndef count_up_to(n):\n    primes = set()\n    count = 0\n    for num in range(2, n):\n        if num not in primes:\n            if is_prime(num):\n                primes.add(num)\n                count += 1\n                if count == n:\n                    break\n    return list(primes)"}
+{"task_id": "HumanEval/96", "solution": ""}
+{"task_id": "HumanEval/96", "solution": ""}
+{"task_id": "HumanEval/97", "solution": ""}
+{"task_id": "HumanEval/97", "solution": "def multiply(a, b):\n    def get_unit_digit(n):\n        if n >= 0:\n            last_digit = n % 10\n        else:\n            last_digit = (abs(n) % 10) * (-1)\n        return last_digit\n    a_unit = get_unit_digit(a)\n    b_unit = get_unit_digit(b)\n    return a_unit * b_unit"}
+{"task_id": "HumanEval/97", "solution": ""}
+{"task_id": "HumanEval/97", "solution": "def multiply(a, b):\n    return (abs(a) % 10) * (abs(b) % 10)"}
+{"task_id": "HumanEval/98", "solution": ""}
+{"task_id": "HumanEval/98", "solution": ""}
+{"task_id": "HumanEval/98", "solution": ""}
+{"task_id": "HumanEval/98", "solution": ""}
+{"task_id": "HumanEval/99", "solution": ""}
+{"task_id": "HumanEval/99", "solution": ""}
+{"task_id": "HumanEval/99", "solution": ""}
+{"task_id": "HumanEval/99", "solution": "import math\ndef closest_integer(value):\n    if '.' in value:\n        integer_part_str, fractional_part_str = value.split('.', 1)\n        integer_part = int(integer_part_str)\n        fractional_part = float(fractional_part_str)\n    else:\n        integer_part = int(value)\n        fractional_part = 0.0\n\n    if '.' in value:\n        if fractional_part > 0.5:\n            rounded = math.floor(integer_part + 0.5)\n        else:\n            rounded = math.ceil(integer_part - 0.5)\n    else:\n        rounded = integer_part\n\n    return rounded"}
+{"task_id": "HumanEval/100", "solution": ""}
+{"task_id": "HumanEval/100", "solution": ""}
+{"task_id": "HumanEval/100", "solution": ""}
+{"task_id": "HumanEval/100", "solution": ""}
+{"task_id": "HumanEval/101", "solution": ""}
+{"task_id": "HumanEval/101", "solution": "import re\ndef words_string(s):\n    parts = re.split(r'[ ,]+', s)\n    result = []\n    for part in parts:\n        if part.strip() == '':\n            continue\n        words = re.split(r'\\s+', part)\n        result.extend(words)\n    return result"}
+{"task_id": "HumanEval/101", "solution": ""}
+{"task_id": "HumanEval/101", "solution": ""}
+{"task_id": "HumanEval/102", "solution": "def choose_num(x, y):\n    if x > y:\n        return -1\n    max_even = -1\n    for num in range(y, x - 1, -1):\n        if num % 2 == 0:\n            max_even = num\n            break\n    return max_even if max_even != -1 else -1"}
+{"task_id": "HumanEval/102", "solution": "def choose_num(x, y):\n    if x > y:\n        return -1\n    max_even = -1\n    lower = min(x, y)\n    upper = max(x, y)\n    for num in range(lower, upper + 1):\n        if num % 2 == 0:\n            if num > max_even:\n                max_even = num\n    return max_even"}
+{"task_id": "HumanEval/102", "solution": "def choose_num(x, y):\n    if x > y:\n        return -1\n    max_val = y if y % 2 == 0 else y - 1\n    return max_val if max_val >= x else -1"}
+{"task_id": "HumanEval/102", "solution": ""}
+{"task_id": "HumanEval/103", "solution": "def rounded_avg(n, m):\n    if n > m:\n        return -1\n    average = (n + m) // 2\n    return bin(average)[2:]"}
+{"task_id": "HumanEval/103", "solution": ""}
+{"task_id": "HumanEval/103", "solution": ""}
+{"task_id": "HumanEval/103", "solution": "def rounded_avg(n, m):\n    if n > m:\n        return -1\n    count = m - n + 1\n    total = (n + m) * count // 2\n    average = total / count\n    rounded = round(average)\n    return bin(rounded)[2:]"}
+{"task_id": "HumanEval/104", "solution": ""}
+{"task_id": "HumanEval/104", "solution": "def unique_digits(x):\n    x = x.split()\n    result = []\n    for num_str in x:\n        has_even = False\n        for d in num_str:\n            if int(d) % 2 == 0:\n                has_even = True\n                break\n        if not has_even:\n            result.append(int(num_str))\n    return sorted(result)"}
+{"task_id": "HumanEval/104", "solution": "def unique_digits(x):\n    res = []\n    for num in x:\n        s = str(num)\n        valid = True\n        for c in s:\n            if int(c) % 2 == 0:\n                valid = False\n                break\n        if valid:\n            res.append(num)\n    return sorted(res)"}
+{"task_id": "HumanEval/104", "solution": "def unique_digits(x):\n    result = []\n    for num in x:\n        s = str(num)\n        valid = True\n        for c in s:\n            if int(c) % 2 == 0:\n                valid = False\n                break\n        if valid:\n            result.append(num)\n    result.sort()\n    return result"}
+{"task_id": "HumanEval/105", "solution": ""}
+{"task_id": "HumanEval/105", "solution": "def by_length(arr):\n    # Filter numbers between 1 and 9 inclusive\n    filtered = [x for x in arr if 1 <= x <= 9]\n    # Sort and reverse\n    sorted_arr = sorted(filtered)\n    reversed_sorted = sorted_arr[::-1]\n    # Mapping to English words\n    mapping = {'1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', '9': 'Nine'}\n    # Convert each number to its English counterpart\n    return [mapping[str(num)] for num in reversed_sorted]"}
+{"task_id": "HumanEval/105", "solution": ""}
+{"task_id": "HumanEval/105", "solution": "words = [\"One\", \"Two\", \"Three\", \"Four\", \"Five\", \"Six\", \"Seven\", \"Eight\", \"Nine\"]\ndef by_length(arr):\n    filtered = [x for x in arr if 1 <= x <= 9]\n    filtered.sort()\n    reversed_filtered = filtered[::-1]\n    return [words[x - 1] for x in reversed_filtered]"}
+{"task_id": "HumanEval/106", "solution": "def f(n):\n    result = []\n    for i in range(1, n + 1):\n        if i % 2 == 0:\n            fact = 1\n            for j in range(1, i + 1):\n                fact *= j\n            result.append(fact)\n        else:\n            sum_val = i * (i + 1) // 2\n            result.append(sum_val)\n    return result"}
+{"task_id": "HumanEval/106", "solution": "import math\ndef f(n):\n    result = []\n    for i in range(1, n + 1):\n        if i % 2 == 0:\n            result.append(math.factorial(i))\n        else:\n            result.append(sum(range(1, i + 1)))\n    return result"}
+{"task_id": "HumanEval/106", "solution": "def f(n):\n    result = []\n    for i in range(1, n + 1):\n        if i % 2 == 0:\n            # Compute factorial of i\n            fact = 1\n            for j in range(1, i + 1):\n                fact *= j\n            result.append(fact)\n        else:\n            # Compute sum from 1 to i\n            total = i * (i + 1) // 2\n            result.append(total)\n    return result"}
+{"task_id": "HumanEval/106", "solution": ""}
+{"task_id": "HumanEval/107", "solution": ""}
+{"task_id": "HumanEval/107", "solution": ""}
+{"task_id": "HumanEval/107", "solution": "def even_odd_palindrome(n):\n    even_count = 0\n    odd_count = 0\n    \n    # Count palindromes of length 1 (1-9)\n    for num in range(1, 10):\n        if num <= n:\n            if num % 2 == 0:\n                even_count += 1\n            else:\n                odd_count += 1\n    \n    # Count palindromes of length 2 (both digits same)\n    for a in range(1, 10):\n        palindrome = a * 10 + a\n        if palindrome <= n:\n            if palindrome % 2 == 0:\n                even_count += 1\n            else:\n                odd_count += 1\n    \n    # Count palindromes of length 3 (first and third digits same)\n    for a in range(1, 10):\n        for b in range(0, 10):\n            palindrome = a * 100 + b * 10 + a\n            if palindrome <= n:\n                if palindrome % 2 == 0:\n                    even_count += 1\n                else:\n                    odd_count += 1\n    \n    return (even_count, odd_count)"}
+{"task_id": "HumanEval/107", "solution": ""}
+{"task_id": "HumanEval/108", "solution": ""}
+{"task_id": "HumanEval/108", "solution": ""}
+{"task_id": "HumanEval/108", "solution": ""}
+{"task_id": "HumanEval/108", "solution": ""}
+{"task_id": "HumanEval/109", "solution": "def move_one_ball(arr):\n    if not arr:\n        return True\n    if len(arr) == 1:\n        return True\n    N = len(arr)\n    for k in range(N):\n        rotated = arr.copy() if k == 0 else arr[-k:] + arr[:-k]\n        sorted_flag = True\n        for i in range(len(rotated)-1):\n            if rotated[i] > rotated[i+1]:\n                sorted_flag = False\n                break\n        if sorted_flag:\n            return True\n    return False"}
+{"task_id": "HumanEval/109", "solution": ""}
+{"task_id": "HumanEval/109", "solution": ""}
+{"task_id": "HumanEval/109", "solution": "def move_one_ball(arr):\n    n = len(arr)\n    for k in range(n):\n        rotated = []\n        for i in range(n):\n            pos = (i - k) % n\n            rotated.append(arr[pos])\n        # Check if rotated is sorted\n        sorted_flag = True\n        for i in range(n-1):\n            if rotated[i] > rotated[i+1]:\n                sorted_flag = False\n                break\n        if sorted_flag:\n            return True\n    return False"}
+{"task_id": "HumanEval/110", "solution": ""}
+{"task_id": "HumanEval/110", "solution": ""}
+{"task_id": "HumanEval/110", "solution": ""}
+{"task_id": "HumanEval/110", "solution": ""}
+{"task_id": "HumanEval/111", "solution": "def histogram(test):\n    parts = test.split()\n    counts = {}\n    for part in parts:\n        if part:\n            counts[part] = counts.get(part, 0) + 1\n    if not counts:\n        return {}\n    max_count = max(counts.values())\n    result = []\n    for letter, cnt in counts.items():\n        if cnt == max_count:\n            result.append(letter)\n    return {'a': max_count} if result else {}"}
+{"task_id": "HumanEval/111", "solution": "def histogram(test):\n    counts = {}\n    if not test:\n        return counts\n    parts = test.split()\n    for part in parts:\n        if part == '':\n            continue\n        if len(part) == 1 and part.islower():\n            counts[part] = counts.get(part, 0) + 1\n    return counts"}
+{"task_id": "HumanEval/111", "solution": ""}
+{"task_id": "HumanEval/111", "solution": "def histogram(test):\n    counts = {}\n    for part in test.split():\n        stripped = part.strip()\n        if stripped:\n            if stripped.isalpha() and len(stripped) == 1:\n                counts[stripped] = counts.get(stripped, 0) + 1\n    if not counts:\n        return {}\n    max_count = max(counts.values())\n    result = []\n    for char, cnt in counts.items():\n        if cnt == max_count:\n            result.append(char)\n    return {k: max_count for k in result}"}
+{"task_id": "HumanEval/112", "solution": ""}
+{"task_id": "HumanEval/112", "solution": "def reverse_delete(s, c):\n    c_set = set(c)\n    filtered = [char for char in s if char not in c_set]\n    filtered_str = ''.join(filtered)\n    return (filtered_str, filtered_str == filtered_str[::-1])"}
+{"task_id": "HumanEval/112", "solution": "def reverse_delete(s, c):\n    filtered = ''.join([char for char in s if char not in c])\n    is_palindrome = filtered == filtered[::-1]\n    return (filtered, is_palindrome)"}
+{"task_id": "HumanEval/112", "solution": ""}
+{"task_id": "HumanEval/113", "solution": ""}
+{"task_id": "HumanEval/113", "solution": ""}
+{"task_id": "HumanEval/113", "solution": ""}
+{"task_id": "HumanEval/113", "solution": ""}
+{"task_id": "HumanEval/114", "solution": ""}
+{"task_id": "HumanEval/114", "solution": "def minSubArraySum(nums):\n    min_sum = float('inf')\n    for i in range(len(nums)):\n        current_sum = nums[i]\n        min_i = current_sum\n        for j in range(i + 1, len(nums)):\n            current_sum += nums[j]\n            if current_sum < min_i:\n                min_i = current_sum\n            else:\n                current_sum = 0\n                current_sum += nums[j]\n        if min_i < min_sum:\n            min_sum = min_i\n    return min_sum"}
+{"task_id": "HumanEval/114", "solution": ""}
+{"task_id": "HumanEval/114", "solution": "def minSubArraySum(nums):\n    if not nums:\n        return 0\n    current_min = nums[0]\n    min_sum = current_min\n    for num in nums[1:]:\n        current_min = min(num, current_min + num)\n        if current_min < min_sum:\n            min_sum = current_min\n    return min_sum"}
+{"task_id": "HumanEval/115", "solution": "import sys"}
+{"task_id": "HumanEval/115", "solution": ""}
+{"task_id": "HumanEval/115", "solution": ""}
+{"task_id": "HumanEval/115", "solution": ""}
+{"task_id": "HumanEval/116", "solution": ""}
+{"task_id": "HumanEval/116", "solution": "def sort_array(arr):\n    return sorted(arr, key=lambda x: (bin(x).count('1'), x))"}
+{"task_id": "HumanEval/116", "solution": "def sort_array(arr):\n    return sorted(arr, key=lambda x: (bin(x).count('1'), -x))"}
+{"task_id": "HumanEval/116", "solution": ""}
+{"task_id": "HumanEval/117", "solution": ""}
+{"task_id": "HumanEval/117", "solution": ""}
+{"task_id": "HumanEval/117", "solution": "def select_words(s, n):\n    vowels = {'a', 'e', 'i', 'o', 'u'}\n    words = s.split()\n    result = []\n    for word in words:\n        cnt = 0\n        for char in word:\n            if char.lower() not in vowels:\n                cnt += 1\n        if cnt == n:\n            result.append(word)\n    return result"}
+{"task_id": "HumanEval/117", "solution": "def select_words(s, n):\n    vowels = {'a', 'e', 'i', 'o', 'u'}\n    words = s.split()\n    result = []\n    for word in words:\n        cnt = 0\n        for c in word:\n            if c not in vowels:\n                cnt += 1\n        if cnt == n:\n            result.append(word)\n    return result"}
+{"task_id": "HumanEval/118", "solution": ""}
+{"task_id": "HumanEval/118", "solution": ""}
+{"task_id": "HumanEval/118", "solution": ""}
+{"task_id": "HumanEval/118", "solution": ""}
+{"task_id": "HumanEval/119", "solution": ""}
+{"task_id": "HumanEval/119", "solution": ""}
+{"task_id": "HumanEval/119", "solution": "def match_parens(lst):\n    s1, s2 = lst\n    # Check both possible orders\n    # Check s1 followed by s2\n    total_open = s1.count('(') + s2.count('(')\n    total_close = s1.count(')') + s2.count(')')\n    if total_open != total_close:\n        return 'No'\n    balance = 0\n    for c in s1 + s2:\n        balance += 1 if c == '(' else -1\n        if balance < 0:\n            break\n    if balance == 0:\n        return 'Yes'\n    # Check s2 followed by s1\n    total_open = s2.count('(') + s1.count('(')\n    total_close = s2.count(')') + s1.count(')')\n    if total_open != total_close:\n        return 'No'\n    balance = 0\n    for c in s2 + s1:\n        balance += 1 if c == '(' else -1\n        if balance < 0:\n            break\n    return 'Yes' if balance == 0 else 'No'"}
+{"task_id": "HumanEval/119", "solution": ""}
+{"task_id": "HumanEval/120", "solution": "def maximum(arr, k):\n    \"\"\"\n    Given an array arr of integers and a positive integer k, return a sorted list of length k with the maximum k numbers in arr.\n\n    Parameters:\n    arr (list): The input array of integers.\n    k (int): The number of top elements to return.\n\n    Returns:\n    list: A sorted list of the largest k numbers in arr.\n    \"\"\"\n    sorted_arr = sorted(arr)\n    selected = sorted_arr[-k:] if k <= len(sorted_arr) else sorted_arr\n    # Sort again in case there are duplicates or if k is larger than the length of the array (though k <= len(arr) per problem constraints)\n    selected_sorted = sorted(selected)\n    return selected_sorted"}
+{"task_id": "HumanEval/120", "solution": ""}
+{"task_id": "HumanEval/120", "solution": ""}
+{"task_id": "HumanEval/120", "solution": ""}
+{"task_id": "HumanEval/121", "solution": "def solution(lst):\n    res = 0\n    for i, num in enumerate(lst):\n        if i % 2 == 0 and num % 2 == 1:\n            res += num\n    return res"}
+{"task_id": "HumanEval/121", "solution": "def solution(lst):\n    total = 0\n    for idx, num in enumerate(lst):\n        if idx % 2 == 0 and num % 2 != 0:\n            total += num\n    return total"}
+{"task_id": "HumanEval/121", "solution": ""}
+{"task_id": "HumanEval/121", "solution": "def solution(lst):\n    total = 0\n    for i in range(len(lst)):\n        if i % 2 == 0 and lst[i] % 2 == 1:\n            total += lst[i]\n    return total"}
+{"task_id": "HumanEval/122", "solution": ""}
+{"task_id": "HumanEval/122", "solution": "def add_elements(arr, k):\n    total = 0\n    for num in arr[:k]:\n        abs_num = abs(num)\n        if len(str(abs_num)) <= 2:\n            total += num\n    return total"}
+{"task_id": "HumanEval/122", "solution": ""}
+{"task_id": "HumanEval/122", "solution": ""}
+{"task_id": "HumanEval/123", "solution": ""}
+{"task_id": "HumanEval/123", "solution": ""}
+{"task_id": "HumanEval/123", "solution": ""}
+{"task_id": "HumanEval/123", "solution": ""}
+{"task_id": "HumanEval/124", "solution": ""}
+{"task_id": "HumanEval/124", "solution": ""}
+{"task_id": "HumanEval/124", "solution": ""}
+{"task_id": "HumanEval/124", "solution": ""}
+{"task_id": "HumanEval/125", "solution": "def split_words(txt):\n    if ',' in txt:\n        return [word for word in txt.split(',')]\n    elif ' ' in txt:\n        return [word for word in txt.split()]\n    else:\n        return sum(1 for c in 'abcdefghijklmnopqrstuvwxyz' if ord(c) % 2 == 1)"}
+{"task_id": "HumanEval/125", "solution": ""}
+{"task_id": "HumanEval/125", "solution": ""}
+{"task_id": "HumanEval/125", "solution": ""}
+{"task_id": "HumanEval/126", "solution": ""}
+{"task_id": "HumanEval/126", "solution": ""}
+{"task_id": "HumanEval/126", "solution": ""}
+{"task_id": "HumanEval/126", "solution": ""}
+{"task_id": "HumanEval/127", "solution": "def is_prime(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    for i in range(3, int(n**0.5) + 1, 2):\n        if n % i == 0:\n            return False\n    return True\ndef intersection(interval1, interval2):\n    start1, end1 = interval1\n    start2, end2 = interval2\n    start_intersect = max(start1, start2)\n    end_intersect = min(end1, end2)\n    if start_intersect > end_intersect:\n        return \"NO\"\n    length = end_intersect - start_intersect\n    if length <= 1:\n        return \"NO\"\n    return \"YES\" if is_prime(length) else \"NO\"\ninterval1 = tuple(map(int, input().split()))\ninterval2 = tuple(map(int, input().split()))"}
+{"task_id": "HumanEval/127", "solution": ""}
+{"task_id": "HumanEval/127", "solution": ""}
+{"task_id": "HumanEval/127", "solution": ""}
+{"task_id": "HumanEval/128", "solution": "def prod_signs(arr):\n    if not arr:\n        return None\n    sum_abs = sum(abs(x) for x in arr)\n    product_signs = 1\n    has_zero = any(x == 0 for x in arr)\n    if has_zero:\n        product_signs = 0\n    else:\n        for x in arr:\n            if x > 0:\n                product_signs *= 1\n            else:\n                product_signs *= -1\n    return sum_abs * product_signs"}
+{"task_id": "HumanEval/128", "solution": ""}
+{"task_id": "HumanEval/128", "solution": "def prod_signs(arr):\n    if not arr:\n        return None\n    product = 1\n    for num in arr:\n        if num == 0:\n            product *= 0\n        else:\n            if num > 0:\n                product *= 1\n            else:\n                product *= -1\n    sum_abs = sum(abs(num) for num in arr)\n    return product * sum_abs"}
+{"task_id": "HumanEval/128", "solution": ""}
+{"task_id": "HumanEval/129", "solution": ""}
+{"task_id": "HumanEval/129", "solution": ""}
+{"task_id": "HumanEval/129", "solution": ""}
+{"task_id": "HumanEval/129", "solution": ""}
+{"task_id": "HumanEval/130", "solution": ""}
+{"task_id": "HumanEval/130", "solution": ""}
+{"task_id": "HumanEval/130", "solution": ""}
+{"task_id": "HumanEval/130", "solution": "def tri(n):\n    res = [0] * (n + 1)\n    for i in range(1, n + 1):\n        if i % 2 == 0:\n            res[i] = 1 + i // 2\n        else:\n            res[i] = res[i - 1] + res[i - 2] + res[i + 1]\n    return res"}
+{"task_id": "HumanEval/131", "solution": ""}
+{"task_id": "HumanEval/131", "solution": ""}
+{"task_id": "HumanEval/131", "solution": ""}
+{"task_id": "HumanEval/131", "solution": "def digits(n):\n    digits_in_number = list(str(n))\n    odds = [int(c) for c in digits_in_number if int(c) % 2 != 0]\n    if not odds:\n        return 0\n    product = 1\n    for d in odds:\n        product *= d\n    return product"}
+{"task_id": "HumanEval/132", "solution": ""}
+{"task_id": "HumanEval/132", "solution": ""}
+{"task_id": "HumanEval/132", "solution": ""}
+{"task_id": "HumanEval/132", "solution": ""}
+{"task_id": "HumanEval/133", "solution": ""}
+{"task_id": "HumanEval/133", "solution": "import math\ndef sum_squares(lst):\n    total = 0\n    for num in lst:\n        ceil_num = math.ceil(num)\n        term = ceil_num ** 2\n        total += int(term)\n    return total"}
+{"task_id": "HumanEval/133", "solution": "import math\ndef sum_squares(lst):\n    return sum(math.ceil(x) ** 2 for x in lst)"}
+{"task_id": "HumanEval/133", "solution": ""}
+{"task_id": "HumanEval/134", "solution": ""}
+{"task_id": "HumanEval/134", "solution": ""}
+{"task_id": "HumanEval/134", "solution": ""}
+{"task_id": "HumanEval/134", "solution": ""}
+{"task_id": "HumanEval/135", "solution": "def can_arrange(arr):\n    max_i = -1\n    for i in range(1, len(arr)):\n        if arr[i] < arr[i-1]:\n            max_i = i\n    return max_i if max_i != -1 else -1"}
+{"task_id": "HumanEval/135", "solution": "def can_arrange(arr):\n    max_index = -1\n    for i in range(1, len(arr)):\n        if arr[i] <= arr[i-1]:\n            if i > max_index:\n                max_index = i\n    return max_index if max_index != -1 else -1"}
+{"task_id": "HumanEval/135", "solution": "def can_arrange(arr):\n    for i in range(len(arr)-1, -1, -1):\n        if arr[i] <= arr[i-1]:\n            return i\n    return -1"}
+{"task_id": "HumanEval/135", "solution": ""}
+{"task_id": "HumanEval/136", "solution": ""}
+{"task_id": "HumanEval/136", "solution": ""}
+{"task_id": "HumanEval/136", "solution": "def largest_smallest_integers(lst):\n    negatives = [num for num in lst if num < 0]\n    positives = [num for num in lst if num > 0]\n    a = max(negatives) if negatives else None\n    b = min(positives) if positives else None\n    return (a, b)"}
+{"task_id": "HumanEval/136", "solution": ""}
+{"task_id": "HumanEval/137", "solution": ""}
+{"task_id": "HumanEval/137", "solution": ""}
+{"task_id": "HumanEval/137", "solution": ""}
+{"task_id": "HumanEval/137", "solution": ""}
+{"task_id": "HumanEval/138", "solution": ""}
+{"task_id": "HumanEval/138", "solution": ""}
+{"task_id": "HumanEval/138", "solution": ""}
+{"task_id": "HumanEval/138", "solution": ""}
+{"task_id": "HumanEval/139", "solution": ""}
+{"task_id": "HumanEval/139", "solution": ""}
+{"task_id": "HumanEval/139", "solution": ""}
+{"task_id": "HumanEval/139", "solution": ""}
+{"task_id": "HumanEval/140", "solution": ""}
+{"task_id": "HumanEval/140", "solution": ""}
+{"task_id": "HumanEval/140", "solution": ""}
+{"task_id": "HumanEval/140", "solution": ""}
+{"task_id": "HumanEval/141", "solution": "def file_name_check(file_name):\n    parts = file_name.split('.')\n    if len(parts) != 2:\n        return 'No'\n    part0, part1 = parts\n    if not part0:\n        return 'No'\n    if not part0[0].isalpha():\n        return 'No'\n    if part1 not in ['txt', 'exe', 'dll']:\n        return 'No'\n    return 'Yes'"}
+{"task_id": "HumanEval/141", "solution": ""}
+{"task_id": "HumanEval/141", "solution": ""}
+{"task_id": "HumanEval/141", "solution": ""}
+{"task_id": "HumanEval/142", "solution": ""}
+{"task_id": "HumanEval/142", "solution": ""}
+{"task_id": "HumanEval/142", "solution": ""}
+{"task_id": "HumanEval/142", "solution": ""}
+{"task_id": "HumanEval/143", "solution": "def words_in_sentence(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    for i in range(3, int(n**0.5) + 1, 2):\n        if n % i == 0:\n            return False\n    return True"}
+{"task_id": "HumanEval/143", "solution": "def words_in_sentence(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    for i in range(3, int(n**0.5) + 1, 2):\n        if n % i == 0:\n            return False\n    return True"}
+{"task_id": "HumanEval/143", "solution": "def words_in_sentence(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    for i in range(3, int(n**0.5) + 1, 2):\n        if n % i == 0:\n            return False\n    return True"}
+{"task_id": "HumanEval/143", "solution": ""}
+{"task_id": "HumanEval/144", "solution": "import math\ndef simplify(x, n):\n    def parse_fraction(s):\n        num_part, den_part = s.split('/')\n        return int(num_part), int(den_part)\n    \n    def reduce(numerator, denominator):\n        gcd = math.gcd(numerator, denominator)\n        return numerator // gcd, denominator // gcd\n    \n    x_num, x_den = parse_fraction(x)\n    x_red_num, x_red_den = reduce(x_num, x_den)\n    \n    y_num, y_den = parse_fraction(n)\n    y_red_num, y_red_den = reduce(y_num, y_den)\n    \n    product_num = x_red_num * y_red_num\n    product_den = x_red_den * y_red_den\n    \n    return product_num % product_den == 0"}
+{"task_id": "HumanEval/144", "solution": "def simplify(x, n):\n    x_parts = x.split('/')\n    n_parts = n.split('/')\n    x_num = int(x_parts[0])\n    x_den = int(x_parts[1])\n    n_num = int(n_parts[0])\n    n_den = int(n_parts[1])\n    product_num = x_num * n_num\n    product_den = x_den * n_den\n    return (product_num % product_den) == 0"}
+{"task_id": "HumanEval/144", "solution": "import math\ndef simplify(numerator, denominator):\n    g = math.gcd(numerator, denominator)\n    return (numerator // g, denominator // g)"}
+{"task_id": "HumanEval/144", "solution": "import math\ndef simplify(x, n):\n    x_parts = x.split('/')\n    y_parts = n.split('/')\n    \n    def parse_fraction(s):\n        num, den = map(int, s.split('/'))\n        gcd_val = math.gcd(num, den)\n        return num // gcd_val, den // gcd_val\n    \n    x_num, x_den = parse_fraction(x)\n    y_num, y_den = parse_fraction(y)\n    \n    product_num = x_num * y_num\n    product_den = x_den * y_den\n    \n    return product_num % product_den == 0"}
+{"task_id": "HumanEval/145", "solution": ""}
+{"task_id": "HumanEval/145", "solution": ""}
+{"task_id": "HumanEval/145", "solution": ""}
+{"task_id": "HumanEval/145", "solution": ""}
+{"task_id": "HumanEval/146", "solution": ""}
+{"task_id": "HumanEval/146", "solution": ""}
+{"task_id": "HumanEval/146", "solution": "def specialFilter(nums):\n    count = 0\n    for num in nums:\n        if num > 10:\n            num_abs = abs(num)\n            s = str(num_abs)\n            first = int(s[0]) if s else 0\n            last = int(s[-1]) if s else 0\n            if first % 2 == 1 and last % 2 == 1:\n                count += 1\n    return count"}
+{"task_id": "HumanEval/146", "solution": ""}
+{"task_id": "HumanEval/147", "solution": ""}
+{"task_id": "HumanEval/147", "solution": ""}
+{"task_id": "HumanEval/147", "solution": ""}
+{"task_id": "HumanEval/147", "solution": ""}
+{"task_id": "HumanEval/148", "solution": ""}
+{"task_id": "HumanEval/148", "solution": ""}
+{"task_id": "HumanEval/148", "solution": ""}
+{"task_id": "HumanEval/148", "solution": ""}
+{"task_id": "HumanEval/149", "solution": ""}
+{"task_id": "HumanEval/149", "solution": "def sorted_list_sum(lst):\n    # Collect even-length words from the original list\n    even_list = []\n    for word in lst:\n        if len(word) % 2 == 0:\n            even_list.append(word)\n    # Sort the even_list by length ascending, then lex order ascending\n    even_list.sort(key=lambda x: (len(x), x))\n    return even_list"}
+{"task_id": "HumanEval/149", "solution": "def sorted_list_sum(lst):\n    filtered = [s for s in lst if len(s) % 2 == 0]\n    return sorted(filtered, key=lambda x: (len(x), x))"}
+{"task_id": "HumanEval/149", "solution": ""}
+{"task_id": "HumanEval/150", "solution": "import math\ndef is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(math.sqrt(n)) + 1):\n        if n % i == 0:\n            return False\n    return True\ndef x_or_y(n, x, y):\n    if is_prime(n):\n        return x\n    else:\n        return y"}
+{"task_id": "HumanEval/150", "solution": "def x_or_y(n, x, y):\n    if n < 2:\n        return y\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return y\n    return x"}
+{"task_id": "HumanEval/150", "solution": ""}
+{"task_id": "HumanEval/150", "solution": "import math\ndef x_or_y(n, x, y):\n    if n < 2:\n        return y\n    if n == 2:\n        return x\n    if n % 2 == 0:\n        return y\n    max_divisor = math.isqrt(n)\n    for i in range(3, max_divisor + 1, 2):\n        if n % i == 0:\n            return y\n    return x"}
+{"task_id": "HumanEval/151", "solution": ""}
+{"task_id": "HumanEval/151", "solution": ""}
+{"task_id": "HumanEval/151", "solution": ""}
+{"task_id": "HumanEval/151", "solution": "def double_the_difference(lst):\n    sum_sq = 0\n    for num in lst:\n        try:\n            num_int = int(num)\n        except ValueError:\n            continue\n        if num_int < 0:\n            continue\n        if num_int % 2 == 1:\n            sum_sq += num_int ** 2\n    return sum_sq"}
+{"task_id": "HumanEval/152", "solution": "def compare(game, guess):\n    \"\"\"Return an array where each element is the absolute difference between game and guess at the same index.\"\"\"\n    return [abs(g - s) for g, s in zip(game, guess)]"}
+{"task_id": "HumanEval/152", "solution": "def compare(game, guess):\n    return [abs(a - b) for a, b in zip(game, guess)]"}
+{"task_id": "HumanEval/152", "solution": "def compare(game, guess):\n    return [abs(g - s) if g != s else 0 for g, s in zip(game, guess)]"}
+{"task_id": "HumanEval/152", "solution": "def compare(game, guess):\n    return [abs(a - b) for a, b in zip(game, guess)]"}
+{"task_id": "HumanEval/153", "solution": ""}
+{"task_id": "HumanEval/153", "solution": ""}
+{"task_id": "HumanEval/153", "solution": "def Strongest_Extension(class_name, extensions):\n    max_strength = None\n    best_extension = None\n    for ext in extensions:\n        cap = 0\n        sm = 0\n        for c in ext:\n            if c.isupper():\n                cap += 1\n            elif c.islower():\n                sm += 1\n        strength = cap - sm\n        if max_strength is None or strength > max_strength:\n            max_strength = strength\n            best_extension = ext\n    return f\"{class_name}.{best_extension}\""}
+{"task_id": "HumanEval/153", "solution": ""}
+{"task_id": "HumanEval/154", "solution": ""}
+{"task_id": "HumanEval/154", "solution": ""}
+{"task_id": "HumanEval/154", "solution": ""}
+{"task_id": "HumanEval/154", "solution": ""}
+{"task_id": "HumanEval/155", "solution": "def even_odd_count(num):\n    num = abs(num)\n    even = 0\n    odd = 0\n    while num > 0:\n        digit = num % 10\n        if digit % 2 == 0:\n            even += 1\n        else:\n            odd += 1\n        num = num // 10\n    return (even, odd)"}
+{"task_id": "HumanEval/155", "solution": ""}
+{"task_id": "HumanEval/155", "solution": ""}
+{"task_id": "HumanEval/155", "solution": "def even_odd_count(num):\n    s = str(abs(num))\n    even = 0\n    odd = 0\n    for c in s:\n        d = int(c)\n        if d % 2 == 0:\n            even += 1\n        else:\n            odd += 1\n    return (even, odd)"}
+{"task_id": "HumanEval/156", "solution": ""}
+{"task_id": "HumanEval/156", "solution": ""}
+{"task_id": "HumanEval/156", "solution": ""}
+{"task_id": "HumanEval/156", "solution": ""}
+{"task_id": "HumanEval/157", "solution": "def right_angle_triangle(a, b, c):\n    sorted_sides = sorted([a, b, c])\n    return (sorted_sides[0] ** 2 + sorted_sides[1] ** 2 == sorted_sides[2] ** 2) and (sorted_sides[0] + sorted_sides[1] > sorted_sides[2])"}
+{"task_id": "HumanEval/157", "solution": ""}
+{"task_id": "HumanEval/157", "solution": "def right_angle_triangle(a, b, c):\n    sides = sorted([a, b, c])\n    return sides[0]**2 + sides[1]**2 == sides[2]**2"}
+{"task_id": "HumanEval/157", "solution": ""}
+{"task_id": "HumanEval/158", "solution": "def find_max(words):\n    max_count = 0\n    result_word = ''\n    for word in words:\n        current = len(set(word))\n        if current > max_count:\n            max_count = current\n            result_word = word\n        elif current == max_count:\n            if word < result_word:\n                result_word = word\n    return result_word"}
+{"task_id": "HumanEval/158", "solution": ""}
+{"task_id": "HumanEval/158", "solution": "def find_max(words):\n    best_count = -1\n    best_word = None\n    for word in words:\n        current_count = len(set(word))\n        if current_count > best_count:\n            best_count = current_count\n            best_word = word\n        elif current_count == best_count:\n            if word < best_word:\n                best_word = word\n    return best_word"}
+{"task_id": "HumanEval/158", "solution": "def find_max(words):\n    max_unique = -1\n    best_word = ''\n    for word in words:\n        current_unique = len(set(word))\n        if current_unique > max_unique:\n            max_unique = current_unique\n            best_word = word\n        elif current_unique == max_unique:\n            if word < best_word:\n                best_word = word\n    return best_word"}
+{"task_id": "HumanEval/159", "solution": ""}
+{"task_id": "HumanEval/159", "solution": "def eat(number, need, remaining):\n    if remaining >= need:\n        total_eaten = need + number\n        remaining = remaining - need\n    else:\n        total_eaten = number + remaining\n        remaining_after = remaining + number - need\n        remaining = max(remaining_after, 0)\n    return [total_eaten, remaining]"}
+{"task_id": "HumanEval/159", "solution": ""}
+{"task_id": "HumanEval/159", "solution": ""}
+{"task_id": "HumanEval/160", "solution": ""}
+{"task_id": "HumanEval/160", "solution": ""}
+{"task_id": "HumanEval/160", "solution": ""}
+{"task_id": "HumanEval/160", "solution": ""}
+{"task_id": "HumanEval/161", "solution": "def solve(s):\n    processed = []\n    for c in s:\n        if c.isalpha():\n            processed.append(c.lower() if c.isupper() else c.upper())\n        else:\n            processed.append(c)\n    letters_present = any(c.isalpha() for c in processed)\n    if not letters_present:\n        return ''.join(reversed(s))\n    else:\n        return ''.join(processed)"}
+{"task_id": "HumanEval/161", "solution": "def solve(s):\n    res = []\n    for c in s:\n        if c.isalpha():\n            res.append(c.swapcase())\n        else:\n            res.append(c)\n    if not res:\n        return ''.join(reversed(res))\n    else:\n        return ''.join(res)"}
+{"task_id": "HumanEval/161", "solution": ""}
+{"task_id": "HumanEval/161", "solution": ""}
+{"task_id": "HumanEval/162", "solution": ""}
+{"task_id": "HumanEval/162", "solution": "import hashlib\ndef string_to_md5(text):\n    if not text:\n        return None\n    return hashlib.md5(text.encode()).hexdigest()"}
+{"task_id": "HumanEval/162", "solution": "import hashlib\ndef string_to_md5(text):\n    if not text:\n        return None\n    m = hashlib.md5()\n    m.update(text.encode('utf-8'))\n    return m.hexdigest()"}
+{"task_id": "HumanEval/162", "solution": ""}
+{"task_id": "HumanEval/163", "solution": "def generate_integers(a, b):\n    evens = []\n    for num in range(a, b + 1):\n        for digit_char in str(num):\n            digit = int(digit_char)\n            if digit % 2 == 0:\n                evens.append(digit)\n    evens.sort()\n    return evens"}
+{"task_id": "HumanEval/163", "solution": ""}
+{"task_id": "HumanEval/163", "solution": ""}
+{"task_id": "HumanEval/163", "solution": ""}
