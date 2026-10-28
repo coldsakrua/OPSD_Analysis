@@ -12,7 +12,8 @@ set -euo pipefail
 
 # Qwen3-1.7B OPSD on APPS (same problem set / user prompt as GRPO APPS).
 # Privilege = official answer code (solution). st/tt, clip=0.05, lr=1e-6.
-# Batch: micro=8, gas=4, 2 GPU → global_batch=64 → 6400 samples / 100 steps.
+# Batch aligned with GRPO train_bs=96 (grpo_think_1p7b_apps_4gpu.sh):
+#   micro=8, gas=6, 2 GPU → global_batch=96 → 4800 samples / 50 steps.
 #
 # Data: scripts/data/preprocess_opsd_apps.py
 #   data/apps/preprocessed/apps.opsd.solution.sthink_tthink.maxprompt2048.parquet
@@ -28,9 +29,9 @@ SEED=${SEED:-42}
 MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-2048}
 MAX_COMPLETION_LENGTH=${MAX_COMPLETION_LENGTH:-1024}
 PER_DEVICE_BATCH_SIZE=${PER_DEVICE_BATCH_SIZE:-8}
-GRADIENT_ACCUMULATION_STEPS=${GRADIENT_ACCUMULATION_STEPS:-4}
-TARGET_GLOBAL_BATCH=${TARGET_GLOBAL_BATCH:-64}
-MAX_STEPS=${MAX_STEPS:-100}
+GRADIENT_ACCUMULATION_STEPS=${GRADIENT_ACCUMULATION_STEPS:-6}
+TARGET_GLOBAL_BATCH=${TARGET_GLOBAL_BATCH:-96}
+MAX_STEPS=${MAX_STEPS:-50}
 SAVE_STEPS=${SAVE_STEPS:-25}
 VLLM_GPU_MEMORY_UTILIZATION=${VLLM_GPU_MEMORY_UTILIZATION:-0.4}
 
@@ -60,7 +61,7 @@ export TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 export HF_HOME=${HF_HOME:-${BASE_DIR}/.cache/huggingface}
 export WANDB_MODE=offline
 export WANDB_PROJECT=${WANDB_PROJECT:-OPSD}
-export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-qwen3_1p7b_fullparam_100step_apps}
+export WANDB_RUN_GROUP=${WANDB_RUN_GROUP:-qwen3_1p7b_fullparam_50step_apps}
 export WANDB_DIR=${WANDB_DIR:-${BASE_DIR}/wandb}
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export VLLM_USE_V1=0
