@@ -53,6 +53,8 @@ status=$?
 
 # Rename Slurm out to include model + variant + dataset when possible.
 # Expected final: seed{SEED}_{1p7b|olmo7bt}_{variant}_{dataset}.{A}_{a}.out
+# variant prefers short ablation keywords; otherwise compress EVAL_TAG
+# (aligned with 1.7b job names / prior manual renames like ot_integer_answer_wrong_ckpt50).
 seed_tok="seed${SEED:-42}"
 case "${ARRAY_SCRIPT_DIR}" in
   */eval/1.7b*) model_short=1p7b; log_root="log/eval/1.7b/array" ;;
@@ -61,14 +63,37 @@ case "${ARRAY_SCRIPT_DIR}" in
 esac
 tag="${EVAL_TAG:-unk}"
 variant=unk
-for v in topk16_rkl topk4_rkl topk1_rkl topk16 topk4 topk1 first256 uni256 last256 irr_other_sol answer c256; do
+# Old ablation short-names only (exact-ish tokens). Do NOT match bare "answer"
+# (would crush ot_integer_answer_* into "answer").
+for v in topk16_rkl topk4_rkl topk1_rkl topk16 topk4 topk1 first256 uni256 last256 irr_other_sol c256; do
   if [[ "${tag}" == *"${v}"* ]]; then
     if [[ "${v}" == irr_other_sol ]]; then variant=ios; else variant="${v}"; fi
     break
   fi
 done
-if [[ "${variant}" == unk && "${tag}" == *openthoughts* ]]; then variant=c1024; fi
+if [[ "${variant}" == unk && "${tag}" == *answer_s* ]]; then variant=answer; fi
+if [[ "${variant}" == unk && "${tag}" == *openthoughts* && "${tag}" != *ot_integer* && "${tag}" != *instr* && "${tag}" != *clip0* && "${tag}" != *clip1* ]]; then
+  variant=c1024
+fi
 if [[ "${variant}" == unk && ( "${tag}" == qwen3-1.7b* || "${tag}" == olmo-3-7b-think* ) ]]; then variant=base; fi
+# Fallback: compress EVAL_TAG → distinctive middle (matches 1.7b / manual olmo renames).
+if [[ "${variant}" == unk && -n "${EVAL_TAG:-}" && "${EVAL_TAG}" != unk ]]; then
+  v="${EVAL_TAG}"
+  v="${v//_olmo7bt/}"
+  v="${v//_1p7b/}"
+  v="${v//_50step/}"
+  v="${v//_100step/}"
+  v="${v//_30step/}"
+  for pfx in st_tt_clip005_1e_6_ st_tt_clip005_1e6_ snt_tnt_clip005_1e_6_ st_tt_clip005_ st_tt_; do
+    if [[ "${v}" == "${pfx}"* ]]; then
+      v="${v#"${pfx}"}"
+      break
+    fi
+  done
+  # Drop trailing eval seed suffix if present (seed is already in filename).
+  v="${v%_seed${SEED:-42}}"
+  variant="${v:-unk}"
+fi
 # attach train-seed for multi-seed trained variants when present in tag
 if [[ "${tag}" =~ seed([0-9]+) && "${variant}" != unk && "${variant}" != base && "${variant}" != topk* ]]; then
   if [[ "${tag}" == *"${variant}_seed${BASH_REMATCH[1]}"* || "${tag}" == *"seed${BASH_REMATCH[1]}_${variant}"* || "${tag}" == *"_seed${BASH_REMATCH[1]}"* ]]; then
@@ -84,6 +109,15 @@ desc_log="${log_root}/${seed_tok}_${model_short}_${variant}_${ds}.${SLURM_ARRAY_
 if [[ -f "${slurm_log}" && "${slurm_log}" != "${desc_log}" ]]; then
   mv -f "${slurm_log}" "${desc_log}" 2>/dev/null || true
   echo "[array] renamed log -> ${desc_log}"
+elif [[ -f "${desc_log}" ]]; then
+  : # already descriptive
+else
+  # Recover: job may have already been renamed to *_unk_*; rewrite from EVAL_TAG.
+  unk_log="${log_root}/${seed_tok}_${model_short}_unk_${ds}.${SLURM_ARRAY_JOB_ID}_${idx}.out"
+  if [[ -f "${unk_log}" && "${unk_log}" != "${desc_log}" && "${variant}" != unk ]]; then
+    mv -f "${unk_log}" "${desc_log}" 2>/dev/null || true
+    echo "[array] renamed log -> ${desc_log}"
+  fi
 fi
 
 exit "${status}"
