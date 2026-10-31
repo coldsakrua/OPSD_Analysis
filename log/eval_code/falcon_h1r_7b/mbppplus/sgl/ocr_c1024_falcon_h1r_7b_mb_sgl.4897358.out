@@ -1,0 +1,307 @@
+[sglang] gcc=x86_64-conda-linux-gnu-c++ (Anaconda gcc) 11.2.0
+[evalplus] backend=sglang (generate-only)
+[evalplus] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[evalplus] checkpoint=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_clip005_1e_6_opencodereasoning_falcon7b_c1024/4894583/checkpoint-100
+[evalplus] dataset=mbppplus thinking=on (template CoT; enable_thinking no-op)
+[evalplus] generate_batch_size=4 (val-n=4)
+[evalplus] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.json
+[evalplus] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/falcon
+Sat Oct 31 04:47:01 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A800-SXM4-80GB          Off |   00000000:8D:00.0 Off |                    0 |
+| N/A   33C    P0             62W /  400W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[evalplus] backend=sglang attention=triton
+[evalplus] dataset=mbpp data=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/mbppplus/MbppPlus.jsonl n_problems=378
+[evalplus] model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_clip005_1e_6_opencodereasoning_falcon7b_c1024/4894583/checkpoint-100
+[evalplus] thinking=True n=4 temp=0.6 top_p=0.95 top_k=-1 max_new_tokens=65536
+[evalplus] context ok: max_prompt=288 + max_new_tokens=65536 < context_length=73728
+[evalplus] launching SGLang Engine ...
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-10-31 04:48:17] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[2026-10-31 04:48:24] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+Multi-thread loading shards:   0% Completed | 0/1 [00:00<?, ?it/s]Multi-thread loading shards: 100% Completed | 1/1 [00:35<00:00, 35.58s/it]Multi-thread loading shards: 100% Completed | 1/1 [00:35<00:00, 35.58s/it]
+  0%|          | 0/12 [00:00<?, ?it/s]Capturing batches (bs=63 avail_mem=11.54 GB):   0%|          | 0/12 [00:00<?, ?it/s]Capturing batches (bs=63 avail_mem=11.54 GB):   8%|▊         | 1/12 [00:03<00:33,  3.09s/it]Capturing batches (bs=56 avail_mem=11.44 GB):   8%|▊         | 1/12 [00:03<00:33,  3.09s/it]Capturing batches (bs=56 avail_mem=11.44 GB):  17%|█▋        | 2/12 [00:03<00:13,  1.36s/it]Capturing batches (bs=48 avail_mem=11.43 GB):  17%|█▋        | 2/12 [00:03<00:13,  1.36s/it]Capturing batches (bs=48 avail_mem=11.43 GB):  25%|██▌       | 3/12 [00:03<00:08,  1.08it/s]Capturing batches (bs=40 avail_mem=11.42 GB):  25%|██▌       | 3/12 [00:03<00:08,  1.08it/s]Capturing batches (bs=40 avail_mem=11.42 GB):  33%|███▎      | 4/12 [00:03<00:04,  1.61it/s]Capturing batches (bs=32 avail_mem=11.40 GB):  33%|███▎      | 4/12 [00:03<00:04,  1.61it/s]Capturing batches (bs=32 avail_mem=11.40 GB):  42%|████▏     | 5/12 [00:03<00:03,  2.21it/s]Capturing batches (bs=24 avail_mem=11.39 GB):  42%|████▏     | 5/12 [00:03<00:03,  2.21it/s]Capturing batches (bs=24 avail_mem=11.39 GB):  50%|█████     | 6/12 [00:04<00:02,  2.88it/s]Capturing batches (bs=16 avail_mem=11.38 GB):  50%|█████     | 6/12 [00:04<00:02,  2.88it/s]Capturing batches (bs=16 avail_mem=11.38 GB):  58%|█████▊    | 7/12 [00:04<00:01,  3.41it/s]Capturing batches (bs=12 avail_mem=11.37 GB):  58%|█████▊    | 7/12 [00:04<00:01,  3.41it/s]Capturing batches (bs=12 avail_mem=11.37 GB):  67%|██████▋   | 8/12 [00:04<00:00,  4.05it/s]Capturing batches (bs=8 avail_mem=11.36 GB):  67%|██████▋   | 8/12 [00:04<00:00,  4.05it/s] Capturing batches (bs=8 avail_mem=11.36 GB):  75%|███████▌  | 9/12 [00:04<00:00,  4.55it/s]Capturing batches (bs=4 avail_mem=11.34 GB):  75%|███████▌  | 9/12 [00:04<00:00,  4.55it/s]Capturing batches (bs=4 avail_mem=11.34 GB):  83%|████████▎ | 10/12 [00:04<00:00,  5.01it/s]Capturing batches (bs=2 avail_mem=11.33 GB):  83%|████████▎ | 10/12 [00:04<00:00,  5.01it/s]Capturing batches (bs=2 avail_mem=11.33 GB):  92%|█████████▏| 11/12 [00:04<00:00,  5.43it/s]Capturing batches (bs=1 avail_mem=11.32 GB):  92%|█████████▏| 11/12 [00:04<00:00,  5.43it/s]Capturing batches (bs=1 avail_mem=11.32 GB): 100%|██████████| 12/12 [00:05<00:00,  4.66it/s]Capturing batches (bs=1 avail_mem=11.32 GB): 100%|██████████| 12/12 [00:05<00:00,  2.32it/s]
+[evalplus] generate 0:4 / 378
+[evalplus] checkpoint 4/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 4:8 / 378
+[evalplus] checkpoint 8/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 8:12 / 378
+[evalplus] checkpoint 12/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 12:16 / 378
+[evalplus] checkpoint 16/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 16:20 / 378
+[evalplus] checkpoint 20/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 20:24 / 378
+[evalplus] checkpoint 24/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 24:28 / 378
+[evalplus] checkpoint 28/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 28:32 / 378
+[evalplus] checkpoint 32/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 32:36 / 378
+[evalplus] checkpoint 36/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 36:40 / 378
+[evalplus] checkpoint 40/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 40:44 / 378
+[evalplus] checkpoint 44/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 44:48 / 378
+[evalplus] checkpoint 48/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 48:52 / 378
+[evalplus] checkpoint 52/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 52:56 / 378
+[evalplus] checkpoint 56/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 56:60 / 378
+[evalplus] checkpoint 60/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 60:64 / 378
+[evalplus] checkpoint 64/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 64:68 / 378
+[evalplus] checkpoint 68/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 68:72 / 378
+[evalplus] checkpoint 72/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 72:76 / 378
+[evalplus] checkpoint 76/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 76:80 / 378
+[evalplus] checkpoint 80/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 80:84 / 378
+[evalplus] checkpoint 84/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 84:88 / 378
+[evalplus] checkpoint 88/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 88:92 / 378
+[evalplus] checkpoint 92/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 92:96 / 378
+[evalplus] checkpoint 96/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 96:100 / 378
+[evalplus] checkpoint 100/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 100:104 / 378
+[evalplus] checkpoint 104/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 104:108 / 378
+[evalplus] checkpoint 108/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 108:112 / 378
+[evalplus] checkpoint 112/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 112:116 / 378
+[evalplus] checkpoint 116/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 116:120 / 378
+[evalplus] checkpoint 120/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 120:124 / 378
+[evalplus] checkpoint 124/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 124:128 / 378
+[evalplus] checkpoint 128/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 128:132 / 378
+[evalplus] checkpoint 132/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 132:136 / 378
+[evalplus] checkpoint 136/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 136:140 / 378
+[evalplus] checkpoint 140/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 140:144 / 378
+[evalplus] checkpoint 144/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 144:148 / 378
+[evalplus] checkpoint 148/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 148:152 / 378
+[evalplus] checkpoint 152/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 152:156 / 378
+[evalplus] checkpoint 156/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 156:160 / 378
+[evalplus] checkpoint 160/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 160:164 / 378
+[evalplus] checkpoint 164/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 164:168 / 378
+[evalplus] checkpoint 168/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 168:172 / 378
+[evalplus] checkpoint 172/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 172:176 / 378
+[evalplus] checkpoint 176/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 176:180 / 378
+[evalplus] checkpoint 180/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 180:184 / 378
+[evalplus] checkpoint 184/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 184:188 / 378
+[evalplus] checkpoint 188/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 188:192 / 378
+[evalplus] checkpoint 192/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 192:196 / 378
+[evalplus] checkpoint 196/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 196:200 / 378
+[evalplus] checkpoint 200/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 200:204 / 378
+[evalplus] checkpoint 204/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 204:208 / 378
+[evalplus] checkpoint 208/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 208:212 / 378
+[evalplus] checkpoint 212/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 212:216 / 378
+[evalplus] checkpoint 216/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 216:220 / 378
+[evalplus] checkpoint 220/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 220:224 / 378
+[evalplus] checkpoint 224/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 224:228 / 378
+[evalplus] checkpoint 228/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 228:232 / 378
+[evalplus] checkpoint 232/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 232:236 / 378
+[evalplus] checkpoint 236/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 236:240 / 378
+[evalplus] checkpoint 240/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 240:244 / 378
+[evalplus] checkpoint 244/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 244:248 / 378
+[evalplus] checkpoint 248/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 248:252 / 378
+[evalplus] checkpoint 252/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 252:256 / 378
+[evalplus] checkpoint 256/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 256:260 / 378
+[evalplus] checkpoint 260/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 260:264 / 378
+[evalplus] checkpoint 264/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 264:268 / 378
+[evalplus] checkpoint 268/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 268:272 / 378
+[evalplus] checkpoint 272/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 272:276 / 378
+[evalplus] checkpoint 276/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 276:280 / 378
+[evalplus] checkpoint 280/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 280:284 / 378
+[evalplus] checkpoint 284/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 284:288 / 378
+[evalplus] checkpoint 288/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 288:292 / 378
+[evalplus] checkpoint 292/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 292:296 / 378
+[evalplus] checkpoint 296/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 296:300 / 378
+[evalplus] checkpoint 300/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 300:304 / 378
+[evalplus] checkpoint 304/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 304:308 / 378
+[evalplus] checkpoint 308/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 308:312 / 378
+[evalplus] checkpoint 312/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 312:316 / 378
+[evalplus] checkpoint 316/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 316:320 / 378
+[evalplus] checkpoint 320/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 320:324 / 378
+[evalplus] checkpoint 324/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 324:328 / 378
+[evalplus] checkpoint 328/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 328:332 / 378
+[evalplus] checkpoint 332/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 332:336 / 378
+[evalplus] checkpoint 336/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 336:340 / 378
+[evalplus] checkpoint 340/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 340:344 / 378
+[evalplus] checkpoint 344/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 344:348 / 378
+[evalplus] checkpoint 348/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 348:352 / 378
+[evalplus] checkpoint 352/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 352:356 / 378
+[evalplus] checkpoint 356/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 356:360 / 378
+[evalplus] checkpoint 360/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 360:364 / 378
+[evalplus] checkpoint 364/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 364:368 / 378
+[evalplus] checkpoint 368/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 368:372 / 378
+[evalplus] checkpoint 372/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 372:376 / 378
+[evalplus] checkpoint 376/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] generate 376:378 / 378
+[evalplus] checkpoint 378/378 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.jsonl
+[evalplus] wrote generations → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.json
+[evalplus] avg_output_tokens=2231.0 (n=1512 median=1331.0 min=459 max=65536)
+[evalplus] wrote metrics → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.json
+[evalplus] submitting CPU judge: /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/scripts/eval_code/falcon_h1r_7b/mbppplus_sgl_judge.sh
+[evalplus] generations=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/mbppplus_falcon_h1r_7b_sgl.generations.json
+[evalplus] judge job-name=ocr_c1024_falcon_h1r_7b_mb_j
+sbatch: ╔════════════════════════════════════════════════════════════╗
+sbatch: ║ 装置四 - 参数检查脚本
+sbatch: ║ Device IV - Parameter Checking Script
+sbatch: ╠════════════════════════════════════════════════════════════╣
+sbatch: ║ 版本: v1.0.5
+sbatch: ║ 时间: 2026-10-31 09:32:32
+sbatch: ╚════════════════════════════════════════════════════════════╝
+sbatch: [提示] 您可在提交作业时通过-p/--partition参数指定分区，可用逗号分开，指定多个分区，如 -p GPUA800,GPUA800L,GPUA40S
+sbatch: [提示] 您可在提交作业时通过--mem(min_mem_per_node)或--mem-per-cpu(min_mem_per_cpu)或--mem-per-gpu(mem_per_tres)参数指定内存
+sbatch: [提示] 您可在提交作业时通过-c/--cpus-per-task(cpus_per_task)或者--cpus-per-gpu=(cpus_per_tres)参数指定CPU
+sbatch: [提示] 您可在提交作业时通过--gres或-G/--gpus或--gpus-per-node或--gpus-per-socket或--gpus-per-task或--tres-per-task参数指定GPU
+sbatch: [提示] 您可在提交作业时通过-n/--ntasks(num_tasks)或--ntasks-per-node或--ntasks-per-socket或--ntasks-per-core或--ntasks-per-gpu参数指定task
+sbatch: [提示] 您可在提交作业时通过-N/--nodes参数指定node
+sbatch: [提示] 您可在提交作业时通过-t/--time(任务最大运行时限time_limit)或--time-min(任务最少需要运行多久,任务可比最少运行时间提前结束)或参数指定任务时长
+sbatch: [装置四->参数检查->分区] partition: C64M512G
+sbatch: [装置四->参数检查->内存] min_mem_per_node: 未设置
+sbatch: [装置四->参数检查->内存] min_mem_per_cpu: 未设置
+sbatch: [装置四->参数检查->内存] mem_per_tres: nil MB
+sbatch: [装置四->参数检查->内存] 提醒：您未指定内存参数，将使用分区的默认值：DefMemPerCPU=7968 MB
+sbatch: [装置四->参数检查->CPU] min_cpus: 48
+sbatch: [装置四->参数检查->CPU] cpus_per_task: 48
+sbatch: [装置四->参数检查->CPU] max_cpus: NO_VAL
+sbatch: [装置四->参数检查->CPU] cpus_per_tres: 未设置
+sbatch: [装置四->参数检查->gres] gres: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_node: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_task: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_socket: 未设置
+sbatch: [装置四->参数检查->gres] tres_per_job: 未设置
+sbatch: [装置四->参数检查->task] num_tasks: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_node: 1
+sbatch: [装置四->参数检查->task] ntasks_per_socket: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_core: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_gpu: NO_VAL
+sbatch: [装置四->参数检查->task] ntasks_per_tres: NO_VAL
+sbatch: [装置四->参数检查->task] tres_per_task: 未设置
+sbatch: [装置四->参数检查->node] min_nodes: 1
+sbatch: [装置四->参数检查->node] max_nodes: 1
+sbatch: [装置四->参数检查->time] time_limit: 720 Min
+sbatch: [装置四->参数检查->time] time_min: NO_VAL
+sbatch: [装置四->参数检查->合理性检查->说明]
+sbatch: [装置四->参数检查->合理性检查->说明] 为给大家提供更好的作业运行体验，我们对作业参数进行了合理性检查，方案如下：
+sbatch: [装置四->参数检查->合理性检查->说明] 1、任务最大运行时长参数强制要求为必填项(调度算法使用)
+sbatch: [装置四->参数检查->合理性检查->说明]    用户必须通过-t/--time参数指定任务最大运行时长，否则作业将被拒绝
+sbatch: [装置四->参数检查->合理性检查->说明]    用户可设置的任务最大运行时长，为任务提交到的分区所允许的最大时长
+sbatch: [装置四->参数检查->合理性检查->说明] 2、建议用户填写作业预估的最小运行时间(调度算法使用)--time-min，用户填写数量越多，任务调度效率越高
+sbatch: [装置四->参数检查->合理性检查->说明] 3、用户填写的参数或未填写的参数，如未特别说明，此拦截脚本不做任何更改，将由slurm默认分配
+sbatch: [装置四->参数检查->合理性检查->说明] 4、slurm将根据节点上CPU、内存、GPU等资源按比例分配或按固定数量分配给您提交的任务
+sbatch: [装置四->参数检查->合理性检查->说明]    您提交的值ReqTRES，不一定与slurm实际为您分配到的值AllocTRES相同
+sbatch: [装置四->参数检查->合理性检查->说明] 5、交互式任务的最大运行时间，已限制为不超过6小时，若在GPU分区运行，最大使用GPU卡数为2张
+sbatch: [装置四->参数检查->合理性检查->说明] 6、slurm已开启Slurm Priority Multifactor（官方多因子优先级调度算法），动态调整任务的优先级，以实现更好的作业运行体验
+sbatch: [装置四->参数检查->合理性检查->说明]    用户公平因子（Fairshare）：基于用户历史消耗资源 / 运行时长扣分（历史占资源越多，优先级越低）
+sbatch: [装置四->参数检查->合理性检查->说明]    资源大小因子（Size Factor）：小任务优先 / 大任务加权可调
+sbatch: [装置四->参数检查->合理性检查->说明]    任务等待时长（Age Factor）：排队越久加分，防饥饿
+sbatch: [装置四->参数检查->合理性检查->说明]    QOS / 锁定标记区分权重（QOS Factor）：给锁定用户单独 QOS，设置独立权重
+sbatch: [装置四->参数检查->合理性检查->说明] 如您执行遇到拦截脚本的问题，请及时反馈，我们会尽快修复！同时也谢谢大家提的宝贵意见
+sbatch: [装置四->参数检查->合理性检查->说明]
+sbatch: [装置四->参数检查->合理性检查->资源配比->CPU] 从cpus_per_task获取: 48
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] num_nodes: 1
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] num_cpus_per_node: 48
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] 检测到用户未指定内存数量，将由slurm自动分配
+sbatch: [装置四->参数检查->合理性检查->CPU分区资源配比] 检查通过，最终资源以slurm自动分配结果为准
+sbatch: ╔════════════════════════════════════════════════════════════╗
+sbatch: ║ 参数检查完成
+sbatch: ║ All Checks Passed
+sbatch: ╚════════════════════════════════════════════════════════════╝
+Submitted batch job 4899446

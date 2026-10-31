@@ -109,6 +109,21 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--tp-size", type=int, default=1)
     p.add_argument("--context-length", type=int, default=40960)
     p.add_argument("--disable-hybrid-swa-memory", action="store_true", default=True)
+    p.add_argument(
+        "--reasoning-parser",
+        type=str,
+        default="",
+        help="SGLang reasoning parser name (e.g. deepseek-r1). Empty disables.",
+    )
+    p.add_argument(
+        "--disable-piecewise-cuda-graph",
+        action="store_true",
+        default=False,
+        help=(
+            "Pass disable_piecewise_cuda_graph to SGLang Engine. "
+            "Required for Falcon-H1: piecewise CUDA graph warmup hits Dynamo KeyError."
+        ),
+    )
     p.add_argument("--max-problems", type=int, default=0)
     p.add_argument("--debug", action="store_true")
     p.add_argument("--skip-evaluate", action="store_true")
@@ -164,6 +179,27 @@ def main() -> None:
     ]
     stop_ids = stop_token_ids(tokenizer)
 
+    # SGLang rejects when (prompt_len + max_new_tokens) >= context_length.
+    # Official MiMo asks max_tokens=32768 with the same 32k model context; clamp.
+    max_new_tokens = int(args.max_new_tokens)
+    context_length = int(args.context_length)
+    prompt_lens = [len(tokenizer.encode(p, add_special_tokens=False)) for p in prompts]
+    max_prompt_tokens = max(prompt_lens) if prompt_lens else 0
+    max_allowed_new = max(1, context_length - max_prompt_tokens - 1)
+    if max_new_tokens > max_allowed_new:
+        print(
+            f"[evalplus] clamp max_new_tokens {max_new_tokens} -> {max_allowed_new} "
+            f"(max_prompt={max_prompt_tokens} + gen must be < context_length={context_length})",
+            flush=True,
+        )
+        max_new_tokens = max_allowed_new
+    else:
+        print(
+            f"[evalplus] context ok: max_prompt={max_prompt_tokens} + "
+            f"max_new_tokens={max_new_tokens} < context_length={context_length}",
+            flush=True,
+        )
+
     from sglang import Engine
 
     engine_kwargs: Dict[str, Any] = {
@@ -174,11 +210,15 @@ def main() -> None:
         "sampling_backend": args.sampling_backend,
         "mem_fraction_static": args.mem_fraction_static,
         "tp_size": args.tp_size,
-        "context_length": args.context_length,
+        "context_length": context_length,
         "log_level": "warning",
     }
     if args.disable_hybrid_swa_memory:
         engine_kwargs["disable_hybrid_swa_memory"] = True
+    if args.reasoning_parser:
+        engine_kwargs["reasoning_parser"] = args.reasoning_parser
+    if args.disable_piecewise_cuda_graph:
+        engine_kwargs["disable_piecewise_cuda_graph"] = True
 
     print("[evalplus] launching SGLang Engine ...", flush=True)
     llm = Engine(**engine_kwargs)
@@ -186,7 +226,7 @@ def main() -> None:
     sampling_params: Dict[str, Any] = {
         "temperature": args.temperature,
         "top_p": args.top_p,
-        "max_new_tokens": args.max_new_tokens,
+        "max_new_tokens": max_new_tokens,
         "n": gen_n,
         "sampling_seed": args.seed,
         "skip_special_tokens": True,
@@ -261,7 +301,7 @@ def main() -> None:
         "top_p": args.top_p,
         "top_k": args.top_k,
         "min_p": args.min_p,
-        "max_new_tokens": args.max_new_tokens,
+        "max_new_tokens": max_new_tokens,
         "seed": args.seed,
         "base_only": bool(args.base_only),
         "backend": "sglang",

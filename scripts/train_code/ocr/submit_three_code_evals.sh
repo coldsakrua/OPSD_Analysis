@@ -87,6 +87,13 @@ case "${MODEL_KEY}" in
     submit_one humanevalplus "${DIR}/humanevalplus_think.sh" "${LOG}/humanevalplus/think/%x.%j.out" th
     submit_one mbppplus "${DIR}/mbppplus_think.sh" "${LOG}/mbppplus/think/%x.%j.out" th
     ;;
+  qwen3_06b|qwen3_0.6b|0.6b|06b)
+    DIR="${BASE_DIR}/scripts/eval_code/0.6b"
+    LOG="log/eval_code/0.6b"
+    submit_one lcb_v6 "${DIR}/lcb_v6_think.sh" "${LOG}/lcb_v6/think/%x.%j.out" th
+    submit_one humanevalplus "${DIR}/humanevalplus_think.sh" "${LOG}/humanevalplus/think/%x.%j.out" th
+    submit_one mbppplus "${DIR}/mbppplus_think.sh" "${LOG}/mbppplus/think/%x.%j.out" th
+    ;;
   qwen3_1.7b_base|1.7b_base)
     DIR="${BASE_DIR}/scripts/eval_code/1.7b_base"
     LOG="log/eval_code/1.7b_base"
@@ -97,6 +104,13 @@ case "${MODEL_KEY}" in
   qwen3_4b|4b)
     DIR="${BASE_DIR}/scripts/eval_code/4b"
     LOG="log/eval_code/4b"
+    submit_one lcb_v6 "${DIR}/lcb_v6_think.sh" "${LOG}/lcb_v6/think/%x.%j.out" th
+    submit_one humanevalplus "${DIR}/humanevalplus_think.sh" "${LOG}/humanevalplus/think/%x.%j.out" th
+    submit_one mbppplus "${DIR}/mbppplus_think.sh" "${LOG}/mbppplus/think/%x.%j.out" th
+    ;;
+  qwen3_4b_thinking|4b_thinking|4bt)
+    DIR="${BASE_DIR}/scripts/eval_code/4b_thinking"
+    LOG="log/eval_code/4b_thinking"
     submit_one lcb_v6 "${DIR}/lcb_v6_think.sh" "${LOG}/lcb_v6/think/%x.%j.out" th
     submit_one humanevalplus "${DIR}/humanevalplus_think.sh" "${LOG}/humanevalplus/think/%x.%j.out" th
     submit_one mbppplus "${DIR}/mbppplus_think.sh" "${LOG}/mbppplus/think/%x.%j.out" th
@@ -135,6 +149,27 @@ case "${MODEL_KEY}" in
     submit_one lcb_v6 "${DIR}/lcb_v6_think.sh" "${LOG}/lcb_v6/sgl/%x.%j.out" th
     submit_one humanevalplus "${DIR}/humanevalplus_sgl_think.sh" "${LOG}/humanevalplus/sgl/%x.%j.out" th
     submit_one mbppplus "${DIR}/mbppplus_sgl_think.sh" "${LOG}/mbppplus/sgl/%x.%j.out" th
+    ;;
+  deepseek_r1_1.5b|deepseek_r1_1p5b|r1_15b)
+    DIR="${BASE_DIR}/scripts/eval_code/deepseek_r1_1.5b"
+    LOG="log/eval_code/deepseek_r1_1.5b"
+    submit_one lcb_v6 "${DIR}/lcb_v6_think.sh" "${LOG}/lcb_v6/think/%x.%j.out" th
+    submit_one humanevalplus "${DIR}/humanevalplus_think.sh" "${LOG}/humanevalplus/think/%x.%j.out" th
+    submit_one mbppplus "${DIR}/mbppplus_think.sh" "${LOG}/mbppplus/think/%x.%j.out" th
+    ;;
+  falcon_h1r_7b|falcon7b)
+    DIR="${BASE_DIR}/scripts/eval_code/falcon_h1r_7b"
+    LOG="log/eval_code/falcon_h1r_7b"
+    submit_one lcb_v6 "${DIR}/lcb_v6_sgl.sh" "${LOG}/lcb_v6/sgl/%x.%j.out" sgl
+    submit_one humanevalplus "${DIR}/humanevalplus_sgl.sh" "${LOG}/humanevalplus/sgl/%x.%j.out" sgl
+    submit_one mbppplus "${DIR}/mbppplus_sgl.sh" "${LOG}/mbppplus/sgl/%x.%j.out" sgl
+    ;;
+  mimo_7b_rl|mimo7b)
+    DIR="${BASE_DIR}/scripts/eval_code/mimo_7b_rl"
+    LOG="log/eval_code/mimo_7b_rl"
+    submit_one lcb_v6 "${DIR}/lcb_v6_sgl_nothink.sh" "${LOG}/lcb_v6/sgl/%x.%j.out" nt
+    submit_one humanevalplus "${DIR}/humanevalplus_sgl_nothink.sh" "${LOG}/humanevalplus/sgl/%x.%j.out" nt
+    submit_one mbppplus "${DIR}/mbppplus_sgl_nothink.sh" "${LOG}/mbppplus/sgl/%x.%j.out" nt
     ;;
   *)
     echo "[error] unknown MODEL_KEY=${MODEL_KEY}" >&2

@@ -1,0 +1,291 @@
+[smoke] model=/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b problems=2 val_n=1 max_new=12288
+Fri Oct 30 18:31:30 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A800-SXM4-80GB          Off |   00000000:8D:00.0 Off |                    0 |
+| N/A   30C    P0             59W /  400W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+===== LCB =====
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[lcb] loaded 2 problems from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/livecodebench/test6.jsonl
+[lcb] model=/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b
+[lcb] thinking=True n=1 temp=0.6 top_p=0.95 top_k=-1 max_new_tokens=12288
+INFO 10-30 18:31:39 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 10-30 18:31:40 [__init__.py:239] Automatically detected platform cuda.
+INFO 10-30 18:31:42 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 10-30 18:31:42 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 10-30 18:31:42 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 10-30 18:31:42 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 10-30 18:31:42 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO 10-30 18:31:50 [config.py:717] This model supports multiple tasks: {'embed', 'reward', 'score', 'generate', 'classify'}. Defaulting to 'generate'.
+WARNING 10-30 18:31:50 [cuda.py:93] To see benefits of async output processing, enable CUDA graph. Since, enforce-eager is enabled, async output processor cannot be used
+INFO 10-30 18:31:50 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=14336, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=False, use_async_output_proc=False, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[],"max_capture_size":0}, use_cached_outputs=False, 
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/uniproc_executor.py:29: UserWarning: Failed to get the IP address, using 0.0.0.0 by default.The value can be set by the environment variable VLLM_HOST_IP or HOST_IP.
+  get_ip(), get_open_port())
+INFO 10-30 18:31:50 [cuda.py:228] Using XFormers backend.
+INFO 10-30 18:31:51 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 10-30 18:31:51 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b...
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:11<00:00, 11.36s/it]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:11<00:00, 11.36s/it]
+
+INFO 10-30 18:32:03 [loader.py:458] Loading weights took 11.74 seconds
+INFO 10-30 18:32:03 [model_runner.py:1140] Model loading took 3.3461 GiB and 11.835043 seconds
+INFO 10-30 18:32:04 [worker.py:287] Memory profiling takes 0.66 seconds
+INFO 10-30 18:32:04 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.95) = 75.29GiB
+INFO 10-30 18:32:04 [worker.py:287] model weights take 3.35GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.43GiB; the rest of the memory reserved for KV Cache is 70.42GiB.
+INFO 10-30 18:32:04 [executor_base.py:112] # cuda blocks: 164831, # CPU blocks: 9362
+INFO 10-30 18:32:04 [executor_base.py:117] Maximum concurrency for 14336 tokens per request: 183.96x
+INFO 10-30 18:32:06 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 3.14 seconds
+[lcb] generate 0:1 / 2
+Processed prompts:   0%|          | 0/1 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts: 100%|██████████| 1/1 [00:29<00:00, 29.87s/it, est. speed input: 14.93 toks/s, output: 102.51 toks/s]Processed prompts: 100%|██████████| 1/1 [00:29<00:00, 29.87s/it, est. speed input: 14.93 toks/s, output: 102.51 toks/s]
+[lcb] checkpoint 1/2 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/lcb_v6_deepseek_r1_1.5b_think.smoke.generations.jsonl
+[lcb] generate 1:2 / 2
+Processed prompts:   0%|          | 0/1 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts: 100%|██████████| 1/1 [02:00<00:00, 120.62s/it, est. speed input: 3.98 toks/s, output: 101.87 toks/s]Processed prompts: 100%|██████████| 1/1 [02:00<00:00, 120.62s/it, est. speed input: 3.98 toks/s, output: 101.87 toks/s]
+[lcb] checkpoint 2/2 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/lcb_v6_deepseek_r1_1.5b_think.smoke.generations.jsonl
+[lcb] wrote generations → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/lcb_v6_deepseek_r1_1.5b_think.smoke.generations.json
+[lcb] avg_output_tokens=7675.0 (n=2 median=7675.0 min=3062 max=12288)
+[lcb] wrote metrics → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/lcb_v6_deepseek_r1_1.5b_think.smoke.json
+[rank0]:[W1030 18:34:39.676019600 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[smoke-extract] file=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/lcb_v6_deepseek_r1_1.5b_think.smoke.generations.json
+[smoke-extract] dataset=lcb_v6 n_rows=2 profile=strict
+========================================================================
+[OK] abc387_b raw_chars=9001 extracted_chars=307
+  fence_python=True </think>=True answer_region_chars=2147 syntax_ok=True
+--- raw (trim) ---
+Okay, I need to solve this problem where I have to calculate the sum of all integers in a 9x9 multiplication table that are not equal to a given X. Let me think through this step by step.
+
+First, I should understand what the multiplication table look
+...
+uted and printed.
+
+This approach efficiently calculates the required sum by leveraging the known total sum of the multiplication table and counting the occurrences of X within it. This ensures that the solution is both optimal and easy to understand.
+--- extracted ---
+X = int(input())
+frequency = {}
+
+for i in range(1, 10):
+    for j in range(1, 10):
+        product = i * j
+        if product == X:
+            frequency[X] += 1
+        else:
+            frequency[product] = frequency.get(product, 0) + 1
+
+total = 2025
+result = total - X * frequency.get(X, 0)
+print(result)
+========================================================================
+[EMPTY] abc387_f raw_chars=36039 extracted_chars=0
+  fence_python=False </think>=False answer_region_chars=36039 syntax_ok=False
+--- raw (trim) ---
+Okay, I've got this problem to solve. Let's try to understand it step by step.
+
+So, the problem is about counting the number of valid sequences x that satisfy certain conditions. The sequences x have length N, and each element is between 1 and M. The
+...
+(max_x - x_i + 1) for all nodes in the component.
+
+But in the sample input 1, this gives 3*3*3=27, but the correct answer is 6.
+
+So, I'm stuck.
+
+Perhaps I should look for another approach.
+
+Alternative Idea:
+
+The problem can be viewed as counting the
+--- extracted ---
+<EMPTY>
+========================================================================
+[smoke-extract] SUMMARY ok=1/2 empty=1 no_python_fence=1 no_think_close=1 bad_syntax=0 profile=strict
+[smoke-extract] VERDICT=WARN (some extraction issues)
+===== HumanEval+ =====
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[evalplus] subset override → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/humanevalplus_deepseek_r1_1.5b_think.smoke.subset.jsonl (2 tasks)
+[evalplus] dataset=humaneval data=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/humanevalplus_deepseek_r1_1.5b_think.smoke.subset.jsonl n_problems=2
+[evalplus] model=/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b
+[evalplus] thinking=True n=1 temp=0.6 top_p=0.95 top_k=-1 max_new_tokens=12288
+INFO 10-30 18:34:45 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 10-30 18:34:47 [__init__.py:239] Automatically detected platform cuda.
+INFO 10-30 18:34:48 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 10-30 18:34:48 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 10-30 18:34:48 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 10-30 18:34:48 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 10-30 18:34:48 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO 10-30 18:34:56 [config.py:717] This model supports multiple tasks: {'reward', 'score', 'classify', 'embed', 'generate'}. Defaulting to 'generate'.
+WARNING 10-30 18:34:56 [cuda.py:93] To see benefits of async output processing, enable CUDA graph. Since, enforce-eager is enabled, async output processor cannot be used
+INFO 10-30 18:34:56 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=14336, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=False, use_async_output_proc=False, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[],"max_capture_size":0}, use_cached_outputs=False, 
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/uniproc_executor.py:29: UserWarning: Failed to get the IP address, using 0.0.0.0 by default.The value can be set by the environment variable VLLM_HOST_IP or HOST_IP.
+  get_ip(), get_open_port())
+INFO 10-30 18:34:56 [cuda.py:228] Using XFormers backend.
+INFO 10-30 18:34:57 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 10-30 18:34:57 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b...
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:07<00:00,  7.37s/it]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:07<00:00,  7.37s/it]
+
+INFO 10-30 18:35:05 [loader.py:458] Loading weights took 7.74 seconds
+INFO 10-30 18:35:05 [model_runner.py:1140] Model loading took 3.3461 GiB and 7.831021 seconds
+INFO 10-30 18:35:06 [worker.py:287] Memory profiling takes 0.59 seconds
+INFO 10-30 18:35:06 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.95) = 75.29GiB
+INFO 10-30 18:35:06 [worker.py:287] model weights take 3.35GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.43GiB; the rest of the memory reserved for KV Cache is 70.42GiB.
+INFO 10-30 18:35:06 [executor_base.py:112] # cuda blocks: 164831, # CPU blocks: 9362
+INFO 10-30 18:35:06 [executor_base.py:117] Maximum concurrency for 14336 tokens per request: 183.96x
+INFO 10-30 18:35:08 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 3.07 seconds
+[evalplus] generate 0:1 / 2
+Processed prompts:   0%|          | 0/1 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts: 100%|██████████| 1/1 [00:28<00:00, 28.78s/it, est. speed input: 5.07 toks/s, output: 102.41 toks/s]Processed prompts: 100%|██████████| 1/1 [00:28<00:00, 28.78s/it, est. speed input: 5.07 toks/s, output: 102.41 toks/s]
+[evalplus] checkpoint 1/2 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/humanevalplus_deepseek_r1_1.5b_think.smoke.generations.jsonl
+[evalplus] generate 1:2 / 2
+Processed prompts:   0%|          | 0/1 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts: 100%|██████████| 1/1 [02:00<00:00, 120.76s/it, est. speed input: 1.13 toks/s, output: 101.76 toks/s]Processed prompts: 100%|██████████| 1/1 [02:00<00:00, 120.76s/it, est. speed input: 1.13 toks/s, output: 101.76 toks/s]
+[evalplus] checkpoint 2/2 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/humanevalplus_deepseek_r1_1.5b_think.smoke.generations.jsonl
+[evalplus] wrote generations → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/humanevalplus_deepseek_r1_1.5b_think.smoke.generations.json
+[evalplus] avg_output_tokens=7617.5 (n=2 median=7617.5 min=2947 max=12288)
+[evalplus] wrote metrics → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/humanevalplus_deepseek_r1_1.5b_think.smoke.json
+[rank0]:[W1030 18:37:40.580835241 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[smoke-extract] file=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/humanevalplus_deepseek_r1_1.5b_think.smoke.generations.json
+[smoke-extract] dataset=humanevalplus n_rows=2 profile=strict
+========================================================================
+[OK] HumanEval/0 raw_chars=11629 extracted_chars=263
+  fence_python=True </think>=True answer_region_chars=2286 syntax_ok=True
+--- raw (trim) ---
+Okay, I need to write a Python script that solves this problem. Let me read the problem carefully.
+
+The task is to write a function called has_close_elements which takes a list of floats and a threshold. It should return True if any two numbers in th
+...
+n returns `True`.
+5. **Final Result**: If no such pair is found after checking all pairs, the function returns `False`.
+
+This approach ensures that all possible pairs are checked efficiently, providing the correct result based on the given threshold.
+--- extracted ---
+import itertools
+
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    if len(numbers) < 2:
+        return False
+    for a, b in itertools.combinations(numbers, 2):
+        if abs(a - b) < threshold:
+            return True
+    return False
+========================================================================
+[EMPTY] HumanEval/1 raw_chars=43187 extracted_chars=0
+  fence_python=False </think>=False answer_region_chars=43187 syntax_ok=False
+--- raw (trim) ---
+Okay, I need to write a Python script that solves this problem. Let me read the problem carefully.
+
+The task is to write a function called separate_paren_groups that takes a string of parentheses and returns a list of separate groups. The input is a 
+...
+that's not possible. So, perhaps the code is correct, but the sample's expected output is different.
+
+Alternatively, perhaps the problem is that the code is not correctly handling the case when a group is closed, and the current group is not added.
+
+
+--- extracted ---
+<EMPTY>
+========================================================================
+[smoke-extract] SUMMARY ok=1/2 empty=1 no_python_fence=1 no_think_close=1 bad_syntax=0 profile=strict
+[smoke-extract] VERDICT=WARN (some extraction issues)
+===== MBPP+ =====
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.4.0) or chardet (7.4.3)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+[evalplus] subset override → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/mbppplus_deepseek_r1_1.5b_think.smoke.subset.jsonl (2 tasks)
+[evalplus] dataset=mbpp data=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/mbppplus_deepseek_r1_1.5b_think.smoke.subset.jsonl n_problems=2
+[evalplus] model=/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b
+[evalplus] thinking=True n=1 temp=0.6 top_p=0.95 top_k=-1 max_new_tokens=12288
+INFO 10-30 18:37:46 [importing.py:53] Triton module has been replaced with a placeholder.
+INFO 10-30 18:37:47 [__init__.py:239] Automatically detected platform cuda.
+INFO 10-30 18:37:49 [__init__.py:30] Available plugins for group vllm.general_plugins:
+INFO 10-30 18:37:49 [__init__.py:32] name=ministral_tokenizer, value=verl_rlsd.ministral_vllm_plugin:init_plugin
+INFO 10-30 18:37:49 [__init__.py:34] all available plugins for group vllm.general_plugins will be loaded.
+INFO 10-30 18:37:49 [__init__.py:36] set environment variable VLLM_PLUGINS to control which plugins to load.
+INFO 10-30 18:37:49 [__init__.py:44] plugin ministral_tokenizer loaded.
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO 10-30 18:37:56 [config.py:717] This model supports multiple tasks: {'embed', 'reward', 'score', 'generate', 'classify'}. Defaulting to 'generate'.
+WARNING 10-30 18:37:56 [cuda.py:93] To see benefits of async output processing, enable CUDA graph. Since, enforce-eager is enabled, async output processor cannot be used
+INFO 10-30 18:37:56 [llm_engine.py:240] Initializing a V0 LLM engine (v0.8.5) with config: model='/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b', speculative_config=None, tokenizer='/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=14336, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar', reasoning_backend=None), observability_config=ObservabilityConfig(show_hidden_metrics=False, otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=None, served_model_name=/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=None, chunked_prefill_enabled=False, use_async_output_proc=False, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[],"max_capture_size":0}, use_cached_outputs=False, 
+/gpfs/share/home/2501210611/miniconda3/envs/anchor/lib/python3.10/site-packages/vllm/executor/uniproc_executor.py:29: UserWarning: Failed to get the IP address, using 0.0.0.0 by default.The value can be set by the environment variable VLLM_HOST_IP or HOST_IP.
+  get_ip(), get_open_port())
+INFO 10-30 18:37:57 [cuda.py:228] Using XFormers backend.
+INFO 10-30 18:37:58 [parallel_state.py:1004] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0
+INFO 10-30 18:37:58 [model_runner.py:1108] Starting to load model /gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b...
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:07<00:00,  7.96s/it]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:07<00:00,  7.96s/it]
+
+INFO 10-30 18:38:06 [loader.py:458] Loading weights took 8.35 seconds
+INFO 10-30 18:38:07 [model_runner.py:1140] Model loading took 3.3461 GiB and 8.792972 seconds
+INFO 10-30 18:38:08 [worker.py:287] Memory profiling takes 1.47 seconds
+INFO 10-30 18:38:08 [worker.py:287] the current vLLM instance can use total_gpu_memory (79.25GiB) x gpu_memory_utilization (0.95) = 75.29GiB
+INFO 10-30 18:38:08 [worker.py:287] model weights take 3.35GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 1.43GiB; the rest of the memory reserved for KV Cache is 70.42GiB.
+INFO 10-30 18:38:08 [executor_base.py:112] # cuda blocks: 164831, # CPU blocks: 9362
+INFO 10-30 18:38:08 [executor_base.py:117] Maximum concurrency for 14336 tokens per request: 183.96x
+INFO 10-30 18:38:11 [llm_engine.py:437] init engine (profile, create kv cache, warmup model) took 3.99 seconds
+[evalplus] generate 0:1 / 2
+Processed prompts:   0%|          | 0/1 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts: 100%|██████████| 1/1 [00:11<00:00, 11.10s/it, est. speed input: 7.30 toks/s, output: 101.36 toks/s]Processed prompts: 100%|██████████| 1/1 [00:11<00:00, 11.10s/it, est. speed input: 7.30 toks/s, output: 101.36 toks/s]
+[evalplus] checkpoint 1/2 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/mbppplus_deepseek_r1_1.5b_think.smoke.generations.jsonl
+[evalplus] generate 1:2 / 2
+Processed prompts:   0%|          | 0/1 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts: 100%|██████████| 1/1 [00:26<00:00, 26.52s/it, est. speed input: 1.92 toks/s, output: 101.60 toks/s]Processed prompts: 100%|██████████| 1/1 [00:26<00:00, 26.52s/it, est. speed input: 1.92 toks/s, output: 101.60 toks/s]
+[evalplus] checkpoint 2/2 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/mbppplus_deepseek_r1_1.5b_think.smoke.generations.jsonl
+[evalplus] wrote generations → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/mbppplus_deepseek_r1_1.5b_think.smoke.generations.json
+[evalplus] avg_output_tokens=1909.5 (n=2 median=1909.5 min=1125 max=2694)
+[evalplus] wrote metrics → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/mbppplus_deepseek_r1_1.5b_think.smoke.json
+[rank0]:[W1030 18:38:51.246060355 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[smoke-extract] file=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_deepseek_r1_1.5b/mbppplus_deepseek_r1_1.5b_think.smoke.generations.json
+[smoke-extract] dataset=mbppplus n_rows=2 profile=strict
+========================================================================
+[OK] Mbpp/2 raw_chars=4864 extracted_chars=54
+  fence_python=True </think>=True answer_region_chars=1323 syntax_ok=True
+--- raw (trim) ---
+Okay, I need to write a Python script that finds the shared elements between two lists. The function should return a set of these common elements. Hmm, let's think about how to do this.
+
+So, the user provided an example: similar_elements((3,4,5,6), (
+...
+t are present in both input sets.
+3. **Return Result**: The function returns the resulting set of common elements.
+
+This approach ensures that the solution is efficient and concise, leveraging Python's built-in set operations for optimal performance.
+--- extracted ---
+def similar_elements(a, b):
+    return set(a) & set(b)
+========================================================================
+[OK] Mbpp/3 raw_chars=10278 extracted_chars=237
+  fence_python=True </think>=True answer_region_chars=2046 syntax_ok=True
+--- raw (trim) ---
+Okay, I need to write a Python script that identifies non-prime numbers. The user provided an example where is_not_prime(2) returns False, which makes sense because 2 is a prime number. So, I should think about how to create a function that checks if
+...
+nd the function returns `True`. If no divisors are found, the number is prime, and the function returns `False`.
+
+This method efficiently determines if a number is prime by minimizing the number of checks needed, making it optimal for larger numbers.
+--- extracted ---
+def is_not_prime(n):
+    if n <= 1:
+        return True
+    if n == 2:
+        return False
+    if n % 2 == 0:
+        return True
+    for i in range(3, int(n**0.5) + 1, 2):
+        if n % i == 0:
+            return True
+    return False
+========================================================================
+[smoke-extract] SUMMARY ok=2/2 empty=0 no_python_fence=0 no_think_close=0 bad_syntax=0 profile=strict
+[smoke-extract] VERDICT=PASS
+[smoke] deepseek_r1_1.5b done

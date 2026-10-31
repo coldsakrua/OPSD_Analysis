@@ -117,9 +117,30 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         default=True,
     )
+    p.add_argument(
+        "--reasoning-parser",
+        type=str,
+        default="",
+        help="SGLang reasoning parser name (e.g. deepseek-r1). Empty disables.",
+    )
+    p.add_argument(
+        "--disable-piecewise-cuda-graph",
+        action="store_true",
+        default=False,
+        help=(
+            "Pass disable_piecewise_cuda_graph to SGLang Engine. "
+            "Required for Falcon-H1: piecewise CUDA graph warmup hits Dynamo KeyError."
+        ),
+    )
     p.add_argument("--max-problems", type=int, default=0)
     p.add_argument("--debug", action="store_true")
     p.add_argument("--skip-evaluate", action="store_true")
+    p.add_argument(
+        "--resume",
+        action="store_true",
+        default=False,
+        help="Keep existing .generations.jsonl and skip completed question_ids.",
+    )
     return p.parse_args()
 
 
@@ -150,89 +171,162 @@ def main() -> None:
     )
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True)
-    prompts = [build_prompt(tokenizer, prob, enable_thinking) for prob in problems]
+    all_problems = list(problems)
+    all_prompts = [build_prompt(tokenizer, prob, enable_thinking) for prob in all_problems]
     stop_ids = _stop_token_ids(tokenizer)
-
-    from sglang import Engine
-
-    engine_kwargs: Dict[str, Any] = {
-        "model_path": args.model_path,
-        "tokenizer_path": args.model_path,
-        "trust_remote_code": True,
-        "attention_backend": args.attention_backend,
-        "sampling_backend": args.sampling_backend,
-        "mem_fraction_static": args.mem_fraction_static,
-        "tp_size": args.tp_size,
-        "context_length": args.context_length,
-        "log_level": "warning",
-    }
-    if args.disable_hybrid_swa_memory:
-        engine_kwargs["disable_hybrid_swa_memory"] = True
-
-    print(f"[lcb] launching SGLang Engine ...", flush=True)
-    llm = Engine(**engine_kwargs)
-
-    sampling_params: Dict[str, Any] = {
-        "temperature": args.temperature,
-        "top_p": args.top_p,
-        "max_new_tokens": args.max_new_tokens,
-        "n": gen_n,
-        "sampling_seed": args.seed,
-        "skip_special_tokens": True,
-    }
-    if args.top_k and args.top_k > 0:
-        sampling_params["top_k"] = args.top_k
-    if args.min_p and args.min_p > 0:
-        sampling_params["min_p"] = args.min_p
-    if args.presence_penalty != 0.0:
-        sampling_params["presence_penalty"] = args.presence_penalty
-    if stop_ids:
-        sampling_params["stop_token_ids"] = stop_ids
+    n_total = len(all_problems)
 
     out_path = Path(args.output_json)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     generations_path = out_path.with_suffix(".generations.json")
     generations_jsonl = out_path.with_suffix(".generations.jsonl")
-    if generations_jsonl.exists():
-        generations_jsonl.unlink()
 
     save_rows: List[Dict[str, Any]] = []
-    gbs = max(1, int(args.generate_batch_size))
-    for start in range(0, len(prompts), gbs):
-        batch_prompts = prompts[start : start + gbs]
-        batch_problems = problems[start : start + len(batch_prompts)]
+    done_ids: set[str] = set()
+    if args.resume and generations_jsonl.exists():
+        for line in generations_jsonl.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            qid = str(row.get("question_id", ""))
+            if not qid or qid in done_ids:
+                continue
+            outs = row.get("output_list") or []
+            if len(outs) < gen_n:
+                continue
+            done_ids.add(qid)
+            save_rows.append(row)
         print(
-            f"[lcb] generate {start}:{start + len(batch_prompts)} / {len(prompts)}",
+            f"[lcb] resume: loaded {len(save_rows)}; "
+            f"remaining {n_total - len(done_ids)}/{n_total}",
             flush=True,
         )
-        raw = llm.generate(batch_prompts, sampling_params=sampling_params)
-        batch_outputs = _normalize_generate_outputs(raw, len(batch_prompts), gen_n)
-        batch_rows = []
-        for problem, gens in zip(batch_problems, batch_outputs):
-            tok_counts = [
-                len(tokenizer.encode(g, add_special_tokens=False)) if g else 0
-                for g in gens
-            ]
-            batch_rows.append(
-                {
-                    "question_id": problem.question_id,
-                    "question_title": problem.question_title,
-                    "difficulty": problem.difficulty.value,
-                    "platform": problem.platform.value,
-                    "contest_date": problem.contest_date.isoformat(),
-                    "output_list": gens,
-                    "num_tokens_list": tok_counts,
-                }
+    elif generations_jsonl.exists():
+        generations_jsonl.unlink()
+
+    keep_idx = [
+        i
+        for i, prob in enumerate(all_problems)
+        if str(prob.question_id) not in done_ids
+    ]
+    problems = [all_problems[i] for i in keep_idx]
+    prompts = [all_prompts[i] for i in keep_idx]
+
+    # SGLang rejects when (prompt_len + max_new_tokens) >= context_length.
+    # Official MiMo asks max_tokens=32768 with the same 32k model context; clamp.
+    max_new_tokens = int(args.max_new_tokens)
+    context_length = int(args.context_length)
+    prompt_lens = [
+        len(tokenizer.encode(p, add_special_tokens=False)) for p in all_prompts
+    ]
+    max_prompt_tokens = max(prompt_lens) if prompt_lens else 0
+    max_allowed_new = max(1, context_length - max_prompt_tokens - 1)
+    if max_new_tokens > max_allowed_new:
+        print(
+            f"[lcb] clamp max_new_tokens {max_new_tokens} -> {max_allowed_new} "
+            f"(max_prompt={max_prompt_tokens} + gen must be < context_length={context_length})",
+            flush=True,
+        )
+        max_new_tokens = max_allowed_new
+    else:
+        print(
+            f"[lcb] context ok: max_prompt={max_prompt_tokens} + "
+            f"max_new_tokens={max_new_tokens} < context_length={context_length}",
+            flush=True,
+        )
+
+    llm = None
+    if prompts:
+        from sglang import Engine
+
+        engine_kwargs: Dict[str, Any] = {
+            "model_path": args.model_path,
+            "tokenizer_path": args.model_path,
+            "trust_remote_code": True,
+            "attention_backend": args.attention_backend,
+            "sampling_backend": args.sampling_backend,
+            "mem_fraction_static": args.mem_fraction_static,
+            "tp_size": args.tp_size,
+            "context_length": context_length,
+            "log_level": "warning",
+        }
+        if args.disable_hybrid_swa_memory:
+            engine_kwargs["disable_hybrid_swa_memory"] = True
+        if args.reasoning_parser:
+            engine_kwargs["reasoning_parser"] = args.reasoning_parser
+        if args.disable_piecewise_cuda_graph:
+            engine_kwargs["disable_piecewise_cuda_graph"] = True
+
+        print(f"[lcb] launching SGLang Engine ...", flush=True)
+        llm = Engine(**engine_kwargs)
+
+        sampling_params: Dict[str, Any] = {
+            "temperature": args.temperature,
+            "top_p": args.top_p,
+            "max_new_tokens": max_new_tokens,
+            "n": gen_n,
+            "sampling_seed": args.seed,
+            "skip_special_tokens": True,
+        }
+        if args.top_k and args.top_k > 0:
+            sampling_params["top_k"] = args.top_k
+        if args.min_p and args.min_p > 0:
+            sampling_params["min_p"] = args.min_p
+        if args.presence_penalty != 0.0:
+            sampling_params["presence_penalty"] = args.presence_penalty
+        if stop_ids:
+            sampling_params["stop_token_ids"] = stop_ids
+
+        gbs = max(1, int(args.generate_batch_size))
+        n_done_before = len(save_rows)
+        for start in range(0, len(prompts), gbs):
+            batch_prompts = prompts[start : start + gbs]
+            batch_problems = problems[start : start + len(batch_prompts)]
+            abs_start = n_done_before + start
+            print(
+                f"[lcb] generate {abs_start}:{abs_start + len(batch_prompts)} / {n_total}",
+                flush=True,
             )
-        with generations_jsonl.open("a", encoding="utf-8") as f:
-            for row in batch_rows:
-                f.write(json.dumps(row, ensure_ascii=False) + "\n")
-            f.flush()
-        save_rows.extend(batch_rows)
-        print(
-            f"[lcb] checkpoint {len(save_rows)}/{len(problems)} → {generations_jsonl}",
-            flush=True,
-        )
+            raw = llm.generate(batch_prompts, sampling_params=sampling_params)
+            batch_outputs = _normalize_generate_outputs(raw, len(batch_prompts), gen_n)
+            batch_rows = []
+            for problem, gens in zip(batch_problems, batch_outputs):
+                tok_counts = [
+                    len(tokenizer.encode(g, add_special_tokens=False)) if g else 0
+                    for g in gens
+                ]
+                batch_rows.append(
+                    {
+                        "question_id": problem.question_id,
+                        "question_title": problem.question_title,
+                        "difficulty": problem.difficulty.value,
+                        "platform": problem.platform.value,
+                        "contest_date": problem.contest_date.isoformat(),
+                        "output_list": gens,
+                        "num_tokens_list": tok_counts,
+                    }
+                )
+            with generations_jsonl.open("a", encoding="utf-8") as f:
+                for row in batch_rows:
+                    f.write(json.dumps(row, ensure_ascii=False) + "\n")
+                f.flush()
+            save_rows.extend(batch_rows)
+            print(
+                f"[lcb] checkpoint {len(save_rows)}/{n_total} → {generations_jsonl}",
+                flush=True,
+            )
+    else:
+        print(f"[lcb] resume: nothing left to generate ({n_total}/{n_total})", flush=True)
+
+    by_id = {str(r["question_id"]): r for r in save_rows}
+    missing = [str(p.question_id) for p in all_problems if str(p.question_id) not in by_id]
+    if missing:
+        raise SystemExit(f"missing generations for {len(missing)} problems, e.g. {missing[:5]}")
+    save_rows = [by_id[str(p.question_id)] for p in all_problems]
+    problems = all_problems
 
     generations_path.write_text(json.dumps(save_rows, ensure_ascii=False))
     print(f"[lcb] wrote generations → {generations_path}", flush=True)
@@ -251,11 +345,12 @@ def main() -> None:
         "top_p": args.top_p,
         "top_k": args.top_k,
         "min_p": args.min_p,
-        "max_new_tokens": args.max_new_tokens,
+        "max_new_tokens": max_new_tokens,
         "seed": args.seed,
-        "generate_batch_size": gbs,
+        "generate_batch_size": max(1, int(args.generate_batch_size)),
         "mem_fraction_static": args.mem_fraction_static,
         "context_length": args.context_length,
+        "tp_size": args.tp_size,
         "generations_json": str(generations_path),
         "extract_on_cpu": True,
     }
@@ -337,10 +432,11 @@ def main() -> None:
     out_path.write_text(json.dumps(metrics_doc, ensure_ascii=False, indent=2))
     print(f"[lcb] wrote metrics → {out_path}")
 
-    try:
-        llm.shutdown()
-    except Exception:
-        pass
+    if llm is not None:
+        try:
+            llm.shutdown()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

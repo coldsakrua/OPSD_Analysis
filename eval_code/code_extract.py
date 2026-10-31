@@ -78,6 +78,7 @@ def infer_extract_profile(
     Think / base models typically emit ```python after ``</think>`` — keep strict.
     Instruct / IT chat (Olmo Instruct, Qwen3-*-Instruct, OCR instruct ckpts)
     continue a prompt-prefilled ```python block or dump bare ``def``.
+    MiMo-7B-RL (nothink EvalPlus) also dumps bare ``def`` without fences.
 
     ``sft_think`` is never auto-selected here (OCR / base / Olmo stay unchanged).
     Pass ``--extract-profile sft_think`` explicitly from SFT judge jobs only.
@@ -85,7 +86,8 @@ def infer_extract_profile(
     del enable_thinking  # path is the source of truth; Instruct eval is nothink.
     blob = f"{model_path or ''} {hint_path or ''}".lower()
     has_instruct = bool(re.search(r"instruct|\bit\b|-it(?:/|_|\b)", blob))
-    if has_instruct:
+    has_mimo = bool(re.search(r"\bmimo\b|mimo[-_]7b|mimo_7b_rl", blob))
+    if has_instruct or has_mimo:
         return PROFILE_OLMO_INSTRUCT
     return PROFILE_STRICT
 
