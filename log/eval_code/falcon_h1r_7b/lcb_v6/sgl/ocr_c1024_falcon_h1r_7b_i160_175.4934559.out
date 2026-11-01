@@ -1,0 +1,69 @@
+[sglang] gcc=x86_64-conda-linux-gnu-c++ (Anaconda gcc) 11.2.0
+[lcb] backend=sglang attention=triton model=Falcon-H1R-7B
+[lcb] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[lcb] checkpoint=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_clip005_1e_6_opencodereasoning_falcon7b_c1024/4894583/checkpoint-100
+[lcb] dataset=lcb_v6 thinking=1 val_n=4 seed=42
+[lcb] generate_batch_size=2 tp=1
+[lcb] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.json
+[lcb] index_slice start=160 end=175
+[lcb] LCB_FORCE_GENERIC_PROMPT=1
+[lcb] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/falcon
+Sun Nov  1 14:51:53 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A800-SXM4-80GB          Off |   00000000:CF:00.0 Off |                    0 |
+| N/A   32C    P0             62W /  400W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[lcb] loaded 175 problems from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/livecodebench/test6.jsonl
+[lcb] index slice [160:175) of 175 → 15 problems
+[lcb] backend=sglang attention=triton
+[lcb] model=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/outputs/falcon_h1r_7b/st_tt_clip005_1e_6_opencodereasoning_falcon7b_c1024/4894583/checkpoint-100
+[lcb] thinking=True n=4 temp=0.6 top_p=0.95 top_k=-1 max_new_tokens=65536
+[lcb] prompt=LCB generic (LCB_FORCE_GENERIC_PROMPT); expert Python system + NOT return anything except program
+[lcb] context ok: max_prompt=1121 + max_new_tokens=65536 < context_length=73728
+[lcb] launching SGLang Engine ...
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-11-01 14:54:35] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[2026-11-01 14:54:45] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+Multi-thread loading shards:   0% Completed | 0/1 [00:00<?, ?it/s]Multi-thread loading shards: 100% Completed | 1/1 [00:56<00:00, 56.41s/it]Multi-thread loading shards: 100% Completed | 1/1 [00:56<00:00, 56.42s/it]
+  0%|          | 0/12 [00:00<?, ?it/s]Capturing batches (bs=63 avail_mem=11.54 GB):   0%|          | 0/12 [00:00<?, ?it/s]Capturing batches (bs=63 avail_mem=11.54 GB):   8%|▊         | 1/12 [00:05<00:58,  5.33s/it]Capturing batches (bs=56 avail_mem=11.44 GB):   8%|▊         | 1/12 [00:05<00:58,  5.33s/it]Capturing batches (bs=56 avail_mem=11.44 GB):  17%|█▋        | 2/12 [00:05<00:22,  2.29s/it]Capturing batches (bs=48 avail_mem=11.43 GB):  17%|█▋        | 2/12 [00:05<00:22,  2.29s/it]Capturing batches (bs=48 avail_mem=11.43 GB):  25%|██▌       | 3/12 [00:05<00:11,  1.32s/it]Capturing batches (bs=40 avail_mem=11.42 GB):  25%|██▌       | 3/12 [00:05<00:11,  1.32s/it]Capturing batches (bs=40 avail_mem=11.42 GB):  33%|███▎      | 4/12 [00:05<00:06,  1.16it/s]Capturing batches (bs=32 avail_mem=11.40 GB):  33%|███▎      | 4/12 [00:05<00:06,  1.16it/s]Capturing batches (bs=32 avail_mem=11.40 GB):  42%|████▏     | 5/12 [00:05<00:04,  1.66it/s]Capturing batches (bs=24 avail_mem=11.39 GB):  42%|████▏     | 5/12 [00:05<00:04,  1.66it/s]Capturing batches (bs=24 avail_mem=11.39 GB):  50%|█████     | 6/12 [00:06<00:02,  2.22it/s]Capturing batches (bs=16 avail_mem=11.38 GB):  50%|█████     | 6/12 [00:06<00:02,  2.22it/s]Capturing batches (bs=16 avail_mem=11.38 GB):  58%|█████▊    | 7/12 [00:06<00:01,  2.76it/s]Capturing batches (bs=12 avail_mem=11.37 GB):  58%|█████▊    | 7/12 [00:06<00:01,  2.76it/s]Capturing batches (bs=12 avail_mem=11.37 GB):  67%|██████▋   | 8/12 [00:06<00:01,  3.39it/s]Capturing batches (bs=8 avail_mem=11.36 GB):  67%|██████▋   | 8/12 [00:06<00:01,  3.39it/s] Capturing batches (bs=8 avail_mem=11.36 GB):  75%|███████▌  | 9/12 [00:06<00:00,  3.92it/s]Capturing batches (bs=4 avail_mem=11.34 GB):  75%|███████▌  | 9/12 [00:06<00:00,  3.92it/s]Capturing batches (bs=4 avail_mem=11.34 GB):  83%|████████▎ | 10/12 [00:06<00:00,  3.82it/s]Capturing batches (bs=2 avail_mem=11.33 GB):  83%|████████▎ | 10/12 [00:06<00:00,  3.82it/s]Capturing batches (bs=2 avail_mem=11.33 GB):  92%|█████████▏| 11/12 [00:07<00:00,  4.39it/s]Capturing batches (bs=1 avail_mem=11.32 GB):  92%|█████████▏| 11/12 [00:07<00:00,  4.39it/s]Capturing batches (bs=1 avail_mem=11.32 GB): 100%|██████████| 12/12 [00:07<00:00,  3.43it/s]Capturing batches (bs=1 avail_mem=11.32 GB): 100%|██████████| 12/12 [00:07<00:00,  1.61it/s]
+[lcb] generate 160:162 (shard 0:2/15, slice [160:175))
+[lcb] checkpoint 2/15 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.generations.jsonl
+[lcb] generate 162:164 (shard 2:4/15, slice [160:175))
+[lcb] checkpoint 4/15 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.generations.jsonl
+[lcb] generate 164:166 (shard 4:6/15, slice [160:175))
+[lcb] checkpoint 6/15 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.generations.jsonl
+[lcb] generate 166:168 (shard 6:8/15, slice [160:175))
+[lcb] checkpoint 8/15 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.generations.jsonl
+[lcb] generate 168:170 (shard 8:10/15, slice [160:175))
+[lcb] checkpoint 10/15 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.generations.jsonl
+[lcb] generate 170:172 (shard 10:12/15, slice [160:175))
+[lcb] checkpoint 12/15 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.generations.jsonl
+[lcb] generate 172:174 (shard 12:14/15, slice [160:175))
+[lcb] checkpoint 14/15 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.generations.jsonl
+[lcb] generate 174:175 (shard 14:15/15, slice [160:175))
+[lcb] checkpoint 15/15 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.generations.jsonl
+[lcb] wrote generations → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.generations.json
+[lcb] avg_output_tokens=52643.6 (n=60 median=62518.0 min=8508 max=65537)
+[lcb] wrote metrics → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/ocr_c1024_falcon_h1r_7b_ckpt100/lcb_v6_falcon_h1r_7b_sgl.i160_175.json
+[lcb] AUTO_JUDGE=0 → skip judge submit

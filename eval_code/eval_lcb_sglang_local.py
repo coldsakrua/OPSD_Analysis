@@ -31,6 +31,8 @@ from eval_lcb_vllm_local import (  # noqa: E402
     _apply_chat_prompt,
     _stop_token_ids,
     build_prompt,
+    is_falcon_model,
+    use_falcon_prompt,
     load_problems_from_jsonl,
 )
 
@@ -133,6 +135,18 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     p.add_argument("--max-problems", type=int, default=0)
+    p.add_argument(
+        "--start-idx",
+        type=int,
+        default=0,
+        help="Inclusive start index into the loaded problem list (after max-problems).",
+    )
+    p.add_argument(
+        "--end-idx",
+        type=int,
+        default=-1,
+        help="Exclusive end index; -1 means through the end of the list.",
+    )
     p.add_argument("--debug", action="store_true")
     p.add_argument("--skip-evaluate", action="store_true")
     p.add_argument(
@@ -163,6 +177,23 @@ def main() -> None:
         problems = problems[:15]
         print(f"[lcb] debug mode: {len(problems)} problems")
 
+    start_idx = max(0, int(args.start_idx))
+    end_idx = int(args.end_idx)
+    if end_idx < 0:
+        end_idx = len(problems)
+    end_idx = min(len(problems), end_idx)
+    if start_idx > end_idx:
+        raise SystemExit(f"invalid index range: start_idx={start_idx} end_idx={end_idx}")
+    global_start_idx = start_idx
+    global_end_idx = end_idx
+    if start_idx > 0 or end_idx < len(problems):
+        print(
+            f"[lcb] index slice [{start_idx}:{end_idx}) of {len(problems)} "
+            f"→ {end_idx - start_idx} problems",
+            flush=True,
+        )
+        problems = problems[start_idx:end_idx]
+
     print(f"[lcb] backend=sglang attention={args.attention_backend}")
     print(f"[lcb] model={args.model_path}")
     print(
@@ -172,7 +203,24 @@ def main() -> None:
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True)
     all_problems = list(problems)
-    all_prompts = [build_prompt(tokenizer, prob, enable_thinking) for prob in all_problems]
+    if use_falcon_prompt(args.model_path):
+        print(
+            "[lcb] Falcon prompt: official system + thinking-friendly user "
+            "(```python final answer)",
+            flush=True,
+        )
+    elif is_falcon_model(args.model_path):
+        print(
+            "[lcb] prompt=LCB generic (LCB_FORCE_GENERIC_PROMPT); "
+            "expert Python system + NOT return anything except program",
+            flush=True,
+        )
+    all_prompts = [
+        build_prompt(
+            tokenizer, prob, enable_thinking, model_path=args.model_path
+        )
+        for prob in all_problems
+    ]
     stop_ids = _stop_token_ids(tokenizer)
     n_total = len(all_problems)
 
@@ -286,8 +334,12 @@ def main() -> None:
             batch_prompts = prompts[start : start + gbs]
             batch_problems = problems[start : start + len(batch_prompts)]
             abs_start = n_done_before + start
+            g0 = global_start_idx + abs_start
+            g1 = global_start_idx + abs_start + len(batch_prompts)
             print(
-                f"[lcb] generate {abs_start}:{abs_start + len(batch_prompts)} / {n_total}",
+                f"[lcb] generate {g0}:{g1} "
+                f"(shard {abs_start}:{abs_start + len(batch_prompts)}/{n_total}, "
+                f"slice [{global_start_idx}:{global_end_idx}))",
                 flush=True,
             )
             raw = llm.generate(batch_prompts, sampling_params=sampling_params)

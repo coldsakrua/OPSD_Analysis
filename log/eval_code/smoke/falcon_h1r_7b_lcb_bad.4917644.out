@@ -1,0 +1,212 @@
+[sglang] gcc=x86_64-conda-linux-gnu-c++ (Anaconda gcc) 11.2.0
+[smoke-bad] data=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/livecodebench/test6_falcon_smoke_bad.jsonl n=6 val_n=1 max_new=65536
+[smoke-bad] these QIDs were 4/4 empty-extract under old LCB generic system prompt
+Sat Oct 31 17:06:57 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A800-SXM4-80GB          Off |   00000000:53:00.0 Off |                    0 |
+| N/A   44C    P0             64W /  400W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[lcb] loaded 6 problems from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/livecodebench/test6_falcon_smoke_bad.jsonl
+[lcb] backend=sglang attention=triton
+[lcb] model=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b
+[lcb] thinking=True n=1 temp=0.6 top_p=0.95 top_k=-1 max_new_tokens=65536
+[lcb] Falcon prompt: official system + thinking-friendly user (```python final answer)
+[lcb] context ok: max_prompt=1166 + max_new_tokens=65536 < context_length=73728
+[lcb] launching SGLang Engine ...
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-10-31 17:07:33] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[2026-10-31 17:07:43] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+Multi-thread loading shards:   0% Completed | 0/4 [00:00<?, ?it/s]Multi-thread loading shards:  25% Completed | 1/4 [00:29<01:28, 29.53s/it]Multi-thread loading shards:  50% Completed | 2/4 [00:30<00:25, 12.76s/it]Multi-thread loading shards:  75% Completed | 3/4 [00:40<00:11, 11.29s/it]Multi-thread loading shards: 100% Completed | 4/4 [00:50<00:00, 11.12s/it]Multi-thread loading shards: 100% Completed | 4/4 [00:50<00:00, 12.74s/it]
+  0%|          | 0/12 [00:00<?, ?it/s]Capturing batches (bs=63 avail_mem=11.54 GB):   0%|          | 0/12 [00:00<?, ?it/s]Capturing batches (bs=63 avail_mem=11.54 GB):   8%|▊         | 1/12 [00:03<00:35,  3.27s/it]Capturing batches (bs=56 avail_mem=11.44 GB):   8%|▊         | 1/12 [00:03<00:35,  3.27s/it]Capturing batches (bs=56 avail_mem=11.44 GB):  17%|█▋        | 2/12 [00:03<00:14,  1.44s/it]Capturing batches (bs=48 avail_mem=11.43 GB):  17%|█▋        | 2/12 [00:03<00:14,  1.44s/it]Capturing batches (bs=48 avail_mem=11.43 GB):  25%|██▌       | 3/12 [00:03<00:08,  1.08it/s]Capturing batches (bs=40 avail_mem=11.42 GB):  25%|██▌       | 3/12 [00:03<00:08,  1.08it/s]Capturing batches (bs=40 avail_mem=11.42 GB):  33%|███▎      | 4/12 [00:03<00:04,  1.61it/s]Capturing batches (bs=32 avail_mem=11.40 GB):  33%|███▎      | 4/12 [00:03<00:04,  1.61it/s]Capturing batches (bs=32 avail_mem=11.40 GB):  42%|████▏     | 5/12 [00:04<00:03,  2.20it/s]Capturing batches (bs=24 avail_mem=11.39 GB):  42%|████▏     | 5/12 [00:04<00:03,  2.20it/s]Capturing batches (bs=24 avail_mem=11.39 GB):  50%|█████     | 6/12 [00:04<00:02,  2.85it/s]Capturing batches (bs=16 avail_mem=11.38 GB):  50%|█████     | 6/12 [00:04<00:02,  2.85it/s]Capturing batches (bs=16 avail_mem=11.38 GB):  58%|█████▊    | 7/12 [00:04<00:01,  3.37it/s]Capturing batches (bs=12 avail_mem=11.37 GB):  58%|█████▊    | 7/12 [00:04<00:01,  3.37it/s]Capturing batches (bs=12 avail_mem=11.37 GB):  67%|██████▋   | 8/12 [00:04<00:00,  4.01it/s]Capturing batches (bs=8 avail_mem=11.36 GB):  67%|██████▋   | 8/12 [00:04<00:00,  4.01it/s] Capturing batches (bs=8 avail_mem=11.36 GB):  75%|███████▌  | 9/12 [00:04<00:00,  4.48it/s]Capturing batches (bs=4 avail_mem=11.34 GB):  75%|███████▌  | 9/12 [00:04<00:00,  4.48it/s]Capturing batches (bs=4 avail_mem=11.34 GB):  83%|████████▎ | 10/12 [00:04<00:00,  4.94it/s]Capturing batches (bs=2 avail_mem=11.33 GB):  83%|████████▎ | 10/12 [00:04<00:00,  4.94it/s]Capturing batches (bs=2 avail_mem=11.33 GB):  92%|█████████▏| 11/12 [00:05<00:00,  5.32it/s]Capturing batches (bs=1 avail_mem=11.32 GB):  92%|█████████▏| 11/12 [00:05<00:00,  5.32it/s]Capturing batches (bs=1 avail_mem=11.32 GB): 100%|██████████| 12/12 [00:05<00:00,  4.79it/s]Capturing batches (bs=1 avail_mem=11.32 GB): 100%|██████████| 12/12 [00:05<00:00,  2.28it/s]
+[lcb] generate 0:1 / 6
+[lcb] checkpoint 1/6 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_falcon_lcb_bad/lcb_v6_falcon_h1r_7b_sgl.smoke.generations.jsonl
+[lcb] generate 1:2 / 6
+[lcb] checkpoint 2/6 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_falcon_lcb_bad/lcb_v6_falcon_h1r_7b_sgl.smoke.generations.jsonl
+[lcb] generate 2:3 / 6
+[lcb] checkpoint 3/6 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_falcon_lcb_bad/lcb_v6_falcon_h1r_7b_sgl.smoke.generations.jsonl
+[lcb] generate 3:4 / 6
+[lcb] checkpoint 4/6 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_falcon_lcb_bad/lcb_v6_falcon_h1r_7b_sgl.smoke.generations.jsonl
+[lcb] generate 4:5 / 6
+[lcb] checkpoint 5/6 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_falcon_lcb_bad/lcb_v6_falcon_h1r_7b_sgl.smoke.generations.jsonl
+[lcb] generate 5:6 / 6
+[lcb] checkpoint 6/6 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_falcon_lcb_bad/lcb_v6_falcon_h1r_7b_sgl.smoke.generations.jsonl
+[lcb] wrote generations → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_falcon_lcb_bad/lcb_v6_falcon_h1r_7b_sgl.smoke.generations.json
+[lcb] avg_output_tokens=60582.0 (n=6 median=65536.0 min=36450 max=65536)
+[lcb] wrote metrics → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_falcon_lcb_bad/lcb_v6_falcon_h1r_7b_sgl.smoke.json
+[smoke-extract] file=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/smoke_falcon_lcb_bad/lcb_v6_falcon_h1r_7b_sgl.smoke.generations.json
+[smoke-extract] dataset=lcb_v6 n_rows=6 profile=strict
+========================================================================
+[OK] abc396_g raw_chars=83448 extracted_chars=1562
+  fence_python=True </think>=True answer_region_chars=8745 syntax_ok=True
+--- raw (trim) ---
+We need to solve the problem: Given an H x W grid of bits (0/1). We can perform any number of row flips (X) and column flips (Y). Each operation flips all bits in a row or column. The goal is to minimize total number of 1s after flips.
+
+This is a cla
+...
+     val = v // N
+        if ans is None or val < ans:
+            ans = val
+    print(ans)
+
+if __name__ == "__main__":
+    solve()
+```
+
+The program follows exactly the algorithm proven correct above
+and conforms to the required input/output format.
+
+--- extracted ---
+import sys
+
+def fwht(a):
+    """In‑place Walsh–Hadamard transform for XOR convolution."""
+    n = len(a)
+    h = 1
+    while h < n:
+        step = h << 1
+        for i in range(0, n, step):
+            for j in range(i, i + h):
+                x = a[
+...
+          # inverse transform (same as forward)
+
+    # divide by N and find minimum
+    ans = None
+    for v in fa:
+        val = v // N
+        if ans is None or val < ans:
+            ans = val
+    print(ans)
+
+if __name__ == "__main__":
+    solve()
+========================================================================
+[OK] abc398_g raw_chars=236617 extracted_chars=1869
+  fence_python=True </think>=True answer_region_chars=12019 syntax_ok=True
+--- raw (trim) ---
+We need to solve a combinatorial game: given an undirected graph with no odd cycles (i.e., bipartite graph). Players take turns adding edges that preserve bipartiteness (i.e., no odd cycles). The graph initially is bipartite. Players can add any miss
+...
+     if parity == 1:
+            print("Aoki")
+        else:
+            print("Takahashi")
+
+if __name__ == "__main__":
+    solve()
+```
+
+The program follows exactly the algorithm proven correct above and conforms to
+the required input/output format.
+
+--- extracted ---
+import sys
+from collections import deque
+
+def solve() -> None:
+    it = iter(sys.stdin.read().split())
+    N = int(next(it))
+    M = int(next(it))
+
+    g = [[] for _ in range(N)]
+    for _ in range(M):
+        u = int(next(it)) - 1
+        v = int(ne
+...
+one component
+    if odd_component_cnt >= 1:
+        print("Aoki")
+    else:
+        parity = (sum_a & 1) ^ (M & 1)
+        if parity == 1:
+            print("Aoki")
+        else:
+            print("Takahashi")
+
+if __name__ == "__main__":
+    solve()
+========================================================================
+[EMPTY] arc190_a raw_chars=228806 extracted_chars=0
+  fence_python=False </think>=False answer_region_chars=228806 syntax_ok=False
+--- raw (trim) ---
+We need to solve this problem. Let's restate:
+
+We have an array of N bits initially all zero. We have M operations, each with interval [L_i, R_i]. For each operation i, we can choose one of three actions:
+
+- 0: do nothing (cost 0)
+- 1: set all bits i
+...
+ Then union covers all. So answer2 works.
+
+Thus algorithm fine.
+
+Now we should also test scenario where containment pair involves intervals that both start >1, not covering point1. Example: intervals: [2,5] contains [3,4] (contains). Using op1 on [2,
+--- extracted ---
+<EMPTY>
+========================================================================
+[EMPTY] arc194_e raw_chars=245008 extracted_chars=0
+  fence_python=False </think>=False answer_region_chars=245008 syntax_ok=False
+--- raw (trim) ---
+We need to solve the problem: given two binary strings S and T of length N, and two positive integers X and Y. We can repeatedly apply two operations: A and B.
+
+Operation A: Choose i such that 1 ≤ i ≤ N-(X+Y)+1, and the substring S[i..i+X-1] are all 
+...
+ possible? But residues set is exactly one zero per each residue class (since X=Y). So any block of length3 will have residues {1,2,0} regardless of start position (since block covers three consecutive positions). So that doesn't restrict start.
+
+But
+--- extracted ---
+<EMPTY>
+========================================================================
+[EMPTY] arc195_c raw_chars=216524 extracted_chars=0
+  fence_python=False </think>=False answer_region_chars=216524 syntax_ok=False
+--- raw (trim) ---
+We need to solve a combinatorial problem: Given R red pieces (move orthogonally) and B blue pieces (move diagonally), we need to place them on distinct squares of a huge board (10^9 x 10^9). The placement order must form a cycle: each piece can move 
+...
++1,c). Works.
+
+For L=3: we need 2 extra intermediate blues. We previously gave example: B0 (r,c+1), B1 (r+1,c+2), B2 (r+2,c+1). That's length 3. That's pattern: down-right, down-left.
+
+For L=5: we need 4 intermediate steps. We can extend as: B0 (r,c+
+--- extracted ---
+<EMPTY>
+========================================================================
+[EMPTY] arc196_d raw_chars=249505 extracted_chars=0
+  fence_python=False </think>=False answer_region_chars=249505 syntax_ok=False
+--- raw (trim) ---
+We need to solve the problem: There are N towns linearly arranged, N-1 edges with integer strengths w_j (can be any integer, positive, negative, zero). For each person i with start S_i and target T_i (S_i != T_i, |S_i - T_i| > 1), they travel along t
+...
+ider that intervals may be nested but share endpoint (L_i = L_j or R_i = R_j) which is already conflict.
+
+Thus conflict detection reduces to these conditions.
+
+Now we need to compute for each interval i the smallest j>i that conflicts with i.
+
+We can
+--- extracted ---
+<EMPTY>
+========================================================================
+[smoke-extract] SUMMARY ok=2/6 empty=4 no_python_fence=4 no_think_close=4 bad_syntax=0 profile=strict
+[smoke-extract] VERDICT=WARN (some extraction issues)
+Traceback (most recent call last):
+  File "<stdin>", line 8, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: 'eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.generations.json'

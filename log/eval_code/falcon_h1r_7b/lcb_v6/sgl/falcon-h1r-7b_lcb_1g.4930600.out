@@ -1,0 +1,67 @@
+[sglang] gcc=x86_64-conda-linux-gnu-c++ (Anaconda gcc) 11.2.0
+[lcb] backend=sglang attention=triton model=Falcon-H1R-7B
+[lcb] base_dir=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis
+[lcb] checkpoint=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b
+[lcb] dataset=lcb_v6 thinking=1 val_n=4 seed=42
+[lcb] generate_batch_size=2 tp=1
+[lcb] output=/gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.json
+[lcb] conda_prefix=/gpfs/share/home/2501210611/miniconda3/envs/falcon
+Sun Nov  1 12:24:20 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A800-SXM4-80GB          Off |   00000000:2C:00.0 Off |                    0 |
+| N/A   46C    P0             64W /  400W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[lcb] loaded 175 problems from /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/data/livecodebench/test6.jsonl
+[lcb] backend=sglang attention=triton
+[lcb] model=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b
+[lcb] thinking=True n=4 temp=0.6 top_p=0.95 top_k=-1 max_new_tokens=65536
+[lcb] prompt=LCB generic (LCB_FORCE_GENERIC_PROMPT); expert Python system + NOT return anything except program
+[lcb] resume: loaded 122; remaining 53/175
+[lcb] context ok: max_prompt=1870 + max_new_tokens=65536 < context_length=73728
+[lcb] launching SGLang Engine ...
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+Disabling overlap schedule since mamba no_buffer is not compatible with overlap schedule, try to use --disable-radix-cache if overlap schedule is necessary
+[2026-11-01 12:24:36] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[transformers] `BaseImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `BaseImageProcessor` instead.
+[2026-11-01 12:24:44] NUMA affinity is already constrained for process, skipping NUMA node configuration for GPU. Remove your constraints to allow automatic configuration.
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+Multi-thread loading shards:   0% Completed | 0/4 [00:00<?, ?it/s]Multi-thread loading shards:  25% Completed | 1/4 [00:09<00:27,  9.09s/it]Multi-thread loading shards:  50% Completed | 2/4 [00:09<00:08,  4.26s/it]Multi-thread loading shards:  75% Completed | 3/4 [00:14<00:04,  4.44s/it]Multi-thread loading shards: 100% Completed | 4/4 [00:20<00:00,  4.82s/it]Multi-thread loading shards: 100% Completed | 4/4 [00:20<00:00,  5.01s/it]
+  0%|          | 0/12 [00:00<?, ?it/s]Capturing batches (bs=63 avail_mem=11.54 GB):   0%|          | 0/12 [00:00<?, ?it/s]Capturing batches (bs=63 avail_mem=11.54 GB):   8%|▊         | 1/12 [00:01<00:18,  1.71s/it]Capturing batches (bs=56 avail_mem=11.44 GB):   8%|▊         | 1/12 [00:01<00:18,  1.71s/it]Capturing batches (bs=56 avail_mem=11.44 GB):  17%|█▋        | 2/12 [00:01<00:07,  1.26it/s]Capturing batches (bs=48 avail_mem=11.43 GB):  17%|█▋        | 2/12 [00:01<00:07,  1.26it/s]Capturing batches (bs=48 avail_mem=11.43 GB):  25%|██▌       | 3/12 [00:02<00:04,  2.00it/s]Capturing batches (bs=40 avail_mem=11.42 GB):  25%|██▌       | 3/12 [00:02<00:04,  2.00it/s]Capturing batches (bs=40 avail_mem=11.42 GB):  33%|███▎      | 4/12 [00:02<00:02,  2.77it/s]Capturing batches (bs=32 avail_mem=11.40 GB):  33%|███▎      | 4/12 [00:02<00:02,  2.77it/s]Capturing batches (bs=32 avail_mem=11.40 GB):  42%|████▏     | 5/12 [00:02<00:01,  3.53it/s]Capturing batches (bs=24 avail_mem=11.39 GB):  42%|████▏     | 5/12 [00:02<00:01,  3.53it/s]Capturing batches (bs=24 avail_mem=11.39 GB):  50%|█████     | 6/12 [00:02<00:01,  4.25it/s]Capturing batches (bs=16 avail_mem=11.38 GB):  50%|█████     | 6/12 [00:02<00:01,  4.25it/s]Capturing batches (bs=16 avail_mem=11.38 GB):  58%|█████▊    | 7/12 [00:02<00:01,  4.62it/s]Capturing batches (bs=12 avail_mem=11.37 GB):  58%|█████▊    | 7/12 [00:02<00:01,  4.62it/s]Capturing batches (bs=12 avail_mem=11.37 GB):  67%|██████▋   | 8/12 [00:02<00:00,  5.17it/s]Capturing batches (bs=8 avail_mem=11.36 GB):  67%|██████▋   | 8/12 [00:02<00:00,  5.17it/s] Capturing batches (bs=8 avail_mem=11.36 GB):  75%|███████▌  | 9/12 [00:02<00:00,  5.50it/s]Capturing batches (bs=4 avail_mem=11.34 GB):  75%|███████▌  | 9/12 [00:02<00:00,  5.50it/s]Capturing batches (bs=4 avail_mem=11.34 GB):  83%|████████▎ | 10/12 [00:03<00:00,  5.83it/s]Capturing batches (bs=2 avail_mem=11.33 GB):  83%|████████▎ | 10/12 [00:03<00:00,  5.83it/s]Capturing batches (bs=2 avail_mem=11.33 GB):  92%|█████████▏| 11/12 [00:03<00:00,  6.13it/s]Capturing batches (bs=1 avail_mem=11.32 GB):  92%|█████████▏| 11/12 [00:03<00:00,  6.13it/s]Capturing batches (bs=1 avail_mem=11.32 GB): 100%|██████████| 12/12 [00:03<00:00,  6.23it/s]Capturing batches (bs=1 avail_mem=11.32 GB): 100%|██████████| 12/12 [00:03<00:00,  3.56it/s]
+[lcb] generate 122:124 / 175
+[lcb] checkpoint 124/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.generations.jsonl
+[lcb] generate 124:126 / 175
+[lcb] checkpoint 126/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.generations.jsonl
+[lcb] generate 126:128 / 175
+[lcb] checkpoint 128/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.generations.jsonl
+[lcb] generate 128:130 / 175
+[lcb] checkpoint 130/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.generations.jsonl
+[lcb] generate 130:132 / 175
+[lcb] checkpoint 132/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.generations.jsonl
+[lcb] generate 132:134 / 175
+[lcb] checkpoint 134/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.generations.jsonl
+[lcb] generate 134:136 / 175
+[lcb] checkpoint 136/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.generations.jsonl
+[lcb] generate 136:138 / 175
+[lcb] checkpoint 138/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.generations.jsonl
+[lcb] generate 138:140 / 175
+[lcb] checkpoint 140/175 → /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/falcon-h1r-7b/lcb_v6_falcon_h1r_7b_sgl.generations.jsonl
+[lcb] generate 140:142 / 175
+slurmstepd: error: *** JOB 4930600 ON gpua800n06 CANCELLED AT 2026-11-01T14:54:19 ***

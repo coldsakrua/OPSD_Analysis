@@ -10,7 +10,7 @@
 #SBATCH --time=48:00:00
 #
 # LiveCodeBench v6, Falcon-H1R-7B via SGLang (same stack as scripts/eval/falcon_h1r_7b/*_sgl.sh)
-# Sampling: temp=0.6 top_p=0.95 max_new_tokens=65536, generate_batch_size=1, reasoning_parser=deepseek-r1
+# Sampling: temp=0.6 top_p=0.95 max_new_tokens=65536, generate_batch_size=2, reasoning_parser=deepseek-r1
 set -euo pipefail
 
 ulimit -u 8192 2>/dev/null || true
@@ -25,6 +25,16 @@ DATASET=lcb_v6
 MODEL_TAG=falcon_h1r_7b
 DEFAULT_CKPT=/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b
 GENERATE_BATCH_SIZE=${GENERATE_BATCH_SIZE:-2}
+# Override for 4×1-GPU shard mode (see submit_lcb_v6_sgl_4x1gpu.sh).
+VAL_N=${VAL_N:-4}
+PASS_AT_K=${PASS_AT_K:-1,4}
+AUTO_JUDGE=${AUTO_JUDGE:-1}
+SAMPLE_IDX=${SAMPLE_IDX:-}
+# Optional problem-index slice (inclusive start, exclusive end). Empty = full set.
+START_IDX=${START_IDX:-}
+END_IDX=${END_IDX:-}
+# Match original LCB generic prompt (not Falcon official template).
+export LCB_FORCE_GENERIC_PROMPT=${LCB_FORCE_GENERIC_PROMPT:-1}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ -n "${BASE_DIR:-}" ]]; then
@@ -38,6 +48,14 @@ CHECKPOINT_PATH=${CHECKPOINT_PATH:-${DEFAULT_CKPT}}
 EVAL_TAG=${EVAL_TAG:-$(basename "${CHECKPOINT_PATH}")}
 OUTPUT_JSON=${OUTPUT_JSON:-${BASE_DIR}/eval_outputs/${EVAL_TAG}/${DATASET}_${MODEL_TAG}_sgl.json}
 DATA_JSONL=${DATA_JSONL:-${BASE_DIR}/data/livecodebench/test6.jsonl}
+
+if [[ -n "${SAMPLE_IDX}" ]]; then
+  # Independent 1-sample shard: one GPU, one answer per problem.
+  VAL_N=1
+  PASS_AT_K=${PASS_AT_K:-1}
+  AUTO_JUDGE=${AUTO_JUDGE:-0}
+  echo "[lcb] SAMPLE_IDX=${SAMPLE_IDX} → val_n=1 seed=${SEED} auto_judge=${AUTO_JUDGE}"
+fi
 
 cd "${BASE_DIR}"
 set +u
@@ -54,19 +72,31 @@ mkdir -p "$(dirname "${OUTPUT_JSON}")" "log/eval_code/falcon_h1r_7b/lcb_v6/sgl"
 echo "[lcb] backend=sglang attention=triton model=Falcon-H1R-7B"
 echo "[lcb] base_dir=${BASE_DIR}"
 echo "[lcb] checkpoint=${CHECKPOINT_PATH}"
-echo "[lcb] dataset=${DATASET} thinking=${THINKING}"
-echo "[lcb] generate_batch_size=${GENERATE_BATCH_SIZE}"
+echo "[lcb] dataset=${DATASET} thinking=${THINKING} val_n=${VAL_N} seed=${SEED}"
+echo "[lcb] generate_batch_size=${GENERATE_BATCH_SIZE} tp=1"
 echo "[lcb] output=${OUTPUT_JSON}"
+if [[ -n "${START_IDX}" || -n "${END_IDX}" ]]; then
+  echo "[lcb] index_slice start=${START_IDX:-0} end=${END_IDX:--1}"
+fi
+echo "[lcb] LCB_FORCE_GENERIC_PROMPT=${LCB_FORCE_GENERIC_PROMPT}"
 echo "[lcb] conda_prefix=${CONDA_PREFIX}"
 command -v nvidia-smi >/dev/null && nvidia-smi || true
 python -c "import mamba_ssm, causal_conv1d" >/dev/null
+
+IDX_ARGS=()
+if [[ -n "${START_IDX}" ]]; then
+  IDX_ARGS+=(--start-idx "${START_IDX}")
+fi
+if [[ -n "${END_IDX}" ]]; then
+  IDX_ARGS+=(--end-idx "${END_IDX}")
+fi
 
 python "${BASE_DIR}/eval_code/eval_lcb_sglang_local.py" \
   --model-path "${CHECKPOINT_PATH}" \
   --data-jsonl "${DATA_JSONL}" \
   --output-json "${OUTPUT_JSON}" \
-  --val-n 4 \
-  --pass-at-k 1,4 \
+  --val-n "${VAL_N}" \
+  --pass-at-k "${PASS_AT_K}" \
   --max-new-tokens 65536 \
   --temperature 0.6 \
   --top-p 0.95 \
@@ -79,13 +109,15 @@ python "${BASE_DIR}/eval_code/eval_lcb_sglang_local.py" \
   --sampling-backend pytorch \
   --mem-fraction-static 0.85 \
   --context-length 73728 \
+  --tp-size 1 \
   --reasoning-parser deepseek-r1 \
   --disable-piecewise-cuda-graph \
   --skip-evaluate \
-  --enable-thinking
+  --resume \
+  --enable-thinking \
+  "${IDX_ARGS[@]}"
 
 # Release GPU ASAP: CPU judge on C64 partition (set AUTO_JUDGE=0 to skip).
-PASS_AT_K=${PASS_AT_K:-1,4}
 JUDGE_SCRIPT="${BASE_DIR}/scripts/eval_code/falcon_h1r_7b/lcb_v6_sgl_judge.sh"
 # shellcheck source=/dev/null
 source "${BASE_DIR}/scripts/eval_code/lcb_auto_submit_judge.sh"

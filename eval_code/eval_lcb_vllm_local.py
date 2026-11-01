@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -81,13 +82,51 @@ def load_problems_from_jsonl(path: Path, max_problems: int = 0) -> List[CodeGene
     return problems
 
 
-def build_user_prompt(problem: CodeGenerationProblem) -> str:
-    """Match official LCB Qwen user-turn content (code_generation.get_qwen_...)."""
-    prompt = (
-        "You will be given a question (problem specification) and will generate a correct "
-        "Python program that matches the specification and passes all tests. "
-        "You will NOT return anything except for the program.\n\n"
-    )
+# Official Falcon-H1R default system (chat_template.jinja / paper). Overriding it
+# with LCB's "expert Python programmer" message breaks think-close on hard LCB.
+FALCON_SYSTEM_MESSAGE = (
+    "You are Falcon, a helpful AI assistant created by Technology Innovation Institute (TII). "
+    "To answer the user's question, you first think about the reasoning process and then "
+    "provide the user with the answer. The reasoning process is enclosed within "
+    "<think> </think> tags, i.e., <think> reasoning process here </think> answer here."
+)
+
+
+def is_falcon_model(model_path: Optional[str] = None, hint: Optional[str] = None) -> bool:
+    blob = f"{model_path or ''} {hint or ''}".lower()
+    return bool(re.search(r"falcon[-_]?h1r|falcon[-_]?h1\b|[/_\-]falcon", blob))
+
+
+def use_falcon_prompt(model_path: Optional[str] = None, hint: Optional[str] = None) -> bool:
+    """Falcon-specific prompt unless LCB_FORCE_GENERIC_PROMPT=1 (match old LCB runs)."""
+    import os
+
+    force = os.environ.get("LCB_FORCE_GENERIC_PROMPT", "").strip().lower()
+    if force in ("1", "true", "yes", "generic"):
+        return False
+    return is_falcon_model(model_path, hint)
+
+
+def build_user_prompt(
+    problem: CodeGenerationProblem,
+    *,
+    thinking_friendly: bool = False,
+) -> str:
+    """LCB user turn. ``thinking_friendly`` keeps CoT allowed but requires ```python."""
+    if thinking_friendly:
+        prompt = (
+            "Solve the following programming problem. Reason carefully, then provide a "
+            "correct Python program that matches the specification and passes all tests.\n"
+            "After reasoning, put the complete final program in one ```python code block "
+            "(language tag required). Do not omit the fence.\n\n"
+        )
+    else:
+        # Match official LCB Qwen user-turn content (code_generation.get_qwen_...).
+        prompt = (
+            "You will be given a question (problem specification) and will generate a correct "
+            "Python program that matches the specification and passes all tests. "
+            "You will NOT return anything except for the program.\n\n"
+        )
     prompt += f"Question:\n{problem.question_content}\n\n"
     if problem.starter_code:
         prompt += f"{PromptConstants.FORMATTING_MESSAGE_WITH_STARTER_CODE}\n"
@@ -103,10 +142,19 @@ def build_prompt(
     problem: CodeGenerationProblem,
     enable_thinking: bool,
     prefill_think: bool = True,
+    model_path: Optional[str] = None,
 ) -> str:
+    falcon = use_falcon_prompt(model_path)
+    if falcon:
+        # Keep Falcon's trained think protocol; only ask for fenced final code in user turn.
+        system = FALCON_SYSTEM_MESSAGE
+        user = build_user_prompt(problem, thinking_friendly=True)
+    else:
+        system = PromptConstants.SYSTEM_MESSAGE_GENERIC
+        user = build_user_prompt(problem, thinking_friendly=False)
     messages = [
-        {"role": "system", "content": PromptConstants.SYSTEM_MESSAGE_GENERIC},
-        {"role": "user", "content": build_user_prompt(problem)},
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
     ]
     text = _apply_chat_prompt(tokenizer, messages, enable_thinking=enable_thinking)
     if enable_thinking and prefill_think:
@@ -213,12 +261,19 @@ def main() -> None:
     from evalplus_opsd import overlay_chat_template
 
     overlay_chat_template(tokenizer, args.chat_template_path or None)
+    if is_falcon_model(args.model_path):
+        print(
+            "[lcb] Falcon prompt: official system + thinking-friendly user "
+            "(```python final answer)",
+            flush=True,
+        )
     prompts = [
         build_prompt(
             tokenizer,
             prob,
             enable_thinking,
             prefill_think=bool(args.prefill_think),
+            model_path=args.model_path,
         )
         for prob in problems
     ]
