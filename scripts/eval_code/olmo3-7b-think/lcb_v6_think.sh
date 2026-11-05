@@ -10,7 +10,8 @@
 #SBATCH --time=48:00:00
 #
 # LiveCodeBench v6, Olmo-3-7B-Think via SGLang (same stack as scripts/eval/olmo_7b_think/*_sgl.sh)
-# Sampling: temp=0.6 top_p=0.95 max_new_tokens=32768, generate_batch_size=4
+# Sampling: temp=0.6 top_p=0.95 max_new_tokens=32768, generate_batch_size=6
+# Optional index slice: START_IDX / END_IDX (inclusive start, exclusive end).
 set -euo pipefail
 
 SEED=${SEED:-42}
@@ -19,6 +20,11 @@ DATASET=lcb_v6
 MODEL_TAG=olmo3_7b_think
 DEFAULT_CKPT=/gpfs/share/home/2501210611/labShare/2501210611/model/olmo-3-7b-think
 GENERATE_BATCH_SIZE=${GENERATE_BATCH_SIZE:-6}
+VAL_N=${VAL_N:-4}
+PASS_AT_K=${PASS_AT_K:-1,4}
+AUTO_JUDGE=${AUTO_JUDGE:-1}
+START_IDX=${START_IDX:-}
+END_IDX=${END_IDX:-}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ -n "${BASE_DIR:-}" ]]; then
@@ -48,18 +54,29 @@ mkdir -p "$(dirname "${OUTPUT_JSON}")" "log/eval_code/olmo3-7b-think/lcb_v6/sgl"
 echo "[lcb] backend=sglang attention=triton model=Olmo-3-7B-Think"
 echo "[lcb] base_dir=${BASE_DIR}"
 echo "[lcb] checkpoint=${CHECKPOINT_PATH}"
-echo "[lcb] dataset=${DATASET} thinking=${THINKING}"
+echo "[lcb] dataset=${DATASET} thinking=${THINKING} val_n=${VAL_N} seed=${SEED}"
 echo "[lcb] generate_batch_size=${GENERATE_BATCH_SIZE}"
 echo "[lcb] output=${OUTPUT_JSON}"
+if [[ -n "${START_IDX}" || -n "${END_IDX}" ]]; then
+  echo "[lcb] index_slice start=${START_IDX:-0} end=${END_IDX:--1}"
+fi
 echo "[lcb] conda_prefix=${CONDA_PREFIX}"
 command -v nvidia-smi >/dev/null && nvidia-smi || true
+
+IDX_ARGS=()
+if [[ -n "${START_IDX}" ]]; then
+  IDX_ARGS+=(--start-idx "${START_IDX}")
+fi
+if [[ -n "${END_IDX}" ]]; then
+  IDX_ARGS+=(--end-idx "${END_IDX}")
+fi
 
 python "${BASE_DIR}/eval_code/eval_lcb_sglang_local.py" \
   --model-path "${CHECKPOINT_PATH}" \
   --data-jsonl "${DATA_JSONL}" \
   --output-json "${OUTPUT_JSON}" \
-  --val-n 4 \
-  --pass-at-k 1,4 \
+  --val-n "${VAL_N}" \
+  --pass-at-k "${PASS_AT_K}" \
   --max-new-tokens 32768 \
   --temperature 0.6 \
   --top-p 0.95 \
@@ -73,10 +90,10 @@ python "${BASE_DIR}/eval_code/eval_lcb_sglang_local.py" \
   --mem-fraction-static 0.80 \
   --context-length 40960 \
   --skip-evaluate \
-  --enable-thinking
+  --enable-thinking \
+  "${IDX_ARGS[@]}"
 
 # Release GPU ASAP: CPU judge on C64 partition (set AUTO_JUDGE=0 to skip).
-PASS_AT_K=${PASS_AT_K:-1,4}
 JUDGE_SCRIPT="${BASE_DIR}/scripts/eval_code/olmo3-7b-think/lcb_v6_think_judge.sh"
 # shellcheck source=/dev/null
 source "${BASE_DIR}/scripts/eval_code/lcb_auto_submit_judge.sh"
