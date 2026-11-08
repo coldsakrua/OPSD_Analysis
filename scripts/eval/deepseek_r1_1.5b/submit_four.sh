@@ -12,13 +12,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_DIR="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 CHECKPOINT_PATH=${CHECKPOINT_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/deepseek-r1-distill-qwen-1.5b}
 EVAL_TAG=${EVAL_TAG:-$(basename "${CHECKPOINT_PATH}")}
+SEED=${SEED:-42}
 
 # Job-name prefix for log/eval/deepseek_r1_1.5b/<ds>/think/%x.%j.out
 # Baseline: eval_r1_15b_a24 ; trained: st_tt_clip005_1e6_r1_15b_a24
-if [[ "${EVAL_TAG}" == "deepseek-r1-distill-qwen-1.5b" || "${EVAL_TAG}" == "checkpoint-100" || "${EVAL_TAG}" == eval_r1* ]]; then
-  JOB_PREFIX=eval_r1_15b
-else
-  JOB_PREFIX="${EVAL_TAG%_ckpt*}"
+if [[ -z "${JOB_PREFIX:-}" ]]; then
+  if [[ "${EVAL_TAG}" == "deepseek-r1-distill-qwen-1.5b" || "${EVAL_TAG}" == "checkpoint-100" || "${EVAL_TAG}" == eval_r1* ]]; then
+    JOB_PREFIX=eval_r1_15b
+  else
+    JOB_PREFIX="${EVAL_TAG%_ckpt*}"
+  fi
 fi
 
 short_ds() {
@@ -46,13 +49,13 @@ mkdir -p log/eval/deepseek_r1_1.5b/{aime24,aime25,aime26,hmmt25}/think
 
 echo "[submit] base_dir=${BASE_DIR}"
 echo "[submit] checkpoint=${CHECKPOINT_PATH}"
-echo "[submit] eval_tag=${EVAL_TAG} job_prefix=${JOB_PREFIX}"
+echo "[submit] eval_tag=${EVAL_TAG} job_prefix=${JOB_PREFIX} seed=${SEED}"
 
 for ds in aime24 aime25 aime26 hmmt25; do
   job_name="${JOB_PREFIX}_$(short_ds "${ds}")"
   sbatch \
     --job-name="${job_name}" \
     --output="log/eval/deepseek_r1_1.5b/${ds}/think/%x.%j.out" \
-    --export=ALL,BASE_DIR="${BASE_DIR}",CHECKPOINT_PATH="${CHECKPOINT_PATH}",EVAL_TAG="${EVAL_TAG}" \
+    --export=ALL,BASE_DIR="${BASE_DIR}",CHECKPOINT_PATH="${CHECKPOINT_PATH}",EVAL_TAG="${EVAL_TAG}",SEED="${SEED}" \
     "${SCRIPT_DIR}/${ds}_think.sh"
 done

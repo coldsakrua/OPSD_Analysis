@@ -106,7 +106,7 @@ python "${BASE_DIR}/eval/eval_math_sglang_local.py" \
   --top-p 0.95 \
   --top-k -1 \
   --generate-batch-size "${GENERATE_BATCH_SIZE}" \
-  --seed 42 \
+  --seed "${SEED:-42}" \
   --attention-backend triton \
   --sampling-backend pytorch \
   --mem-fraction-static "${MEM_FRACTION_STATIC}" \

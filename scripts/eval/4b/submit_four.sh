@@ -1,7 +1,7 @@
 #!/bin/bash
 # Submit 4 think evals for Qwen3-4B (aime24/25/26 + hmmt25).
 # Required: CHECKPOINT_PATH
-# Optional: EVAL_TAG, BASE_DIR, JOB_PREFIX
+# Optional: EVAL_TAG, BASE_DIR, JOB_PREFIX, SEED (default 42)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,6 +9,7 @@ BASE_DIR=${BASE_DIR:-$(cd "${SCRIPT_DIR}/../../.." && pwd)}
 cd "${BASE_DIR}"
 
 : "${CHECKPOINT_PATH:?Set CHECKPOINT_PATH}"
+SEED=${SEED:-42}
 
 ckpt_ok() {
   local p=$1
@@ -44,14 +45,14 @@ short_ds() {
 
 mkdir -p log/eval/4b/{aime24,aime25,aime26,hmmt25}/think
 
-echo "[submit] 4b think ckpt=${CHECKPOINT_PATH} tag=${EVAL_TAG}"
+echo "[submit] 4b think ckpt=${CHECKPOINT_PATH} tag=${EVAL_TAG} seed=${SEED}"
 for ds in aime24 aime25 aime26 hmmt25; do
   job_name="${JOB_PREFIX}_$(short_ds "${ds}")"
   job_name="${job_name:0:64}"
   sbatch \
     --job-name="${job_name}" \
     --output="log/eval/4b/${ds}/think/%x.%j.out" \
-    --export=ALL,BASE_DIR="${BASE_DIR}",CHECKPOINT_PATH="${CHECKPOINT_PATH}",EVAL_TAG="${EVAL_TAG}" \
+    --export=ALL,BASE_DIR="${BASE_DIR}",CHECKPOINT_PATH="${CHECKPOINT_PATH}",EVAL_TAG="${EVAL_TAG}",SEED="${SEED}" \
     "${SCRIPT_DIR}/${ds}_think.sh"
 done
 echo "[submit] done 4b four think evals"

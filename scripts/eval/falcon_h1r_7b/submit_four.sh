@@ -13,13 +13,16 @@ else
 fi
 CHECKPOINT_PATH=${CHECKPOINT_PATH:-/gpfs/share/home/2501210611/labShare/2501210611/model/falcon-h1r-7b}
 EVAL_TAG=${EVAL_TAG:-$(basename "${CHECKPOINT_PATH}")}
+SEED=${SEED:-42}
 
 # Job-name prefix for log/eval/falcon_h1r_7b/<ds>/%x.%j.out (same idea as 4b/aime24/think).
 # Baseline: eval_falcon7b_a24 ; trained: st_tt_clip005_1e6_falcon7b_a24
-if [[ "${EVAL_TAG}" == "falcon-h1r-7b" || "${EVAL_TAG}" == "checkpoint-100" || "${EVAL_TAG}" == eval_falcon7b* ]]; then
-  JOB_PREFIX=eval_falcon7b
-else
-  JOB_PREFIX="${EVAL_TAG%_ckpt*}"
+if [[ -z "${JOB_PREFIX:-}" ]]; then
+  if [[ "${EVAL_TAG}" == "falcon-h1r-7b" || "${EVAL_TAG}" == "checkpoint-100" || "${EVAL_TAG}" == eval_falcon7b* ]]; then
+    JOB_PREFIX=eval_falcon7b
+  else
+    JOB_PREFIX="${EVAL_TAG%_ckpt*}"
+  fi
 fi
 
 short_ds() {
@@ -37,7 +40,7 @@ mkdir -p log/eval/falcon_h1r_7b/{aime24,aime25,aime26,hmmt25}
 
 echo "[submit] base_dir=${BASE_DIR}"
 echo "[submit] checkpoint=${CHECKPOINT_PATH}"
-echo "[submit] eval_tag=${EVAL_TAG} job_prefix=${JOB_PREFIX}"
+echo "[submit] eval_tag=${EVAL_TAG} job_prefix=${JOB_PREFIX} seed=${SEED}"
 python - "${CHECKPOINT_PATH}" <<'PY'
 import json, struct, sys
 from pathlib import Path
@@ -66,6 +69,6 @@ for ds in aime24 aime25 aime26 hmmt25; do
   sbatch \
     --job-name="${job_name}" \
     --output="log/eval/falcon_h1r_7b/${ds}/%x.%j.out" \
-    --export=ALL,BASE_DIR="${BASE_DIR}",CHECKPOINT_PATH="${CHECKPOINT_PATH}",EVAL_TAG="${EVAL_TAG}" \
+    --export=ALL,BASE_DIR="${BASE_DIR}",CHECKPOINT_PATH="${CHECKPOINT_PATH}",EVAL_TAG="${EVAL_TAG}",SEED="${SEED}" \
     "${SCRIPT_DIR}/${ds}_sgl.sh"
 done
