@@ -48,4 +48,53 @@ INFO 11-08 22:21:24 [llm_engine.py:437] init engine (profile, create kv cache, w
 prompt_batches:  25%|██▌       | 1/4 [08:42<26:07, 522.56s/it]WARNING 11-08 22:38:53 [scheduler.py:1768] Sequence group 14_parallel_sample_7 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_num_cumulative_preemption=1
 [eval] wrote partial json: 16/30 metrics=aime26_1.7b_think.metrics.json results=aime26_1.7b_think.results.json
 prompt_batches:  50%|█████     | 2/4 [31:00<33:24, 1002.28s/it][eval] wrote partial json: 24/30 metrics=aime26_1.7b_think.metrics.json results=aime26_1.7b_think.results.json
-prompt_batches:  75%|███████▌  | 3/4 [53:53<19:31, 1171.71s/it]
+prompt_batches:  75%|███████▌  | 3/4 [53:53<19:31, 1171.71s/it][eval] wrote partial json: 30/30 metrics=aime26_1.7b_think.metrics.json results=aime26_1.7b_think.results.json
+prompt_batches: 100%|██████████| 4/4 [1:11:25<00:00, 1124.31s/it]prompt_batches: 100%|██████████| 4/4 [1:11:25<00:00, 1071.40s/it]
+[eval] wrote partial json: 30/30 metrics=aime26_1.7b_think.metrics.json results=aime26_1.7b_think.results.json
+[eval] wrote final metrics -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_jsd_clip005_1e_6_openthoughts_1p7b_ckpt100_seed1024/aime26_1.7b_think.metrics.json
+[eval] wrote final results -> /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_jsd_clip005_1e_6_openthoughts_1p7b_ckpt100_seed1024/aime26_1.7b_think.results.json
+
+============================================================
+[ALL] combined
+  Pass@1: 33.33% (10/30)
+  Pass@4: 46.67% (14/30)
+  Pass@8: 53.33% (16/30)
+  Avg1(one-shot hit rate): 33.33%
+  Avg16(overall correctness): 30.42%
+  Avg output tokens: 14869.3
+[aime26] n=30
+  Pass@1: 33.33% (10/30)
+  Pass@4: 46.67% (14/30)
+  Pass@8: 53.33% (16/30)
+  Avg1(one-shot hit rate): 33.33%
+  Avg16(overall correctness): 30.42%
+  Avg output tokens: 14869.3
+[BY_CATEGORY]
+[__uncategorized__] n=30
+  Pass@1: 33.33% (10/30)
+  Pass@4: 46.67% (14/30)
+  Pass@8: 53.33% (16/30)
+  Avg1(one-shot hit rate): 33.33%
+  Avg16(overall correctness): 30.42%
+  Avg output tokens: 14869.3
+Avg correct / sample: 30.42%
+Majority vote: 33.33%
+Boxed format rate: 99.58%
+Avg output tokens: 14869.3
+[TOKEN_BUDGET]
+[aime26] n=30
+  @1k: Pass@8=0.00% (0/30)  Avg16=0.00%
+  @2k: Pass@8=3.33% (1/30)  Avg16=0.42%
+  @4k: Pass@8=16.67% (5/30)  Avg16=6.67%
+  @8k: Pass@8=40.00% (12/30)  Avg16=24.17%
+  @16k: Pass@8=50.00% (15/30)  Avg16=28.75%
+  @32k: Pass@8=53.33% (16/30)  Avg16=30.42%
+  @38k: Pass@8=53.33% (16/30)  Avg16=30.42%
+[AP-LNE@16]  1e5 * (2*A_avg*P_k/(A_avg+P_k)) / [log2(1+L)]^4
+[aime26] n=30  P@16=0.00%  Avg16=30.42%  L=14869.3  AP-LNE@16=0.0000
+[PASS-AVG/LOG(kL)@16]  P@16/log2(16*L), Avg@16/log2(16*L)
+[aime26] n=30  P@16=0.00%  Avg16=30.42%  L=14869.3  pass/log2(16L)=0.0000  avg/log2(16L)=1.7031
+Wrote metrics /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_jsd_clip005_1e_6_openthoughts_1p7b_ckpt100_seed1024/aime26_1.7b_think.metrics.json
+Wrote results /gpfs/share/home/2501210611/opsd_analysis/OPSD_Analysis/eval_outputs/st_tt_jsd_clip005_1e_6_openthoughts_1p7b_ckpt100_seed1024/aime26_1.7b_think.results.json
+============================================================
+[rank0]:[W1108 23:33:28.539414571 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
