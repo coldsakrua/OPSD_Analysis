@@ -83,13 +83,18 @@ if [[ ! -f "${META}" ]]; then
   exit 1
 fi
 MAX_PROMPT_LENGTH=$(python3 -c "import json; print(json.load(open('${META}'))['max_prompt_length'])")
+COMPLETION_LENGTH=${COMPLETION_LENGTH:-1024}
+if [[ "${COMPLETION_LENGTH}" != "1024" ]]; then
+  RUN_NAME="${RUN_NAME}_c${COMPLETION_LENGTH}"
+fi
 
 export OPSD_SEQUENTIAL_DATA=1
 export DATASET_PATH
 export RUN_NAME
 export MAX_PROMPT_LENGTH
+export MAX_COMPLETION_LENGTH="${COMPLETION_LENGTH}"
 
 echo "[aligned] spec=${SPEC} run=${RUN_NAME}"
 echo "[aligned] dataset=${DATASET_PATH}"
-echo "[aligned] max_prompt_length=${MAX_PROMPT_LENGTH} sequential=1"
+echo "[aligned] max_prompt_length=${MAX_PROMPT_LENGTH} max_completion_length=${MAX_COMPLETION_LENGTH} sequential=1"
 exec bash "${BASE_DIR}/${INNER}"

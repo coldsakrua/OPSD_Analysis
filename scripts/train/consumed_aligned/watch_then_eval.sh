@@ -1,5 +1,7 @@
 #!/bin/bash
-# When an aligned answer/unrelated run has checkpoint-100, submit the four math evals.
+# Submit four math evals only after every train job in the manifest has left the queue.
+# Jobs that already have a .done stamp are left alone. A checkpoint saved while other
+# trains are still queued or running is held until the whole batch has exited.
 set -euo pipefail
 
 BASE_DIR=${BASE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}}
@@ -97,6 +99,8 @@ while true; do
   done_count=0
   pending=0
   failed=0
+  training=0
+  ready=()
 
   for row in "${ROWS[@]}"; do
     IFS=$'\t' read -r model_key model_tag run_name train_jid _script eval_tag <<<"${row}"
@@ -107,18 +111,58 @@ while true; do
       done_count=$((done_count + 1))
       continue
     fi
-    if [[ -f "${fail_stamp}" ]] && ! find_ckpt "${model_tag}" "${run_name}" "${train_jid}" >/dev/null; then
-      failed=$((failed + 1))
+
+    if job_in_queue "${train_jid}"; then
+      st=$(job_state "${train_jid}")
+      training=$((training + 1))
+      pending=$((pending + 1))
+      log "WAIT ${eval_tag} jid=${train_jid} state=${st}"
       continue
     fi
 
-    if ckpt=$(find_ckpt "${model_tag}" "${run_name}" "${train_jid}"); then
-      st=$(job_state "${train_jid}")
-      log "READY ${eval_tag} jid=${train_jid} -> ${ckpt} (train_state=${st})"
-      sleep "${POST_DONE_WAIT}"
+    st=$(job_state "${train_jid}")
+    if find_ckpt "${model_tag}" "${run_name}" "${train_jid}" >/dev/null; then
+      ready+=("${row}")
+      log "HOLD ${eval_tag} jid=${train_jid} state=${st} ckpt ready, waiting for the other trains"
+      continue
+    fi
+
+    case "${st}" in
+      FAILED*|CANCELLED*|TIMEOUT*|NODE_FAIL*|OUT_OF_MEMORY*|PREEMPTED*)
+        if [[ ! -f "${fail_stamp}" ]]; then
+          log "FAIL ${eval_tag} jid=${train_jid} state=${st} and no usable ckpt"
+          date -Is >"${fail_stamp}"
+          echo "${st}" >>"${fail_stamp}"
+        fi
+        failed=$((failed + 1))
+        ;;
+      *)
+        pending=$((pending + 1))
+        log "WAIT ${eval_tag} jid=${train_jid} state=${st} exited without a usable ckpt yet"
+        ;;
+    esac
+  done
+
+  if [[ "${training}" -gt 0 ]]; then
+    log "progress done=${done_count}/${total} holding=${#ready[@]} training=${training} failed=${failed}"
+    sleep "${INTERVAL}"
+    continue
+  fi
+
+  if [[ ${#ready[@]} -gt 0 ]]; then
+    log "all ${total} trains have exited; submitting ${#ready[@]} held evals"
+    sleep "${POST_DONE_WAIT}"
+    for row in "${ready[@]}"; do
+      IFS=$'\t' read -r model_key model_tag run_name train_jid _script eval_tag <<<"${row}"
+      stamp="${STATE_DIR}/${eval_tag}_${train_jid}.done"
+      fail_stamp="${STATE_DIR}/${eval_tag}_${train_jid}.failed"
+      if [[ -f "${stamp}" ]]; then
+        done_count=$((done_count + 1))
+        continue
+      fi
       if ! ckpt=$(find_ckpt "${model_tag}" "${run_name}" "${train_jid}"); then
         pending=$((pending + 1))
-        log "WAIT ${eval_tag} jid=${train_jid} (ckpt disappeared after wait)"
+        log "WAIT ${eval_tag} jid=${train_jid} ckpt disappeared before submit"
         continue
       fi
       ckpt_base="$(basename "${ckpt}")"
@@ -136,33 +180,11 @@ while true; do
         pending=$((pending + 1))
         log "ERROR submitting evals for ${eval_tag} (will retry)"
       fi
-      continue
-    fi
-
-    if job_in_queue "${train_jid}"; then
-      st=$(job_state "${train_jid}")
-      pending=$((pending + 1))
-      log "WAIT ${eval_tag} jid=${train_jid} state=${st}"
-      continue
-    fi
-
-    st=$(job_state "${train_jid}")
-    case "${st}" in
-      FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY|PREEMPTED)
-        log "FAIL ${eval_tag} jid=${train_jid} state=${st} and no usable ckpt-100/final"
-        date -Is >"${fail_stamp}"
-        echo "${st}" >>"${fail_stamp}"
-        failed=$((failed + 1))
-        ;;
-      *)
-        pending=$((pending + 1))
-        log "WAIT ${eval_tag} jid=${train_jid} left queue (state=${st}) but no usable ckpt yet"
-        ;;
-    esac
-  done
+    done
+  fi
 
   log "progress done=${done_count}/${total} pending=${pending} failed=${failed}"
-  if [[ $((done_count + failed)) -ge "${total}" ]]; then
+  if [[ "${pending}" -eq 0 && $((done_count + failed)) -ge "${total}" ]]; then
     log "ALL trains handled (done=${done_count} failed=${failed}); exiting"
     break
   fi
