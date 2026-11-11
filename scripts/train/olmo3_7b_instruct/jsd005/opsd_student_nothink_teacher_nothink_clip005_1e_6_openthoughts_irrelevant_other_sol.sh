@@ -109,7 +109,7 @@ fi
 THINK_ARGS=(--no-student-thinking --no-teacher-thinking)
 MASTER_PORT=${MASTER_PORT:-$((20000 + (${SLURM_JOB_ID:-$$} % 20000)))}
 
-NUM_GPUS=${NUM_GPUS:-4}
+NUM_GPUS=4
 GLOBAL_BATCH=$((PER_DEVICE_BATCH_SIZE * GRADIENT_ACCUMULATION_STEPS * NUM_GPUS))
 
 if [[ "${JSD_TOKEN_CLIP}" == "none" || "${JSD_TOKEN_CLIP}" == "None" || "${JSD_TOKEN_CLIP}" == "NONE" ]]; then
