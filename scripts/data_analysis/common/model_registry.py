@@ -18,6 +18,14 @@ TEACHER_PREFIXES = ("sol", "answer", "irrelevant_other_sol", "sol_long", "cot_go
 # 2.2 OT integer answer-privilege ablations (all use privilege_mode=correct, field=answer).
 # Distinct names so one generate pass can score several answer texts on the same rollouts.
 ANSWER_VARIANT_PREFIXES = ("answer", "rewritten", "wrong_n10p1", "wrong_rand50")
+# Full-solution packs whose last \\boxed{} answer was rewritten / corrupted.
+# Privilege is still opsd/solution; names are distinct for multi-prefix scoring.
+SOLUTION_ANSWER_VARIANT_PREFIXES = (
+    "sol",
+    "sol_rewritten",
+    "sol_wrong_n10p1",
+    "sol_wrong_rand50",
+)
 LENGTH_WINDOWS = (
     (0, 128),
     (128, 256),
@@ -294,7 +302,12 @@ def teacher_prefix_max_prompt(
     if prefix == "cot_gold":
         return COT_GOLD_TEACHER_MAX_PROMPT
     # same: no GT; teacher user text equals the student. Cap is the student prompt cap.
-    if prefix == "same" or prefix in TEACHER_PREFIXES or prefix in ANSWER_VARIANT_PREFIXES:
+    if (
+        prefix == "same"
+        or prefix in TEACHER_PREFIXES
+        or prefix in ANSWER_VARIANT_PREFIXES
+        or prefix in SOLUTION_ANSWER_VARIANT_PREFIXES
+    ):
         return int(default_max_prompt)
     raise ValueError(f"unknown teacher prefix {prefix!r}")
 
@@ -372,7 +385,7 @@ def teacher_prefix_dataset(
 
 def privilege_for_prefix(prefix: str) -> tuple[str, str]:
     """Return (privilege_mode, teacher_privilege_field) for collator."""
-    if prefix in ("sol", "sol_long", "cot_gold"):
+    if prefix in ("sol", "sol_long", "cot_gold") or prefix in SOLUTION_ANSWER_VARIANT_PREFIXES:
         return "opsd", "solution"
     if prefix in ANSWER_VARIANT_PREFIXES:
         # answer / rewritten / wrong_*: teacher privilege is the parquet ``answer`` column.

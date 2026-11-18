@@ -18,6 +18,7 @@ from data_collator import SelfDistillationDataCollator  # noqa: E402
 from .model_registry import (
     ANSWER_VARIANT_PREFIXES,
     LONG_TEACHER_MAX_PROMPT,
+    SOLUTION_ANSWER_VARIANT_PREFIXES,
     combo_think,
     privilege_for_prefix,
     teacher_prefix_max_prompt,
@@ -259,18 +260,26 @@ def load_multi_prefix_samples(
     # Answer-privilege ablations: each prefix may point at a different parquet whose
     # ``answer`` column differs (rewritten / wrong_*) while problem order matches.
     answer_override: dict[str, pd.DataFrame] = {}
+    # Solution-answer ablations: full solution text differs (last \\boxed{} edited).
+    solution_override: dict[str, pd.DataFrame] = {}
     bind_resolved = Path(bind_path).resolve()
     for name, path in dataset_paths.items():
-        if name not in ANSWER_VARIANT_PREFIXES:
-            continue
         if Path(path).resolve() == bind_resolved:
             continue
-        ov = pd.read_parquet(path, columns=["problem", "answer"])
-        if len(ov) != len(df):
-            raise RuntimeError(
-                f"answer-variant {name!r} rows={len(ov)} != bind rows={len(df)} ({path})"
-            )
-        answer_override[name] = ov
+        if name in ANSWER_VARIANT_PREFIXES:
+            ov = pd.read_parquet(path, columns=["problem", "answer"])
+            if len(ov) != len(df):
+                raise RuntimeError(
+                    f"answer-variant {name!r} rows={len(ov)} != bind rows={len(df)} ({path})"
+                )
+            answer_override[name] = ov
+        elif name in SOLUTION_ANSWER_VARIANT_PREFIXES:
+            ov = pd.read_parquet(path, columns=["problem", "solution", "answer"])
+            if len(ov) != len(df):
+                raise RuntimeError(
+                    f"solution-variant {name!r} rows={len(ov)} != bind rows={len(df)} ({path})"
+                )
+            solution_override[name] = ov
     distractor_lookup: dict[str, dict[str, Any]] | None = None
     if "irrelevant_other_sol" in dataset_paths:
         distractor_lookup = _distractor_lookup(dataset_paths["irrelevant_other_sol"])
@@ -327,6 +336,20 @@ def load_multi_prefix_samples(
                 feat_for_prefix["answer"] = ans
                 # Answer-only packs keep solution == answer for the privilege text.
                 feat_for_prefix["solution"] = ans
+            if name in solution_override:
+                ov_row = solution_override[name].iloc[int(idx)]
+                ov_problem = str(ov_row["problem"]).strip()
+                if ov_problem != feature["problem"]:
+                    raise RuntimeError(
+                        f"solution-variant {name!r} row {int(idx)} problem mismatch vs bind pool"
+                    )
+                feat_for_prefix = dict(feature)
+                feat_for_prefix["solution"] = (
+                    str(ov_row["solution"]).strip() if ov_row["solution"] is not None else ""
+                )
+                feat_for_prefix["answer"] = (
+                    str(ov_row["answer"]).strip() if ov_row["answer"] is not None else ""
+                )
             if (
                 name == "sol"
                 and "sol_long" in collators
