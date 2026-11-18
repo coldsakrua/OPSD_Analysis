@@ -15,6 +15,9 @@ ENTROPY_BUCKETS = ("he20", "le20", "he80", "le80")
 # 2.2: short solution / answer / distractors / long solution (teacher cap 12*1024)
 # / cot+gold (same row order as sol_long; teacher cap from parquet meta).
 TEACHER_PREFIXES = ("sol", "answer", "irrelevant_other_sol", "sol_long", "cot_gold")
+# 2.2 OT integer answer-privilege ablations (all use privilege_mode=correct, field=answer).
+# Distinct names so one generate pass can score several answer texts on the same rollouts.
+ANSWER_VARIANT_PREFIXES = ("answer", "rewritten", "wrong_n10p1", "wrong_rand50")
 LENGTH_WINDOWS = (
     (0, 128),
     (128, 256),
@@ -291,7 +294,7 @@ def teacher_prefix_max_prompt(
     if prefix == "cot_gold":
         return COT_GOLD_TEACHER_MAX_PROMPT
     # same: no GT; teacher user text equals the student. Cap is the student prompt cap.
-    if prefix == "same" or prefix in TEACHER_PREFIXES:
+    if prefix == "same" or prefix in TEACHER_PREFIXES or prefix in ANSWER_VARIANT_PREFIXES:
         return int(default_max_prompt)
     raise ValueError(f"unknown teacher prefix {prefix!r}")
 
@@ -371,7 +374,8 @@ def privilege_for_prefix(prefix: str) -> tuple[str, str]:
     """Return (privilege_mode, teacher_privilege_field) for collator."""
     if prefix in ("sol", "sol_long", "cot_gold"):
         return "opsd", "solution"
-    if prefix == "answer":
+    if prefix in ANSWER_VARIANT_PREFIXES:
+        # answer / rewritten / wrong_*: teacher privilege is the parquet ``answer`` column.
         return "correct", "answer"
     if prefix == "irrelevant_other_sol":
         return "irrelevant_other_sol", "none"

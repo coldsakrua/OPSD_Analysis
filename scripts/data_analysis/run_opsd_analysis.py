@@ -46,6 +46,7 @@ from common.generation import run_generation  # noqa: E402
 from common.io import append_jsonl, load_jsonl, save_jsonl, write_json  # noqa: E402
 from common.metrics import DEFAULT_JSD_BETA, DEFAULT_JSD_TOKEN_CLIP, DEFAULT_TOPK_HIT_KS  # noqa: E402
 from common.model_registry import (  # noqa: E402
+    ANSWER_VARIANT_PREFIXES,
     COTLEN_BANDS,
     COTLEN_MAX_PROMPT,
     DEFAULT_MAX_PROMPT,
@@ -135,6 +136,18 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--entropy-bucket", choices=("he20", "le20", "he80", "le80"), default="")
     p.add_argument("--teacher-prefixes", nargs="+", default=list(TEACHER_PREFIXES))
+    p.add_argument(
+        "--teacher-prefix-dataset",
+        action="append",
+        default=[],
+        metavar="NAME=PATH",
+        help=(
+            "Per-prefix parquet override (repeatable), e.g. "
+            "answer=/path/a.parquet rewritten=/path/b.parquet. "
+            "Used by OT integer answer-privilege ablations so one generate pass "
+            f"can score {', '.join(ANSWER_VARIANT_PREFIXES)} on the same rollouts."
+        ),
+    )
     p.add_argument("--top-token-k", type=int, default=50)
     p.add_argument(
         "--jsd-beta",
@@ -581,13 +594,41 @@ def _attach_same_teacher_prompts(
     )
 
 
+def _parse_teacher_prefix_datasets(items: list[str]) -> dict[str, str]:
+    """Parse repeated ``name=path`` CLI values into a prefix→parquet map."""
+    out: dict[str, str] = {}
+    for raw in items:
+        if "=" not in raw:
+            raise ValueError(
+                f"--teacher-prefix-dataset expects NAME=PATH, got {raw!r}"
+            )
+        name, path = raw.split("=", 1)
+        name = name.strip()
+        path = path.strip()
+        if not name or not path:
+            raise ValueError(
+                f"--teacher-prefix-dataset expects NAME=PATH, got {raw!r}"
+            )
+        out[name] = path
+    return out
+
+
 def run_teacher_prefix(
     args: argparse.Namespace,
     model_cfg,
     out_dir: Path,
     overrides: dict[str, Any],
 ) -> dict[str, Any]:
-    if args.dataset_path:
+    per_prefix = _parse_teacher_prefix_datasets(list(args.teacher_prefix_dataset or []))
+    if per_prefix:
+        missing_names = [n for n in args.teacher_prefixes if n not in per_prefix]
+        if missing_names:
+            raise ValueError(
+                "--teacher-prefix-dataset provided but missing entries for: "
+                + ", ".join(missing_names)
+            )
+        ds_map = {name: str(per_prefix[name]) for name in args.teacher_prefixes}
+    elif args.dataset_path:
         # Shared override (e.g. DAPO answer-only shared2048) for every requested prefix.
         ds_map = {name: str(args.dataset_path) for name in args.teacher_prefixes}
     else:

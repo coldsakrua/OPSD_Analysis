@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from data_collator import SelfDistillationDataCollator  # noqa: E402
 
 from .model_registry import (
+    ANSWER_VARIANT_PREFIXES,
     LONG_TEACHER_MAX_PROMPT,
     combo_think,
     privilege_for_prefix,
@@ -255,6 +256,21 @@ def load_multi_prefix_samples(
                 f"cot_gold rows={len(cot_df)} != bind rows={len(df)} ({bind_path}). "
                 "Rebuild cot+gold with the same row order as the sol_long parquet."
             )
+    # Answer-privilege ablations: each prefix may point at a different parquet whose
+    # ``answer`` column differs (rewritten / wrong_*) while problem order matches.
+    answer_override: dict[str, pd.DataFrame] = {}
+    bind_resolved = Path(bind_path).resolve()
+    for name, path in dataset_paths.items():
+        if name not in ANSWER_VARIANT_PREFIXES:
+            continue
+        if Path(path).resolve() == bind_resolved:
+            continue
+        ov = pd.read_parquet(path, columns=["problem", "answer"])
+        if len(ov) != len(df):
+            raise RuntimeError(
+                f"answer-variant {name!r} rows={len(ov)} != bind rows={len(df)} ({path})"
+            )
+        answer_override[name] = ov
     distractor_lookup: dict[str, dict[str, Any]] | None = None
     if "irrelevant_other_sol" in dataset_paths:
         distractor_lookup = _distractor_lookup(dataset_paths["irrelevant_other_sol"])
@@ -299,6 +315,18 @@ def load_multi_prefix_samples(
             if feat_for_prefix is None:
                 ok = False
                 break
+            if name in answer_override:
+                ov_row = answer_override[name].iloc[int(idx)]
+                ov_problem = str(ov_row["problem"]).strip()
+                if ov_problem != feature["problem"]:
+                    raise RuntimeError(
+                        f"answer-variant {name!r} row {int(idx)} problem mismatch vs bind pool"
+                    )
+                feat_for_prefix = dict(feature)
+                ans = str(ov_row["answer"]).strip() if ov_row["answer"] is not None else ""
+                feat_for_prefix["answer"] = ans
+                # Answer-only packs keep solution == answer for the privilege text.
+                feat_for_prefix["solution"] = ans
             if (
                 name == "sol"
                 and "sol_long" in collators

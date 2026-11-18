@@ -87,14 +87,19 @@ COMPLETION_LENGTH=${COMPLETION_LENGTH:-1024}
 if [[ "${COMPLETION_LENGTH}" != "1024" ]]; then
   RUN_NAME="${RUN_NAME}_c${COMPLETION_LENGTH}"
 fi
+SEED=${SEED:-42}
+if [[ "${SEED}" != "42" ]]; then
+  RUN_NAME="${RUN_NAME}_seed${SEED}"
+fi
 
 export OPSD_SEQUENTIAL_DATA=1
 export DATASET_PATH
 export RUN_NAME
+export SEED
 export MAX_PROMPT_LENGTH
 export MAX_COMPLETION_LENGTH="${COMPLETION_LENGTH}"
 
-echo "[aligned] spec=${SPEC} run=${RUN_NAME}"
+echo "[aligned] spec=${SPEC} run=${RUN_NAME} seed=${SEED}"
 echo "[aligned] dataset=${DATASET_PATH}"
 echo "[aligned] max_prompt_length=${MAX_PROMPT_LENGTH} max_completion_length=${MAX_COMPLETION_LENGTH} sequential=1"
 exec bash "${BASE_DIR}/${INNER}"
